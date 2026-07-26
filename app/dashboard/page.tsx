@@ -28,7 +28,7 @@ export default function DashboardPage() {
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Business workspace
+          Ownward Workspace
         </p>
 
         <h1 className="mt-2 text-3xl font-bold text-white">
