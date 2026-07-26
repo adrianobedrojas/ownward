@@ -68,11 +68,10 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  active
-                    ? "bg-cyan-400/10 text-cyan-300"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${active
+                  ? "bg-cyan-400/10 text-cyan-300"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
               >
                 {item.name}
               </Link>
@@ -80,21 +79,20 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <Link
-            href="/invoices"
-            className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+            href="/login"
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
           >
-            + New invoice
+            Log in
           </Link>
 
-          <button
-            type="button"
-            aria-label="Open account menu"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-sm font-semibold text-white"
+          <Link
+            href="/signup"
+            className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
-            AR
-          </button>
+            Create account
+          </Link>
         </div>
 
         <details className="relative lg:hidden">
@@ -112,11 +110,10 @@ export default function Navbar() {
                     key={item.name}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${
-                      active
-                        ? "bg-cyan-400/10 text-cyan-300"
-                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                    }`}
+                    className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${active
+                      ? "bg-cyan-400/10 text-cyan-300"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
                   >
                     {item.name}
                   </Link>
@@ -124,12 +121,21 @@ export default function Navbar() {
               })}
             </div>
 
-            <Link
-              href="/invoices"
-              className="mt-3 block rounded-lg bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
-            >
-              + New invoice
-            </Link>
+            <div className="mt-3 grid gap-2">
+              <Link
+                href="/login"
+                className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Log in
+              </Link>
+
+              <Link
+                href="/signup"
+                className="block rounded-lg bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+              >
+                Create account
+              </Link>
+            </div>
           </div>
         </details>
       </nav>

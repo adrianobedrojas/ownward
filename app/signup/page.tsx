@@ -80,7 +80,11 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6">
+        <form
+          action="/api/signup"
+          method="post"
+          className="mt-8 space-y-6"
+          >
           <div>
             <label
               htmlFor="account-type"
@@ -100,21 +104,10 @@ export default function SignupPage() {
                 Select an account type
               </option>
 
-              <option value="owner">
-                Business owner
-              </option>
-
-              <option value="buyer">
-                Business buyer
-              </option>
-
-              <option value="owner-buyer">
-                Owner and buyer
-              </option>
-
-              <option value="advisor">
-                Advisor or agency
-              </option>
+              <option value="owner">Business owner</option>
+              <option value="buyer">Business buyer</option>
+              <option value="owner-buyer">Owner and buyer</option>
+              <option value="advisor">Advisor or agency</option>
             </select>
           </div>
 
@@ -192,6 +185,7 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="Create a password"
+                minLength={8}
                 required
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400"
               />
@@ -211,6 +205,7 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 placeholder="Repeat your password"
+                minLength={8}
                 required
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400"
               />
@@ -218,8 +213,7 @@ export default function SignupPage() {
           </div>
 
           <p className="text-xs text-slate-500">
-            Your password should eventually require at least eight characters,
-            including a number and a special character.
+            Your password must contain at least eight characters.
           </p>
 
           <label className="flex items-start gap-3 text-sm text-slate-300">
@@ -236,15 +230,14 @@ export default function SignupPage() {
           </label>
 
           <button
-            type="button"
+            type="submit"
             className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
             Create account
           </button>
 
           <p className="text-center text-xs text-slate-500">
-            Account creation will become active after secure authentication
-            and the user database are connected.
+            Create your secure Ownward account using Supabase authentication.
           </p>
         </form>
 
