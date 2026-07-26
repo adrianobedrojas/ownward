@@ -45,11 +45,11 @@ export default function DocumentsPage() {
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-            Business workspace
+            Ownward Vault
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-white">
-            Business Vault
+            Vault
           </h1>
 
           <p className="mt-2 text-slate-400">
