@@ -64,7 +64,11 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6">
+        <form
+          action="/api/login"
+          method="post"
+          className="mt-8 space-y-6"
+        >
           <div>
             <label
               htmlFor="email"
@@ -120,15 +124,14 @@ export default function LoginPage() {
           </label>
 
           <button
-            type="button"
+            type="submit"
             className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
             Log in
           </button>
 
           <p className="text-center text-xs text-slate-500">
-            Account login will become active after secure authentication is
-            connected.
+            Sign in securely with your Ownward account.
           </p>
         </form>
 
