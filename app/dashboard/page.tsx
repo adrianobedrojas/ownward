@@ -18,8 +18,28 @@ const quickActions = [
   },
   {
     name: "Upload a document",
-    description: "Store a business document in your vault.",
+    description: "Store an important record in Ownward Vault.",
     href: "/upload",
+  },
+  {
+    name: "Browse the marketplace",
+    description: "Discover businesses available to buy.",
+    href: "/marketplace",
+  },
+  {
+    name: "Check business valuation",
+    description: "Start estimating what your business may be worth.",
+    href: "/valuation",
+  },
+  {
+    name: "Plan business growth",
+    description: "Review actions that may improve your business.",
+    href: "/grow",
+  },
+  {
+    name: "Open Deal Room",
+    description: "Organize offers, documents, and due diligence.",
+    href: "/deals",
   },
 ];
 
@@ -68,7 +88,7 @@ export default function DashboardPage() {
             Quick actions
           </h2>
 
-          <div className="mt-5 grid gap-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {quickActions.map((action) => (
               <Link
                 key={action.name}
