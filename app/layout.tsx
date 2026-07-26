@@ -4,11 +4,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "LifeVault Business",
-    template: "%s | LifeVault Business",
+    default: "Ownward",
+    template: "%s | Ownward",
   },
   description:
-    "Organize customers, tasks, invoices, money, and business documents.",
+    "Run, grow, buy, and sell small businesses in one connected platform.",
 };
 
 export default function RootLayout({
