@@ -5,7 +5,7 @@ export default function UploadPage() {
     <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Business Vault
+          Ownward Vault
         </p>
 
         <h1 className="mt-2 text-3xl font-bold text-white">
@@ -128,7 +128,7 @@ export default function UploadPage() {
             href="/documents"
             className="block text-center text-sm font-semibold text-cyan-400 hover:text-cyan-300"
           >
-            Return to Business Vault
+            Return to Ownward Vault
           </Link>
         </aside>
       </div>
