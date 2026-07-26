@@ -4,7 +4,7 @@ export default function InvoicesPage() {
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-            Business workspace
+            Ownward Money
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-white">
