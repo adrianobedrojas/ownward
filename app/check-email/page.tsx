@@ -1,10 +1,11 @@
+// app/check-email/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Check Your Email",
   description:
-    "Confirm your email address to finish creating your Ownward account.",
+    "Confirm your email address to finish creating your Ownward Hub account.",
 };
 
 export default function CheckEmailPage() {
@@ -24,7 +25,7 @@ export default function CheckEmailPage() {
         </h1>
 
         <p className="mt-4 leading-7 text-slate-300">
-          Ownward sent you a confirmation link. Open the email and select the
+          Ownward Hub sent you a confirmation link. Open the email and select the
           link to activate your account.
         </p>
 
@@ -51,7 +52,7 @@ export default function CheckEmailPage() {
           href="/"
           className="mt-5 block text-sm font-semibold text-slate-400 hover:text-white"
         >
-          Return to the Ownward homepage
+          Return to the Ownward Hub homepage
         </Link>
       </section>
     </main>
