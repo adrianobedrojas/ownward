@@ -28,6 +28,10 @@ const navigation = [
     name: "Money",
     href: "/money",
   },
+  {
+    name: "Contact",
+    href: "/contact",
+  },
 ];
 
 export default function Navbar() {
@@ -68,10 +72,11 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${active
-                  ? "bg-cyan-400/10 text-cyan-300"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  active
+                    ? "bg-cyan-400/10 text-cyan-300"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`}
               >
                 {item.name}
               </Link>
@@ -110,10 +115,11 @@ export default function Navbar() {
                     key={item.name}
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${active
-                      ? "bg-cyan-400/10 text-cyan-300"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                      }`}
+                    className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${
+                      active
+                        ? "bg-cyan-400/10 text-cyan-300"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
                   >
                     {item.name}
                   </Link>
