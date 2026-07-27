@@ -1,7 +1,7 @@
 // app/b/[slug]/page.tsx
 import CommunityPulseForm from '@/components/CommunityPulseForm';
 import { notFound } from 'next/navigation';
-import { createServerClient } from '@/lib/supabase/server'; // Adjust this path if your Supabase server client is located elsewhere (e.g., '@/utils/supabase/server')
+import { createClient } from '@/lib/supabase/server'; // Adjust this path if your Supabase server client is located elsewhere (e.g., '@/utils/supabase/server')
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -11,7 +11,7 @@ export default async function PublicBusinessPage({ params }: Props) {
     const { slug } = await params;
 
     // Initialize Supabase for server-side fetching
-    const supabase = await createServerClient();
+    const supabase = await createClient();
 
     // Fetch the business details, ensuring it is marked as public
     const { data: business, error } = await supabase

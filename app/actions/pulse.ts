@@ -1,6 +1,6 @@
 'use server';
 
-import { createServerClient } from '@/lib/supabase/server'; // Adjust if your Supabase client helper is elsewhere
+import { createClient } from '@/lib/supabase/server';
 
 export interface PulseResponseInput {
   businessId: string;
@@ -13,7 +13,7 @@ export interface PulseResponseInput {
 }
 
 export async function submitPulseResponse(formData: PulseResponseInput) {
-  const supabase = await createServerClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('community_pulse_responses')
@@ -32,4 +32,32 @@ export async function submitPulseResponse(formData: PulseResponseInput) {
   }
 
   return { success: true, data };
+}
+
+export async function getOwnerPulseAnalytics(businessId: string) {
+  const supabase = await createClient();
+
+  // 1. Fetch total visit count
+  const { count: totalVisits, error: visitsError } = await supabase
+    .from('business_visits')
+    .select('*', { count: 'exact', head: true })
+    .eq('business_id', businessId);
+
+  // 2. Fetch pulse responses
+  const { data: responses, error: pulseError } = await supabase
+    .from('community_pulse_responses')
+    .select('*')
+    .eq('business_id', businessId)
+    .order('created_at', { ascending: false });
+
+  if (visitsError || pulseError) {
+    return { success: false, error: visitsError?.message || pulseError?.message };
+  }
+
+  return {
+    success: true,
+    totalVisits: totalVisits || 0,
+    totalResponses: responses?.length || 0,
+    responses: responses || [],
+  };
 }

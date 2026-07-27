@@ -1,153 +1,104 @@
-import Link from "next/link";
+import { createClient } from '@/lib/supabase/server';
+import { getOwnerPulseAnalytics } from '@/app/actions/pulse';
+import Link from 'next/link';
 
-const quickActions = [
-  {
-    name: "Add a customer",
-    description: "Create a customer or lead record.",
-    href: "/customers",
-  },
-  {
-    name: "Create a task",
-    description: "Organize your next business priority.",
-    href: "/tasks",
-  },
-  {
-    name: "Create an invoice",
-    description: "Prepare an invoice for a customer.",
-    href: "/invoices",
-  },
-  {
-    name: "Upload a document",
-    description: "Store an important record in Ownward Vault.",
-    href: "/upload",
-  },
-  {
-    name: "Browse the marketplace",
-    description: "Discover businesses available to buy.",
-    href: "/marketplace",
-  },
-  {
-    name: "Check business valuation",
-    description: "Start estimating what your business may be worth.",
-    href: "/valuation",
-  },
-  {
-    name: "Plan business growth",
-    description: "Review actions that may improve your business.",
-    href: "/grow",
-  },
-  {
-    name: "Open Deal Room",
-    description: "Organize offers, documents, and due diligence.",
-    href: "/deals",
-  },
-];
+export default async function DashboardPage() {
+  const supabase = await createClient();
 
-export default function DashboardPage() {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Get user's business profile
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('owner_id', user?.id || '')
+    .single();
+
+  let analytics = null;
+  if (business) {
+    analytics = await getOwnerPulseAnalytics(business.id);
+  }
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Ownward Workspace
-        </p>
+    <main className="max-w-6xl mx-auto px-4 py-10 text-slate-100">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
 
-        <h1 className="mt-2 text-3xl font-bold text-white">
-          Dashboard
-        </h1>
-
-        <p className="mt-2 text-slate-400">
-          See your customers, tasks, invoices, and money in one place.
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">Total customers</p>
-          <p className="mt-2 text-3xl font-bold text-white">0</p>
-        </article>
-
-        <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">Tasks due</p>
-          <p className="mt-2 text-3xl font-bold text-white">0</p>
-        </article>
-
-        <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">Unpaid invoices</p>
-          <p className="mt-2 text-3xl font-bold text-amber-400">$0</p>
-        </article>
-
-        <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <p className="text-sm text-slate-400">Estimated profit</p>
-          <p className="mt-2 text-3xl font-bold text-emerald-400">$0</p>
-        </article>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-xl font-semibold text-white">
-            Quick actions
-          </h2>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {quickActions.map((action) => (
-              <Link
-                key={action.name}
-                href={action.href}
-                className="rounded-lg border border-slate-800 bg-slate-950 p-4 transition hover:border-cyan-400"
-              >
-                <p className="font-semibold text-white">
-                  {action.name}
-                </p>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  {action.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-xl font-semibold text-white">
-            Recent activity
-          </h2>
-
-          <div className="mt-5 rounded-lg border border-dashed border-slate-700 px-5 py-12 text-center">
-            <p className="font-semibold text-white">
-              No activity yet
-            </p>
-
-            <p className="mt-2 text-sm text-slate-400">
-              New customers, tasks, invoices, payments, and documents will
-              appear here.
-            </p>
-          </div>
-        </section>
-      </div>
-
-      <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
-        <h2 className="text-xl font-semibold text-white">
-          Getting started
-        </h2>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <p className="rounded-lg bg-slate-950 p-4 text-slate-300">
-            1. Add your first customer
-          </p>
-
-          <p className="rounded-lg bg-slate-950 p-4 text-slate-300">
-            2. Create a business task
-          </p>
-
-          <p className="rounded-lg bg-slate-950 p-4 text-slate-300">
-            3. Prepare your first invoice
-          </p>
-
-          <p className="rounded-lg bg-slate-950 p-4 text-slate-300">
-            4. Record income or an expense
-          </p>
+      {!business ? (
+        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+          <p className="text-slate-300">You haven't set up a business profile yet.</p>
+          <Link 
+            href="/sell" 
+            className="mt-4 inline-block rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
+          >
+            Create Business Profile
+          </Link>
         </div>
-      </section>
-    </section>
+      ) : (
+        <div className="mt-8 space-y-8">
+          {/* Header Stats */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+              <p className="text-sm text-slate-400">Total Profile Visits</p>
+              <p className="mt-2 text-3xl font-bold text-white">
+                {analytics?.totalVisits ?? 0}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+              <p className="text-sm text-slate-400">Pulse Responses</p>
+              <p className="mt-2 text-3xl font-bold text-cyan-400">
+                {analytics?.totalResponses ?? 0}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+              <p className="text-sm text-slate-400">Public Link</p>
+              <Link 
+                href={`/b/${business.slug}`} 
+                target="_blank"
+                className="mt-2 block truncate text-sm text-cyan-400 underline hover:text-cyan-300"
+              >
+                /b/{business.slug}
+              </Link>
+            </div>
+          </div>
+
+          {/* Response Details List */}
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+            <h2 className="text-xl font-semibold text-white">Recent Community Pulse Feed</h2>
+
+            {analytics?.responses && analytics.responses.length > 0 ? (
+              <div className="mt-4 divide-y divide-slate-800">
+                {analytics.responses.map((item: any) => (
+                  <div key={item.id} className="py-4">
+                    <div className="flex items-center justify-between">
+                      <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-cyan-400">
+                        {item.relationship.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-sm text-slate-300">
+                      <strong>Intent:</strong> {item.support_intent.replace(/_/g, ' ')}
+                    </p>
+
+                    {item.reveal_identity && (
+                      <p className="mt-1 text-xs text-slate-400">
+                        <strong>Contact:</strong> {item.visitor_name || 'Anonymous'} ({item.visitor_email || 'No email provided'})
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-slate-500">No responses collected yet. Share your public profile link to gather community feedback!</p>
+            )}
+          </div>
+        </div>
+      )}
+    </main>
   );
 }
