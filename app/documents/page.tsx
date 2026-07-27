@@ -34,7 +34,6 @@ export default async function DocumentsPage() {
   const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
   const maxMB = 500;
 
-  // Calculate file counts per folder
   const folderCounts: Record<string, number> = {};
   documents.forEach((doc) => {
     const folder = doc.folder || 'Formation';
@@ -46,7 +45,7 @@ export default async function DocumentsPage() {
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-            Ownward Vault
+            Ownward Hub Vault
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-white">
