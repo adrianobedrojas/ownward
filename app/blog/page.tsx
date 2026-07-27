@@ -15,7 +15,7 @@ export default async function BlogIndexPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-16 text-slate-100">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-white">Ownward Blog</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-white">Ownward Hub Blog</h1>
         <p className="mt-4 text-lg text-slate-300">
           Insights, guides, and updates on running, growing, buying, and selling small businesses.
         </p>
