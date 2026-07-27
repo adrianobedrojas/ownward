@@ -1,10 +1,11 @@
+// app/customers/page.tsx
 export default function CustomersPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-            Ownward CRM
+            Ownward Hub CRM
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-white">
