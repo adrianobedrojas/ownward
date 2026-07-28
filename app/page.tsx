@@ -26,7 +26,7 @@ export default function HomePage() {
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
-                href="/marketplace"
+                href="/buy"
                 className="rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Explore businesses
