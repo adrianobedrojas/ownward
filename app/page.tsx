@@ -1,5 +1,11 @@
-// app/page.tsx
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Ownward Hub | All-in-One Business Platform",
+  description:
+    "Manage your business, understand its value, prepare for a future sale, or discover your next opportunity—all through one connected platform.",
+};
 
 export default function HomePage() {
   return (
