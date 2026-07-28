@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    console.error("Ownward login error:", error.message);
+    console.error("Ownward Hub login error:", error.message);
     return redirectTo("/error");
   }
 
