@@ -1,104 +1,163 @@
-import { createClient } from '@/lib/supabase/server';
-import { getOwnerPulseAnalytics } from '@/app/actions/pulse';
-import Link from 'next/link';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { deleteListingDraft } from "./actions";
 
-export default async function DashboardPage() {
+export const metadata: Metadata = {
+  title: "Dashboard | Ownward Hub",
+  description: "Manage your business listing drafts, account settings, and secure deal rooms.",
+};
+
+interface SearchParams {
+  success?: string;
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
 
-  // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Get user's business profile
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('owner_id', user?.id || '')
-    .single();
-
-  let analytics = null;
-  if (business) {
-    analytics = await getOwnerPulseAnalytics(business.id);
-  }
+  // Fetch listings belonging to the authenticated user
+  const { data: listings, error } = await supabase
+    .from("business_listings")
+    .select("*")
+    .eq("user_id", user?.id)
+    .order("created_at", { ascending: false });
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-10 text-slate-100">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      {!business ? (
-        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900/50 p-6">
-          <p className="text-slate-300">You haven't set up a business profile yet.</p>
-          <Link 
-            href="/sell" 
-            className="mt-4 inline-block rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
-          >
-            Create Business Profile
-          </Link>
-        </div>
-      ) : (
-        <div className="mt-8 space-y-8">
-          {/* Header Stats */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
-              <p className="text-sm text-slate-400">Total Profile Visits</p>
-              <p className="mt-2 text-3xl font-bold text-white">
-                {analytics?.totalVisits ?? 0}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
-              <p className="text-sm text-slate-400">Pulse Responses</p>
-              <p className="mt-2 text-3xl font-bold text-cyan-400">
-                {analytics?.totalResponses ?? 0}
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
-              <p className="text-sm text-slate-400">Public Link</p>
-              <Link 
-                href={`/b/${business.slug}`} 
-                target="_blank"
-                className="mt-2 block truncate text-sm text-cyan-400 underline hover:text-cyan-300"
-              >
-                /b/{business.slug}
-              </Link>
-            </div>
-          </div>
-
-          {/* Response Details List */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 className="text-xl font-semibold text-white">Recent Community Pulse Feed</h2>
-
-            {analytics?.responses && analytics.responses.length > 0 ? (
-              <div className="mt-4 divide-y divide-slate-800">
-                {analytics.responses.map((item: any) => (
-                  <div key={item.id} className="py-4">
-                    <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-cyan-400">
-                        {item.relationship.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <p className="mt-2 text-sm text-slate-300">
-                      <strong>Intent:</strong> {item.support_intent.replace(/_/g, ' ')}
-                    </p>
-
-                    {item.reveal_identity && (
-                      <p className="mt-1 text-xs text-slate-400">
-                        <strong>Contact:</strong> {item.visitor_name || 'Anonymous'} ({item.visitor_email || 'No email provided'})
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-slate-500">No responses collected yet. Share your public profile link to gather community feedback!</p>
-            )}
-          </div>
+    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      {/* Success Banner */}
+      {params.success === "draft-saved" && (
+        <div className="mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
+          <p className="font-semibold">Draft saved successfully!</p>
+          <p className="text-sm text-emerald-400/80 mt-1">
+            Your business listing draft has been securely stored in your dashboard.
+          </p>
         </div>
       )}
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
+            Ownward Hub Dashboard
+          </p>
+          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+            Your Business Listings & Vault
+          </h1>
+          <p className="mt-2 text-slate-300">
+            Manage your sale drafts, track preparation progress, and review your assets.
+          </p>
+        </div>
+
+        <div>
+          <Link
+            href="/sell"
+            className="inline-flex items-center rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
+          >
+            + Create New Listing
+          </Link>
+        </div>
+      </div>
+
+      {/* Listings Section */}
+      <section className="mt-12">
+        <h2 className="text-xl font-bold text-white mb-6">Saved Listing Drafts</h2>
+
+        {error && (
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-300">
+            <p>Error loading listings: {error.message}</p>
+          </div>
+        )}
+
+        {!error && (!listings || listings.length === 0) ? (
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 text-center">
+            <p className="text-slate-400">You haven&apos;t created any listing drafts yet.</p>
+            <Link
+              href="/sell"
+              className="mt-4 inline-block rounded-lg border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/10"
+            >
+              Start Your First Listing
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {listings?.map((listing) => (
+              <article
+                key={listing.id}
+                className="flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-900 p-6"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                      {listing.category}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {new Date(listing.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 text-xl font-bold text-white">
+                    {listing.business_name}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-400">
+                    {listing.location || "Location not specified"}
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-sm">
+                    <div>
+                      <p className="text-xs text-slate-500">Asking Price</p>
+                      <p className="font-semibold text-white">
+                        {listing.asking_price
+                          ? `$${Number(listing.asking_price).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Annual Revenue</p>
+                      <p className="font-semibold text-white">
+                        {listing.annual_revenue
+                          ? `$${Number(listing.annual_revenue).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {listing.summary && (
+                    <p className="mt-4 text-sm text-slate-300 line-clamp-2">
+                      {listing.summary}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
+                  <span className="text-xs font-medium uppercase text-amber-400 bg-amber-400/10 px-2 py-1 rounded">
+                    {listing.status}
+                  </span>
+
+                  <form action={deleteListingDraft}>
+                    <input type="hidden" name="listingId" value={listing.id} />
+                    <button
+                      type="submit"
+                      className="text-xs font-semibold text-rose-400 transition hover:text-rose-300"
+                    >
+                      Delete draft
+                    </button>
+                  </form>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
