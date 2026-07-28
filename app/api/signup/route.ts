@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error(
-      "Ownward signup error:",
+      "Ownward Hub signup error:",
       error.message
     );
 
