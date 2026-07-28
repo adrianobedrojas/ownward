@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Marketplace",
@@ -7,40 +8,48 @@ export const metadata: Metadata = {
     "Discover small businesses for sale and find what you want to own next.",
 };
 
-const businesses = [
-  {
-    name: "Residential Cleaning Company",
-    category: "Service business",
-    location: "San Antonio, Texas",
-    askingPrice: "$120,000",
-    annualRevenue: "$240,000",
-    ownerEarnings: "$72,000",
-    description:
-      "An established residential cleaning company with recurring customers and documented operating procedures.",
-  },
-  {
-    name: "Neighborhood Bakery",
-    category: "Food and beverage",
-    location: "Austin, Texas",
-    askingPrice: "$185,000",
-    annualRevenue: "$310,000",
-    ownerEarnings: "$86,000",
-    description:
-      "A local bakery with an established customer base, commercial equipment, and opportunities for delivery growth.",
-  },
-  {
-    name: "Digital Marketing Studio",
-    category: "Marketing",
-    location: "Remote",
-    askingPrice: "$95,000",
-    annualRevenue: "$180,000",
-    ownerEarnings: "$64,000",
-    description:
-      "A remote service business providing social media and advertising support to small-business clients.",
-  },
-];
+interface SearchParams {
+  search?: string;
+  category?: string;
+  location?: string;
+}
 
-export default function MarketplacePage() {
+export default async function MarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const searchQuery = params.search?.trim() || "";
+  const categoryQuery = params.category || "";
+  const locationQuery = params.location?.trim() || "";
+
+  const supabase = await createClient();
+
+  let query = supabase.from("listings").select("*");
+
+  if (searchQuery) {
+    query = query.ilike("name", `%${searchQuery}%`);
+  }
+
+  if (categoryQuery) {
+    query = query.eq("category", categoryQuery);
+  }
+
+  if (locationQuery) {
+    query = query.ilike("location", `%${locationQuery}%`);
+  }
+
+  const { data: businesses = [], error } = await query.order("created_at", {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching marketplace listings:", error.message);
+  }
+
+  const displayBusinesses = businesses ?? [];
+
   return (
     <main>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -68,24 +77,12 @@ export default function MarketplacePage() {
           </Link>
         </div>
 
-        <div className="mt-8 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-4">
-          <p className="font-semibold text-cyan-300">
-            Marketplace preview
-          </p>
-
-          <p className="mt-1 text-sm text-slate-300">
-            The businesses shown below are example listings used to design and
-            test the Ownward marketplace. They are not real businesses for
-            sale.
-          </p>
-        </div>
-
         <section className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
           <h2 className="text-lg font-semibold text-white">
             Search opportunities
           </h2>
 
-          <form className="mt-4 grid gap-4 md:grid-cols-4">
+          <form method="get" className="mt-4 grid gap-4 md:grid-cols-4">
             <div>
               <label
                 htmlFor="search"
@@ -98,6 +95,7 @@ export default function MarketplacePage() {
                 id="search"
                 name="search"
                 type="search"
+                defaultValue={searchQuery}
                 placeholder="Search businesses"
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
               />
@@ -114,15 +112,15 @@ export default function MarketplacePage() {
               <select
                 id="category"
                 name="category"
-                defaultValue=""
+                defaultValue={categoryQuery}
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
               >
                 <option value="">All categories</option>
-                <option value="services">Services</option>
-                <option value="food">Food and beverage</option>
-                <option value="retail">Retail</option>
-                <option value="marketing">Marketing</option>
-                <option value="technology">Technology</option>
+                <option value="Service business">Service business</option>
+                <option value="Food and beverage">Food and beverage</option>
+                <option value="Retail">Retail</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Technology">Technology</option>
               </select>
             </div>
 
@@ -138,6 +136,7 @@ export default function MarketplacePage() {
                 id="location"
                 name="location"
                 type="text"
+                defaultValue={locationQuery}
                 placeholder="City, state, or remote"
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
               />
@@ -145,18 +144,13 @@ export default function MarketplacePage() {
 
             <div className="flex items-end">
               <button
-                type="button"
-                className="w-full rounded-lg bg-slate-700 px-5 py-3 font-semibold text-white transition hover:bg-slate-600"
+                type="submit"
+                className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Search
               </button>
             </div>
           </form>
-
-          <p className="mt-3 text-xs text-slate-500">
-            Search and filtering will become active after the marketplace
-            database is connected.
-          </p>
         </section>
 
         <section className="mt-10">
@@ -167,81 +161,86 @@ export default function MarketplacePage() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-400">
-                Example listings showing how businesses will appear.
+                Active listings available on the Ownward marketplace.
               </p>
             </div>
 
             <p className="text-sm text-slate-500">
-              {businesses.length} demo listings
+              {displayBusinesses.length} listings found
             </p>
           </div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-3">
-            {businesses.map((business) => (
-              <article
-                key={business.name}
-                className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-cyan-400"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
-                    {business.category}
-                  </span>
+          {displayBusinesses.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-12 text-center">
+              <p className="text-lg font-semibold text-white">No businesses found</p>
+              <p className="mt-2 text-sm text-slate-400">
+                Try adjusting your search filters or check back later for new opportunities.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-5 lg:grid-cols-3">
+              {displayBusinesses.map((business) => (
+                <article
+                  key={business.id}
+                  className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-cyan-400"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
+                      {business.category}
+                    </span>
 
-                  <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-                    Demo
-                  </span>
-                </div>
-
-                <h3 className="mt-5 text-xl font-semibold text-white">
-                  {business.name}
-                </h3>
-
-                <p className="mt-1 text-sm text-slate-400">
-                  {business.location}
-                </p>
-
-                <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">
-                  {business.description}
-                </p>
-
-                <div className="mt-6 grid grid-cols-3 gap-3 border-y border-slate-800 py-4">
-                  <div>
-                    <p className="text-xs text-slate-500">
-                      Asking price
-                    </p>
-
-                    <p className="mt-1 text-sm font-semibold text-white">
-                      {business.askingPrice}
-                    </p>
+                    {business.is_demo && (
+                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                        Demo
+                      </span>
+                    )}
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-500">
-                      Revenue
-                    </p>
+                  <h3 className="mt-5 text-xl font-semibold text-white">
+                    {business.name}
+                  </h3>
 
-                    <p className="mt-1 text-sm font-semibold text-white">
-                      {business.annualRevenue}
-                    </p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    {business.location}
+                  </p>
+
+                  <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">
+                    {business.description}
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-3 gap-3 border-y border-slate-800 py-4">
+                    <div>
+                      <p className="text-xs text-slate-500">Asking price</p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {business.asking_price}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500">Revenue</p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {business.annual_revenue}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500">Earnings</p>
+                      <p className="mt-1 text-sm font-semibold text-emerald-400">
+                        {business.owner_earnings}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-500">
-                      Earnings
-                    </p>
-
-                    <p className="mt-1 text-sm font-semibold text-emerald-400">
-                      {business.ownerEarnings}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-lg bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-slate-500">
-                  Details coming soon
-                </div>
-              </article>
-            ))}
-          </div>
+                  <Link
+                    href={`/marketplace/${business.id}`}
+                    className="mt-5 rounded-lg bg-cyan-400/10 px-4 py-3 text-center text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+                  >
+                    View details
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="mt-12 grid gap-5 lg:grid-cols-2">
