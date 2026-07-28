@@ -1,4 +1,6 @@
+// app/api/checkout/route.ts
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -13,6 +15,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing priceId' }, { status: 400 });
     }
 
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     const origin = req.headers.get('origin') || 'http://localhost:3000';
 
     const session = await stripe.checkout.sessions.create({
@@ -21,6 +26,8 @@ export async function POST(req: Request) {
       mode: 'subscription',
       success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing`,
+      client_reference_id: user?.id, // Links Stripe session to Supabase user ID
+      customer_email: user?.email,   // Pre-fills customer email during checkout
     });
 
     return NextResponse.json({ url: session.url });
