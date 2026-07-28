@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Marketplace",
+  title: "Buy Businesses | Ownward Hub",
   description:
     "Discover small businesses for sale and find what you want to own next.",
 };
@@ -231,8 +231,9 @@ export default async function MarketplacePage({
                     </div>
                   </div>
 
+                  {/* FIXED: Changed /marketplace/[id] to /buy/[id] */}
                   <Link
-                    href={`/marketplace/${business.id}`}
+                    href={`/buy/${business.id}`}
                     className="mt-5 rounded-lg bg-cyan-400/10 px-4 py-3 text-center text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
                   >
                     View details
