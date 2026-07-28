@@ -1,6 +1,14 @@
 import Link from "next/link";
+import { uploadDocument } from "./actions";
 
-export default function UploadPage() {
+export default async function UploadPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const errorMessage = params.error;
+
   return (
     <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <div>
@@ -13,13 +21,19 @@ export default function UploadPage() {
         </h1>
 
         <p className="mt-2 text-slate-400">
-          Add a business file and choose where it should be organized.
+          Add a business file and choose where it should be organized in your secure vault.
         </p>
       </div>
 
+      {errorMessage && (
+        <div className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+          Upload failed ({errorMessage}). Please check your file and try again.
+        </div>
+      )}
+
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <form>
+          <form action={uploadDocument}>
             <div>
               <label
                 htmlFor="document"
@@ -32,6 +46,7 @@ export default function UploadPage() {
                 id="document"
                 name="document"
                 type="file"
+                required
                 className="mt-3 block w-full rounded-lg border border-slate-700 bg-slate-950 p-3 text-sm text-slate-300 file:mr-4 file:rounded-md file:border-0 file:bg-cyan-400 file:px-4 file:py-2 file:font-semibold file:text-slate-950"
               />
             </div>
@@ -47,7 +62,8 @@ export default function UploadPage() {
               <select
                 id="folder"
                 name="folder"
-                defaultValue=""
+                defaultValue="formation"
+                required
                 className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
               >
                 <option value="" disabled>
@@ -83,15 +99,14 @@ export default function UploadPage() {
             </div>
 
             <button
-              type="button"
-              className="mt-6 w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300"
+              type="submit"
+              className="mt-6 w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
             >
               Upload document
             </button>
 
             <p className="mt-3 text-center text-xs text-slate-500">
-              File uploading will become active after secure storage is
-              connected.
+              Files are securely stored in your private Supabase vault storage.
             </p>
           </form>
         </section>
@@ -103,11 +118,11 @@ export default function UploadPage() {
             </h2>
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800">
-              <div className="h-full w-0 bg-cyan-400" />
+              <div className="h-full w-2 bg-cyan-400" />
             </div>
 
             <p className="mt-3 text-sm text-slate-400">
-              0 MB used of 500 MB
+              Secure Supabase storage connected
             </p>
           </section>
 
