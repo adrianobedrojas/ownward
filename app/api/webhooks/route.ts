@@ -1,4 +1,4 @@
-// app/api/webhooks/stripe/route.ts
+// app/api/webhooks/route.ts
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
@@ -31,11 +31,21 @@ export async function POST(req: Request) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
+      const userId = session.metadata?.userId || session.client_reference_id;
       const userEmail = session.customer_details?.email;
       const customerId = session.customer as string;
       const subscriptionId = session.subscription as string;
 
-      if (userEmail) {
+      if (userId) {
+        await supabase
+          .from('profiles')
+          .update({
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            subscription_status: 'active',
+          })
+          .eq('id', userId);
+      } else if (userEmail) {
         await supabase
           .from('profiles')
           .update({
