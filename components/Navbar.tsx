@@ -93,7 +93,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <details className="relative lg:hidden">
+        <details className="relative lg:hidden" suppressHydrationWarning>
           <summary className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
             Menu
           </summary>
