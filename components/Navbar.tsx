@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const navigation = [
   {
     name: "Buy",
-    href: "/marketplace",
+    href: "/buy",
   },
   {
     name: "Sell",
