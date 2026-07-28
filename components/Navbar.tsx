@@ -5,32 +5,24 @@ import { usePathname } from "next/navigation";
 
 const navigation = [
   {
-    name: "Dashboard",
-    href: "/dashboard",
+    name: "Buy",
+    href: "/marketplace",
   },
   {
-    name: "CRM",
-    href: "/customers",
+    name: "Sell",
+    href: "/sell",
   },
   {
-    name: "Run",
-    href: "/tasks",
+    name: "Features",
+    href: "/#features",
   },
   {
-    name: "Invoices",
-    href: "/invoices",
+    name: "Pricing",
+    href: "/pricing",
   },
   {
-    name: "Vault",
-    href: "/documents",
-  },
-  {
-    name: "Money",
-    href: "/money",
-  },
-  {
-    name: "Contact",
-    href: "/contact",
+    name: "Guide",
+    href: "/guide",
   },
 ];
 
@@ -38,6 +30,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   function isActive(href: string) {
+    if (href.startsWith("/#")) return false;
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
