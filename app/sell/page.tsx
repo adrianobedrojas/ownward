@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { saveListingDraft } from "./actions";
 
 export const metadata: Metadata = {
   title: "Sell a Business",
@@ -93,7 +94,7 @@ export default function SellBusinessPage() {
               </p>
             </div>
 
-            <form className="mt-8 space-y-6">
+            <form action={saveListingDraft} className="mt-8 space-y-6">
               <div>
                 <label
                   htmlFor="business-name"
@@ -106,6 +107,7 @@ export default function SellBusinessPage() {
                   id="business-name"
                   name="businessName"
                   type="text"
+                  required
                   placeholder="Enter the business name"
                   className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
                 />
@@ -129,6 +131,7 @@ export default function SellBusinessPage() {
                     id="category"
                     name="category"
                     defaultValue=""
+                    required
                     className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
                   >
                     <option value="" disabled>
@@ -248,16 +251,11 @@ export default function SellBusinessPage() {
               </div>
 
               <button
-                type="button"
+                type="submit"
                 className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Save draft listing
               </button>
-
-              <p className="text-center text-xs text-slate-500">
-                Draft saving will become active after authentication and the
-                marketplace database are connected.
-              </p>
             </form>
           </section>
 
