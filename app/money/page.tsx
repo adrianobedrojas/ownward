@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { addTransaction } from "./actions";
+import { addTransaction } from "./action";
 
 export const metadata: Metadata = {
   title: "Money",

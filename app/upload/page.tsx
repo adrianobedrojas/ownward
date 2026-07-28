@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { uploadDocument } from "./actions";
+import { uploadDocument } from "./action";
 
 export default async function UploadPage({
   searchParams,

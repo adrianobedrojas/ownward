@@ -1,4 +1,3 @@
-// app/contact/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -42,16 +41,18 @@ export default function ContactPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 text-white">
       <h1 className="text-4xl font-bold mb-6">About & Contact</h1>
-      
+
+      {/* Flex container grouping image and bio */}
       <div className="flex flex-col md:flex-row gap-8 items-center mb-12">
-        <div className="relative w-48 h-48 rounded-full overflow-hidden border-2 border-cyan-500 flex-shrink-0">
+        <div className="relative h-48 w-48 flex-shrink-0 overflow-hidden rounded-full border-2 border-cyan-500">
           <Image 
             src="/profile.jpg" 
             alt="Founder Headshot" 
             fill 
-            className="object-cover" 
+            className="object-cover object-top translate-y-1 scale-115" 
           />
         </div>
+
         <div>
           <h2 className="text-2xl font-semibold mb-2">Hi, I'm Adrian</h2>
           <p className="text-slate-300 leading-relaxed">
