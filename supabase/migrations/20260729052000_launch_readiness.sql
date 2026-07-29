@@ -86,8 +86,8 @@ SET slug = lower(regexp_replace(coalesce(business_name, 'business'), '[^a-zA-Z0-
 WHERE slug IS NULL OR btrim(slug) = '';
 
 WITH ranked AS (
-  SELECT id, slug, lower(slug) AS normalized_slug,
-         row_number() OVER (PARTITION BY lower(slug) ORDER BY created_at, id) AS rn
+  SELECT id, slug, lower(btrim(slug)) AS normalized_slug,
+         row_number() OVER (PARTITION BY lower(btrim(slug)) ORDER BY created_at, id) AS rn
   FROM public.business_listings
   WHERE slug IS NOT NULL AND btrim(slug) <> ''
 )
@@ -99,7 +99,7 @@ WHERE ranked.id = bl.id
 
 DROP INDEX IF EXISTS public.business_listings_slug_key;
 CREATE UNIQUE INDEX IF NOT EXISTS business_listings_slug_lower_key
-  ON public.business_listings (lower(slug))
+  ON public.business_listings (lower(btrim(slug)))
   WHERE slug IS NOT NULL AND btrim(slug) <> '';
 
 -- Listings owner and public policies
