@@ -21,8 +21,9 @@ export function isInvalidDocumentFilename(filename: string) {
 
 export function sanitizeDocumentFilename(filename: string) {
   const extensionIndex = filename.lastIndexOf(".");
-  const rawBasename = extensionIndex > 0 ? filename.slice(0, extensionIndex) : filename;
-  const rawExtension = extensionIndex > 0 ? filename.slice(extensionIndex + 1) : "";
+  const hasExtensionSeparator = extensionIndex >= 1;
+  const rawBasename = hasExtensionSeparator ? filename.slice(0, extensionIndex) : filename;
+  const rawExtension = hasExtensionSeparator ? filename.slice(extensionIndex + 1) : "";
   const fallbackId =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()

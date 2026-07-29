@@ -73,7 +73,7 @@ export async function uploadDocument(formData: FormData) {
     const { error: cleanupError } = await supabase.storage.from("vault").remove([filePath]);
     if (cleanupError) {
       console.error("Storage cleanup error after database failure:", cleanupError.message);
-      redirect("/upload?error=DatabaseCleanupFailed");
+      redirect("/upload?error=UploadIncomplete");
     }
     redirect("/upload?error=DatabaseError");
   }

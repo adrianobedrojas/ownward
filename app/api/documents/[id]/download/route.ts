@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { DOCUMENT_DOWNLOAD_SIGNED_URL_EXPIRY_SECONDS } from "@/lib/documents";
 
+const POSTGREST_NO_ROWS_ERROR_CODE = "PGRST116";
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -25,7 +27,7 @@ export async function GET(
     .single();
 
   if (documentError) {
-    if (documentError.code === "PGRST116") {
+    if (documentError.code === POSTGREST_NO_ROWS_ERROR_CODE) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
     return NextResponse.json({ error: "Unable to retrieve document" }, { status: 500 });

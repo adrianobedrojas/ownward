@@ -11,7 +11,7 @@ export async function uploadDocument(formData: FormData) {
     return { success: false, error: 'Unauthorized' };
   }
 
-  const file = (formData.get('file') ?? formData.get('document')) as File;
+  const file = formData.get('file') as File;
   const folder = String(formData.get('folder') ?? DEFAULT_DOCUMENT_FOLDER).toLowerCase();
   if (!file) {
     return { success: false, error: 'No file provided' };
