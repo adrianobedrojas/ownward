@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
+import { createUniqueListingSlug, isSlugConflictError } from "@/lib/listings";
 import { revalidatePath } from "next/cache";
 
 function getMissingPublishFields(listing: {
@@ -33,43 +34,6 @@ function getMissingPublishFields(listing: {
   }
 
   return missing;
-}
-
-function createListingSlug(input: string) {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 50);
-}
-
-async function createUniqueListingSlug(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  businessName: string,
-) {
-  const baseSlug = createListingSlug(businessName) || "business";
-
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const suffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-    const slug = `${baseSlug}-${suffix}`;
-
-    const { data, error } = await supabase
-      .from("business_listings")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (!data) {
-      return slug;
-    }
-  }
-
-  throw new Error("Could not generate a unique listing slug. Please try again.");
 }
 
 export async function deleteListingDraft(formData: FormData) {
@@ -139,27 +103,38 @@ export async function publishListing(formData: FormData) {
     );
   }
 
-  const slug = listing.slug ?? await createUniqueListingSlug(supabase, listing.business_name);
-
-  const { error } = await supabase
-    .from("business_listings")
-    .update({
-      slug,
-      is_public: true,
-      status: "published",
-      published_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", listingId)
-    .eq("user_id", user.id);
-
-  if (error) {
-    throw new Error(error.message);
+  const businessName = listing.business_name?.trim();
+  if (!businessName) {
+    throw new Error("Listing cannot be published until business name is set.");
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/buy");
-  revalidatePath(`/b/${slug}`);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const slug = listing.slug ?? await createUniqueListingSlug(supabase, businessName);
+    const { error } = await supabase
+      .from("business_listings")
+      .update({
+        slug,
+        is_public: true,
+        status: "published",
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", listingId)
+      .eq("user_id", user.id);
+
+    if (!error) {
+      revalidatePath("/dashboard");
+      revalidatePath("/buy");
+      revalidatePath(`/b/${slug}`);
+      return;
+    }
+
+    if (!isSlugConflictError(error) || listing.slug) {
+      throw new Error(error.message);
+    }
+  }
+
+  throw new Error("Could not publish listing due to slug conflicts. Please try again.");
 }
 
 export async function unpublishListing(formData: FormData) {
