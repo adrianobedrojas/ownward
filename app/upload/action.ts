@@ -3,10 +3,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState } from "@/lib/billing";
+import { DEFAULT_DOCUMENT_FOLDER } from "@/lib/documents";
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get("document") as File;
-  const folder = String(formData.get("folder") ?? "formation");
+  const folder = String(formData.get("folder") ?? DEFAULT_DOCUMENT_FOLDER);
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!file || file.size === 0) {

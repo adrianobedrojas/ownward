@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 
 function redirectTo(path: string) {
   return new Response(null, {
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     email,
     password,
     options: {
-      emailRedirectTo: `${siteUrl}/auth/confirm?next=/onboarding`,
+      emailRedirectTo: getOnboardingConfirmRedirectUrl(siteUrl),
       data: {
         account_type: accountType,
         full_name: fullName,

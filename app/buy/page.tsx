@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { capitalizeFirst } from "@/lib/documents";
 
 export const metadata: Metadata = {
   title: "Buy Businesses | Ownward Hub",
@@ -195,7 +196,7 @@ export default async function MarketplacePage({
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
                       {business.category
-                        ? business.category.replace(/^./, (value: string) => value.toUpperCase())
+                        ? capitalizeFirst(business.category)
                         : "Other"}
                     </span>
 

@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server'; // or your server client helper
+import { DEFAULT_DOCUMENT_FOLDER } from '@/lib/documents';
 
 export async function uploadDocument(formData: FormData) {
   const supabase = await createClient();
@@ -35,7 +36,7 @@ export async function uploadDocument(formData: FormData) {
       filesize: file.size,
       filetype: file.type || 'application/octet-stream',
       storage_path: filePath,
-      folder: 'formation',
+      folder: DEFAULT_DOCUMENT_FOLDER,
       notes: null,
       public_url: null,
     });

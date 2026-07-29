@@ -2,12 +2,13 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from '@/lib/billing';
+import { DEFAULT_DOCUMENT_FOLDER } from '@/lib/documents';
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    const folder = ((formData.get('folder') as string) || 'formation').toLowerCase();
+    const folder = ((formData.get('folder') as string) || DEFAULT_DOCUMENT_FOLDER).toLowerCase();
     const notes = String(formData.get('notes') ?? '').trim();
 
     if (!file) {

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from "@/lib/billing";
+import { DEFAULT_DOCUMENT_FOLDER, formatFolderName } from "@/lib/documents";
 
 interface DocumentRow {
   id: string;
@@ -49,7 +50,7 @@ export default async function DocumentsPage() {
 
   const folderCounts: Record<string, number> = {};
   documents.forEach((doc) => {
-    const folder = (doc.folder || "formation").toLowerCase();
+    const folder = (doc.folder || DEFAULT_DOCUMENT_FOLDER).toLowerCase();
     folderCounts[folder] = (folderCounts[folder] || 0) + 1;
   });
 
@@ -172,7 +173,7 @@ export default async function DocumentsPage() {
                 <div>
                   <span className="font-medium text-white">{doc.filename}</span>
                   <span className="ml-3 rounded-full bg-slate-800 px-2.5 py-0.5 text-xs text-cyan-400">
-                    {(doc.folder || "formation").toString().replace(/^./, (value: string) => value.toUpperCase())}
+                    {formatFolderName(doc.folder)}
                   </span>
                 </div>
 
