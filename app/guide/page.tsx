@@ -42,7 +42,7 @@ const categories = [
     name: "5. Buying a business",
     description: "How to evaluate listings, verify revenue, spot red flags, and navigate due diligence.",
     cta: "Create your buyer profile and receive opportunities that match your interests.",
-    ctaLink: "/marketplace",
+    ctaLink: "/buy",
   },
   {
     slug: "stories",
@@ -111,12 +111,20 @@ export default function GuideIndexPage() {
 
               <div className="mt-6 border-t border-slate-800 pt-4">
                 <p className="text-xs font-medium text-cyan-400">{cat.cta}</p>
-                <Link
-                  href={`/guide/${cat.slug}`}
-                  className="mt-3 inline-block text-sm font-semibold text-white hover:text-cyan-300"
-                >
-                  Browse category &rarr;
-                </Link>
+                <div className="mt-3 flex items-center gap-4">
+                  <Link
+                    href={`/guide/${cat.slug}`}
+                    className="inline-block text-sm font-semibold text-white hover:text-cyan-300"
+                  >
+                    Browse category &rarr;
+                  </Link>
+                  <Link
+                    href={cat.ctaLink}
+                    className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200"
+                  >
+                    Open tool &rarr;
+                  </Link>
+                </div>
               </div>
             </article>
           ))}

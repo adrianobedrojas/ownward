@@ -1,12 +1,15 @@
 // app/api/upload/route.ts
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getUserBillingState } from '@/lib/billing';
+import { DEFAULT_DOCUMENT_FOLDER } from '@/lib/documents';
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    const folder = (formData.get('folder') as string) || 'Formation';
+    const folder = ((formData.get('folder') as string) || DEFAULT_DOCUMENT_FOLDER).toLowerCase();
+    const notes = String(formData.get('notes') ?? '').trim();
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -18,6 +21,16 @@ export async function POST(req: Request) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const billing = await getUserBillingState(supabase, user.id);
+    const { count: documentCount } = await supabase
+      .from('documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if ((documentCount ?? 0) >= billing.entitlements.documentLimit) {
+      return NextResponse.json({ error: 'Document limit reached for your plan' }, { status: 403 });
     }
 
     // Generate unique file path: user_id/folder/timestamp_filename
@@ -46,11 +59,13 @@ export async function POST(req: Request) {
       .from('documents')
       .insert({
         user_id: user.id,
-        name: file.name,
-        size: file.size,
-        folder: folder,
-        file_path: storageData.path,
-        mime_type: file.type,
+        filename: file.name,
+        filesize: file.size,
+        folder,
+        storage_path: storageData.path,
+        filetype: file.type || 'application/octet-stream',
+        notes: notes || null,
+        public_url: null,
       });
 
     if (dbError) {
@@ -60,8 +75,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, path: storageData.path });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error';
     console.error('Ownward Hub upload error:', err);
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 
 export async function signup(formData: FormData) {
   const accountType = String(formData.get("accountType") ?? "");
@@ -30,11 +31,13 @@ export async function signup(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: getOnboardingConfirmRedirectUrl(siteUrl),
       data: {
         account_type: accountType,
         full_name: fullName,

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { uploadDocument } from "./action";
+import { DEFAULT_DOCUMENT_FOLDER } from "@/lib/documents";
 
 export default async function UploadPage({
   searchParams,
@@ -62,7 +63,7 @@ export default async function UploadPage({
               <select
                 id="folder"
                 name="folder"
-                defaultValue="formation"
+                defaultValue={DEFAULT_DOCUMENT_FOLDER}
                 required
                 className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
               >
