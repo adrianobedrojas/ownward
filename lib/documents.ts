@@ -27,7 +27,7 @@ export function sanitizeDocumentFilename(filename: string) {
   const fallbackId =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      : `${Date.now()}`;
   const fallbackBasename = `document-${fallbackId}`;
   const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9_-]/g, "_");
   const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9]/g, "");

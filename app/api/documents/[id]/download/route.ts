@@ -33,7 +33,7 @@ export async function GET(
     return NextResponse.json({ error: "Unable to retrieve document" }, { status: 500 });
   }
 
-  if (!document || document.user_id !== user.id) {
+  if (document.user_id !== user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
