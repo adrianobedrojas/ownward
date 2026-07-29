@@ -7,7 +7,7 @@ import { DEFAULT_DOCUMENT_FOLDER } from "@/lib/documents";
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get("document") as File;
-  const folder = String(formData.get("folder") ?? DEFAULT_DOCUMENT_FOLDER);
+  const folder = String(formData.get("folder") ?? DEFAULT_DOCUMENT_FOLDER).toLowerCase();
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!file || file.size === 0) {
@@ -68,6 +68,7 @@ export async function uploadDocument(formData: FormData) {
 
   if (dbError) {
     console.error("Database insert error:", dbError.message);
+    await supabase.storage.from("vault").remove([filePath]);
     redirect("/upload?error=DatabaseError");
   }
 

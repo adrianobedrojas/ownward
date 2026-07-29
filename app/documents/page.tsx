@@ -7,8 +7,10 @@ import { DEFAULT_DOCUMENT_FOLDER, formatFolderName } from "@/lib/documents";
 interface DocumentRow {
   id: string;
   filename: string;
+  storage_path: string;
   folder: string | null;
   filesize: number;
+  filetype: string;
   created_at: string;
 }
 
@@ -37,7 +39,7 @@ export default async function DocumentsPage() {
 
     const { data } = await supabase
       .from('documents')
-      .select('*')
+      .select('id,filename,storage_path,folder,filesize,filetype,created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     if (data) documents = data;
@@ -175,11 +177,22 @@ export default async function DocumentsPage() {
                   <span className="ml-3 rounded-full bg-slate-800 px-2.5 py-0.5 text-xs text-cyan-400">
                     {formatFolderName(doc.folder)}
                   </span>
+                  <span className="ml-2 text-xs text-slate-500">
+                    {doc.filetype}
+                  </span>
                 </div>
 
-                <span className="text-slate-500">
-                  {new Date(doc.created_at).toLocaleDateString()}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500">
+                    {new Date(doc.created_at).toLocaleDateString()}
+                  </span>
+                  <a
+                    href={`/api/documents/${doc.id}/download`}
+                    className="text-cyan-400 hover:text-cyan-300"
+                  >
+                    Download
+                  </a>
+                </div>
               </div>
             ))}
           </div>

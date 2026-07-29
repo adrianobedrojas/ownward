@@ -16,7 +16,8 @@ export async function uploadDocument(formData: FormData) {
     return { success: false, error: 'No file provided' };
   }
 
-  const filePath = `${user.id}/${Date.now()}-${file.name}`;
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const filePath = `${user.id}/${DEFAULT_DOCUMENT_FOLDER}/${Date.now()}-${sanitizedName}`;
 
   // 1. Upload to Supabase Storage
   const { error: storageError } = await supabase.storage
@@ -42,6 +43,7 @@ export async function uploadDocument(formData: FormData) {
     });
 
   if (dbError) {
+    await supabase.storage.from('vault').remove([filePath]);
     return { success: false, error: dbError.message };
   }
 
