@@ -16,13 +16,16 @@ export async function uploadDocument(formData: FormData) {
   if (!file) {
     return { success: false, error: 'No file provided' };
   }
+  if (file.name.includes('..') || file.name.startsWith('.')) {
+    return { success: false, error: 'Invalid filename' };
+  }
 
   const extensionIndex = file.name.lastIndexOf('.');
   const rawBasename = extensionIndex > 0 ? file.name.slice(0, extensionIndex) : file.name;
   const rawExtension = extensionIndex > 0 ? file.name.slice(extensionIndex + 1) : '';
-  const fallbackBasename = `document-${Math.random().toString(36).slice(2, 8)}`;
+  const fallbackBasename = `document-${crypto.randomUUID()}`;
   const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9-]/g, '_');
-  const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9]/g, '');
+  const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9-]/g, '');
   const safeFilename = sanitizedExtension
     ? `${sanitizedBasename}.${sanitizedExtension}`
     : sanitizedBasename;
