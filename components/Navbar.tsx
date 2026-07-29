@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
 
 const navigation = [
   {
@@ -28,10 +29,18 @@ const navigation = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
   function isActive(href: string) {
     if (href.startsWith("/#")) return false;
+    if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  function closeMobileMenu() {
+    if (detailsRef.current) {
+      detailsRef.current.open = false;
+    }
   }
 
   return (
@@ -56,6 +65,7 @@ export default function Navbar() {
           </span>
         </Link>
 
+        {/* Desktop Navigation */}
         <div className="hidden items-center gap-1 lg:flex">
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -77,6 +87,7 @@ export default function Navbar() {
           })}
         </div>
 
+        {/* Desktop Actions */}
         <div className="hidden items-center gap-2 lg:flex">
           <Link
             href="/login"
@@ -93,7 +104,12 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <details className="relative lg:hidden" suppressHydrationWarning>
+        {/* Mobile Dropdown Menu */}
+        <details
+          ref={detailsRef}
+          className="relative lg:hidden"
+          suppressHydrationWarning
+        >
           <summary className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
             Menu
           </summary>
@@ -107,6 +123,7 @@ export default function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={closeMobileMenu}
                     aria-current={active ? "page" : undefined}
                     className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${
                       active
@@ -123,6 +140,7 @@ export default function Navbar() {
             <div className="mt-3 grid gap-2">
               <Link
                 href="/login"
+                onClick={closeMobileMenu}
                 className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
               >
                 Log in
@@ -130,6 +148,7 @@ export default function Navbar() {
 
               <Link
                 href="/signup"
+                onClick={closeMobileMenu}
                 className="block rounded-lg bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Create account
