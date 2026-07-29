@@ -76,9 +76,9 @@ ALTER TABLE IF EXISTS public.business_listings
   ADD COLUMN IF NOT EXISTS published_at timestamp with time zone;
 
 UPDATE public.business_listings
-SET slug = lower(trim(slug))
+SET slug = lower(btrim(slug))
 WHERE slug IS NOT NULL
-  AND slug <> lower(trim(slug));
+  AND slug <> lower(btrim(slug));
 
 UPDATE public.business_listings
 SET slug = lower(regexp_replace(coalesce(business_name, 'business'), '[^a-zA-Z0-9]+', '-', 'g'))
