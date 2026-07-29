@@ -4,15 +4,40 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 function createListingSlug(input: string) {
-  const baseSlug = input
+  return input
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 50);
+}
 
-  const safeBase = baseSlug || "business";
-  return `${safeBase}-${Date.now().toString(36)}`;
+async function createUniqueListingSlug(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  businessName: string,
+) {
+  const baseSlug = createListingSlug(businessName) || "business";
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const suffix = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+    const slug = `${baseSlug}-${suffix}`;
+
+    const { data, error } = await supabase
+      .from("business_listings")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data) {
+      return slug;
+    }
+  }
+
+  throw new Error("Could not generate a unique listing slug. Please try again.");
 }
 
 export async function saveListingDraft(formData: FormData) {
@@ -34,11 +59,11 @@ export async function saveListingDraft(formData: FormData) {
   const annualRevenue = formData.get("annualRevenue") ? parseFloat(formData.get("annualRevenue") as string) : null;
   const askingPrice = formData.get("askingPrice") ? parseFloat(formData.get("askingPrice") as string) : null;
   const summary = formData.get("summary") as string;
-  const slug = createListingSlug(businessName);
 
   if (!businessName || !category) {
     throw new Error("Business name and category are required.");
   }
+  const slug = await createUniqueListingSlug(supabase, businessName);
 
   const { error: insertError } = await supabase.from("business_listings").insert({
     user_id: user.id,
