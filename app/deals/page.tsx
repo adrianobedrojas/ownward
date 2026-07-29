@@ -164,10 +164,10 @@ export default function DealsPage() {
             </div>
 
             <Link
-              href="/marketplace"
+              href="/buy"
               className="rounded-lg border border-cyan-400 px-4 py-2 text-center text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/10"
             >
-              Explore the marketplace
+              Explore listings
             </Link>
           </div>
 
@@ -184,7 +184,7 @@ export default function DealsPage() {
 
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
-                href="/marketplace"
+                href="/buy"
                 className="rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Browse businesses

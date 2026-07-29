@@ -146,7 +146,6 @@ export default function HomePage() {
                 Discover opportunities, compare businesses, and organize due diligence.
               </p>
             </div>
-            {/* FIXED: changed /marketplace to /buy */}
             <Link
               href="/buy"
               className="mt-6 inline-block rounded-lg bg-slate-800 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-slate-700"
@@ -180,7 +179,6 @@ export default function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">Marketplace Preview</p>
             <h2 className="mt-2 text-3xl font-bold text-white">Explore business opportunities</h2>
           </div>
-          {/* FIXED: changed /marketplace to /buy */}
           <Link href="/buy" className="text-sm font-semibold text-cyan-400 hover:underline">
             View all listings &rarr;
           </Link>
@@ -427,7 +425,6 @@ export default function HomePage() {
           >
             Create account
           </Link>
-          {/* FIXED: changed /marketplace to /buy */}
           <Link
             href="/buy"
             className="rounded-lg border border-slate-700 bg-slate-900 px-6 py-3.5 font-semibold text-white transition hover:border-cyan-400 hover:bg-slate-800"

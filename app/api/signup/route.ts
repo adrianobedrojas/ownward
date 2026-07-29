@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 
 function redirectTo(path: string) {
   return new Response(null, {
@@ -46,11 +47,13 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: getOnboardingConfirmRedirectUrl(siteUrl),
       data: {
         account_type: accountType,
         full_name: fullName,

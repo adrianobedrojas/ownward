@@ -2,22 +2,16 @@
 
 import { useState } from 'react';
 
-const PLAN_PRICES = {
-  starter: 'price_1TxeKJEMVIcG0GpnB3QUddIQ',
-  builder: 'price_1TxeMsEMVIcG0GpnoMsBKsu9',
-  pro: 'price_1TxeOvEMVIcG0Gpnm4HzuIiu',
-};
-
 export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleSubscribe = async (priceId: string, planKey: string) => {
-    setLoadingPlan(planKey);
+  const handleSubscribe = async (plan: string) => {
+    setLoadingPlan(plan);
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ plan }),
       });
 
       const data = await res.json();
@@ -60,7 +54,7 @@ export default function PricingPage() {
             </ul>
           </div>
           <button
-            onClick={() => handleSubscribe(PLAN_PRICES.starter, 'starter')}
+            onClick={() => handleSubscribe('starter')}
             disabled={loadingPlan !== null}
             className="mt-8 w-full rounded-lg bg-slate-800 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-700 disabled:opacity-50"
           >
@@ -88,7 +82,7 @@ export default function PricingPage() {
             </ul>
           </div>
           <button
-            onClick={() => handleSubscribe(PLAN_PRICES.builder, 'builder')}
+            onClick={() => handleSubscribe('builder')}
             disabled={loadingPlan !== null}
             className="mt-8 w-full rounded-lg bg-cyan-400 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-50"
           >
@@ -113,7 +107,7 @@ export default function PricingPage() {
             </ul>
           </div>
           <button
-            onClick={() => handleSubscribe(PLAN_PRICES.pro, 'pro')}
+            onClick={() => handleSubscribe('pro')}
             disabled={loadingPlan !== null}
             className="mt-8 w-full rounded-lg bg-slate-800 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-700 disabled:opacity-50"
           >
