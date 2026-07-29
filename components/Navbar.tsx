@@ -4,6 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 
+type NavbarProps = {
+  logo?: React.ReactNode;
+};
+
 const navigation = [
   {
     name: "Buy",
@@ -27,7 +31,7 @@ const navigation = [
   },
 ];
 
-export default function Navbar() {
+export default function Navbar({ logo }: NavbarProps) {
   const pathname = usePathname();
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -50,9 +54,11 @@ export default function Navbar() {
         className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6"
       >
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-blue-950">
-            O
-          </span>
+          {logo ?? (
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 font-bold text-white shadow-lg shadow-blue-950">
+              O
+            </span>
+          )}
 
           <span>
             <span className="block font-bold text-white">
