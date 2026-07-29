@@ -1,7 +1,11 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
-import { createUniqueListingSlug, isSlugConflictError } from "@/lib/listings";
+import {
+  createUniqueListingSlug,
+  isSlugConflictError,
+  MAX_SLUG_GENERATION_ATTEMPTS,
+} from "@/lib/listings";
 import { revalidatePath } from "next/cache";
 
 function getMissingPublishFields(listing: {
@@ -103,13 +107,15 @@ export async function publishListing(formData: FormData) {
     );
   }
 
-  const businessName = listing.business_name?.trim();
+  const businessName = listing.business_name?.trim() ?? "";
   if (!businessName) {
-    throw new Error("Listing cannot be published until business name is set.");
+    throw new Error("Listing cannot be published until all required fields are complete: business name.");
   }
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const slug = listing.slug ?? await createUniqueListingSlug(supabase, businessName);
+  for (let attempt = 0; attempt < MAX_SLUG_GENERATION_ATTEMPTS; attempt += 1) {
+    const slug = (attempt === 0 && listing.slug)
+      ? listing.slug
+      : createUniqueListingSlug(businessName);
     const { error } = await supabase
       .from("business_listings")
       .update({
@@ -129,7 +135,7 @@ export async function publishListing(formData: FormData) {
       return;
     }
 
-    if (!isSlugConflictError(error) || listing.slug) {
+    if (!isSlugConflictError(error)) {
       throw new Error(error.message);
     }
   }

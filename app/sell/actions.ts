@@ -1,7 +1,11 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
-import { createUniqueListingSlug, isSlugConflictError } from "@/lib/listings";
+import {
+  createUniqueListingSlug,
+  isSlugConflictError,
+  MAX_SLUG_GENERATION_ATTEMPTS,
+} from "@/lib/listings";
 import { redirect } from "next/navigation";
 
 export async function saveListingDraft(formData: FormData) {
@@ -28,8 +32,8 @@ export async function saveListingDraft(formData: FormData) {
     throw new Error("Business name and category are required.");
   }
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const slug = await createUniqueListingSlug(supabase, businessName);
+  for (let attempt = 0; attempt < MAX_SLUG_GENERATION_ATTEMPTS; attempt += 1) {
+    const slug = createUniqueListingSlug(businessName);
 
     const { error: insertError } = await supabase.from("business_listings").insert({
       user_id: user.id,

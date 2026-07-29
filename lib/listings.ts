@@ -1,40 +1,20 @@
-import { createClient } from "@/lib/supabase/server";
+export const MAX_SLUG_GENERATION_ATTEMPTS = 5;
 
 export function createListingSlug(input: string) {
-  return input
+  const normalizedSlug = input
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 50);
+
+  return normalizedSlug || "business";
 }
 
-export async function createUniqueListingSlug(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  businessName: string,
-) {
-  const baseSlug = createListingSlug(businessName) || "business";
-
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-    const slug = `${baseSlug}-${suffix}`;
-
-    const { data, error } = await supabase
-      .from("business_listings")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (!data) {
-      return slug;
-    }
-  }
-
-  throw new Error("Could not generate a unique listing slug. Please try again.");
+export function createUniqueListingSlug(businessName: string) {
+  const baseSlug = createListingSlug(businessName);
+  const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  return `${baseSlug}-${suffix}`;
 }
 
 export function isSlugConflictError(error: {
