@@ -7,7 +7,6 @@ import { DEFAULT_DOCUMENT_FOLDER, formatFolderName } from "@/lib/documents";
 interface DocumentRow {
   id: string;
   filename: string;
-  storage_path: string;
   folder: string | null;
   filesize: number;
   filetype: string;
@@ -39,7 +38,7 @@ export default async function DocumentsPage() {
 
     const { data } = await supabase
       .from('documents')
-      .select('id,filename,storage_path,folder,filesize,filetype,created_at')
+      .select('id,filename,folder,filesize,filetype,created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     if (data) documents = data;

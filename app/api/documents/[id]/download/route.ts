@@ -24,7 +24,14 @@ export async function GET(
     .eq("id", id)
     .single();
 
-  if (documentError || !document || document.user_id !== user.id) {
+  if (documentError) {
+    if (documentError.code === "PGRST116") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ error: "Unable to retrieve document" }, { status: 500 });
+  }
+
+  if (!document || document.user_id !== user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

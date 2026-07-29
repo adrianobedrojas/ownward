@@ -11,7 +11,12 @@ export function formatFolderName(folder?: string | null) {
 }
 
 export function isInvalidDocumentFilename(filename: string) {
-  return filename.includes("..") || filename.startsWith(".");
+  return (
+    filename.includes("..") ||
+    filename.startsWith(".") ||
+    filename.includes("/") ||
+    filename.includes("\\")
+  );
 }
 
 export function sanitizeDocumentFilename(filename: string) {
@@ -23,7 +28,7 @@ export function sanitizeDocumentFilename(filename: string) {
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const fallbackBasename = `document-${fallbackId}`;
-  const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9-]/g, "_");
+  const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9_-]/g, "_");
   const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9]/g, "");
 
   return sanitizedExtension
