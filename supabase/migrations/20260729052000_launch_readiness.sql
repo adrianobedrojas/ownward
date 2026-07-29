@@ -76,9 +76,9 @@ ALTER TABLE IF EXISTS public.business_listings
   ADD COLUMN IF NOT EXISTS published_at timestamp with time zone;
 
 UPDATE public.business_listings
-SET slug = lower(btrim(slug))
+SET slug = lower(regexp_replace(slug, '^\s+|\s+$', '', 'g'))
 WHERE slug IS NOT NULL
-  AND slug <> lower(btrim(slug));
+  AND slug <> lower(regexp_replace(slug, '^\s+|\s+$', '', 'g'));
 
 UPDATE public.business_listings
 SET slug = lower(regexp_replace(coalesce(business_name, 'business'), '[^a-zA-Z0-9]+', '-', 'g'))
@@ -92,7 +92,7 @@ WITH ranked AS (
   WHERE slug IS NOT NULL AND btrim(slug) <> ''
 )
 UPDATE public.business_listings bl
-SET slug = bl.slug || '-' || substr(bl.id::text, 1, 8)
+SET slug = lower(bl.slug) || '-' || substr(bl.id::text, 1, 8)
 FROM ranked
 WHERE ranked.id = bl.id
   AND ranked.rn > 1;
