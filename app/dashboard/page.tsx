@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { deleteListingDraft, publishListing } from "./actions";
+import { deleteListingDraft, publishListing, unpublishListing } from "./actions";
 
 export const metadata: Metadata = {
   title: "Dashboard | Ownward Hub",
@@ -152,13 +152,25 @@ export default async function DashboardPage({
                   </span>
 
                   <div className="flex items-center gap-4">
-                    {listing.is_public && listing.slug ? (
+                    {listing.is_public && listing.slug && (
                       <Link
                         href={`/b/${listing.slug}`}
                         className="text-xs font-semibold text-cyan-300 transition hover:text-cyan-200"
                       >
                         View public page
                       </Link>
+                    )}
+
+                    {listing.status === "published" ? (
+                      <form action={unpublishListing}>
+                        <input type="hidden" name="listingId" value={listing.id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-amber-400 transition hover:text-amber-300"
+                        >
+                          Unpublish
+                        </button>
+                      </form>
                     ) : (
                       <form action={publishListing}>
                         <input type="hidden" name="listingId" value={listing.id} />

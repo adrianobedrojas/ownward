@@ -1,7 +1,8 @@
 export interface Document {
   id: string;
   filename: string;
+  storage_path: string;
   filesize: number;
   filetype: string;
-  createdAt: Date;
+  created_at: string;
 }

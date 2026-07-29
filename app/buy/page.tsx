@@ -30,7 +30,8 @@ export default async function MarketplacePage({
   let query = supabase
     .from("business_listings")
     .select("*")
-    .eq("is_public", true);
+    .eq("is_public", true)
+    .eq("status", "published");
 
   if (searchQuery) {
     query = query.ilike("business_name", `%${searchQuery}%`);
