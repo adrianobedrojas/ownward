@@ -20,7 +20,8 @@ export async function uploadDocument(formData: FormData) {
   const extensionIndex = file.name.lastIndexOf('.');
   const rawBasename = extensionIndex > 0 ? file.name.slice(0, extensionIndex) : file.name;
   const rawExtension = extensionIndex > 0 ? file.name.slice(extensionIndex + 1) : '';
-  const sanitizedBasename = (rawBasename || 'document').replace(/[^a-zA-Z0-9-]/g, '_');
+  const fallbackBasename = `document-${Math.random().toString(36).slice(2, 8)}`;
+  const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9-]/g, '_');
   const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9]/g, '');
   const safeFilename = sanitizedExtension
     ? `${sanitizedBasename}.${sanitizedExtension}`
@@ -51,7 +52,10 @@ export async function uploadDocument(formData: FormData) {
     });
 
   if (dbError) {
-    await supabase.storage.from('vault').remove([filePath]);
+    const { error: cleanupError } = await supabase.storage.from('vault').remove([filePath]);
+    if (cleanupError) {
+      console.error('Storage cleanup error after database failure:', cleanupError.message);
+    }
     return { success: false, error: dbError.message };
   }
 

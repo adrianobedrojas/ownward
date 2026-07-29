@@ -68,7 +68,10 @@ export async function uploadDocument(formData: FormData) {
 
   if (dbError) {
     console.error("Database insert error:", dbError.message);
-    await supabase.storage.from("vault").remove([filePath]);
+    const { error: cleanupError } = await supabase.storage.from("vault").remove([filePath]);
+    if (cleanupError) {
+      console.error("Storage cleanup error after database failure:", cleanupError.message);
+    }
     redirect("/upload?error=DatabaseError");
   }
 
