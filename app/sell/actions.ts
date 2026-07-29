@@ -1,19 +1,12 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  createUniqueListingSlug,
+  isSlugConflictError,
+  MAX_SLUG_GENERATION_ATTEMPTS,
+} from "@/lib/listings";
 import { redirect } from "next/navigation";
-
-function createListingSlug(input: string) {
-  const baseSlug = input
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 50);
-
-  const safeBase = baseSlug || "business";
-  return `${safeBase}-${Date.now().toString(36)}`;
-}
 
 export async function saveListingDraft(formData: FormData) {
   const supabase = await createClient();
@@ -34,29 +27,36 @@ export async function saveListingDraft(formData: FormData) {
   const annualRevenue = formData.get("annualRevenue") ? parseFloat(formData.get("annualRevenue") as string) : null;
   const askingPrice = formData.get("askingPrice") ? parseFloat(formData.get("askingPrice") as string) : null;
   const summary = formData.get("summary") as string;
-  const slug = createListingSlug(businessName);
 
   if (!businessName || !category) {
     throw new Error("Business name and category are required.");
   }
 
-  const { error: insertError } = await supabase.from("business_listings").insert({
-    user_id: user.id,
-    business_name: businessName,
-    category,
-    location,
-    year_established: yearEstablished,
-    annual_revenue: annualRevenue,
-    asking_price: askingPrice,
-    summary,
-    slug,
-    is_public: false,
-    status: 'draft',
-  });
+  for (let attempt = 0; attempt < MAX_SLUG_GENERATION_ATTEMPTS; attempt += 1) {
+    const slug = createUniqueListingSlug(businessName);
 
-  if (insertError) {
-    throw new Error(insertError.message);
+    const { error: insertError } = await supabase.from("business_listings").insert({
+      user_id: user.id,
+      business_name: businessName,
+      category,
+      location,
+      year_established: yearEstablished,
+      annual_revenue: annualRevenue,
+      asking_price: askingPrice,
+      summary,
+      slug,
+      is_public: false,
+      status: "draft",
+    });
+
+    if (!insertError) {
+      redirect("/dashboard?success=draft-saved");
+    }
+
+    if (!isSlugConflictError(insertError)) {
+      throw new Error(insertError.message);
+    }
   }
 
-  redirect("/dashboard?success=draft-saved");
+  throw new Error("Could not save listing draft due to slug conflicts. Please try again.");
 }
