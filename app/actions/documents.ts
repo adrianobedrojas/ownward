@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server'; // or your server client helper
-import { DEFAULT_DOCUMENT_FOLDER } from '@/lib/documents';
+import { DEFAULT_DOCUMENT_FOLDER, isInvalidDocumentFilename, sanitizeDocumentFilename } from '@/lib/documents';
 
 export async function uploadDocument(formData: FormData) {
   const supabase = await createClient();
@@ -12,11 +12,15 @@ export async function uploadDocument(formData: FormData) {
   }
 
   const file = formData.get('file') as File;
+  const folder = String(formData.get('folder') ?? DEFAULT_DOCUMENT_FOLDER).toLowerCase();
   if (!file) {
     return { success: false, error: 'No file provided' };
   }
+  if (isInvalidDocumentFilename(file.name)) {
+    return { success: false, error: 'Invalid filename' };
+  }
 
-  const filePath = `${user.id}/${Date.now()}-${file.name}`;
+  const filePath = `${user.id}/${folder}/${Date.now()}-${sanitizeDocumentFilename(file.name)}`;
 
   // 1. Upload to Supabase Storage
   const { error: storageError } = await supabase.storage
@@ -36,12 +40,16 @@ export async function uploadDocument(formData: FormData) {
       filesize: file.size,
       filetype: file.type || 'application/octet-stream',
       storage_path: filePath,
-      folder: DEFAULT_DOCUMENT_FOLDER,
+      folder,
       notes: null,
       public_url: null,
     });
 
   if (dbError) {
+    const { error: cleanupError } = await supabase.storage.from('vault').remove([filePath]);
+    if (cleanupError) {
+      console.error('Storage cleanup error after database failure:', cleanupError.message);
+    }
     return { success: false, error: dbError.message };
   }
 
