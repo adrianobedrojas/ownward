@@ -196,13 +196,14 @@ ALTER TABLE "public"."community_pulse_responses" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."documents" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "user_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL,
-    "file_path" "text" NOT NULL,
-    "folder" "text" NOT NULL,
-    "file_size" bigint NOT NULL,
-    "file_type" "text" NOT NULL,
+    "filename" "text" NOT NULL,
+    "storage_path" "text" NOT NULL,
+    "folder" "text",
+    "filesize" bigint NOT NULL,
+    "filetype" "text" NOT NULL,
     "notes" "text",
-    "created_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL
+    "created_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL,
+    "public_url" "text"
 );
 
 
@@ -447,19 +448,11 @@ CREATE POLICY "Public can view public businesses" ON "public"."businesses" FOR S
 
 
 
-CREATE POLICY "Users can delete their own document metadata" ON "public"."documents" FOR DELETE TO "authenticated" USING (("auth"."uid"() = "user_id"));
-
-
-
 CREATE POLICY "Users can delete their own invoices" ON "public"."invoices" FOR DELETE USING (("auth"."uid"() = "user_id"));
 
 
 
 CREATE POLICY "Users can delete their own transactions" ON "public"."transactions" FOR DELETE TO "authenticated" USING (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Users can insert their own document metadata" ON "public"."documents" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
 
 
 
@@ -472,6 +465,10 @@ CREATE POLICY "Users can insert their own listings" ON "public"."business_listin
 
 
 CREATE POLICY "Users can insert their own transactions" ON "public"."transactions" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
+
+
+
+CREATE POLICY "Users can manage their own documents" ON "public"."documents" TO "authenticated" USING (("auth"."uid"() = "user_id")) WITH CHECK (("auth"."uid"() = "user_id"));
 
 
 
@@ -488,10 +485,6 @@ CREATE POLICY "Users can update their own listings" ON "public"."business_listin
 
 
 CREATE POLICY "Users can view own profile" ON "public"."profiles" FOR SELECT USING (("auth"."uid"() = "id"));
-
-
-
-CREATE POLICY "Users can view their own document metadata" ON "public"."documents" FOR SELECT TO "authenticated" USING (("auth"."uid"() = "user_id"));
 
 
 
