@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState } from "@/lib/billing";
-import { DEFAULT_DOCUMENT_FOLDER } from "@/lib/documents";
+import { DEFAULT_DOCUMENT_FOLDER, isInvalidDocumentFilename, sanitizeDocumentFilename } from "@/lib/documents";
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get("document") as File;
@@ -12,6 +12,9 @@ export async function uploadDocument(formData: FormData) {
 
   if (!file || file.size === 0) {
     redirect("/upload?error=NoFileSelected");
+  }
+  if (isInvalidDocumentFilename(file.name)) {
+    redirect("/upload?error=InvalidFilename");
   }
 
   const supabase = await createClient();
@@ -37,8 +40,7 @@ export async function uploadDocument(formData: FormData) {
   }
 
   // 2. Prepare isolated file path: user_id/folder/timestamp-filename
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-  const fileName = `${Date.now()}-${sanitizedName}`;
+  const fileName = `${Date.now()}-${sanitizeDocumentFilename(file.name)}`;
   const filePath = `${user.id}/${folder}/${fileName}`;
 
   // 3. Upload file to Supabase Storage bucket "vault"

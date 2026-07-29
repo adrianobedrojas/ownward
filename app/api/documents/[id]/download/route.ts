@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-const SIGNED_URL_EXPIRY_SECONDS = 60;
+import { DOCUMENT_DOWNLOAD_SIGNED_URL_EXPIRY_SECONDS } from "@/lib/documents";
 
 export async function GET(
   _req: Request,
@@ -31,7 +30,7 @@ export async function GET(
 
   const { data: signedUrlData, error: signedUrlError } = await supabase.storage
     .from("vault")
-    .createSignedUrl(document.storage_path, SIGNED_URL_EXPIRY_SECONDS);
+    .createSignedUrl(document.storage_path, DOCUMENT_DOWNLOAD_SIGNED_URL_EXPIRY_SECONDS);
 
   if (signedUrlError || !signedUrlData?.signedUrl) {
     return NextResponse.json({ error: "Unable to generate download link" }, { status: 500 });

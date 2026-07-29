@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server'; // or your server client helper
-import { DEFAULT_DOCUMENT_FOLDER } from '@/lib/documents';
+import { DEFAULT_DOCUMENT_FOLDER, isInvalidDocumentFilename, sanitizeDocumentFilename } from '@/lib/documents';
 
 export async function uploadDocument(formData: FormData) {
   const supabase = await createClient();
@@ -16,20 +16,11 @@ export async function uploadDocument(formData: FormData) {
   if (!file) {
     return { success: false, error: 'No file provided' };
   }
-  if (file.name.includes('..') || file.name.startsWith('.')) {
+  if (isInvalidDocumentFilename(file.name)) {
     return { success: false, error: 'Invalid filename' };
   }
 
-  const extensionIndex = file.name.lastIndexOf('.');
-  const rawBasename = extensionIndex > 0 ? file.name.slice(0, extensionIndex) : file.name;
-  const rawExtension = extensionIndex > 0 ? file.name.slice(extensionIndex + 1) : '';
-  const fallbackBasename = `document-${crypto.randomUUID()}`;
-  const sanitizedBasename = (rawBasename || fallbackBasename).replace(/[^a-zA-Z0-9-]/g, '_');
-  const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9-]/g, '');
-  const safeFilename = sanitizedExtension
-    ? `${sanitizedBasename}.${sanitizedExtension}`
-    : sanitizedBasename;
-  const filePath = `${user.id}/${folder}/${Date.now()}-${safeFilename}`;
+  const filePath = `${user.id}/${folder}/${Date.now()}-${sanitizeDocumentFilename(file.name)}`;
 
   // 1. Upload to Supabase Storage
   const { error: storageError } = await supabase.storage
