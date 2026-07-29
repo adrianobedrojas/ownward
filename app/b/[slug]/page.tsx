@@ -15,6 +15,7 @@ export default async function PublicBusinessPage({ params }: Props) {
     .select("*")
     .eq("slug", slug)
     .eq("is_public", true)
+    .eq("status", "published")
     .maybeSingle();
 
   if (error || !listing) {
