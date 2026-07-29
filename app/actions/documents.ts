@@ -11,13 +11,21 @@ export async function uploadDocument(formData: FormData) {
     return { success: false, error: 'Unauthorized' };
   }
 
-  const file = formData.get('file') as File;
+  const file = (formData.get('file') ?? formData.get('document')) as File;
+  const folder = String(formData.get('folder') ?? DEFAULT_DOCUMENT_FOLDER).toLowerCase();
   if (!file) {
     return { success: false, error: 'No file provided' };
   }
 
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-  const filePath = `${user.id}/${DEFAULT_DOCUMENT_FOLDER}/${Date.now()}-${sanitizedName}`;
+  const extensionIndex = file.name.lastIndexOf('.');
+  const rawBasename = extensionIndex > 0 ? file.name.slice(0, extensionIndex) : file.name;
+  const rawExtension = extensionIndex > 0 ? file.name.slice(extensionIndex + 1) : '';
+  const sanitizedBasename = (rawBasename || 'document').replace(/[^a-zA-Z0-9-]/g, '_');
+  const sanitizedExtension = rawExtension.replace(/[^a-zA-Z0-9]/g, '');
+  const safeFilename = sanitizedExtension
+    ? `${sanitizedBasename}.${sanitizedExtension}`
+    : sanitizedBasename;
+  const filePath = `${user.id}/${folder}/${Date.now()}-${safeFilename}`;
 
   // 1. Upload to Supabase Storage
   const { error: storageError } = await supabase.storage
@@ -37,7 +45,7 @@ export async function uploadDocument(formData: FormData) {
       filesize: file.size,
       filetype: file.type || 'application/octet-stream',
       storage_path: filePath,
-      folder: DEFAULT_DOCUMENT_FOLDER,
+      folder,
       notes: null,
       public_url: null,
     });
