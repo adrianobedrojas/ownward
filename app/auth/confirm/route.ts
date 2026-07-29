@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const redirectTo =
     next && next.startsWith("/") && !next.startsWith("//")
       ? next
-      : "/dashboard";
+      : "/onboarding";
 
   if (tokenHash && type) {
     const supabase = await createClient();

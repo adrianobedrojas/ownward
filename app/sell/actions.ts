@@ -3,6 +3,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+function createListingSlug(input: string) {
+  const baseSlug = input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50);
+
+  const safeBase = baseSlug || "business";
+  return `${safeBase}-${Date.now().toString(36)}`;
+}
+
 export async function saveListingDraft(formData: FormData) {
   const supabase = await createClient();
 
@@ -22,6 +34,7 @@ export async function saveListingDraft(formData: FormData) {
   const annualRevenue = formData.get("annualRevenue") ? parseFloat(formData.get("annualRevenue") as string) : null;
   const askingPrice = formData.get("askingPrice") ? parseFloat(formData.get("askingPrice") as string) : null;
   const summary = formData.get("summary") as string;
+  const slug = createListingSlug(businessName);
 
   if (!businessName || !category) {
     throw new Error("Business name and category are required.");
@@ -36,6 +49,8 @@ export async function saveListingDraft(formData: FormData) {
     annual_revenue: annualRevenue,
     asking_price: askingPrice,
     summary,
+    slug,
+    is_public: false,
     status: 'draft',
   });
 

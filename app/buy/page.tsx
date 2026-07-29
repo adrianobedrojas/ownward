@@ -26,10 +26,13 @@ export default async function MarketplacePage({
 
   const supabase = await createClient();
 
-  let query = supabase.from("listings").select("*");
+  let query = supabase
+    .from("business_listings")
+    .select("*")
+    .eq("is_public", true);
 
   if (searchQuery) {
-    query = query.ilike("name", `%${searchQuery}%`);
+    query = query.ilike("business_name", `%${searchQuery}%`);
   }
 
   if (categoryQuery) {
@@ -40,7 +43,10 @@ export default async function MarketplacePage({
     query = query.ilike("location", `%${locationQuery}%`);
   }
 
-  const { data: businesses = [], error } = await query.order("created_at", {
+  const { data: listings = [], error } = await query.order("published_at", {
+    ascending: false,
+    nullsFirst: false,
+  }).order("created_at", {
     ascending: false,
   });
 
@@ -48,7 +54,7 @@ export default async function MarketplacePage({
     console.error("Error fetching marketplace listings:", error.message);
   }
 
-  const displayBusinesses = businesses ?? [];
+  const displayListings = listings ?? [];
 
   return (
     <main>
@@ -116,11 +122,13 @@ export default async function MarketplacePage({
                 className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
               >
                 <option value="">All categories</option>
-                <option value="Service business">Service business</option>
-                <option value="Food and beverage">Food and beverage</option>
-                <option value="Retail">Retail</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Technology">Technology</option>
+                <option value="services">Services</option>
+                <option value="food">Food and beverage</option>
+                <option value="retail">Retail</option>
+                <option value="construction">Construction</option>
+                <option value="marketing">Marketing</option>
+                <option value="technology">Technology</option>
+                <option value="other">Other</option>
               </select>
             </div>
 
@@ -166,11 +174,11 @@ export default async function MarketplacePage({
             </div>
 
             <p className="text-sm text-slate-500">
-              {displayBusinesses.length} listings found
+              {displayListings.length} listings found
             </p>
           </div>
 
-          {displayBusinesses.length === 0 ? (
+          {displayListings.length === 0 ? (
             <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-12 text-center">
               <p className="text-lg font-semibold text-white">No businesses found</p>
               <p className="mt-2 text-sm text-slate-400">
@@ -179,25 +187,22 @@ export default async function MarketplacePage({
             </div>
           ) : (
             <div className="mt-6 grid gap-5 lg:grid-cols-3">
-              {displayBusinesses.map((business) => (
+              {displayListings.map((business) => (
                 <article
                   key={business.id}
                   className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-cyan-400"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
-                      {business.category}
+                      {business.category
+                        ? business.category.replace(/^./, (value: string) => value.toUpperCase())
+                        : "Other"}
                     </span>
 
-                    {business.is_demo && (
-                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-                        Demo
-                      </span>
-                    )}
                   </div>
 
                   <h3 className="mt-5 text-xl font-semibold text-white">
-                    {business.name}
+                    {business.business_name}
                   </h3>
 
                   <p className="mt-1 text-sm text-slate-400">
@@ -205,35 +210,38 @@ export default async function MarketplacePage({
                   </p>
 
                   <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">
-                    {business.description}
+                    {business.summary || "No summary provided yet."}
                   </p>
 
                   <div className="mt-6 grid grid-cols-3 gap-3 border-y border-slate-800 py-4">
                     <div>
                       <p className="text-xs text-slate-500">Asking price</p>
                       <p className="mt-1 text-sm font-semibold text-white">
-                        {business.asking_price}
+                        {business.asking_price
+                          ? `$${Number(business.asking_price).toLocaleString()}`
+                          : "Not set"}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-xs text-slate-500">Revenue</p>
                       <p className="mt-1 text-sm font-semibold text-white">
-                        {business.annual_revenue}
+                        {business.annual_revenue
+                          ? `$${Number(business.annual_revenue).toLocaleString()}`
+                          : "Not set"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-500">Earnings</p>
+                      <p className="text-xs text-slate-500">Established</p>
                       <p className="mt-1 text-sm font-semibold text-emerald-400">
-                        {business.owner_earnings}
+                        {business.year_established || "N/A"}
                       </p>
                     </div>
                   </div>
 
-                  {/* FIXED: Changed /marketplace/[id] to /buy/[id] */}
                   <Link
-                    href={`/buy/${business.id}`}
+                    href={`/b/${business.slug}`}
                     className="mt-5 rounded-lg bg-cyan-400/10 px-4 py-3 text-center text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
                   >
                     View details

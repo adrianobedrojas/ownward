@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getUserBillingState } from "@/lib/billing";
 
 export async function uploadDocument(formData: FormData) {
   const file = formData.get("document") as File;
@@ -22,6 +23,16 @@ export async function uploadDocument(formData: FormData) {
 
   if (authError || !user) {
     redirect("/login");
+  }
+
+  const billing = await getUserBillingState(supabase, user.id);
+  const { count: documentCount } = await supabase
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  if ((documentCount ?? 0) >= billing.entitlements.documentLimit) {
+    redirect("/upload?error=DocumentLimitReached");
   }
 
   // 2. Prepare isolated file path: user_id/folder/timestamp-filename
@@ -45,12 +56,13 @@ export async function uploadDocument(formData: FormData) {
   // 4. Record document metadata in PostgreSQL "documents" table
   const { error: dbError } = await supabase.from("documents").insert({
     user_id: user.id,
-    name: file.name,
-    file_path: filePath,
+    filename: file.name,
+    storage_path: filePath,
     folder,
-    file_size: file.size,
-    file_type: file.type || "application/octet-stream",
+    filesize: file.size,
+    filetype: file.type || "application/octet-stream",
     notes: notes || null,
+    public_url: null,
   });
 
   if (dbError) {

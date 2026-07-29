@@ -46,11 +46,13 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${siteUrl}/auth/confirm?next=/onboarding`,
       data: {
         account_type: accountType,
         full_name: fullName,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { deleteListingDraft } from "./actions";
+import { deleteListingDraft, publishListing } from "./actions";
 
 export const metadata: Metadata = {
   title: "Dashboard | Ownward Hub",
@@ -39,6 +39,14 @@ export default async function DashboardPage({
           <p className="font-semibold">Draft saved successfully!</p>
           <p className="text-sm text-emerald-400/80 mt-1">
             Your business listing draft has been securely stored in your dashboard.
+          </p>
+        </div>
+      )}
+      {params.success === "onboarding-complete" && (
+        <div className="mb-8 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-cyan-200">
+          <p className="font-semibold">Onboarding complete!</p>
+          <p className="text-sm text-cyan-300/80 mt-1">
+            Your workspace has been set up. You can now manage listings and documents.
           </p>
         </div>
       )}
@@ -143,15 +151,36 @@ export default async function DashboardPage({
                     {listing.status}
                   </span>
 
-                  <form action={deleteListingDraft}>
-                    <input type="hidden" name="listingId" value={listing.id} />
-                    <button
-                      type="submit"
-                      className="text-xs font-semibold text-rose-400 transition hover:text-rose-300"
-                    >
-                      Delete draft
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-4">
+                    {listing.is_public && listing.slug ? (
+                      <Link
+                        href={`/b/${listing.slug}`}
+                        className="text-xs font-semibold text-cyan-300 transition hover:text-cyan-200"
+                      >
+                        View public page
+                      </Link>
+                    ) : (
+                      <form action={publishListing}>
+                        <input type="hidden" name="listingId" value={listing.id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-emerald-400 transition hover:text-emerald-300"
+                        >
+                          Publish
+                        </button>
+                      </form>
+                    )}
+
+                    <form action={deleteListingDraft}>
+                      <input type="hidden" name="listingId" value={listing.id} />
+                      <button
+                        type="submit"
+                        className="text-xs font-semibold text-rose-400 transition hover:text-rose-300"
+                      >
+                        Delete draft
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </article>
             ))}

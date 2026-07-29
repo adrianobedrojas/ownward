@@ -1,17 +1,26 @@
 // app/documents/page.tsx
 import Link from "next/link";
 import { createClient } from '@/lib/supabase/server';
+import { getUserBillingState } from "@/lib/billing";
+
+interface DocumentRow {
+  id: string;
+  filename: string;
+  folder: string | null;
+  filesize: number;
+  created_at: string;
+}
 
 const vaultFolders = [
-  { name: "Formation", description: "Registration and business formation records." },
-  { name: "Customers", description: "Documents connected to customers and projects." },
-  { name: "Agreements", description: "Contracts and signed agreements." },
-  { name: "Quotes", description: "Quotes and business proposals." },
-  { name: "Invoices", description: "Sent and received invoices." },
-  { name: "Receipts", description: "Receipts and proof of payment." },
-  { name: "Expenses", description: "Bills and expense records." },
-  { name: "Taxes", description: "Tax documents and supporting records." },
-  { name: "Marketing", description: "Logos, advertisements, and promotional files." },
+  { key: "formation", label: "Formation", description: "Registration and business formation records." },
+  { key: "customers", label: "Customers", description: "Documents connected to customers and projects." },
+  { key: "agreements", label: "Agreements", description: "Contracts and signed agreements." },
+  { key: "quotes", label: "Quotes", description: "Quotes and business proposals." },
+  { key: "invoices", label: "Invoices", description: "Sent and received invoices." },
+  { key: "receipts", label: "Receipts", description: "Receipts and proof of payment." },
+  { key: "expenses", label: "Expenses", description: "Bills and expense records." },
+  { key: "taxes", label: "Taxes", description: "Tax documents and supporting records." },
+  { key: "marketing", label: "Marketing", description: "Logos, advertisements, and promotional files." },
 ];
 
 export default async function DocumentsPage() {
@@ -19,8 +28,12 @@ export default async function DocumentsPage() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  let documents: any[] = [];
+  let documents: DocumentRow[] = [];
+  let maxDocuments = 10;
   if (user) {
+    const billing = await getUserBillingState(supabase, user.id);
+    maxDocuments = billing.entitlements.documentLimit;
+
     const { data } = await supabase
       .from('documents')
       .select('*')
@@ -30,13 +43,13 @@ export default async function DocumentsPage() {
   }
 
   const totalDocuments = documents.length;
-  const totalBytes = documents.reduce((acc, doc) => acc + (doc.size || 0), 0);
+  const totalBytes = documents.reduce((acc, doc) => acc + (doc.filesize || 0), 0);
   const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
-  const maxMB = 500;
+  const maxMB = maxDocuments * 50;
 
   const folderCounts: Record<string, number> = {};
   documents.forEach((doc) => {
-    const folder = doc.folder || 'Formation';
+    const folder = (doc.folder || "formation").toLowerCase();
     folderCounts[folder] = (folderCounts[folder] || 0) + 1;
   });
 
@@ -104,15 +117,15 @@ export default async function DocumentsPage() {
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {vaultFolders.map((folder) => {
-            const count = folderCounts[folder.name] || 0;
+            const count = folderCounts[folder.key] || 0;
             return (
               <article
-                key={folder.name}
+                key={folder.key}
                 className="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-cyan-400"
               >
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-white">
-                    {folder.name}
+                    {folder.label}
                   </h3>
 
                   <span className="text-sm text-slate-500">
@@ -157,9 +170,9 @@ export default async function DocumentsPage() {
             {documents.map((doc) => (
               <div key={doc.id} className="py-3 flex items-center justify-between text-sm">
                 <div>
-                  <span className="font-medium text-white">{doc.name}</span>
+                  <span className="font-medium text-white">{doc.filename}</span>
                   <span className="ml-3 rounded-full bg-slate-800 px-2.5 py-0.5 text-xs text-cyan-400">
-                    {doc.folder}
+                    {(doc.folder || "formation").toString().replace(/^./, (value: string) => value.toUpperCase())}
                   </span>
                 </div>
 
