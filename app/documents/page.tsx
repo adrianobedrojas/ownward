@@ -1,8 +1,8 @@
 // app/documents/page.tsx
 import Link from "next/link";
-import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from "@/lib/billing";
 import { DEFAULT_DOCUMENT_FOLDER, formatFolderName } from "@/lib/documents";
+import { requireUser } from "@/lib/require-user";
 
 interface DocumentRow {
   id: string;
@@ -26,23 +26,19 @@ const vaultFolders = [
 ];
 
 export default async function DocumentsPage() {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const { supabase, user } = await requireUser();
 
   let documents: DocumentRow[] = [];
   let maxDocuments = 10;
-  if (user) {
-    const billing = await getUserBillingState(supabase, user.id);
-    maxDocuments = billing.entitlements.documentLimit;
+  const billing = await getUserBillingState(supabase, user.id);
+  maxDocuments = billing.entitlements.documentLimit;
 
-    const { data } = await supabase
-      .from('documents')
-      .select('id,filename,folder,filesize,filetype,created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    if (data) documents = data;
-  }
+  const { data } = await supabase
+    .from('documents')
+    .select('id,filename,folder,filesize,filetype,created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (data) documents = data;
 
   const totalDocuments = documents.length;
   const totalBytes = documents.reduce((acc, doc) => acc + (doc.filesize || 0), 0);

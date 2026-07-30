@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { deleteListingDraft, publishListing, unpublishListing } from "./actions";
+import { requireUser } from "@/lib/require-user";
 
 export const metadata: Metadata = {
   title: "Dashboard | Ownward Hub",
@@ -18,17 +18,13 @@ export default async function DashboardPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await requireUser();
 
   // Fetch listings belonging to the authenticated user
   const { data: listings, error } = await supabase
     .from("business_listings")
     .select("*")
-    .eq("user_id", user?.id)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   return (
@@ -47,6 +43,14 @@ export default async function DashboardPage({
           <p className="font-semibold">Onboarding complete!</p>
           <p className="text-sm text-cyan-300/80 mt-1">
             Your workspace has been set up. You can now manage listings and documents.
+          </p>
+        </div>
+      )}
+      {params.success === "password-updated" && (
+        <div className="mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
+          <p className="font-semibold">Password updated!</p>
+          <p className="text-sm text-emerald-400/80 mt-1">
+            Your new password has been saved.
           </p>
         </div>
       )}

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { uploadDocument } from "./action";
 import { DEFAULT_DOCUMENT_FOLDER } from "@/lib/documents";
+import { requireUser } from "@/lib/require-user";
 
 export default async function UploadPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  await requireUser();
   const params = await searchParams;
   const errorMessage = params.error;
 

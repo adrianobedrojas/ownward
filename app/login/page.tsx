@@ -98,8 +98,13 @@ export default function LoginPage() {
               </label>
 
               <span className="text-xs text-slate-500">
-                Password recovery coming soon
-              </span>
+                  <a
+                    href="/forgot-password"
+                    className="text-cyan-400 hover:text-cyan-300"
+                  >
+                    Forgot password?
+                  </a>
+                </span>
             </div>
 
             <input
