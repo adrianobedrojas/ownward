@@ -53,23 +53,35 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
     notFound();
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ownwardhub.com";
   const canonicalUrl = new URL(
     `/guide/${article.category}/${article.slug}`,
-    "https://ownwardhub.com",
+    siteUrl,
   ).toString();
+
+  const guideLabel = article.articleType ?? "Ownward Guide";
+  const introTitle = article.introductionTitle ?? "Introduction";
+  const actionPlanTitle = article.actionPlanTitle ?? "30-day action plan";
+  const checklistTitle = article.checklistTitle ?? "Checklist";
+  const hasActionPlan = Array.isArray(article.actionPlan) && article.actionPlan.length > 0;
+  const hasChecklist = Array.isArray(article.checklist) && article.checklist.length > 0;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 text-slate-100">
       <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Ownward Guide · {catInfo.title}
+          {guideLabel} · {catInfo.title}
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
           {article.title}
         </h1>
         <p className="mt-3 text-base leading-7 text-slate-300">{article.description}</p>
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
-          <span>{article.readingTime}</span>
+          {article.publishedDate ? (
+            <span>{article.publishedDate} · {article.readingTime}</span>
+          ) : (
+            <span>{article.readingTime}</span>
+          )}
           {article.lastReviewed && (
             <span>Last reviewed {article.lastReviewed}</span>
           )}
@@ -85,7 +97,7 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
         <hr className="my-8 border-slate-800" />
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-white">Introduction</h2>
+          <h2 className="text-2xl font-semibold text-white">{introTitle}</h2>
           {article.introduction.map((paragraph) => (
             <p key={paragraph} className="text-sm leading-7 text-slate-300 sm:text-base">
               {paragraph}
@@ -120,40 +132,52 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
                   ))}
                 </ol>
               )}
+
+              {section.quote && (
+                <blockquote className="border-l-4 border-cyan-400 pl-5 py-2 my-4">
+                  <p className="text-base font-medium italic leading-8 text-slate-200 sm:text-lg">
+                    &ldquo;{section.quote}&rdquo;
+                  </p>
+                </blockquote>
+              )}
             </section>
           ))}
         </div>
 
-        <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/50 p-5 sm:p-6">
-          <h2 className="text-2xl font-semibold text-white">30-day action plan</h2>
-          <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300 sm:text-base">
-            {article.actionPlan.map((item) => (
-              <li key={item.week} className="rounded-lg border border-slate-800 px-4 py-3">
-                <span className="font-semibold text-white">{item.week}:</span>{" "}
-                {item.focus}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {hasActionPlan && (
+          <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/50 p-5 sm:p-6">
+            <h2 className="text-2xl font-semibold text-white">{actionPlanTitle}</h2>
+            <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-300 sm:text-base">
+              {article.actionPlan!.map((item) => (
+                <li key={item.week} className="rounded-lg border border-slate-800 px-4 py-3">
+                  <span className="font-semibold text-white">{item.week}:</span>{" "}
+                  {item.focus}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
-        <section className="mt-10">
-          <h2 className="text-2xl font-semibold text-white">Checklist</h2>
-          <ul className="mt-4 space-y-3" aria-label="Article checklist">
-            {article.checklist.map((item) => (
-              <li key={item}>
-                <label className="flex items-start gap-3 rounded-lg border border-slate-800 px-4 py-3 text-sm leading-6 text-slate-300 sm:text-base">
-                  <input
-                    type="checkbox"
-                    disabled
-                    aria-label={item}
-                    className="mt-1 h-4 w-4 accent-cyan-400"
-                  />
-                  <span>{item}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {hasChecklist && (
+          <section className="mt-10">
+            <h2 className="text-2xl font-semibold text-white">{checklistTitle}</h2>
+            <ul className="mt-4 space-y-3" aria-label="Article checklist">
+              {article.checklist!.map((item) => (
+                <li key={item}>
+                  <label className="flex items-start gap-3 rounded-lg border border-slate-800 px-4 py-3 text-sm leading-6 text-slate-300 sm:text-base">
+                    <input
+                      type="checkbox"
+                      disabled
+                      aria-label={item}
+                      className="mt-1 h-4 w-4 accent-cyan-400"
+                    />
+                    <span>{item}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {article.sources && article.sources.length > 0 && (
           <section className="mt-10">
