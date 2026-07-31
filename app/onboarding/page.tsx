@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { completeOnboarding } from "./actions";
 
@@ -11,6 +13,31 @@ export default async function OnboardingPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select(
+      "full_name, account_type, business_name, current_stage, terms_accepted_at, privacy_accepted_at"
+    )
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    redirect("/error");
+  }
+
+  const prefilledFullName =
+    profile?.full_name ??
+    String(user.user_metadata?.full_name ?? "").trim();
+  const prefilledAccountType =
+    profile?.account_type ??
+    String(user.user_metadata?.account_type ?? "").trim();
+  const prefilledBusinessName =
+    profile?.business_name ??
+    String(user.user_metadata?.business_name ?? "").trim();
+  const currentStage = profile?.current_stage ?? "run";
+  const needsPolicyConsent =
+    !profile?.terms_accepted_at || !profile?.privacy_accepted_at;
 
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
@@ -25,6 +52,42 @@ export default async function OnboardingPage() {
 
         <form action={completeOnboarding} className="mt-8 space-y-6">
           <div>
+            <label htmlFor="fullName" className="block text-sm font-semibold text-slate-300">
+              Full name
+            </label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              defaultValue={prefilledFullName}
+              required
+              autoComplete="name"
+              className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="accountType" className="block text-sm font-semibold text-slate-300">
+              Account type
+            </label>
+            <select
+              id="accountType"
+              name="accountType"
+              defaultValue={prefilledAccountType || ""}
+              required
+              className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
+            >
+              <option value="" disabled>
+                Select an account type
+              </option>
+              <option value="owner">Business owner</option>
+              <option value="buyer">Business buyer</option>
+              <option value="owner-buyer">Owner and buyer</option>
+              <option value="advisor">Advisor or agency</option>
+            </select>
+          </div>
+
+          <div>
             <label htmlFor="businessName" className="block text-sm font-semibold text-slate-300">
               Business name
             </label>
@@ -32,6 +95,7 @@ export default async function OnboardingPage() {
               id="businessName"
               name="businessName"
               type="text"
+              defaultValue={prefilledBusinessName}
               placeholder="Optional"
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
             />
@@ -44,7 +108,7 @@ export default async function OnboardingPage() {
             <select
               id="currentStage"
               name="currentStage"
-              defaultValue="run"
+              defaultValue={currentStage}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
             >
               <option value="start">Starting</option>
@@ -53,6 +117,42 @@ export default async function OnboardingPage() {
               <option value="buy">Looking to buy</option>
             </select>
           </div>
+
+          {needsPolicyConsent && (
+            <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+              <label className="flex items-start gap-3 text-sm text-slate-300">
+                <input
+                  name="acceptTerms"
+                  type="checkbox"
+                  required
+                  className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+                />
+                <span>
+                  I agree to the{" "}
+                  <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                    Terms of Service
+                  </Link>
+                  .
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 text-sm text-slate-300">
+                <input
+                  name="acceptPrivacy"
+                  type="checkbox"
+                  required
+                  className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+                />
+                <span>
+                  I acknowledge the{" "}
+                  <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+            </div>
+          )}
 
           <button
             type="submit"

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
+import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Create Account",
@@ -30,7 +32,17 @@ const accountTypes = [
   },
 ];
 
-export default function SignupPage() {
+interface SignupSearchParams {
+  next?: string;
+}
+
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<SignupSearchParams>;
+}) {
+  const params = await searchParams;
+
   return (
     <main className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-2">
       <section>
@@ -85,6 +97,16 @@ export default function SignupPage() {
           method="post"
           className="mt-8 space-y-6"
           >
+          <SocialAuthButtons next={params.next} />
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-800" />
+            <p className="text-xs uppercase tracking-wider text-slate-500">
+              Or continue with email
+            </p>
+            <div className="h-px flex-1 bg-slate-800" />
+          </div>
+
           <div>
             <label
               htmlFor="account-type"
@@ -225,7 +247,15 @@ export default function SignupPage() {
             />
 
             <span>
-              I agree to the Ownward terms of service and privacy policy.
+              I agree to the Ownward{" "}
+              <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                terms of service
+              </Link>{" "}
+              and{" "}
+              <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                privacy policy
+              </Link>
+              .
             </span>
           </label>
 
