@@ -2,70 +2,22 @@
 
 import { useState } from 'react';
 import type { BillingPlan, BillingState } from '@/lib/billing';
+import { PLAN_CATALOG } from '@/lib/billing';
 
 interface PricingCardsProps {
   /** null when user is not signed in */
   billingState: BillingState | null;
 }
 
-const PLANS: {
-  key: BillingPlan;
-  name: string;
-  tagline: string;
-  price: string;
-  features: string[];
-  featured: boolean;
-}[] = [
-  {
-    key: 'starter',
-    name: 'Starter',
-    tagline: 'New owners & explorers',
-    price: '$5',
-    features: [
-      '1 Business Profile',
-      'Timeline & 10 Milestones/mo',
-      'Basic Health Checklist',
-      'Basic Valuation Range',
-      'Up to 10 Documents',
-      'Up to 500 MB storage',
-      'Standard Support',
-    ],
-    featured: false,
-  },
-  {
-    key: 'builder',
-    name: 'Builder',
-    tagline: 'Active owners building operations',
-    price: '$10',
-    features: [
-      'Up to 2 Businesses',
-      'Revenue & Expense Tracking',
-      'Tasks, Goals & 100 Active Leads',
-      'Advanced Health Report',
-      'Detailed Valuation Estimate',
-      'Up to 100 documents plus the Builder template library',
-      'Up to 5 GB storage',
-      '2 Invited Collaborators (owner excluded)',
-    ],
-    featured: true,
-  },
-  {
-    key: 'pro',
-    name: 'Pro',
-    tagline: 'Serious owners preparing to grow or sell',
-    price: '$20',
-    features: [
-      'Up to 5 Businesses',
-      'Sale-Readiness Score',
-      'Full Valuation Report (Weekly)',
-      'Customer Concentration Analysis',
-      'Basic Deal Room & Seller Area',
-      '1,000 Leads & up to 50 GB storage',
-      'Up to 5 Team Members',
-    ],
-    featured: false,
-  },
-];
+// Derive the display plans from the authoritative catalog (exclude free tier)
+const PLANS = PLAN_CATALOG.filter((p) => p.key !== 'free').map((p) => ({
+  key: p.key as Exclude<BillingPlan, 'free'>,
+  name: p.name,
+  tagline: p.tagline,
+  price: `$${p.monthlyPrice}`,
+  features: p.publicFeatures,
+  featured: p.key === 'builder',
+}));
 
 export default function PricingCards({ billingState }: PricingCardsProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -78,7 +30,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
   const isSignedIn = billingState !== null;
 
   const handleSubscribe = async (planKey: string) => {
-    // Not signed in → redirect to login
     if (!isSignedIn) {
       window.location.assign(`/login?next=${encodeURIComponent('/pricing')}`);
       return;
@@ -102,7 +53,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
       if (res.status === 409) {
         if (data.portalRedirect) {
-          // Active sub on a different plan → send to portal
           const portalRes = await fetch('/api/billing/portal', { method: 'POST' });
           const portalData = await portalRes.json();
           if (portalData.url) {
@@ -154,7 +104,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
   return (
     <>
-      {/* Inline status message */}
       {statusMessage && (
         <div
           role="alert"
@@ -169,7 +118,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         </div>
       )}
 
-      {/* Current plan bar */}
       {isSignedIn && currentPlan && currentPlan !== 'free' && (
         <div className="mt-6 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200 flex items-center justify-between flex-wrap gap-3">
           <span>
@@ -190,7 +138,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         </div>
       )}
 
-      {/* Privacy control spacing guard — ensure cards don't overlap floating element */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pb-24 md:pb-16">
         {PLANS.map((plan) => {
           const isCurrent = isCurrentPlan(plan.key);
