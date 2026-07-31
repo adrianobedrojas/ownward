@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -66,7 +67,11 @@ export default function ContactPage() {
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
         <h3 className="text-2xl font-bold mb-2 text-white">Get in Touch</h3>
         <p className="text-slate-400 mb-6">
-          Have questions about listings, deal rooms, or articles? Send a secure message below. Your email address will remain completely confidential.
+          Have questions about listings, deal rooms, or articles? Send a secure message below. Your contact information will be used to review and respond to your message and handled according to our{' '}
+          <Link href="/privacy" className="font-semibold text-cyan-300 hover:text-cyan-200">
+            Privacy Policy
+          </Link>
+          .
         </p>
 
         {status === 'success' ? (
