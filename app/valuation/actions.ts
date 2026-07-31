@@ -8,6 +8,7 @@ import { validateValuationInput } from "@/lib/valuation/normalization";
 import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
 import type { SaveEstimateInput, EstimateActionResult } from "./types";
+import { getUserBillingState } from "@/lib/billing";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -133,6 +134,17 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
   }
 
   const { supabase, user } = auth;
+
+  // Enforce valuation tier — free users cannot save drafts
+  const billing = await getUserBillingState(supabase, user.id);
+  const valuationLevel = billing.entitlements.valuationLevel;
+  if (valuationLevel === "preview") {
+    return {
+      success: false,
+      message: "Upgrade to Starter to save valuation reports.",
+    };
+  }
+
   const input = buildInputFromFormData(formData);
 
   const reportId = (formData.get("reportId") as string) ?? null;
@@ -212,6 +224,18 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   }
 
   const { supabase, user } = auth;
+
+  // Enforce valuation tier server-side — never trust client
+  const billing = await getUserBillingState(supabase, user.id);
+  const valuationLevel = billing.entitlements.valuationLevel;
+  if (valuationLevel === "preview") {
+    return {
+      success: false,
+      message:
+        "Upgrade to Starter to generate and save a valuation report. The free plan includes a basic estimate preview only.",
+    };
+  }
+
   const input = buildInputFromFormData(formData);
 
   // Validate input on the server
@@ -230,6 +254,21 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
 
   // Run the calculation entirely on the server
   const result = calculateValuation(input);
+
+  // Tier-limit the result_snapshot for non-enhanced tiers.
+  // For "basic" (Starter): cap recommended actions to 3, null out Pro-only fields.
+  // This ensures Pro-only data is never persisted for lower-tier reports.
+  const tieredResult =
+    valuationLevel === "basic"
+      ? {
+          ...result,
+          recommendedActions: result.recommendedActions.slice(0, 3),
+          // Pro-only sections — set null to avoid persisting enhanced data
+          buyerInterpretations: null,
+          valueBridgeScenarios: null,
+          valueDnaScorecard: null,
+        }
+      : result;
 
   const reportId = (formData.get("reportId") as string) ?? null;
   const existingReportId = isUuid(reportId) ? reportId : null;
@@ -254,6 +293,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
         .insert({
           user_id: user.id,
           status: "calculated",
+          report_level: valuationLevel,
           methodology_version: METHODOLOGY_VERSION,
           currency: input.businessProfile.currency,
           business_name: input.businessProfile.businessName,
@@ -263,7 +303,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
           strategic_value: result.strategicValue,
           confidence_score: result.confidenceScore,
           input_snapshot: input,
-          result_snapshot: result,
+          result_snapshot: tieredResult,
           version: 1,
         })
         .select("id")
@@ -282,6 +322,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
       .from("valuation_reports")
       .update({
         status: "calculated",
+        report_level: valuationLevel,
         methodology_version: METHODOLOGY_VERSION,
         currency: input.businessProfile.currency,
         business_name: input.businessProfile.businessName,
@@ -291,7 +332,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
         strategic_value: result.strategicValue,
         confidence_score: result.confidenceScore,
         input_snapshot: input,
-        result_snapshot: result,
+        result_snapshot: tieredResult,
       })
       .eq("id", existingReportId)
       .eq("user_id", user.id);
@@ -310,6 +351,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
     .insert({
       user_id: user.id,
       status: "calculated",
+      report_level: valuationLevel,
       methodology_version: METHODOLOGY_VERSION,
       currency: input.businessProfile.currency,
       business_name: input.businessProfile.businessName,
@@ -319,7 +361,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
       strategic_value: result.strategicValue,
       confidence_score: result.confidenceScore,
       input_snapshot: input,
-      result_snapshot: result,
+      result_snapshot: tieredResult,
     })
     .select("id")
     .single();

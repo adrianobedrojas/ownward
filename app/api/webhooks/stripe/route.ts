@@ -88,6 +88,10 @@ export async function POST(req: Request) {
             ? new Date(subscription.canceled_at * 1000).toISOString()
             : null;
 
+          const currentPeriodEnd = subscription.items.data[0]?.current_period_end
+            ? new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+            : null;
+
           const { error: upsertError } = await supabaseAdmin
             .from("subscriptions")
             .upsert({
@@ -102,6 +106,7 @@ export async function POST(req: Request) {
               quantity: subscription.items.data[0].quantity ?? 1,
               cancel_at_period_end: subscription.cancel_at_period_end,
               canceled_at: canceledAt,
+              current_period_end: currentPeriodEnd,
               last_stripe_event_created: event.created,
               updated_at: new Date().toISOString(),
             });
@@ -133,6 +138,10 @@ export async function POST(req: Request) {
           ? new Date(subscription.canceled_at * 1000).toISOString()
           : null;
 
+        const currentPeriodEndUpd = subscription.items.data[0]?.current_period_end
+          ? new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+          : null;
+
         const { error: updateError } = await supabaseAdmin
           .from("subscriptions")
           .update({
@@ -145,6 +154,7 @@ export async function POST(req: Request) {
             quantity: subscription.items.data[0].quantity ?? 1,
             cancel_at_period_end: subscription.cancel_at_period_end,
             canceled_at: canceledAt,
+            current_period_end: currentPeriodEndUpd,
             last_stripe_event_created: event.created,
             updated_at: new Date().toISOString(),
           })

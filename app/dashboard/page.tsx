@@ -3,6 +3,8 @@ import Link from "next/link";
 import { deleteListingDraft, publishListing, unpublishListing } from "./actions";
 import { requireUser } from "@/lib/require-user";
 import FeaturedListingButton from "@/components/FeaturedListingButton";
+import { getUserBillingState } from "@/lib/billing";
+import { getNextBestAction } from "@/lib/launchpad/next-best-action";
 
 export const metadata: Metadata = {
   title: "Dashboard | Ownward Hub",
@@ -21,6 +23,120 @@ export default async function DashboardPage({
 }) {
   const params = await searchParams;
   const { supabase, user } = await requireUser();
+
+  // ── Billing & Launchpad data ─────────────────────────────────────────────
+  const billing = await getUserBillingState(supabase, user.id);
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("active_business_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const activeBizId = profile?.active_business_id;
+
+  // Business data
+  const { count: businessCount } = await supabase
+    .from("businesses")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id)
+    .is("deleted_at", null);
+
+  const { data: activeBizData } = activeBizId
+    ? await supabase
+        .from("businesses")
+        .select("id, name, profile_completion")
+        .eq("id", activeBizId)
+        .maybeSingle()
+    : { data: null };
+
+  // Milestones
+  const { count: milestoneCount } = await supabase
+    .from("business_milestones")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+
+  const { data: oldestMilestone } = await supabase
+    .from("business_milestones")
+    .select("title")
+    .eq("user_id", user.id)
+    .in("status", ["planned", "in_progress"])
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  // Documents
+  const { count: docCount } = await supabase
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+
+  // Storage
+  const { data: storageDocs } = await supabase
+    .from("documents")
+    .select("filesize")
+    .eq("user_id", user.id)
+    .is("deleted_at", null);
+  const usedBytes = (storageDocs ?? []).reduce(
+    (s, d) => s + Number(d.filesize ?? 0),
+    0
+  );
+
+  // Health assessment
+  const { count: healthCount } = await supabase
+    .from("business_health_assessments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const { data: latestHealth } = await supabase
+    .from("business_health_assessments")
+    .select("overall_score, category_scores")
+    .eq("user_id", user.id)
+    .order("completed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Lowest health category
+  let lowestHealthCategory: string | null = null;
+  if (latestHealth?.category_scores) {
+    const scores = latestHealth.category_scores as Record<string, number>;
+    const sorted = Object.entries(scores).sort(([, a], [, b]) => a - b);
+    if (sorted.length > 0) lowestHealthCategory = sorted[0][0];
+  }
+
+  // Valuation
+  const { count: valuationCount } = await supabase
+    .from("valuation_reports")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("status", "calculated");
+
+  // Monthly milestone usage
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+  const { count: milestoneMonthCount } = await supabase
+    .from("business_milestones")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", startOfMonth.toISOString());
+
+  // Next Best Action
+  const nba = getNextBestAction({
+    businessCount: businessCount ?? 0,
+    businessCompletion: activeBizData?.profile_completion ?? null,
+    hasHealthAssessment: (healthCount ?? 0) > 0,
+    milestoneCount: milestoneCount ?? 0,
+    documentCount: docCount ?? 0,
+    hasValuation: (valuationCount ?? 0) > 0,
+    oldestIncompleteMilestone: oldestMilestone?.title ?? null,
+    lowestHealthCategory,
+  });
+
+  // ── Listings ─────────────────────────────────────────────────────────────
 
   // Fetch listings belonging to the authenticated user
   const { data: listings, error } = await supabase
@@ -128,6 +244,147 @@ export default async function DashboardPage({
           </Link>
         </div>
       </div>
+
+      {/* ── Starter Launchpad ─────────────────────────────────────────────── */}
+      {billing.plan !== "free" && (
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">
+              Starter Launchpad
+            </h2>
+            <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400 capitalize">
+              {billing.plan} Plan
+            </span>
+          </div>
+
+          {/* Next Best Action */}
+          <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/5 p-5 mb-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-1">
+              Next Best Action
+            </p>
+            <h3 className="text-lg font-bold text-white">{nba.title}</h3>
+            <p className="text-sm text-slate-400 mt-1">{nba.description}</p>
+            <Link
+              href={nba.href}
+              className="mt-3 inline-flex items-center rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition"
+            >
+              {nba.cta} →
+            </Link>
+          </div>
+
+          {/* Quick stats grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {/* Active Business */}
+            <Link
+              href="/business"
+              className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-cyan-400/40 transition"
+            >
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Business</p>
+              <p className="mt-1 text-xl font-bold text-white truncate">
+                {activeBizData?.name ?? (businessCount ?? 0) > 0 ? `${businessCount} workspace${(businessCount ?? 0) !== 1 ? "s" : ""}` : "None"}
+              </p>
+              {activeBizData && (
+                <div className="mt-1.5 h-1 rounded-full bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-cyan-400"
+                    style={{ width: `${activeBizData.profile_completion ?? 0}%` }}
+                  />
+                </div>
+              )}
+            </Link>
+
+            {/* Health Score */}
+            <Link
+              href="/health"
+              className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-cyan-400/40 transition"
+            >
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Health</p>
+              <p className="mt-1 text-xl font-bold text-white">
+                {latestHealth?.overall_score != null
+                  ? `${latestHealth.overall_score}/100`
+                  : "–"}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {(healthCount ?? 0) > 0 ? "Last score" : "Not assessed"}
+              </p>
+            </Link>
+
+            {/* Milestones */}
+            <Link
+              href="/milestones"
+              className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-cyan-400/40 transition"
+            >
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Milestones</p>
+              <p className="mt-1 text-xl font-bold text-white">{milestoneCount ?? 0}</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {milestoneMonthCount ?? 0}/{billing.entitlements.milestoneMonthlyLimit} this month
+              </p>
+            </Link>
+
+            {/* Documents */}
+            <Link
+              href="/documents"
+              className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-cyan-400/40 transition"
+            >
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Documents</p>
+              <p className="mt-1 text-xl font-bold text-white">{docCount ?? 0}</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                of {billing.entitlements.documentLimit}
+              </p>
+            </Link>
+
+            {/* Storage */}
+            <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Storage</p>
+              <p className="mt-1 text-xl font-bold text-white">
+                {usedBytes < 1024 * 1024
+                  ? `${Math.round(usedBytes / 1024)} KB`
+                  : `${(usedBytes / (1024 * 1024)).toFixed(1)} MB`}
+              </p>
+              <div className="mt-1.5 h-1 rounded-full bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-cyan-400"
+                  style={{
+                    width: `${Math.min(100, (usedBytes / billing.entitlements.storageBytes) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Valuation */}
+            <Link
+              href="/valuation"
+              className="rounded-xl border border-slate-800 bg-slate-900 p-4 hover:border-cyan-400/40 transition"
+            >
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Valuation</p>
+              <p className="mt-1 text-xl font-bold text-white">
+                {(valuationCount ?? 0) > 0 ? "Generated" : "None"}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5 capitalize">
+                {billing.entitlements.valuationLevel} tier
+              </p>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Upgrade prompt for free users */}
+      {billing.plan === "free" && (
+        <section className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <p className="text-sm font-semibold text-slate-300">
+            Unlock the full Ownward toolkit
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            Upgrade to Starter to get your Business Passport, Milestone Trail, Health Check, Valuation, and more.
+          </p>
+          <Link
+            href="/pricing"
+            className="mt-3 inline-flex items-center rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition"
+          >
+            See Plans →
+          </Link>
+        </section>
+      )}
 
       {/* Bookkeeping workspace card */}
       <section className="mt-10">

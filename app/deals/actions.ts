@@ -38,6 +38,19 @@ type ActivityEvent =
   | 'request_updated'
   | 'request_completed';
 
+const ACTIVITY_EVENTS = [
+  'deal_room_created',
+  'stage_changed',
+  'status_changed',
+  'member_invited',
+  'member_removed',
+  'document_uploaded',
+  'document_deleted',
+  'request_created',
+  'request_updated',
+  'request_completed',
+] as const satisfies readonly ActivityEvent[];
+
 const INVITATION_TTL_HOURS = 72;
 
 /** Maximum deal-room document size: 50 MB */

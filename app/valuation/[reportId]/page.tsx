@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
+import { getUserBillingState } from "@/lib/billing";
 import { ValuationRange } from "@/components/valuation/ValuationRange";
 import { ConfidenceMeter } from "@/components/valuation/ConfidenceMeter";
 import { NormalizedEarningsTable } from "@/components/valuation/NormalizedEarningsTable";
@@ -10,6 +11,7 @@ import { BuyerLens } from "@/components/valuation/BuyerLens";
 import { ValueBridge } from "@/components/valuation/ValueBridge";
 import { RiskMap } from "@/components/valuation/RiskMap";
 import type { ValuationResult } from "@/lib/valuation/types";
+import type { ValuationLevel } from "@/lib/billing";
 import { archiveReportFormAction } from "../actions";
 
 export const metadata: Metadata = {
@@ -63,7 +65,7 @@ export default async function ValuationReportPage({ params }: PageProps) {
   const { data: report } = await supabase
     .from("valuation_reports")
     .select(
-      "id, user_id, status, business_name, industry, currency, defensive_value, expected_value, strategic_value, confidence_score, result_snapshot, methodology_version, created_at, updated_at, version"
+      "id, user_id, status, business_name, industry, currency, defensive_value, expected_value, strategic_value, confidence_score, result_snapshot, methodology_version, created_at, updated_at, version, report_level"
     )
     .eq("id", reportId)
     .eq("user_id", user.id)  // ownership check
@@ -80,6 +82,24 @@ export default async function ValuationReportPage({ params }: PageProps) {
   }
 
   const currency = report.currency ?? "USD";
+
+  // Determine effective access level: min(stored report_level, current billing)
+  const billing = await getUserBillingState(supabase, user.id);
+  const currentLevel = billing.entitlements.valuationLevel;
+  const storedLevel = (report.report_level as ValuationLevel | null) ?? "basic";
+
+  // Level precedence: enhanced > detailed > basic > preview
+  const levelRank: Record<ValuationLevel, number> = {
+    preview: 0,
+    basic: 1,
+    detailed: 2,
+    enhanced: 3,
+  };
+  const effectiveLevel: ValuationLevel =
+    levelRank[currentLevel] < levelRank[storedLevel] ? currentLevel : storedLevel;
+
+  const showDetailed = levelRank[effectiveLevel] >= levelRank["detailed"];
+  const showEnhanced = levelRank[effectiveLevel] >= levelRank["enhanced"];
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -135,6 +155,21 @@ export default async function ValuationReportPage({ params }: PageProps) {
         </p>
       </div>
 
+      {/* Tier indicator for basic reports */}
+      {effectiveLevel === "basic" && (
+        <div className="mt-4 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-4 flex items-start gap-3">
+          <span className="shrink-0 text-cyan-400 font-bold text-sm mt-0.5">ℹ</span>
+          <div>
+            <p className="text-sm font-semibold text-cyan-300">Starter Basic Report</p>
+            <p className="mt-1 text-xs leading-5 text-slate-400">
+              This is a basic valuation report included with the Starter plan. It includes a valuation range, confidence indicator, and up to 3 improvement actions.{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Upgrade to Builder or Pro</Link>
+              {" "}for multi-year weighted analysis, risk maps, buyer lens, and value bridge scenarios.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 space-y-8">
         {/* Core valuation range */}
         <ValuationRange
@@ -160,29 +195,62 @@ export default async function ValuationReportPage({ params }: PageProps) {
           currency={currency}
         />
 
-        {/* Value DNA */}
-        <ValueDnaScorecard scores={result.dnaScores} />
+        {/* Value DNA — Pro (enhanced) only */}
+        {showEnhanced ? (
+          <ValueDnaScorecard scores={result.dnaScores} />
+        ) : (
+          <section className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Value DNA Scorecard</p>
+            <p className="text-slate-400 text-sm mt-2">
+              This section is available on the{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Pro plan</Link>.
+              It shows a multi-dimension value scorecard across growth, risk, earnings quality, and scalability.
+            </p>
+          </section>
+        )}
 
-        {/* Owner dependence */}
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <SectionHeader>Owner-dependence analysis</SectionHeader>
-          <h2 className="text-lg font-bold text-white mb-3">Owner involvement</h2>
-          <p className="text-sm leading-6 text-slate-300">
-            {result.ownerDependenceNote}
-          </p>
-        </section>
+        {/* Owner dependence — detailed+ */}
+        {showDetailed ? (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <SectionHeader>Owner-dependence analysis</SectionHeader>
+            <h2 className="text-lg font-bold text-white mb-3">Owner involvement</h2>
+            <p className="text-sm leading-6 text-slate-300">
+              {result.ownerDependenceNote}
+            </p>
+          </section>
+        ) : (
+          <section className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Owner-dependence analysis</p>
+            <p className="text-slate-400 text-sm mt-2">
+              Detailed owner and customer dependence analysis is available on the{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Builder plan</Link>.
+            </p>
+          </section>
+        )}
 
-        {/* Customer concentration */}
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <SectionHeader>Customer-concentration analysis</SectionHeader>
-          <h2 className="text-lg font-bold text-white mb-3">Customer concentration</h2>
-          <p className="text-sm leading-6 text-slate-300">
-            {result.customerConcentrationNote}
-          </p>
-        </section>
+        {/* Customer concentration — detailed+ */}
+        {showDetailed ? (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <SectionHeader>Customer-concentration analysis</SectionHeader>
+            <h2 className="text-lg font-bold text-white mb-3">Customer concentration</h2>
+            <p className="text-sm leading-6 text-slate-300">
+              {result.customerConcentrationNote}
+            </p>
+          </section>
+        ) : null}
 
-        {/* Risk map */}
-        <RiskMap risks={result.riskFactors} />
+        {/* Risk map — detailed+ */}
+        {showDetailed ? (
+          <RiskMap risks={result.riskFactors} />
+        ) : (
+          <section className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Risk Analysis</p>
+            <p className="text-slate-400 text-sm mt-2">
+              Detailed risk analysis is available on the{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Builder plan</Link>.
+            </p>
+          </section>
+        )}
 
         {/* Value drivers */}
         {result.valueDrivers.length > 0 && (
@@ -266,15 +334,35 @@ export default async function ValuationReportPage({ params }: PageProps) {
           </section>
         )}
 
-        {/* Buyer lens */}
-        <BuyerLens interpretations={result.buyerInterpretations} currency={currency} />
+        {/* Buyer lens — Pro (enhanced) only */}
+        {showEnhanced ? (
+          <BuyerLens interpretations={result.buyerInterpretations} currency={currency} />
+        ) : (
+          <section className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Buyer Lens</p>
+            <p className="text-slate-400 text-sm mt-2">
+              The Buyer Lens — showing how strategic, financial, and individual buyers would view your business — is available on the{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Pro plan</Link>.
+            </p>
+          </section>
+        )}
 
-        {/* Value bridge */}
-        <ValueBridge
-          expectedValue={result.expectedValue}
-          scenarios={result.valueBridgeScenarios}
-          currency={currency}
-        />
+        {/* Value bridge — Pro (enhanced) only */}
+        {showEnhanced ? (
+          <ValueBridge
+            expectedValue={result.expectedValue}
+            scenarios={result.valueBridgeScenarios}
+            currency={currency}
+          />
+        ) : (
+          <section className="rounded-xl border border-slate-700 bg-slate-900/50 p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-1">Value Bridge</p>
+            <p className="text-slate-400 text-sm mt-2">
+              The Value Bridge — showing upside scenarios and how to close the gap to your target value — is available on the{" "}
+              <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Pro plan</Link>.
+            </p>
+          </section>
+        )}
 
         {/* Adjustments */}
         {result.adjustments.length > 0 && (
