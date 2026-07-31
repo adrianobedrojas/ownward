@@ -248,10 +248,23 @@ CREATE POLICY "Active members can view deal room members"
   USING (public.is_active_deal_room_member(deal_room_id));
 
 -- Seller manages invites: INSERT and UPDATE membership records.
--- Server action also accepts/declines on behalf of the invited user.
+-- Bootstrap case: when the deal room is first created there are no members
+-- yet, so is_deal_room_seller() returns false.  We therefore also allow the
+-- deal room's own seller to insert their initial (seller-role) membership
+-- directly from the deal_rooms table.
 CREATE POLICY "Seller can manage deal room members"
   ON public.deal_room_members FOR INSERT TO authenticated
-  WITH CHECK (public.is_deal_room_seller(deal_room_id));
+  WITH CHECK (
+    -- General case: already an active seller member (for subsequent invites)
+    public.is_deal_room_seller(deal_room_id)
+    -- Bootstrap case: the deal_rooms row identifies this user as the seller
+    OR EXISTS (
+      SELECT 1 FROM public.deal_rooms dr
+      WHERE dr.id = deal_room_id
+        AND dr.seller_id = auth.uid()
+        AND dr.created_by = auth.uid()
+    )
+  );
 
 CREATE POLICY "Seller can update deal room members"
   ON public.deal_room_members FOR UPDATE TO authenticated
@@ -371,6 +384,7 @@ CREATE POLICY "Active members can upload deal room files"
   ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (
     bucket_id = 'deal-room-files'
+    AND (string_to_array(name, '/'))[1] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
     AND public.is_active_deal_room_member(
       (string_to_array(name, '/'))[1]::uuid
     )
@@ -380,6 +394,7 @@ CREATE POLICY "Active members can read deal room files"
   ON storage.objects FOR SELECT TO authenticated
   USING (
     bucket_id = 'deal-room-files'
+    AND (string_to_array(name, '/'))[1] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
     AND public.is_active_deal_room_member(
       (string_to_array(name, '/'))[1]::uuid
     )
@@ -391,6 +406,7 @@ CREATE POLICY "Seller can delete deal room files"
   ON storage.objects FOR DELETE TO authenticated
   USING (
     bucket_id = 'deal-room-files'
+    AND (string_to_array(name, '/'))[1] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
     AND public.is_deal_room_seller(
       (string_to_array(name, '/'))[1]::uuid
     )
