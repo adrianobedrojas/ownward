@@ -70,6 +70,21 @@ export default async function ConversationPage({ params }: Props) {
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
 
+  // Load existing deal room for this conversation (if any)
+  const { data: dealRoom } = await supabase
+    .from("deal_rooms")
+    .select("id")
+    .eq("conversation_id", conversationId)
+    .maybeSingle();
+
+  const dealRoomId = (dealRoom?.id ?? null) as string | null;
+
+  // Seller may create a Deal Room when status is active, qualified, or nda_requested
+  const canCreateDealRoom =
+    isSeller &&
+    ["active", "qualified", "nda_requested"].includes(conversation.status) &&
+    !dealRoomId;
+
   const listingRaw = conversation.business_listings;
   const listing = (Array.isArray(listingRaw) ? listingRaw[0] : listingRaw) as {
     business_name: string;
@@ -127,6 +142,8 @@ export default async function ConversationPage({ params }: Props) {
         initialMessages={(messages ?? []) as Message[]}
         otherUserId={isBuyer ? conversation.seller_id : conversation.buyer_id}
         otherUserName={isBuyer ? sellerName : buyerName}
+        dealRoomId={dealRoomId}
+        canCreateDealRoom={canCreateDealRoom}
       />
     </main>
   );

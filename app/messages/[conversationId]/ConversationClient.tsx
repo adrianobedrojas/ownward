@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, updateConversationStatus, blockUser, reportMessage } from "@/app/actions/messaging";
+import { createDealRoom } from "@/app/deals/actions";
 import type { Message } from "./page";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -17,6 +20,8 @@ interface Props {
   initialMessages: Message[];
   otherUserId: string;
   otherUserName: string;
+  dealRoomId?: string | null;
+  canCreateDealRoom?: boolean;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -80,7 +85,10 @@ export default function ConversationClient({
   initialMessages,
   otherUserId,
   otherUserName,
+  dealRoomId: initialDealRoomId,
+  canCreateDealRoom = false,
 }: Props) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +99,9 @@ export default function ConversationClient({
   const [reportReason, setReportReason] = useState("");
   const [blockConfirm, setBlockConfirm] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [dealRoomId, setDealRoomId] = useState<string | null>(initialDealRoomId ?? null);
+  const [dealRoomError, setDealRoomError] = useState<string | null>(null);
+  const [creatingDealRoom, startDealRoomCreate] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
   const isClosed = ["not_a_fit", "archived"].includes(conversationStatus);
 
@@ -205,10 +216,77 @@ export default function ConversationClient({
     });
   }
 
+  // ── Create Deal Room ─────────────────────────────────────────────────────────
+  function handleCreateDealRoom() {
+    setDealRoomError(null);
+    const fd = new FormData();
+    fd.append("conversationId", conversationId);
+    startDealRoomCreate(async () => {
+      const result = await createDealRoom(fd);
+      if (result.error) {
+        setDealRoomError(result.error);
+        return;
+      }
+      if (result.data?.dealRoomId) {
+        setDealRoomId(result.data.dealRoomId);
+        setConversationStatus("deal_room");
+        router.push(`/deals/${result.data.dealRoomId}`);
+      }
+    });
+  }
+
   const starters = isSeller ? SELLER_STARTERS : BUYER_STARTERS;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Deal Room control – seller only */}
+      {isSeller && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-500/20 bg-cyan-400/5 px-4 py-3">
+          <span className="text-sm font-medium text-cyan-300">Deal Room</span>
+          {dealRoomId ? (
+            <Link
+              href={`/deals/${dealRoomId}`}
+              className="rounded-lg bg-cyan-400 px-4 py-1.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+            >
+              Open Deal Room
+            </Link>
+          ) : canCreateDealRoom ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCreateDealRoom}
+                disabled={creatingDealRoom}
+                className="rounded-lg bg-cyan-400 px-4 py-1.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-50"
+              >
+                {creatingDealRoom ? "Creating…" : "+ Create Deal Room"}
+              </button>
+              {dealRoomError && (
+                <span className="text-xs text-rose-300">{dealRoomError}</span>
+              )}
+            </div>
+          ) : (
+            <span className="text-xs text-slate-500">
+              {conversationStatus === "deal_room"
+                ? "Deal Room was created"
+                : "Available when conversation is active, qualified, or NDA-requested"}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Buyer: show link if deal room exists */}
+      {!isSeller && dealRoomId && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-500/20 bg-cyan-400/5 px-4 py-3">
+          <span className="text-sm font-medium text-cyan-300">Deal Room created</span>
+          <Link
+            href={`/deals/${dealRoomId}`}
+            className="rounded-lg bg-cyan-400 px-4 py-1.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+          >
+            Open Deal Room
+          </Link>
+        </div>
+      )}
+
       {/* Seller status control */}
       {isSeller && (
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3">

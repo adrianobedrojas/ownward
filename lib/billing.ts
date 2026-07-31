@@ -1,5 +1,38 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+// ─── Featured-listing one-time product ───────────────────────────────────────
+
+/**
+ * Server-only helper: returns the Stripe Price ID and duration for featured
+ * listings.  Both values come exclusively from environment variables so the
+ * client can never supply or override them.
+ *
+ * @throws if either variable is missing or the duration is not a positive integer.
+ */
+export function getFeaturedListingConfig(): {
+  priceId: string;
+  durationDays: number;
+} {
+  const priceId = process.env.STRIPE_PRICE_FEATURED_LISTING;
+  if (!priceId) {
+    throw new Error(
+      "STRIPE_PRICE_FEATURED_LISTING is not configured on the server."
+    );
+  }
+
+  const rawDuration = process.env.FEATURED_LISTING_DURATION_DAYS ?? "30";
+  const durationDays = parseInt(rawDuration, 10);
+  if (!Number.isInteger(durationDays) || durationDays <= 0) {
+    throw new Error(
+      `FEATURED_LISTING_DURATION_DAYS must be a positive integer, got: "${rawDuration}".`
+    );
+  }
+
+  return { priceId, durationDays };
+}
+
+// ─── Subscription plans ───────────────────────────────────────────────────────
+
 export const PLAN_KEYS = ["starter", "builder", "pro"] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
 

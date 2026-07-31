@@ -13,22 +13,25 @@ const categories = [
     slug: "run",
     name: "1. Run a business",
     description: "Practical material for existing owners on organization, records, operations, and reducing owner dependence.",
-    cta: "Create your Ownward business profile and start organizing your company.",
+    cta: "Access your business dashboard to manage tasks, customers, documents, and key metrics.",
     ctaLink: "/dashboard",
+    ctaLabel: "Open dashboard",
   },
   {
     slug: "grow",
     name: "2. Grow a business",
     description: "Strategies on customer profitability, value drivers, recurring revenue, and 90-day growth planning.",
-    cta: "Track your goals, financial progress, and value drivers with Ownward.",
-    ctaLink: "/pricing",
+    cta: "Set measurable growth goals and track progress toward them with the 90-day planner.",
+    ctaLink: "/grow",
+    ctaLabel: "Open growth planner",
   },
   {
     slug: "value",
     name: "3. Business valuation",
     description: "Breakdowns of SDE, EBITDA multiples, revenue vs. profit, and valuation estimation factors.",
-    cta: "Get an initial valuation estimate or order an Enhanced Valuation Report.",
+    cta: "Build a preliminary valuation scenario using your own financial inputs.",
     ctaLink: "/valuation",
+    ctaLabel: "Estimate business value",
   },
   {
     slug: "sell",
@@ -36,20 +39,23 @@ const categories = [
     description: "Step-by-step guidance on confidential listings, due diligence, NDAs, CIMs, and closing.",
     cta: "Prepare your business for sale or create a confidential listing.",
     ctaLink: "/sell",
+    ctaLabel: "Create listing draft",
   },
   {
     slug: "buy",
     name: "5. Buying a business",
     description: "How to evaluate listings, verify revenue, spot red flags, and navigate due diligence.",
-    cta: "Create your buyer profile and receive opportunities that match your interests.",
+    cta: "Browse active business listings and search by category or location.",
     ctaLink: "/buy",
+    ctaLabel: "Browse marketplace",
   },
   {
     slug: "stories",
     name: "6. Owner stories & founder notes",
     description: "Real-world lessons, behind-the-scenes building notes, and relatable scenarios from business owners.",
-    cta: "Explore the Ownward community and learn from others.",
+    cta: "Read stories and lessons from owners who have built, grown, bought, or sold businesses.",
     ctaLink: "/guide/stories",
+    ctaLabel: "Browse stories",
   },
 ];
 
@@ -112,17 +118,19 @@ export default function GuideIndexPage() {
               <div className="mt-6 border-t border-slate-800 pt-4">
                 <p className="text-xs font-medium text-cyan-400">{cat.cta}</p>
                 <div className="mt-3 flex items-center gap-4">
-                  <Link
-                    href={`/guide/${cat.slug}`}
-                    className="inline-block text-sm font-semibold text-white hover:text-cyan-300"
-                  >
-                    Browse category &rarr;
-                  </Link>
+                  {cat.slug !== "stories" && (
+                    <Link
+                      href={`/guide/${cat.slug}`}
+                      className="inline-block text-sm font-semibold text-white hover:text-cyan-300"
+                    >
+                      Browse category &rarr;
+                    </Link>
+                  )}
                   <Link
                     href={cat.ctaLink}
                     className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200"
                   >
-                    Open tool &rarr;
+                    {cat.ctaLabel} &rarr;
                   </Link>
                 </div>
               </div>
