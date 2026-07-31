@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getOrCreateVisitorToken } from '@/lib/visitor';
 import { submitPulseResponse } from '@/app/actions/pulse';
 
@@ -27,7 +27,10 @@ const INTENTS = [
 ];
 
 export default function CommunityPulseForm({ businessId }: Props) {
-  const [visitorToken, setVisitorToken] = useState('');
+  return <CommunityPulseFormFields businessId={businessId} />;
+}
+
+function CommunityPulseFormFields({ businessId }: Props) {
   const [relationship, setRelationship] = useState('');
   const [supportIntent, setSupportIntent] = useState('');
   const [revealIdentity, setRevealIdentity] = useState(false);
@@ -38,17 +41,14 @@ export default function CommunityPulseForm({ businessId }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    const token = getOrCreateVisitorToken();
-    setVisitorToken(token);
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!relationship || !supportIntent) {
       setErrorMessage('Please select options for both questions.');
       return;
     }
+
+    const visitorToken = getOrCreateVisitorToken();
 
     setIsSubmitting(true);
     setErrorMessage('');
@@ -85,6 +85,12 @@ export default function CommunityPulseForm({ businessId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <p className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-xs leading-6 text-slate-400">
+        To help prevent duplicate Community Pulse submissions, Ownward stores an anonymous
+        response token in this browser when Functionality storage is enabled. It stays local to
+        this browser and is sent only with your response.
+      </p>
+
       <div>
         <label className="block text-sm font-medium text-slate-200">
           1. What is your relationship to this business?
