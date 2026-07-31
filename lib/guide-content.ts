@@ -22,7 +22,7 @@ export const guideCategoryContent = {
   buy: {
     title: "Buying a Business",
     description:
-      "How to evaluate listings, verify revenue, and navigate acquisitions.",
+      "How to evaluate listings, verify revenue, understand financing readiness, spot red flags, and navigate acquisitions.",
   },
   stories: {
     title: "Owner Stories & Founder Notes",
@@ -48,6 +48,11 @@ interface GuideActionPlanWeek {
   focus: string;
 }
 
+interface GuideArticleSource {
+  label: string;
+  href: string;
+}
+
 export interface GuideArticle {
   slug: string;
   category: GuideCategorySlug;
@@ -64,6 +69,9 @@ export interface GuideArticle {
   categoryCtaLabel: string;
   ownwardCtaHref: string;
   ownwardCtaLabel: string;
+  lastReviewed?: string;
+  sources?: GuideArticleSource[];
+  interactiveTool?: "sba-readiness";
 }
 
 export const guideArticles: GuideArticle[] = [
@@ -1088,6 +1096,229 @@ export const guideArticles: GuideArticle[] = [
     categoryCtaLabel: "Back to Business Valuation",
     ownwardCtaHref: "/valuation",
     ownwardCtaLabel: "Estimate your business value with Ownward",
+  },
+  {
+    slug: "sba-loan-qualification",
+    category: "buy",
+    title: "Can You Qualify for an SBA Loan to Buy a Business? A Practical Readiness Guide",
+    cardTitle: "Can You Qualify for an SBA Loan?",
+    description:
+      "Understand the basic SBA eligibility rules, how lenders evaluate an acquisition, what documents buyers should prepare, and which issues to address before contacting a lender.",
+    readingTime: "12 min read",
+    lastReviewed: "July 31, 2026",
+    metadataDescription:
+      "Learn how SBA loan qualification works when buying a small business, including 7(a) eligibility, citizenship and residency rules, personal guarantees, lender underwriting, required documents, common red flags, and a practical readiness checklist.",
+    interactiveTool: "sba-readiness",
+    introduction: [
+      "Buying a business often begins with the question, \"Can I afford this?\" A lender asks a more detailed question: \"Can this buyer and this business repay the proposed debt under reasonable assumptions?\"",
+      "An SBA loan is not free money and is not generally issued directly by the SBA. A participating lender makes the loan, while the SBA guarantees an eligible portion of it. The guarantee reduces some of the lender's risk, but the buyer must still pass eligibility review, credit underwriting, financial analysis, and transaction review.",
+      "This guide explains how to prepare for that conversation. It does not promise approval and does not replace guidance from an SBA-participating lender, attorney, accountant, or other qualified professional.",
+    ],
+    sections: [
+      {
+        title: "1. What an SBA 7(a) loan can do",
+        paragraphs: [
+          "The 7(a) program is the SBA's primary general-purpose business loan program. Eligible proceeds may include complete or partial changes of ownership, as well as working capital, equipment, supplies, qualifying debt refinancing, and real estate.",
+          "The maximum 7(a) loan amount is generally $5 million. The lender—not the SBA—receives the application and makes the credit decision under the applicable process.",
+          "Think of the SBA guarantee as additional support for the lender, not a substitute for a qualified borrower or a financially viable business.",
+          "An SBA guarantee does not mean automatic approval.",
+        ],
+      },
+      {
+        title: "2. Pass the eligibility gate first",
+        paragraphs: [
+          "Lender preferences cannot fix a basic SBA eligibility problem. Before underwriting begins, the transaction must meet the program's fundamental requirements.",
+          "Meeting these requirements only allows the transaction to proceed to underwriting. It does not guarantee approval.",
+        ],
+        bullets: [
+          "The applicant must generally be an operating business.",
+          "It must operate for profit.",
+          "It must be located in the United States.",
+          "It must meet the applicable SBA size requirements.",
+          "It must not be an ineligible type of business.",
+          "It must not be able to obtain the desired credit on reasonable terms from non-federal, non-state, and non-local government sources.",
+          "It must be creditworthy.",
+          "It must demonstrate a reasonable ability to repay the loan.",
+        ],
+      },
+      {
+        title: "3. Citizenship and principal residence are separate issues",
+        paragraphs: [
+          "Time-sensitive rule: As of this article's July 31, 2026 review date, SBA policy effective March 1, 2026 requires the applicable direct and indirect owners of a 7(a) or 504 applicant to be U.S. citizens or U.S. nationals whose principal residence is in the United States or a U.S. territory.",
+          "Holding U.S. citizenship does not by itself establish principal residence. Temporarily visiting the United States is not necessarily the same as genuinely establishing it as the person's primary home.",
+          "Lenders may request documentation supporting citizenship, ownership, address, and residency. A person living abroad should discuss the facts with participating lenders before relocating, signing a purchase agreement, paying a deposit, or making another major commitment.",
+          "Policy can change, so users must verify the rule at application time.",
+        ],
+      },
+      {
+        title: "4. The lender looks through five lenses",
+        paragraphs: [
+          "Lenders commonly evaluate acquisitions through a framework that considers character, capacity, capital, collateral, and conditions. This is a common lending framework, not an official five-part SBA test.",
+          "A strong credit score cannot repair weak cash flow, and strong cash flow may not repair an eligibility problem. The lender evaluates the complete transaction.",
+        ],
+        bullets: [
+          "Character: payment history, management experience, integrity, defaults, and financial conduct.",
+          "Capacity: whether the business cash flow can support the proposed payments.",
+          "Capital: the buyer's available funds, post-closing liquidity, and financial commitment.",
+          "Collateral: available business and personal assets when applicable.",
+          "Conditions: industry risk, purchase price, business trends, loan purpose, and transaction structure.",
+        ],
+      },
+      {
+        title: "5. The lender evaluates two borrowers—the buyer and the business",
+        paragraphs: [
+          "In an acquisition, the lender effectively examines both the buyer and the business being acquired.",
+          "Buyer-side information typically includes: personal financial statement, credit history, personal and business tax returns when applicable, resume and relevant management experience, source of the buyer's contribution, existing debts and monthly obligations, and available liquidity after closing.",
+          "Business-side information typically includes: historical business tax returns, profit-and-loss statements, balance sheets, cash-flow information, customer and supplier concentration, existing debts, payroll and staffing, lease terms, licenses and permits, purchase agreement or letter of intent, business valuation when required, and explanation of unusual financial changes.",
+          "The question is not only whether the business was profitable in the past. The lender must decide whether its normalized future cash flow can support the new debt after the ownership change.",
+        ],
+      },
+      {
+        title: "6. Your purchase price is not the complete funding requirement",
+        paragraphs: [
+          "Buyers may need funds beyond the purchase price itself. Planning for total cash needs before approaching a lender helps avoid surprises during underwriting.",
+          "Equity-injection requirements can depend on the transaction, loan amount, current SBA policy, and the lender's underwriting standards. Do not assume that one percentage applies to every acquisition.",
+        ],
+        bullets: [
+          "Buyer contribution or equity injection when required",
+          "Closing costs",
+          "Professional fees",
+          "Initial working capital",
+          "Inventory adjustments",
+          "Repairs or equipment",
+          "Licensing and insurance",
+          "Emergency operating reserves",
+          "Transition expenses",
+        ],
+      },
+      {
+        title: "7. Personal guarantees and personal exposure",
+        paragraphs: [
+          "Individuals who own 20% or more of the applicant generally must provide an unlimited personal guaranty. The SBA guarantee primarily protects the lender.",
+          "Buying through an LLC does not automatically erase a personal guarantee.",
+          "A business entity does not necessarily prevent a guarantor from being personally responsible for the guaranteed debt. Available collateral may also be reviewed.",
+          "Users should understand the loan and guarantee documents before signing.",
+        ],
+      },
+      {
+        title: "8. Myth versus reality",
+        paragraphs: [
+          "Several common beliefs about SBA loans are inaccurate or oversimplified. Understanding the reality helps buyers prepare more effectively.",
+        ],
+        bullets: [
+          "Myth: \"The SBA lends me the money directly.\" Reality: A participating lender generally makes the 7(a) loan.",
+          "Myth: \"I am a U.S. citizen, so I automatically qualify.\" Reality: Citizenship is only one issue. Current residency, business eligibility, repayment ability, and lender underwriting also matter.",
+          "Myth: \"The SBA guarantee protects me from the debt.\" Reality: The guarantee primarily reduces the lender's exposure and does not remove the borrower's repayment obligation.",
+          "Myth: \"There is one universal SBA credit score.\" Reality: SBA rules and lender underwriting requirements interact, and lenders may apply different credit standards.",
+          "Myth: \"The asking price proves the business value.\" Reality: A lender will analyze financial performance, cash flow, transaction structure, and any required valuation.",
+          "Myth: \"Approval means the business is a good investment.\" Reality: Loan approval is a financing decision, not a guarantee that the acquisition will succeed.",
+        ],
+      },
+      {
+        title: "9. Common issues that delay or weaken an application",
+        paragraphs: [
+          "The buyer should not conceal negative information. Material inconsistencies discovered later can damage credibility and delay or end the transaction.",
+        ],
+        bullets: [
+          "Inconsistent tax returns and financial statements",
+          "Unexplained deposits or expenses",
+          "Insufficient proof of funds",
+          "Undocumented source of the buyer contribution",
+          "Weak post-closing liquidity",
+          "Business revenue that depends heavily on the seller",
+          "Significant customer concentration",
+          "Expiring or nontransferable leases",
+          "Missing licenses or permits",
+          "Unrealistic projections",
+          "Undisclosed personal or business debts",
+          "Applying before citizenship or residency documentation is clear",
+          "Signing a purchase agreement without an appropriate financing contingency or professional review",
+        ],
+      },
+      {
+        title: "10. What to do when you are ready",
+        paragraphs: [
+          "Working through the following sequence before contacting lenders helps buyers present a more complete and credible file.",
+        ],
+        steps: [
+          "Define the business type, price range, location, and owner role you can realistically handle.",
+          "Review personal credit reports and existing debt obligations.",
+          "Estimate available cash while preserving post-closing reserves.",
+          "Organize personal and business financial records.",
+          "Evaluate the target business's financial statements and tax returns.",
+          "Prepare a clear explanation of the acquisition and use of funds.",
+          "Contact more than one SBA-participating lender.",
+          "Compare rates, terms, fees, required contribution, collateral expectations, and closing conditions.",
+          "Use SBA Lender Match as one method of finding participating lenders.",
+          "Obtain legal, tax, and accounting review before closing.",
+        ],
+      },
+    ],
+    actionPlan: [
+      {
+        week: "Week 1",
+        focus: "Confirm the basic eligibility, citizenship, residency, ownership, and U.S.-business requirements.",
+      },
+      {
+        week: "Week 2",
+        focus: "Review credit, debts, liquidity, tax returns, and personal financial information.",
+      },
+      {
+        week: "Week 3",
+        focus: "Define the acquisition criteria and organize the target business's financial records.",
+      },
+      {
+        week: "Week 4",
+        focus: "Speak with multiple participating lenders and compare preliminary requirements before committing to a transaction.",
+      },
+    ],
+    checklist: [
+      "All direct and indirect owners reviewed for current citizenship and residency eligibility",
+      "U.S. business location confirmed",
+      "Business type checked against current SBA eligibility requirements",
+      "Personal credit reports reviewed",
+      "Existing debts documented",
+      "Personal financial statement prepared",
+      "Buyer contribution and source of funds documented",
+      "Post-closing liquidity estimated",
+      "Buyer resume and management experience prepared",
+      "Target company tax returns collected",
+      "Profit-and-loss statements and balance sheets reviewed",
+      "Cash flow tested against expected debt payments",
+      "Customer concentration reviewed",
+      "Lease and license transferability reviewed",
+      "Purchase agreement reviewed by qualified counsel",
+      "Financing contingency considered",
+      "Multiple lenders compared",
+      "Personal-guarantee exposure understood",
+      "Current SBA rules verified before applying",
+    ],
+    categoryCtaHref: "/guide/buy",
+    categoryCtaLabel: "Back to Buying a Business",
+    ownwardCtaHref: "/buy",
+    ownwardCtaLabel: "Browse businesses for sale on Ownward",
+    sources: [
+      {
+        label: "SBA — 7(a) Loans",
+        href: "https://www.sba.gov/loans/7a-loans/",
+      },
+      {
+        label: "SBA — 7(a) Terms, Conditions and Eligibility",
+        href: "https://www.sba.gov/sba-lenders/#7a-terms",
+      },
+      {
+        label: "SBA — Revised Applicant Ownership, Citizenship, and Residency Requirements for 7(a) and 504 Loans",
+        href: "https://www.sba.gov/document/procedural-notice-5000-876626-revised-applicant-ownership-citizenship-residency-requirements-7a-504-loans",
+      },
+      {
+        label: "SBA Form 148 — Unconditional Guarantee",
+        href: "https://www.sba.gov/document/sba-form-148-unconditional-guarantee",
+      },
+      {
+        label: "SBA — Lender Match",
+        href: "https://www.sba.gov/loans/lender-match/",
+      },
+    ],
   },
   {
     slug: "how-to-prepare-your-business-for-sale",
