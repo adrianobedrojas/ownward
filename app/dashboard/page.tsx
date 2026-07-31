@@ -25,7 +25,9 @@ export default async function DashboardPage({
   // Fetch listings belonging to the authenticated user
   const { data: listings, error } = await supabase
     .from("business_listings")
-    .select("*")
+    .select(
+      "id,user_id,business_name,slug,category,location,status,is_public,published_at,created_at,featured_until"
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

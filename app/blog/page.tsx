@@ -8,7 +8,7 @@ export default async function BlogIndexPage() {
   // Fetch all published posts ordered by creation date
   const { data: posts, error } = await supabase
     .from('posts')
-    .select('*')
+    .select('id,slug,title,description,created_at')
     .eq('published', true)
     .order('created_at', { ascending: false });
 

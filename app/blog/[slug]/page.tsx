@@ -14,7 +14,7 @@ export default async function BlogPostPage({ params }: Props) {
   // Fetch the blog post, ensuring it is published
   const { data: post, error } = await supabase
     .from('posts')
-    .select('*')
+    .select('id,slug,title,content,created_at')
     .eq('slug', slug)
     .eq('published', true)
     .single();

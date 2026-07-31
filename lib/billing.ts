@@ -48,8 +48,12 @@ export type PlanKey = (typeof PLAN_KEYS)[number];
 export type ValuationLevel = "basic" | "detailed" | "enhanced";
 
 type PlanEntitlements = {
+  businessLimit: number;
   documentLimit: number;
+  storageBytes: number;
   listingLimit: number;
+  leadLimit: number;
+  teamMemberLimit: number;
   dealRooms: boolean;
   // ── Valuation entitlements ──────────────────
   basicValuation: boolean;
@@ -65,8 +69,12 @@ type PlanEntitlements = {
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
   starter: {
+    businessLimit: 1,
     documentLimit: 10,
+    storageBytes: 10 * 50 * 1024 * 1024,
     listingLimit: 1,
+    leadLimit: 10,
+    teamMemberLimit: 1,
     dealRooms: false,
     basicValuation: true,
     detailedValuation: false,
@@ -74,8 +82,12 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     valuationRefreshDays: null,
   },
   builder: {
+    businessLimit: 2,
     documentLimit: 100,
+    storageBytes: 100 * 50 * 1024 * 1024,
     listingLimit: 2,
+    leadLimit: 100,
+    teamMemberLimit: 2,
     dealRooms: false,
     basicValuation: true,
     detailedValuation: true,
@@ -83,8 +95,12 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     valuationRefreshDays: null,
   },
   pro: {
+    businessLimit: 5,
     documentLimit: 1000,
+    storageBytes: 1000 * 50 * 1024 * 1024,
     listingLimit: 5,
+    leadLimit: 1000,
+    teamMemberLimit: 5,
     dealRooms: true,
     basicValuation: true,
     detailedValuation: true,
@@ -132,6 +148,10 @@ export function getPlanByPriceId(priceId: string) {
 export function getEntitlementsByPlan(plan: PlanKey | null) {
   if (!plan) {
     return PLAN_ENTITLEMENTS.starter;
+  }
+
+  export function getPlanEntitlements() {
+    return PLAN_ENTITLEMENTS;
   }
 
   return PLAN_ENTITLEMENTS[plan];

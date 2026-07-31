@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getFeaturedListingConfig } from "@/lib/billing";
+import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -109,10 +110,16 @@ export async function POST(req: Request) {
   }
 
   // 6. Build safe site URL for redirects
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    req.headers.get("origin") ||
-    "http://localhost:3000";
+  let siteUrl: string;
+  try {
+    siteUrl = getSiteUrl();
+  } catch (error) {
+    console.error("Invalid site URL configuration:", error);
+    return NextResponse.json(
+      { error: "Application URL is not configured" },
+      { status: 500 }
+    );
+  }
 
   // 7. Create Stripe Checkout Session (mode: payment — one-time)
   try {

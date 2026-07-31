@@ -22,12 +22,15 @@ export async function GET(
   // ── Load document record ──────────────────────────────────────────────────
   const { data: doc } = await supabase
     .from("deal_room_documents")
-    .select("id, deal_room_id, storage_path, filename, deleted_at")
+    .select("id, deal_room_id, storage_path, filename, deleted_at, retention_status")
     .eq("id", docId)
     .is("deleted_at", null)
     .maybeSingle();
 
   if (!doc) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (doc.retention_status && doc.retention_status !== "active") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

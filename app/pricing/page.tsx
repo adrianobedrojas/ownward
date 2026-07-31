@@ -50,6 +50,7 @@ export default function PricingPage() {
               <li>✓ Basic Health Checklist</li>
               <li>✓ Basic Valuation Range</li>
               <li>✓ Up to 10 Documents</li>
+              <li>✓ Up to 500 MB storage</li>
               <li>✓ Standard Support</li>
             </ul>
           </div>
@@ -78,6 +79,7 @@ export default function PricingPage() {
               <li>✓ Advanced Health Report</li>
               <li>✓ Detailed Valuation Estimate</li>
               <li>✓ 100 Documents & Templates</li>
+              <li>✓ Up to 5 GB storage</li>
               <li>✓ 2 Team Members</li>
             </ul>
           </div>
@@ -102,7 +104,7 @@ export default function PricingPage() {
               <li>✓ Full Valuation Report (Weekly)</li>
               <li>✓ Customer Concentration Analysis</li>
               <li>✓ Basic Deal Room & Seller Area</li>
-              <li>✓ 1,000 Leads & Unlimited Storage</li>
+              <li>✓ 1,000 Leads & up to 50 GB storage</li>
               <li>✓ Up to 5 Team Members</li>
             </ul>
           </div>

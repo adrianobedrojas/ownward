@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/require-user";
 import { addTransaction } from "./action";
 
 export const metadata: Metadata = {
@@ -23,11 +23,12 @@ export default async function MoneyPage({
   const errorMessage = params.error;
   const successMessage = params.success;
 
-  const supabase = await createClient();
+  const { supabase, user } = await requireUser();
 
   const { data: transactions = [], error } = await supabase
     .from("transactions")
-    .select("*")
+    .select("id,user_id,title,amount,type,status,category,transaction_date,created_at")
+    .eq("user_id", user.id)
     .order("transaction_date", { ascending: false });
 
   if (error) {

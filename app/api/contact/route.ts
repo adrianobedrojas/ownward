@@ -11,19 +11,27 @@ export async function POST(req: Request) {
     }
 
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    // Insert the message into a 'contact_messages' table in Supabase
     const { error } = await supabase
       .from('contact_messages')
-      .insert([{ name, email, message }]);
+      .insert([{
+        name: String(name).trim(),
+        email: String(email).trim().toLowerCase(),
+        message: String(message).trim(),
+        user_id: user?.id ?? null,
+      }]);
 
     if (error) {
       throw error;
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error';
     console.error('Contact form error:', err);
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
