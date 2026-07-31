@@ -60,10 +60,10 @@ export default function PrivacyChoicesPage() {
             Privacy Policy
           </Link>
           <Link
-            href="mailto:privacy@ownwardhub.com"
+            href="mailto:ownwardhub@gmail.com"
             className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200"
           >
-            privacy@ownwardhub.com
+            ownwardhub@gmail.com
           </Link>
         </div>
 

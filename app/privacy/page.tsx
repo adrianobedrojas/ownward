@@ -182,17 +182,9 @@ export default function PrivacyPolicyPage() {
         <section id="contact" className="mt-8 space-y-4">
           <h2 className="text-2xl font-semibold text-white">13. Contact Us</h2>
           <p className="text-slate-300">
-            For privacy requests or questions, contact us at{' '}
-            <Link href="mailto:privacy@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
-              privacy@ownwardhub.com
-            </Link>
-            ,{' '}
-            <Link href="mailto:support@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
-              support@ownwardhub.com
-            </Link>
-            , or{' '}
-            <Link href="mailto:legal@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
-              legal@ownwardhub.com
+            For privacy inquiries, support requests, legal notices, or security reports, contact us at{' '}
+            <Link href="mailto:ownwardhub@gmail.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
+              ownwardhub@gmail.com
             </Link>
             .
           </p>
