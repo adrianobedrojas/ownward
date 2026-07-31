@@ -69,12 +69,12 @@ export const guideArticles: GuideArticle[] = [
   {
     slug: "business-operations-basics",
     category: "run",
-    title: "Business Operations Basics",
+    title: "Business Operations Basics: Build a Business That Runs More Smoothly",
     description:
-      "Learn how to organize daily work, build repeatable processes, and create a business that runs more consistently.",
+      "Learn how to organize daily work, build repeatable processes, and create a business that runs more consistently — without relying on the owner for everything.",
     readingTime: "10 min read",
     metadataDescription:
-      "Learn beginner-friendly business operations basics, including recurring tasks, process checklists, routines, metrics, and a practical 30-day action plan.",
+      "A beginner's guide to business operations: identify recurring tasks, build process checklists, establish daily and weekly routines, track key metrics, and follow a practical 30-day action plan.",
     introduction: [
       "Business operations are the day-to-day activities that keep your company moving. They include the routines, decisions, and systems behind serving customers, collecting money, and delivering work.",
       "When operations are unclear, work gets delayed, responsibilities get confused, and results become inconsistent. Strong operations make your business more stable, easier to manage, and more prepared for growth.",

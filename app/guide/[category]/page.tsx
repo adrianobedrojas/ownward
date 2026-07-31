@@ -1,10 +1,25 @@
 // app/guide/[category]/page.tsx
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGuideArticlesByCategory, getGuideCategory } from "@/lib/guide-content";
+import { getGuideArticlesByCategory, getGuideCategory, guideCategoryContent } from "@/lib/guide-content";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
+}
+
+export async function generateStaticParams() {
+  return Object.keys(guideCategoryContent).map((category) => ({ category }));
+}
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { category } = await params;
+  const catInfo = getGuideCategory(category);
+  if (!catInfo) return {};
+  return {
+    title: `${catInfo.title} — Ownward Guide`,
+    description: catInfo.description,
+  };
 }
 
 export default async function GuideCategoryPage({ params }: CategoryPageProps) {

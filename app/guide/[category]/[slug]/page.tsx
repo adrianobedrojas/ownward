@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGuideArticle } from "@/lib/guide-content";
+import { getGuideArticle, getGuideCategory, guideArticles } from "@/lib/guide-content";
 
 interface GuideArticlePageProps {
   params: Promise<{ category: string; slug: string }>;
+}
+
+export async function generateStaticParams() {
+  return guideArticles.map((article) => ({
+    category: article.category,
+    slug: article.slug,
+  }));
 }
 
 export async function generateMetadata({
@@ -26,8 +33,9 @@ export async function generateMetadata({
 export default async function GuideArticlePage({ params }: GuideArticlePageProps) {
   const { category, slug } = await params;
   const article = getGuideArticle(category, slug);
+  const catInfo = getGuideCategory(category);
 
-  if (!article) {
+  if (!article || !catInfo) {
     notFound();
   }
 
@@ -35,7 +43,7 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 text-slate-100">
       <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Ownward Guide · Run a Business
+          Ownward Guide · {catInfo.title}
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
           {article.title}
