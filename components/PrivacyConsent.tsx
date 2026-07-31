@@ -261,8 +261,8 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
               <Link href="/privacy-choices" className="font-semibold text-cyan-300 hover:text-cyan-200">
                 Privacy Choices
               </Link>
-              <Link href="mailto:privacy@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
-                privacy@ownwardhub.com
+              <Link href="mailto:ownwardhub@gmail.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
+                ownwardhub@gmail.com
               </Link>
             </div>
           </section>
