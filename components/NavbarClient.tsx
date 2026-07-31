@@ -116,6 +116,13 @@ export default function NavbarClient({
                 Vault
               </Link>
 
+              <Link
+                href="/messages"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              >
+                Messages
+              </Link>
+
               <form action="/auth/signout" method="post">
                 <button
                   type="submit"
@@ -194,6 +201,14 @@ export default function NavbarClient({
                     className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Vault
+                  </Link>
+
+                  <Link
+                    href="/messages"
+                    onClick={closeMobileMenu}
+                    className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Messages
                   </Link>
 
                   <form action="/auth/signout" method="post">

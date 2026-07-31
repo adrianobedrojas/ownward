@@ -27,6 +27,32 @@ export default async function DashboardPage({
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
+  // Fetch seller-side conversation stats (for listings they own)
+  const listingIds = (listings ?? []).map((l) => l.id);
+  let newInquiries = 0;
+  let activeConversations = 0;
+  let unreadMessages = 0;
+
+  if (listingIds.length > 0) {
+    const { data: convs } = await supabase
+      .from("conversations")
+      .select("id, status, last_message_at, seller_last_read_at")
+      .in("listing_id", listingIds)
+      .eq("seller_id", user.id);
+
+    if (convs) {
+      newInquiries = convs.filter((c) => c.status === "new").length;
+      activeConversations = convs.filter((c) =>
+        ["new", "active", "qualified", "nda_requested", "deal_room"].includes(c.status)
+      ).length;
+      unreadMessages = convs.filter((c) => {
+        if (!c.last_message_at) return false;
+        if (!c.seller_last_read_at) return true;
+        return new Date(c.last_message_at) > new Date(c.seller_last_read_at);
+      }).length;
+    }
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       {/* Success Banner */}
@@ -203,6 +229,41 @@ export default async function DashboardPage({
           </div>
         )}
       </section>
+
+      {/* Seller: Buyer Interest Section */}
+      {listingIds.length > 0 && (
+        <section className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-white">Buyer Interest</h2>
+            <Link
+              href="/messages"
+              className="text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            >
+              View all messages →
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <p className="text-xs text-slate-500 uppercase tracking-wider">New inquiries</p>
+              <p className="mt-2 text-3xl font-bold text-white">{newInquiries}</p>
+              <p className="mt-1 text-sm text-slate-400">Awaiting your reply</p>
+            </div>
+            <div className={`rounded-xl border p-5 ${unreadMessages > 0 ? "border-cyan-500/30 bg-cyan-400/5" : "border-slate-800 bg-slate-900"}`}>
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Unread messages</p>
+              <p className={`mt-2 text-3xl font-bold ${unreadMessages > 0 ? "text-cyan-300" : "text-white"}`}>
+                {unreadMessages}
+              </p>
+              <p className="mt-1 text-sm text-slate-400">Across all conversations</p>
+            </div>
+            <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+              <p className="text-xs text-slate-500 uppercase tracking-wider">Active conversations</p>
+              <p className="mt-2 text-3xl font-bold text-white">{activeConversations}</p>
+              <p className="mt-1 text-sm text-slate-400">Open buyer discussions</p>
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
