@@ -41,6 +41,7 @@ interface GuideArticleSection {
   paragraphs: string[];
   bullets?: string[];
   steps?: string[];
+  quote?: string;
 }
 
 interface GuideActionPlanWeek {
@@ -58,12 +59,17 @@ export interface GuideArticle {
   metadataDescription: string;
   introduction: string[];
   sections: GuideArticleSection[];
-  actionPlan: GuideActionPlanWeek[];
-  checklist: string[];
+  actionPlan?: GuideActionPlanWeek[];
+  checklist?: string[];
   categoryCtaHref: string;
   categoryCtaLabel: string;
   ownwardCtaHref: string;
   ownwardCtaLabel: string;
+  articleType?: string;
+  publishedDate?: string;
+  introductionTitle?: string;
+  actionPlanTitle?: string;
+  checklistTitle?: string;
 }
 
 export const guideArticles: GuideArticle[] = [
@@ -816,6 +822,146 @@ export const guideArticles: GuideArticle[] = [
     categoryCtaLabel: "Back to Business Valuation",
     ownwardCtaHref: "/valuation",
     ownwardCtaLabel: "Estimate your business value with Ownward",
+  },
+  {
+    slug: "the-day-my-side-project-asked-for-paperwork",
+    category: "stories",
+    title: "The Day My Side Project Asked for Paperwork",
+    cardTitle: "The Day My Side Project Asked for Paperwork",
+    description:
+      "A founder's reflection on hesitation, responsibility, and the decision to give a growing business a legal home.",
+    readingTime: "7 min read",
+    metadataDescription:
+      "The story of how building Ownward led its founder to form an LLC, move beyond the side-project stage, and begin treating the company's responsibilities as seriously as its possibilities.",
+    articleType: "Founder Note",
+    publishedDate: "July 31, 2026",
+    introductionTitle: "When an idea stops feeling hypothetical",
+    introduction: [
+      "For a long time, Ownward existed in the most exciting and dangerous stage of a business: the stage where almost anything feels possible because almost nothing is official.",
+      "It had a name. It had a website. It had features, pricing ideas, unfinished pages, ambitious plans, and enough browser tabs to qualify as its own operating system. I could describe what I was building, show someone the platform, and spend hours explaining where it could go.",
+      "But legally, the business was still mostly an idea attached to me.",
+      "At first, that felt reasonable. Why create a company before knowing whether the idea would work? Why add filings, expenses, and responsibilities to a project that was still evolving? I told myself I was being cautious.",
+      "Part of that was true.",
+      "Another part was hesitation wearing a very professional-looking disguise.",
+    ],
+    sections: [
+      {
+        title: "The comfortable phase of \"I'm still working on it\"",
+        paragraphs: [
+          "There is a certain freedom in calling something a project.",
+          "A project can change direction without explanation. It can disappear for three weeks while you rethink the homepage. It can have five different pricing models before lunch. Nobody expects a project to have policies, accounting records, or a plan for what happens when real customers arrive.",
+          "A company is different.",
+          "A company creates expectations. It asks you to make decisions that will still matter after the excitement of launching has faded. It forces you to think beyond the product and consider ownership, contracts, money, risk, privacy, taxes, and responsibility.",
+          "That was the part I was avoiding.",
+          "I enjoyed thinking about what Ownward could become: a place where people could run, grow, buy, or sell a small business. I liked designing the marketplace, planning valuation tools, and imagining how buyers and sellers might communicate.",
+          "Thinking about legal structure was less glamorous.",
+          "No founder daydream begins with, \"One day, I hope to organize my liability and maintain accurate company records.\"",
+          "Still, the more I built, the harder it became to pretend that structure was optional.",
+        ],
+      },
+      {
+        title: "The moment the idea started carrying weight",
+        paragraphs: [
+          "There was no dramatic movie scene when I made the decision.",
+          "No investor walked into a coffee shop and handed me a giant check. No customer sent a message saying, \"I will subscribe immediately, but only after reviewing your formation documents.\"",
+          "The realization arrived gradually.",
+          "Every new feature added another layer of responsibility. If Ownward would accept payments, store documents, publish business listings, support private conversations, and eventually help people evaluate major financial decisions, then it could not be treated like a casual website.",
+          "The platform was asking people to trust it.",
+          "That meant I needed to treat it like something worthy of trust.",
+          "I began thinking about the difference between owning a domain and operating a business. A domain gives an idea an address. A legal entity gives it a home.",
+          "That distinction changed how I viewed the LLC.",
+          "It was no longer paperwork that I would complete after the business became real. It was part of the process of making the business real.",
+        ],
+        quote: "A domain gives an idea an address. A legal entity gives it a home.",
+      },
+      {
+        title: "My reasons were practical, not ceremonial",
+        paragraphs: [
+          "Forming an LLC did not magically guarantee that Ownward would succeed. It did not create customers, finish the product, or solve every legal concern.",
+          "It did, however, provide a clearer foundation.",
+          "I wanted a formal structure that could hold the business's contracts, expenses, revenue, and future obligations. I wanted to establish a meaningful separation between my personal life and the company's activities. I also wanted the business to look organized when speaking with customers, service providers, and potential partners.",
+          "More importantly, I wanted to build correctly before growth made everything harder to reorganize.",
+          "It is easy to delay structure when only one person is involved. But what happens when a contractor contributes to the platform? When someone provides a professional service through it? When a customer purchases a subscription? When documents, payments, or sensitive business information begin moving through the system?",
+          "At that point, \"I will figure it out later\" stops being a harmless sentence.",
+          "It becomes a business strategy, and not a very good one.",
+        ],
+      },
+      {
+        title: "The fear behind the filing",
+        paragraphs: [
+          "My hesitation was not only about the cost or the forms.",
+          "Creating an LLC felt like making a public promise to myself.",
+          "Before that decision, I could still describe Ownward as something I was experimenting with. If it failed, I could tell myself that it had never officially begun.",
+          "Forming the company removed some of that emotional escape route.",
+          "It meant saying:",
+          "That is a surprisingly vulnerable decision.",
+          "Founders are often told to move quickly, think boldly, and take risks. Less attention is given to the quieter moment when a person chooses to become accountable for an idea.",
+          "The LLC represented that moment for me.",
+          "It was not proof that I had succeeded. It was proof that I had decided to take responsibility for trying.",
+        ],
+        quote: "I do not know exactly how far this will go, but I believe it deserves to be built seriously.",
+      },
+      {
+        title: "What changed after I decided",
+        paragraphs: [
+          "The website did not suddenly load faster. My unfinished tasks did not complete themselves. There was no ceremonial music when I opened my laptop the next morning.",
+          "But my thinking changed.",
+          "I began asking better questions.",
+        ],
+        bullets: [
+          "What information would this feature collect?",
+          "Who should be allowed to access it?",
+          "What promises am I making to the user?",
+          "How will payments, cancellations, and records be handled?",
+          "What could go wrong, and how should the business respond?",
+        ],
+      },
+      {
+        title: "A legal structure is not a personality transplant",
+        paragraphs: [
+          "Those questions did not make Ownward less creative. They made the creativity more disciplined.",
+          "An idea can survive on enthusiasm. A company needs systems.",
+          "The LLC became one of the first systems surrounding Ownward. It gave me a clearer reason to document decisions, separate business expenses, think carefully about agreements, and plan for the platform as something that could eventually operate beyond me.",
+          "There is also a temptation to believe that forming a company means suddenly acting like a giant corporation.",
+          "I did not want Ownward to become distant, complicated, or buried under formal language. The purpose of creating structure was not to remove the human side of the business. It was to protect the space where that human side could grow.",
+          "Small-business ownership is already intimidating. Ownward is supposed to make it feel more understandable, not more bureaucratic.",
+          "That principle also influenced my decision.",
+          "If I wanted to build a platform that encouraged owners to organize their businesses, improve their records, and prepare for future opportunities, I needed to apply the same discipline to my own company.",
+          "I could not build a platform about responsible ownership while indefinitely avoiding the responsibilities of ownership.",
+          "The irony was becoming difficult to ignore.",
+        ],
+      },
+      {
+        title: "The real value of the decision",
+        paragraphs: [
+          "Looking back, the greatest value of forming an LLC was not the document itself.",
+          "It was the shift from possibility to intention.",
+          "Before, Ownward was something I hoped to build. Afterward, it became something I had chosen to build deliberately.",
+          "That does not mean every founder must create an LLC immediately. Timing, location, risk, taxes, and business activities all matter. A legal structure should be selected thoughtfully, often with professional guidance.",
+          "But waiting for complete certainty can become its own form of risk.",
+          "There will always be another feature to finish, another expense to calculate, and another reason to delay. At some point, progress requires making a decision with the information available and accepting that the rest will be learned along the way.",
+          "That was my decision.",
+          "I did not form an LLC because I believed every part of the future was predictable.",
+          "I formed it because I finally understood that building the future required a container strong enough to hold it.",
+        ],
+      },
+      {
+        title: "What I would tell another founder",
+        paragraphs: [
+          "You do not need to feel completely ready before you begin treating your business seriously.",
+          "Readiness often arrives after the decision, not before it.",
+          "The important question is not whether your business already looks impressive from the outside. The question is whether its responsibilities are becoming real.",
+          "Are people paying you? Are you making commitments? Are you collecting information? Are you working with other people? Are you building something you intend to continue?",
+          "Those are signs that your idea may be asking for more structure.",
+          "For me, forming an LLC was not the finish line. It was the moment I stopped waiting for Ownward to become a real business and started behaving like its owner.",
+        ],
+        quote: "The paperwork did not create the dream. It simply made me sign my name beneath it.",
+      },
+    ],
+    categoryCtaHref: "/guide/stories",
+    categoryCtaLabel: "Back to Owner Stories & Founder Notes",
+    ownwardCtaHref: "/",
+    ownwardCtaLabel: "Explore Ownward",
   },
 ];
 
