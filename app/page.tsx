@@ -323,11 +323,11 @@ export default function HomePage() {
 
           <article className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 flex flex-col justify-between">
             <div>
-              <span className="text-xs font-semibold text-cyan-400 uppercase">Buying Guide</span>
-              <h3 className="mt-2 font-bold text-white">Buying Your First Business</h3>
-              <p className="mt-2 text-xs text-slate-400">Learn how to compare opportunities and review financial information.</p>
+              <span className="text-xs font-semibold text-cyan-400 uppercase">Financing Guide</span>
+              <h3 className="mt-2 font-bold text-white">Could You Qualify for an SBA Loan?</h3>
+              <p className="mt-2 text-xs text-slate-400">Understand eligibility, lender underwriting, residency rules, and the documents buyers should prepare.</p>
             </div>
-            <Link href="/guide/buy" className="mt-4 text-xs font-semibold text-cyan-300 hover:underline">
+            <Link href="/guide/buy/sba-loan-qualification" className="mt-4 text-xs font-semibold text-cyan-300 hover:underline">
               Read article &rarr;
             </Link>
           </article>

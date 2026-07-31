@@ -270,6 +270,12 @@ export default async function MarketplacePage({
               <li>Request access to confidential business documents.</li>
               <li>Organize offers and due-diligence tasks.</li>
             </ul>
+            <Link
+              href="/guide/buy/sba-loan-qualification"
+              className="mt-6 inline-block text-sm font-semibold text-cyan-300 hover:underline"
+            >
+              Explore SBA loan qualification and lender readiness &rarr;
+            </Link>
           </article>
 
           <article className="rounded-xl border border-slate-800 bg-slate-900 p-6">
