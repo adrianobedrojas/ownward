@@ -55,7 +55,7 @@ export default async function GuideCategoryPage({ params }: CategoryPageProps) {
                 {catInfo.title}
               </p>
               <h2 className="mt-3 text-2xl font-semibold text-white group-hover:text-cyan-200">
-                {article.title}
+                {article.cardTitle ?? article.title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-300">
                 {article.description}
