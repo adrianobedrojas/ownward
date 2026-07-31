@@ -388,6 +388,240 @@ export const guideArticles: GuideArticle[] = [
     ownwardCtaHref: "/documents",
     ownwardCtaLabel: "Organize your business documents in Ownward",
   },
+  {
+    slug: "identify-most-profitable-customers",
+    category: "grow",
+    title:
+      "How to Identify Your Most Profitable Customers and Grow More Strategically",
+    cardTitle: "How to Identify Your Most Profitable Customers",
+    description:
+      "Learn how to compare customer revenue, direct costs, time requirements, repeat purchases, and retention so you can focus growth efforts on the customers who create the most value.",
+    readingTime: "11 min read",
+    metadataDescription:
+      "Learn how to identify profitable customer groups by comparing revenue, direct costs, servicing time, repeat purchases, retention, and growth potential.",
+    introduction: [
+      "Growth is not only about attracting more customers. For a small-business owner, the more useful question is often which customers, customer groups, products, or services create the most value for the business.",
+      "Some customers generate substantial revenue but also require high costs, repeated follow-up, discounts, and excessive owner time. A customer who looks strong on a sales report may still be difficult to serve profitably.",
+      "A smaller customer may create more value because they purchase repeatedly, pay on time, require less support, and are easier to serve. That is why owners should evaluate customer value using several factors instead of revenue alone.",
+      "This article provides general educational information only. It is not legal, tax, accounting, or investment advice.",
+    ],
+    sections: [
+      {
+        title: "1. Understand the difference between revenue and profitability",
+        paragraphs: [
+          "Revenue is the amount you charge or collect from a customer. Profitability looks more broadly at what it costs to win, serve, and support that customer.",
+          "High revenue does not always mean high profit. If an owner makes decisions based only on sales totals, they may focus energy on customers who keep the business busy without creating enough value.",
+          "Consider a simple example. Customer A generates $5,000 in revenue but requires $3,500 in materials, contractor costs, discounts, and repeated support. Customer B generates $3,500 in revenue but requires only $1,000 in direct costs and much less owner time.",
+          "Customer B may create more value for the business even though total revenue is lower. This is only a simplified management comparison, not a formal accounting profit calculation, but it is still useful for decision-making.",
+        ],
+      },
+      {
+        title: "2. Gather basic customer information",
+        paragraphs: [
+          "Start by collecting a small set of useful facts for each customer or customer group. You do not need perfect records to begin. If exact information is unavailable, use reasonable estimates and label them clearly so you can improve them later.",
+          "Try to gather information that helps you compare both money and effort, not just sales volume.",
+          "Collect only information needed for legitimate business purposes, limit access to customer information, do not place sensitive personal information in an unsecured spreadsheet or document, and follow applicable privacy, record-retention, and security requirements.",
+        ],
+        bullets: [
+          "Customer or customer-group name",
+          "Products or services purchased",
+          "Revenue generated",
+          "Direct materials or product costs",
+          "Contractor or delivery costs",
+          "Discounts and refunds",
+          "Payment-processing fees when relevant",
+          "Time required to sell, serve, and support the customer",
+          "Number of purchases",
+          "Payment speed",
+          "Length of the customer relationship",
+          "Complaints, returns, or rework",
+        ],
+      },
+      {
+        title: "3. Estimate customer contribution",
+        paragraphs: [
+          "A practical starting point is a simple customer contribution estimate: customer revenue minus the direct costs associated with serving that customer.",
+          "This is a simplified management estimate, not the same as complete accounting profit. It helps an owner compare customers or groups in a beginner-friendly way.",
+          "Direct costs are the costs that would not have occurred without that sale or account. General overhead such as rent, software used across the whole business, and broad administrative expenses may require separate analysis.",
+        ],
+        bullets: [
+          "Product or material costs",
+          "Shipping or delivery",
+          "Contractor labor",
+          "Commissions",
+          "Refunds",
+          "Discounts",
+          "Customer-specific software or service costs",
+          "Other costs that would not have occurred without that sale",
+        ],
+      },
+      {
+        title: "4. Account for time and service effort",
+        paragraphs: [
+          "Time has economic value even when the owner does not formally pay themselves by the hour. A customer who requires constant attention can quietly reduce profitability by taking time away from better work, better customers, or business improvement.",
+          "Watch for customer behaviors that increase effort and reduce value. These issues do not always mean you should reject a customer, but they may show the need for clearer pricing, boundaries, processes, or service levels.",
+        ],
+        bullets: [
+          "Repeated urgent requests",
+          "Frequent revisions",
+          "Excessive meetings",
+          "Incomplete information",
+          "Late approvals",
+          "Unpaid custom work",
+          "Repeated support for the same issue",
+          "Late payments",
+          "Scope changes",
+        ],
+      },
+      {
+        title: "5. Group customers into useful segments",
+        paragraphs: [
+          "After reviewing individual customers, look for patterns across groups. Segmentation helps you understand which types of customers are easier to serve, more profitable, and better aligned with your business.",
+          "Choose segments that support a real business decision, such as pricing, marketing, service design, or customer selection. Do not base segments on protected or otherwise inappropriate personal characteristics.",
+        ],
+        bullets: [
+          "Product or service purchased",
+          "Customer industry",
+          "Business size",
+          "Geographic area",
+          "Acquisition source",
+          "First-time versus repeat customer",
+          "Subscription versus one-time customer",
+          "High-support versus low-support customer",
+          "Fast-paying versus slow-paying customer",
+          "High-margin versus low-margin work",
+        ],
+      },
+      {
+        title: "6. Look beyond the first purchase",
+        paragraphs: [
+          "The first sale matters, but long-term value often matters more. A customer with a modest first purchase may still become highly valuable if they stay with the business, buy again, and require limited support.",
+          "When comparing customers or groups, consider whether they are likely to create value over time. Do not treat future revenue as guaranteed, but do pay attention to signs of healthy repeat business and strategic fit.",
+        ],
+        bullets: [
+          "Repeat purchases",
+          "Subscription retention",
+          "Renewal rates",
+          "Referrals",
+          "Upsell opportunities",
+          "Payment reliability",
+          "Low refund rates",
+          "Low support burden",
+          "Strategic fit with the business",
+        ],
+      },
+      {
+        title: "7. Identify the characteristics of high-value customers",
+        paragraphs: [
+          "Once you have compared several customers or groups, write down the characteristics that appear most often among the strongest ones. This helps you attract more of the right work instead of simply more work.",
+          "The goal is not to treat customers unfairly. The goal is to understand which offers, service models, and customer groups are sustainable for the business.",
+        ],
+        bullets: [
+          "Buy profitable products or services",
+          "Purchase repeatedly",
+          "Pay on time",
+          "Provide complete information",
+          "Respect project scope",
+          "Require reasonable support",
+          "Refer similar customers",
+          "Are a good fit for the business's expertise",
+          "Are likely to continue needing the service",
+        ],
+      },
+      {
+        title: "8. Recognize warning signs",
+        paragraphs: [
+          "Some patterns suggest that revenue is growing in an unhealthy way. If cash becomes tighter while revenue rises, or if one customer consumes too much time and flexibility, the business may be adding strain instead of strength.",
+          "Customer concentration risk means the business depends too heavily on one customer. If that customer reduces spending or leaves, revenue, cash flow, and confidence can drop quickly. There is no universal percentage threshold, but owners should understand when one account has become too important.",
+        ],
+        bullets: [
+          "Revenue increases while cash becomes tighter",
+          "A large customer requires continual discounts",
+          "The owner spends excessive time on one account",
+          "Rework or refunds are frequent",
+          "The customer regularly pays late",
+          "The work requires tools or skills the company does not normally use",
+          "The customer represents an unsafe percentage of total revenue",
+          "The business cannot serve the customer without delaying other work",
+        ],
+      },
+      {
+        title: "9. Choose an appropriate growth action",
+        paragraphs: [
+          "After reviewing the evidence, choose one or two focused actions that improve the quality of your growth. Better growth usually comes from clearer choices, not from reacting to every customer the same way.",
+          "Test changes carefully instead of making abrupt decisions based on limited data. A small pricing adjustment, process change, or targeting improvement can be enough to show whether you are moving in the right direction.",
+        ],
+        bullets: [
+          "Focus marketing on similar high-value customers",
+          "Improve the offer that attracts profitable customers",
+          "Raise prices where service demands are consistently underestimated",
+          "Create clearer service packages",
+          "Establish change-order or revision rules",
+          "Require deposits or milestone payments when appropriate",
+          "Improve customer onboarding",
+          "Reduce unnecessary support work",
+          "Stop promoting consistently unprofitable offers",
+          "Diversify when one customer represents excessive dependence",
+        ],
+      },
+      {
+        title: "10. Review customer profitability regularly",
+        paragraphs: [
+          "Customer profitability can change over time. Costs rise, customer behavior changes, new competitors appear, and your own delivery process may improve or become more complex.",
+          "Review monthly if your business has frequent transactions, quarterly if you work on longer projects, and whenever pricing, costs, staffing, or service delivery changes.",
+        ],
+      },
+      {
+        title: "Sample customer comparison",
+        paragraphs: [
+          "A simple comparison can reveal which customer groups deserve more attention.",
+          "One-time custom projects may bring typical revenue of about $4,500 per project, but they often come with higher direct costs, long meetings, revisions, and unpredictable scope. Repeat purchases are limited, payment reliability varies, and the main operational concern is that each project can consume more time than expected.",
+          "Monthly service clients may generate about $1,200 per month each, with moderate direct costs and a steadier amount of service time. They often purchase repeatedly by design, usually pay on a predictable schedule, and the main operational concern is keeping service delivery consistent so retention stays strong.",
+          "Standard product customers may spend about $250 per order, with clearer direct costs and relatively low service time. Some become repeat buyers, payment is usually immediate, and the main operational concern is maintaining margin after shipping, refunds, and promotions.",
+          "In this example, monthly service clients may look most attractive because they combine repeat revenue, better predictability, and manageable service effort. Standard product customers may also be appealing if margins stay healthy and fulfillment remains efficient. One-time custom projects may still be worthwhile, but only if pricing and scope control are strong enough to protect value.",
+        ],
+      },
+    ],
+    actionPlan: [
+      {
+        week: "Week 1",
+        focus:
+          "Select 10 recent customers or three meaningful customer groups and collect basic revenue, direct-cost, and service-effort information.",
+      },
+      {
+        week: "Week 2",
+        focus:
+          "Estimate contribution and compare the time required to serve each customer or group.",
+      },
+      {
+        week: "Week 3",
+        focus:
+          "Identify patterns among the most valuable and least sustainable customers.",
+      },
+      {
+        week: "Week 4",
+        focus:
+          "Choose one focused growth change, such as improving pricing, targeting a stronger customer group, simplifying an offer, or strengthening service boundaries.",
+      },
+    ],
+    checklist: [
+      "Customer or customer groups selected",
+      "Revenue information collected",
+      "Direct costs estimated",
+      "Owner and team time considered",
+      "Repeat purchases reviewed",
+      "Payment reliability reviewed",
+      "Refunds and rework considered",
+      "Customer concentration considered",
+      "High-value customer characteristics identified",
+      "One growth action selected",
+      "Review date scheduled",
+    ],
+    categoryCtaHref: "/guide/grow",
+    categoryCtaLabel: "Back to Grow a Business",
+    ownwardCtaHref: "/customers",
+    ownwardCtaLabel: "Review your customer list in Ownward",
+  },
 ];
 
 export function getGuideCategory(slug: string) {
