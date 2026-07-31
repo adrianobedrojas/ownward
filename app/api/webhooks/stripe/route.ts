@@ -84,9 +84,6 @@ export async function POST(req: Request) {
         const subscriptionId = session.subscription as string;
         if (userId && subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          const currentPeriodEnd = subscription.current_period_end
-            ? new Date(subscription.current_period_end * 1000).toISOString()
-            : null;
           const canceledAt = subscription.canceled_at
             ? new Date(subscription.canceled_at * 1000).toISOString()
             : null;
@@ -104,7 +101,6 @@ export async function POST(req: Request) {
               price_id: subscription.items.data[0].price.id,
               quantity: subscription.items.data[0].quantity ?? 1,
               cancel_at_period_end: subscription.cancel_at_period_end,
-              current_period_end: currentPeriodEnd,
               canceled_at: canceledAt,
               last_stripe_event_created: event.created,
               updated_at: new Date().toISOString(),
@@ -133,9 +129,6 @@ export async function POST(req: Request) {
           break;
         }
 
-        const currentPeriodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
-          : null;
         const canceledAt = subscription.canceled_at
           ? new Date(subscription.canceled_at * 1000).toISOString()
           : null;
@@ -151,7 +144,6 @@ export async function POST(req: Request) {
             price_id: subscription.items.data[0].price.id,
             quantity: subscription.items.data[0].quantity ?? 1,
             cancel_at_period_end: subscription.cancel_at_period_end,
-            current_period_end: currentPeriodEnd,
             canceled_at: canceledAt,
             last_stripe_event_created: event.created,
             updated_at: new Date().toISOString(),

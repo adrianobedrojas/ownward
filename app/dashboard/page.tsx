@@ -26,7 +26,7 @@ export default async function DashboardPage({
   const { data: listings, error } = await supabase
     .from("business_listings")
     .select(
-      "id,user_id,business_name,slug,category,location,status,is_public,published_at,created_at,featured_until"
+      "id,user_id,business_name,slug,category,location,status,is_public,published_at,created_at,featured_until,asking_price,annual_revenue,summary"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });

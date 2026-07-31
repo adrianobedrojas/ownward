@@ -111,6 +111,9 @@ async function logActivity(
   eventType: ActivityEvent,
   metadata?: Record<string, unknown>,
 ): Promise<void> {
+  if (!(ACTIVITY_EVENTS as readonly string[]).includes(eventType)) {
+    return;
+  }
   const { error } = await supabase.from('deal_room_activity').insert({
     deal_room_id: dealRoomId,
     actor_id: actorId,

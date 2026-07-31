@@ -149,12 +149,11 @@ export function getEntitlementsByPlan(plan: PlanKey | null) {
   if (!plan) {
     return PLAN_ENTITLEMENTS.starter;
   }
-
-  export function getPlanEntitlements() {
-    return PLAN_ENTITLEMENTS;
-  }
-
   return PLAN_ENTITLEMENTS[plan];
+}
+
+export function getPlanEntitlements() {
+  return PLAN_ENTITLEMENTS;
 }
 
 export function isActiveSubscription(status?: string | null) {
