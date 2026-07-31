@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getOrCreateVisitorToken } from '@/lib/visitor';
 import { submitPulseResponse } from '@/app/actions/pulse';
+import { ConsentGate, OpenPrivacyChoicesButton } from '@/components/PrivacyConsent';
 
 interface Props {
   businessId: string;
@@ -27,7 +28,31 @@ const INTENTS = [
 ];
 
 export default function CommunityPulseForm({ businessId }: Props) {
-  const [visitorToken, setVisitorToken] = useState('');
+  return (
+    <ConsentGate
+      categories="functionality"
+      fallback={
+        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+          <h3 className="text-lg font-semibold text-white">Community Pulse requires functionality storage</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            To help prevent duplicate responses, Ownward uses an anonymous response token that
+            stays in this browser. Enable Functionality storage if you want to submit a Community
+            Pulse response from this device.
+          </p>
+          <div className="mt-4">
+            <OpenPrivacyChoicesButton>
+              Update privacy choices
+            </OpenPrivacyChoicesButton>
+          </div>
+        </div>
+      }
+    >
+      <CommunityPulseFormFields businessId={businessId} />
+    </ConsentGate>
+  );
+}
+
+function CommunityPulseFormFields({ businessId }: Props) {
   const [relationship, setRelationship] = useState('');
   const [supportIntent, setSupportIntent] = useState('');
   const [revealIdentity, setRevealIdentity] = useState(false);
@@ -38,15 +63,17 @@ export default function CommunityPulseForm({ businessId }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    const token = getOrCreateVisitorToken();
-    setVisitorToken(token);
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!relationship || !supportIntent) {
       setErrorMessage('Please select options for both questions.');
+      return;
+    }
+
+    const visitorToken = getOrCreateVisitorToken();
+
+    if (!visitorToken) {
+      setErrorMessage('Enable Functionality storage to submit a response from this browser.');
       return;
     }
 
@@ -85,6 +112,12 @@ export default function CommunityPulseForm({ businessId }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <p className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-xs leading-6 text-slate-400">
+        To help prevent duplicate Community Pulse submissions, Ownward stores an anonymous
+        response token in this browser when Functionality storage is enabled. It stays local to
+        this browser and is sent only with your response.
+      </p>
+
       <div>
         <label className="block text-sm font-medium text-slate-200">
           1. What is your relationship to this business?

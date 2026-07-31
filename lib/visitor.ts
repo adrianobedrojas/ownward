@@ -1,10 +1,33 @@
+import { hasPrivacyConsent } from '@/lib/privacy-consent';
+
+const VISITOR_TOKEN_KEY = 'ownward_visitor_token';
+const LEGACY_VISITOR_TOKEN_KEY = 'onward_visitor_token';
+
 export function getOrCreateVisitorToken(): string {
   if (typeof window === 'undefined') return '';
-  
-  let token = localStorage.getItem('onward_visitor_token');
+
+  if (!hasPrivacyConsent('functionality')) {
+    localStorage.removeItem(VISITOR_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_VISITOR_TOKEN_KEY);
+    return '';
+  }
+
+  let token = localStorage.getItem(VISITOR_TOKEN_KEY);
+
+  if (!token) {
+    const legacyToken = localStorage.getItem(LEGACY_VISITOR_TOKEN_KEY);
+
+    if (legacyToken) {
+      token = legacyToken;
+      localStorage.setItem(VISITOR_TOKEN_KEY, token);
+      localStorage.removeItem(LEGACY_VISITOR_TOKEN_KEY);
+    }
+  }
+
   if (!token) {
     token = crypto.randomUUID();
-    localStorage.setItem('onward_visitor_token', token);
+    localStorage.setItem(VISITOR_TOKEN_KEY, token);
   }
+
   return token;
 }
