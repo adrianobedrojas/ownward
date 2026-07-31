@@ -26,7 +26,9 @@ export default async function MarketplacePage({
   const locationQuery = params.location?.trim() || "";
 
   const supabase = await createClient();
+  const now = new Date().toISOString();
 
+  // Base filter: public + published
   let query = supabase
     .from("business_listings")
     .select("*")
@@ -45,18 +47,22 @@ export default async function MarketplacePage({
     query = query.ilike("location", `%${locationQuery}%`);
   }
 
-  const { data: listings = [], error } = await query.order("published_at", {
-    ascending: false,
-    nullsFirst: false,
-  }).order("created_at", {
-    ascending: false,
-  });
+  const { data: allListings = [], error } = await query
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching marketplace listings:", error.message);
   }
 
-  const displayListings = listings ?? [];
+  const listings = allListings ?? [];
+
+  // Split into featured (active promotion) and normal
+  const featuredListings = listings.filter(
+    (l) => l.featured_until && new Date(l.featured_until) > new Date(now)
+  );
+  const featuredIds = new Set(featuredListings.map((l) => l.id));
+  const normalListings = listings.filter((l) => !featuredIds.has(l.id));
 
   return (
     <main>
@@ -163,11 +169,100 @@ export default async function MarketplacePage({
           </form>
         </section>
 
+        {/* Featured listings section */}
+        {featuredListings.length > 0 && (
+          <section className="mt-10">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  Featured opportunities
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Promoted listings from verified sellers.
+                </p>
+              </div>
+              <p className="text-sm text-slate-500">
+                {featuredListings.length} featured
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-5 lg:grid-cols-3">
+              {featuredListings.map((business) => (
+                <article
+                  key={business.id}
+                  className="flex flex-col rounded-xl border border-amber-500/40 bg-slate-900 p-6 ring-1 ring-amber-500/10 transition hover:border-amber-400"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
+                      {business.category
+                        ? capitalizeFirst(business.category)
+                        : "Other"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">
+                        ★ Featured
+                      </span>
+                      <span className="text-xs text-slate-500">Promoted</span>
+                    </div>
+                  </div>
+
+                  <h3 className="mt-5 text-xl font-semibold text-white">
+                    {business.business_name}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-400">
+                    {business.location}
+                  </p>
+
+                  <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">
+                    {business.summary || "No summary provided yet."}
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-3 gap-3 border-y border-slate-800 py-4">
+                    <div>
+                      <p className="text-xs text-slate-500">Asking price</p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {business.asking_price
+                          ? `$${Number(business.asking_price).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500">Revenue</p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {business.annual_revenue
+                          ? `$${Number(business.annual_revenue).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500">Established</p>
+                      <p className="mt-1 text-sm font-semibold text-emerald-400">
+                        {business.year_established || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/b/${business.slug}`}
+                    className="mt-5 rounded-lg bg-amber-400/10 px-4 py-3 text-center text-sm font-semibold text-amber-300 transition hover:bg-amber-400 hover:text-slate-950"
+                  >
+                    View details
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* All business opportunities section */}
         <section className="mt-10">
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-white">
-                Featured opportunities
+                All business opportunities
               </h2>
 
               <p className="mt-1 text-sm text-slate-400">
@@ -176,20 +271,24 @@ export default async function MarketplacePage({
             </div>
 
             <p className="text-sm text-slate-500">
-              {displayListings.length} listings found
+              {listings.length} listing{listings.length !== 1 ? "s" : ""} found
             </p>
           </div>
 
-          {displayListings.length === 0 ? (
+          {listings.length === 0 ? (
             <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-12 text-center">
               <p className="text-lg font-semibold text-white">No businesses found</p>
               <p className="mt-2 text-sm text-slate-400">
                 Try adjusting your search filters or check back later for new opportunities.
               </p>
             </div>
+          ) : normalListings.length === 0 ? (
+            <p className="mt-6 text-sm text-slate-400">
+              All matching listings are featured above.
+            </p>
           ) : (
             <div className="mt-6 grid gap-5 lg:grid-cols-3">
-              {displayListings.map((business) => (
+              {normalListings.map((business) => (
                 <article
                   key={business.id}
                   className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-6 transition hover:border-cyan-400"
@@ -200,7 +299,6 @@ export default async function MarketplacePage({
                         ? capitalizeFirst(business.category)
                         : "Other"}
                     </span>
-
                   </div>
 
                   <h3 className="mt-5 text-xl font-semibold text-white">
