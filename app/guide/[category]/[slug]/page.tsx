@@ -25,9 +25,21 @@ export async function generateMetadata({
     return {};
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ownwardhub.com";
+  const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
+
   return {
     title: article.title,
     description: article.metadataDescription,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: article.title,
+      description: article.metadataDescription,
+      url: canonicalUrl,
+      type: "article",
+    },
   };
 }
 
@@ -117,8 +129,8 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
         </section>
 
         <section className="mt-10">
-          <h2 className="text-2xl font-semibold text-white">Operations checklist</h2>
-          <ul className="mt-4 space-y-3" aria-label="Operations checklist">
+          <h2 className="text-2xl font-semibold text-white">Checklist</h2>
+          <ul className="mt-4 space-y-3" aria-label="Article checklist">
             {article.checklist.map((item) => (
               <li key={item}>
                 <label className="flex items-start gap-3 rounded-lg border border-slate-800 px-4 py-3 text-sm leading-6 text-slate-300 sm:text-base">
