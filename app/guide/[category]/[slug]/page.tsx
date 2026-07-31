@@ -25,7 +25,7 @@ export async function generateMetadata({
     return {};
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ownwardhub.com";
   const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
 
   return {
@@ -52,7 +52,7 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
     notFound();
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ownwardhub.com";
   const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
 
   return (
