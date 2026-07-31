@@ -622,6 +622,201 @@ export const guideArticles: GuideArticle[] = [
     ownwardCtaHref: "/customers",
     ownwardCtaLabel: "Review your customer list in Ownward",
   },
+  {
+    slug: "how-much-is-my-business-worth",
+    category: "value",
+    title:
+      "How Much Is My Business Worth? A Beginner's Guide to Small-Business Valuation",
+    cardTitle: "How Much Is My Business Worth?",
+    description:
+      "Learn how small businesses are commonly valued, how SDE and EBITDA work, what valuation multiples mean, and which factors can increase or reduce a company's estimated value.",
+    readingTime: "12 min read",
+    metadataDescription:
+      "Learn the fundamentals of small-business valuation, including normalized earnings, SDE, EBITDA, valuation multiples, asset-based, market, and income approaches, value drivers, risk factors, and a practical 30-day valuation-preparation plan.",
+    introduction: [
+      "Business value is not determined by revenue alone. A company with strong sales but thin margins, heavy owner dependence, or concentrated customers may be worth far less than its top-line numbers suggest.",
+      "Asking price, estimated value, and final transaction price are three different things. A seller may list a business at any price, but the amount a buyer is willing to pay and the amount that actually closes depend on financial evidence, due diligence, financing terms, and deal structure.",
+      "A valuation is an informed estimate, not a guarantee. It is based on financial performance, risk, assets, market evidence, transferability, and deal terms — all evaluated at a specific point in time. Different purposes, different buyers, and different market conditions can produce different conclusions from the same data.",
+      "An online estimate or preliminary calculation can be a useful starting point for planning and discussion. It is not a substitute for a qualified professional valuation when one is required for tax reporting, legal proceedings, SBA financing, or other regulated purposes.",
+    ],
+    sections: [
+      {
+        title: "1. Understand what business value means",
+        paragraphs: [
+          "Value depends on the purpose and date of the valuation. A business may be valued differently depending on whether the purpose is a market sale, internal planning, bank financing, tax reporting, litigation, estate planning, or a partner ownership change. The same business can produce different value indications under different standards and methods.",
+          "The final sale price may also be affected by factors beyond the business itself, including available financing, seller notes, working capital adjustments, retained liabilities, earnout provisions, and other deal terms negotiated between the buyer and seller.",
+          "A seller's emotional investment in the business — the years of effort, personal sacrifices, and professional pride — does not automatically create transferable financial value. Buyers evaluate what the business is expected to produce for them going forward, not what it meant to the person who built it.",
+        ],
+      },
+      {
+        title: "2. Gather reliable financial information",
+        paragraphs: [
+          "A credible valuation requires reliable source material. Incomplete or inconsistent records make the process harder and the conclusion less defensible. Before attempting any estimate, gather the following documents when available.",
+          "Consistent, well-organized financial records make the valuation more credible, easier to verify during due diligence, and more likely to support the asking price in a buyer negotiation.",
+        ],
+        bullets: [
+          "Three years of profit-and-loss statements",
+          "Business tax returns",
+          "Current balance sheet",
+          "Year-to-date financial statements",
+          "Bank and payment processor records",
+          "Payroll information",
+          "Debt schedules",
+          "Equipment and asset lists",
+          "Customer concentration information",
+          "Recurring-revenue information",
+          "Owner compensation and benefit information",
+          "Documentation supporting proposed adjustments",
+        ],
+      },
+      {
+        title: "3. Normalize the company's earnings",
+        paragraphs: [
+          "Normalized earnings are an estimate of the company's maintainable financial performance under ordinary ownership. The normalization process adjusts reported income to remove items that distort the true operating picture, such as one-time events, owner-specific compensation, or expenses that would not continue under new ownership.",
+          "Potential adjustments include one working owner's compensation and benefits, interest expense, depreciation, amortization, documented one-time expenses, clearly personal expenses paid through the business, unusual income not expected to continue, below-market or above-market related-party transactions, and necessary operating expenses that have been omitted from the financials.",
+          "An adjustment is not valid merely because the owner calls it an add-back. Each adjustment should be documented, reasonable, and unlikely to continue under a new buyer. Adjustments that cannot be supported with records are likely to be challenged or rejected during due diligence.",
+          "Normalization also runs in both directions. If the business has omitted necessary operating expenses — such as replacing the owner's labor with hired management — those missing costs may need to be added back as downward adjustments to earnings.",
+        ],
+      },
+      {
+        title: "4. Understand Seller's Discretionary Earnings",
+        paragraphs: [
+          "Seller's Discretionary Earnings, or SDE, is a commonly used earnings measure for smaller owner-operated businesses. It attempts to show the total financial benefit available to one full-time owner-operator before debt service and certain noncash or discretionary items.",
+          "A common starting point is pretax business profit, adjusted for one working owner's compensation and benefits, interest, depreciation, amortization, supported nonrecurring expenses, and supported discretionary expenses the owner ran through the business.",
+          "SDE is designed for businesses where a single owner-operator works full time in the business. It assumes that the buyer will replace the seller in that role and captures the full economic benefit of doing so.",
+          "Common mistakes when calculating SDE include adding back compensation for multiple working owners without accounting for the replacement labor cost, adding back recurring operating expenses that a buyer would still need to pay, adding back undocumented personal costs, ignoring wages needed to replace the current owner's daily work, and double-counting the same adjustment under different labels.",
+        ],
+      },
+      {
+        title: "5. Understand EBITDA",
+        paragraphs: [
+          "EBITDA stands for earnings before interest, taxes, depreciation, and amortization. It is more commonly emphasized for larger or more professionally managed businesses where market-rate management compensation is already included as an operating expense.",
+          "Unlike SDE, EBITDA does not add back one owner's full compensation. EBITDA normally assumes that the business is run by hired management at market rates, so the owner's pay is treated as an ordinary operating cost rather than a discretionary item.",
+          "Adjusted EBITDA may include documented normalization adjustments for nonrecurring items, related-party transactions, and other distortions — but those adjustments must still be legitimate and defensible.",
+          "SDE and EBITDA are not interchangeable. A business can show a higher SDE than EBITDA because SDE may add back one owner's full compensation on top of the other adjustments. Using the wrong measure, or mixing measures with an incompatible multiple, will produce a misleading result.",
+        ],
+      },
+      {
+        title: "6. Learn the three broad valuation approaches",
+        paragraphs: [
+          "Asset approach: The asset approach estimates business value by calculating the value of assets minus liabilities. It may be especially relevant for asset-heavy businesses, holding companies, or businesses with limited earnings. Book value recorded on financial statements may not equal current market value. Intangible assets such as customer relationships, trade names, or proprietary processes may require separate identification and consideration.",
+          "Market approach: The market approach compares the business with sales or pricing evidence from similar companies. For the comparison to be meaningful, the selected companies should be similar in industry, size, geographic location, margins, growth trajectory, customer concentration, and operating risk. A multiple should not be selected simply because another company advertised a high asking price. Closed and verified transactions are generally more meaningful than unsupported listing prices, which may not reflect what actually changed hands.",
+          "Income approach: The income approach estimates value from expected future economic benefit. It may involve capitalizing a single normalized earnings figure or discounting a series of projected cash flows. Both forecasts and the discount or capitalization rates used must realistically reflect the risk and expected performance of the specific business. Small changes in assumptions — especially in the discount or capitalization rate — can significantly change the resulting value indication.",
+          "A credible valuation typically compares evidence from more than one approach rather than mechanically applying a single formula. When multiple approaches produce similar conclusions, confidence in the range increases. When they diverge significantly, it is worth understanding why.",
+        ],
+      },
+      {
+        title: "7. Understand valuation multiples",
+        paragraphs: [
+          "A valuation multiple converts an earnings or revenue measure into a preliminary value indication. For example, normalized SDE multiplied by an appropriate SDE multiple produces an indicated enterprise value. The appropriate multiple depends on market evidence and the risk profile of the specific business.",
+          "Revenue multiples should not be applied without understanding profit margins. Two companies with identical revenue can have very different values if their margins, cost structures, and earnings differ significantly.",
+          "Factors that may support a stronger multiple include stable or growing normalized earnings, recurring or repeat revenue, diverse customer base, reliable financial records, documented operating procedures, low owner dependence, transferable contracts and relationships, strong employee retention, defensible competitive advantages, limited capital expenditure requirements, and predictable cash flow.",
+          "Factors that may reduce a multiple include declining revenue or earnings, dependence on a single customer, excessive dependence on the owner, weak or inconsistent financial records, unresolved legal or regulatory problems, high employee turnover, deferred maintenance, unrecorded cash sales, unusual supplier dependence, revenue that may not transfer to a new owner, significant working-capital requirements, and cybersecurity, privacy, or operational weaknesses.",
+        ],
+      },
+      {
+        title: "8. Calculate a simple preliminary estimate",
+        paragraphs: [
+          "The following is a hypothetical educational example only. It does not establish an appropriate multiple or earnings figure for any specific business.",
+          "Hypothetical inputs: reported pretax profit of $90,000; one working owner's compensation and benefits of $70,000; interest expense of $8,000; depreciation and amortization of $7,000; a supported one-time expense of $5,000; and a required replacement or missing operating expense of negative $20,000.",
+          "Illustrative normalized SDE: $90,000 + $70,000 + $8,000 + $7,000 + $5,000 − $20,000 = $160,000.",
+          "If supported market evidence suggested an illustrative range of 2.5 to 3.25 times SDE, the preliminary value indication for this hypothetical example would be $400,000 to $520,000. These figures are for illustration only. The range 2.5 to 3.25 is not a universal or recommended benchmark and does not apply to every business or industry.",
+          "A preliminary estimate may also need adjustments for business debt, excess cash, inventory, real estate, equipment condition, working capital, retained liabilities, and the structure of the transaction. What enterprise value suggests and what the seller actually receives are not the same number.",
+        ],
+      },
+      {
+        title: "9. Separate enterprise value from what the seller receives",
+        paragraphs: [
+          "An indicated business value is not necessarily the seller's net proceeds. Several items may reduce or adjust what the seller actually receives at closing.",
+          "Potential deductions or adjustments include outstanding business debt, transaction fees, income and capital gains taxes, legal and accounting costs, broker or M&A advisor fees, required working capital adjustments, retained or assumed liabilities, deferred or contingent payments, seller-financing risk, and escrow or holdback amounts held pending post-closing conditions.",
+          "On the other side, excess cash, real estate owned by the business, inventory above or below normalized levels, and other assets may be treated separately depending on how the transaction is structured. Understanding the difference between enterprise value and net seller proceeds early in the process helps avoid surprises later.",
+        ],
+      },
+      {
+        title: "10. Improve the quality of the valuation",
+        paragraphs: [
+          "Steps taken before a valuation — or before going to market — can meaningfully improve both the accuracy of the estimate and the credibility of the result during buyer due diligence.",
+        ],
+        bullets: [
+          "Reconcile accounting records to bank statements",
+          "Separate personal and business expenses clearly",
+          "Document every proposed normalization adjustment",
+          "Track and report customer concentration",
+          "Document recurring revenue and churn rates",
+          "Prepare a complete asset and liability schedule",
+          "Create written operating procedures",
+          "Reduce owner dependence in daily operations",
+          "Resolve expired licenses, contracts, or compliance issues",
+          "Compare multiple years rather than relying on one strong period",
+          "Record the assumptions and valuation date",
+        ],
+      },
+      {
+        title: "11. Know when professional help may be necessary",
+        paragraphs: [
+          "A self-calculated preliminary estimate can be useful for internal planning and early conversations, but professional assistance may be appropriate or required in certain situations.",
+          "Consider engaging qualified professionals for SBA-financed acquisitions, tax reporting purposes, estate or gift planning, divorce or litigation proceedings, partner disputes, employee ownership transactions, complex intellectual property valuation, real estate-heavy transactions, businesses with unreliable financial records, transactions involving related parties, and large or unusually complex acquisitions.",
+          "Qualified professionals who may be involved in business valuation include credentialed business appraisers, certified public accountants, transaction attorneys, tax professionals, business brokers, M&A advisors, and lenders. The right combination depends on the complexity of the situation and the required standard of value. This article does not endorse any specific credential or provider.",
+        ],
+      },
+      {
+        title: "12. Treat valuation as a range, not a promise",
+        paragraphs: [
+          "A preliminary valuation is normally more useful as a range than as a single exact number. The range should come with clearly documented assumptions and a specific valuation date, because conditions that change after that date may change the conclusion.",
+          "Buyer demand, financing availability, due diligence findings, market conditions, and transaction terms can all affect what a business ultimately sells for — and none of those factors are fully predictable at the time of the preliminary estimate.",
+          "Ownward's valuation tools are organizational and educational tools designed to help owners think through their numbers, document their adjustments, and understand the concepts involved. They are not certified appraisal services and should not be relied on as such when a formal appraisal is legally or professionally required.",
+        ],
+      },
+    ],
+    actionPlan: [
+      {
+        week: "Week 1",
+        focus:
+          "Gather three years of financial statements, tax returns, current financial information, debt records, and an asset list.",
+      },
+      {
+        week: "Week 2",
+        focus:
+          "Reconcile the records and identify proposed normalization adjustments, including both legitimate add-backs and missing necessary expenses.",
+      },
+      {
+        week: "Week 3",
+        focus:
+          "Calculate preliminary normalized SDE or EBITDA and document the assumptions behind each calculation.",
+      },
+      {
+        week: "Week 4",
+        focus:
+          "Review value drivers, risks, customer concentration, owner dependence, and whether a qualified valuation professional should be consulted.",
+      },
+    ],
+    checklist: [
+      "Valuation purpose identified",
+      "Valuation date selected",
+      "Financial statements gathered",
+      "Tax returns gathered",
+      "Balance sheet reviewed",
+      "Debt schedule prepared",
+      "Asset list prepared",
+      "Owner compensation documented",
+      "Proposed add-backs documented",
+      "Missing operating expenses considered",
+      "Normalized earnings calculated",
+      "SDE and EBITDA differences understood",
+      "Customer concentration reviewed",
+      "Recurring revenue reviewed",
+      "Owner dependence assessed",
+      "Multiple assumptions documented",
+      "Enterprise value and seller proceeds separated",
+      "Professional valuation needs considered",
+      "Preliminary estimate labeled as non-certified",
+      "Review date scheduled",
+    ],
+    categoryCtaHref: "/guide/value",
+    categoryCtaLabel: "Back to Business Valuation",
+    ownwardCtaHref: "/valuation",
+    ownwardCtaLabel: "Estimate your business value with Ownward",
+  },
 ];
 
 export function getGuideCategory(slug: string) {
