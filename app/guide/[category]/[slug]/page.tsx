@@ -52,8 +52,10 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
     notFound();
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ownwardhub.com";
-  const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
+  const canonicalUrl = new URL(
+    `/guide/${article.category}/${article.slug}`,
+    "https://ownwardhub.com",
+  ).toString();
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 text-slate-100">
