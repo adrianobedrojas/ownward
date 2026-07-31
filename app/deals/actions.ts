@@ -25,18 +25,17 @@ const REQUEST_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const;
 
 const REQUEST_STATUSES = ['open', 'in_progress', 'completed', 'cancelled'] as const;
 
-const ACTIVITY_EVENTS = [
-  'deal_room_created',
-  'stage_changed',
-  'status_changed',
-  'member_invited',
-  'member_removed',
-  'document_uploaded',
-  'document_deleted',
-  'request_created',
-  'request_updated',
-  'request_completed',
-] as const;
+type ActivityEvent =
+  | 'deal_room_created'
+  | 'stage_changed'
+  | 'status_changed'
+  | 'member_invited'
+  | 'member_removed'
+  | 'document_uploaded'
+  | 'document_deleted'
+  | 'request_created'
+  | 'request_updated'
+  | 'request_completed';
 
 /** Maximum deal-room document size: 50 MB */
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
@@ -61,7 +60,6 @@ type DealRoomStatus = (typeof DEAL_ROOM_STATUSES)[number];
 type MemberRole = (typeof MEMBER_ROLES)[number];
 type RequestPriority = (typeof REQUEST_PRIORITIES)[number];
 type RequestStatus = (typeof REQUEST_STATUSES)[number];
-type ActivityEvent = (typeof ACTIVITY_EVENTS)[number];
 
 interface ActionResult<T = Record<string, unknown>> {
   data?: T;

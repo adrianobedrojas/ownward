@@ -7,6 +7,7 @@ import { calculateValuation } from "@/lib/valuation/engine";
 import { validateValuationInput } from "@/lib/valuation/normalization";
 import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
+import type { SaveEstimateInput, EstimateActionResult } from "@/app/valuation/types";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -369,4 +370,99 @@ export async function archiveReport(formData: FormData): Promise<ValuationAction
 export async function archiveReportFormAction(formData: FormData): Promise<void> {
   await archiveReport(formData);
   redirect("/valuation");
+}
+
+// ─────────────────────────────────────────────
+// Save estimate
+// ─────────────────────────────────────────────
+
+export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateActionResult> {
+  const auth = await getAuthenticatedUser();
+  if (!auth.authenticated) {
+    return { success: false, message: "You must be signed in to save estimates." };
+  }
+
+  const { supabase, user } = auth;
+
+  const payload = {
+    user_id: user.id,
+    name: (input.name ?? "Untitled estimate").trim().slice(0, 200) || "Untitled estimate",
+    annual_revenue: input.annualRevenue ?? null,
+    base_earnings: input.baseEarnings ?? null,
+    owner_compensation: input.ownerCompensation ?? 0,
+    interest_addback: input.interestAddback ?? 0,
+    depreciation_addback: input.depreciationAddback ?? 0,
+    amortization_addback: input.amortizationAddback ?? 0,
+    onetime_expenses: input.onetimeExpenses ?? 0,
+    nonoperating_income: input.nonoperatingIncome ?? 0,
+    normalized_earnings: input.normalizedEarnings ?? null,
+    low_multiple: input.lowMultiple ?? 2,
+    base_multiple: input.baseMultiple ?? 3,
+    high_multiple: input.highMultiple ?? 4,
+    low_estimate: input.lowEstimate ?? null,
+    base_estimate: input.baseEstimate ?? null,
+    high_estimate: input.highEstimate ?? null,
+  };
+
+  // Update existing estimate
+  if (input.id && isUuid(input.id)) {
+    const { data, error } = await supabase
+      .from("valuation_estimates")
+      .update(payload)
+      .eq("id", input.id)
+      .eq("user_id", user.id)
+      .select()
+      .maybeSingle();
+
+    if (error || !data) {
+      return { success: false, message: "Failed to update estimate." };
+    }
+
+    revalidatePath("/valuation");
+    return { success: true, message: "Estimate updated.", estimate: data };
+  }
+
+  // Insert new estimate
+  const { data, error } = await supabase
+    .from("valuation_estimates")
+    .insert(payload)
+    .select()
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, message: "Failed to save estimate." };
+  }
+
+  revalidatePath("/valuation");
+  return { success: true, message: "Estimate saved.", estimate: data };
+}
+
+// ─────────────────────────────────────────────
+// Delete estimate
+// ─────────────────────────────────────────────
+
+export async function deleteEstimate(id: string): Promise<EstimateActionResult> {
+  const auth = await getAuthenticatedUser();
+  if (!auth.authenticated) {
+    return { success: false, message: "You must be signed in." };
+  }
+
+  if (!isUuid(id)) {
+    return { success: false, message: "Invalid estimate ID." };
+  }
+
+  const { supabase, user } = auth;
+
+  const { error } = await supabase
+    .from("valuation_estimates")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { success: false, message: "Failed to delete estimate." };
+  }
+
+  revalidatePath("/valuation");
+  return { success: true, message: "Estimate deleted." };
 }

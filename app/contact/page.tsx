@@ -33,9 +33,9 @@ export default function ContactPage() {
       setName('');
       setEmail('');
       setMessage('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err.message);
+      setErrorMessage(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -55,7 +55,7 @@ export default function ContactPage() {
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold mb-2">Hi, I'm Adrian</h2>
+          <h2 className="text-2xl font-semibold mb-2">Hi, I&apos;m Adrian</h2>
           <p className="text-slate-300 leading-relaxed">
             Welcome to Ownward Hub. I built this platform to give business owners 
             the tools, knowledge, and confidential deal rooms needed to manage, grow, 
@@ -77,7 +77,7 @@ export default function ContactPage() {
         {status === 'success' ? (
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-emerald-400">
             <h4 className="font-semibold text-lg mb-1">Message Sent Successfully!</h4>
-            <p className="text-sm text-emerald-300">Thank you for reaching out. I'll get back to you as soon as possible.</p>
+            <p className="text-sm text-emerald-300">Thank you for reaching out. I&apos;ll get back to you as soon as possible.</p>
             <button
               onClick={() => setStatus('idle')}
               className="mt-4 inline-block bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-medium px-4 py-2 rounded-lg text-sm transition"

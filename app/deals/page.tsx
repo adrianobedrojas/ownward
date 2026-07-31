@@ -131,8 +131,8 @@ export default async function DealsPage() {
   }
 
   // ── Per-room open request counts ─────────────────────────────────────────
-  let roomRequestCounts: Record<string, number> = {};
-  let roomDocCounts: Record<string, number> = {};
+  const roomRequestCounts: Record<string, number> = {};
+  const roomDocCounts: Record<string, number> = {};
   if (dealRoomIds.length > 0) {
     const { data: reqRows } = await supabase
       .from("deal_room_requests")

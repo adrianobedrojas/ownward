@@ -127,6 +127,32 @@ export default async function DashboardPage({
         </div>
       </div>
 
+      {/* Bookkeeping workspace card */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold text-white mb-4">Bookkeeping</h2>
+        <Link
+          href="/money"
+          className="block rounded-xl border border-slate-800 bg-slate-900 p-6 hover:border-cyan-400/40 transition group"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
+                Ownward Books
+              </p>
+              <h3 className="mt-2 text-lg font-bold text-white group-hover:text-cyan-300 transition">
+                Bookkeeping workspace
+              </h3>
+              <p className="mt-1 text-sm text-slate-400">
+                Track income, expenses, receipts, and invoices. Review monthly records and monitor financial health.
+              </p>
+            </div>
+            <span className="shrink-0 rounded-lg bg-cyan-400/10 px-4 py-2 text-sm font-semibold text-cyan-400 group-hover:bg-cyan-400/20 transition">
+              Open Books →
+            </span>
+          </div>
+        </Link>
+      </section>
+
       {/* Listings Section */}
       <section className="mt-12">
         <h2 className="text-xl font-bold text-white mb-6">Saved Listing Drafts</h2>

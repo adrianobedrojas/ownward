@@ -110,6 +110,13 @@ export default function NavbarClient({
               </Link>
 
               <Link
+                href="/money"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              >
+                Books
+              </Link>
+
+              <Link
                 href="/documents"
                 className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
               >
@@ -193,6 +200,14 @@ export default function NavbarClient({
                     className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Dashboard
+                  </Link>
+
+                  <Link
+                    href="/money"
+                    onClick={closeMobileMenu}
+                    className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Books
                   </Link>
 
                   <Link
