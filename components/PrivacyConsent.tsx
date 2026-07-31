@@ -255,8 +255,11 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-400">
+              <Link href="/privacy" className="font-semibold text-cyan-300 hover:text-cyan-200">
+                Privacy Policy
+              </Link>
               <Link href="/privacy-choices" className="font-semibold text-cyan-300 hover:text-cyan-200">
-                Learn more
+                Privacy Choices
               </Link>
               <Link href="mailto:privacy@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
                 privacy@ownwardhub.com

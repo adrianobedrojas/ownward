@@ -16,6 +16,9 @@ export interface PrivacyConsentState {
   updatedAt: string;
 }
 
+let cachedPrivacyConsentRaw: string | null | undefined;
+let cachedPrivacyConsent: PrivacyConsentState | null = null;
+
 function isBrowser() {
   return typeof window !== 'undefined';
 }
@@ -54,12 +57,24 @@ export function readPrivacyConsent(): PrivacyConsentState | null {
   try {
     const stored = window.localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
 
+    if (stored === cachedPrivacyConsentRaw) {
+      return cachedPrivacyConsent;
+    }
+
     if (!stored) {
+      cachedPrivacyConsentRaw = stored;
+      cachedPrivacyConsent = null;
       return null;
     }
 
-    return normalizePrivacyConsent(JSON.parse(stored));
+    const normalizedConsent = normalizePrivacyConsent(JSON.parse(stored));
+    cachedPrivacyConsentRaw = stored;
+    cachedPrivacyConsent = normalizedConsent;
+
+    return normalizedConsent;
   } catch {
+    cachedPrivacyConsentRaw = undefined;
+    cachedPrivacyConsent = null;
     return null;
   }
 }
@@ -102,6 +117,8 @@ export function savePrivacyConsent(
   };
 
   window.localStorage.setItem(PRIVACY_CONSENT_STORAGE_KEY, JSON.stringify(savedConsent));
+  cachedPrivacyConsentRaw = window.localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
+  cachedPrivacyConsent = savedConsent;
 
   if (!savedConsent.functionality) {
     window.localStorage.removeItem(OWNWARD_VISITOR_TOKEN_KEY);

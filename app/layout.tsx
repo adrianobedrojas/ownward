@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Navbar from "../components/Navbar";
+import Footer from "@/components/Footer";
 import { PrivacyConsentProvider } from "@/components/PrivacyConsent";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
         <PrivacyConsentProvider>
           <Navbar />
           <main>{children}</main>
+          <Footer />
         </PrivacyConsentProvider>
       </body>
     </html>
