@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import GuideShareControls from "@/components/GuideShareControls";
 import { getGuideArticle, getGuideCategory, guideArticles } from "@/lib/guide-content";
 
 interface GuideArticlePageProps {
@@ -39,6 +40,9 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
     notFound();
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 text-slate-100">
       <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
@@ -50,6 +54,13 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
         </h1>
         <p className="mt-3 text-base leading-7 text-slate-300">{article.description}</p>
         <p className="mt-3 text-sm text-slate-400">{article.readingTime}</p>
+        <div className="mt-5">
+          <GuideShareControls
+            title={article.title}
+            description={article.description}
+            canonicalUrl={canonicalUrl}
+          />
+        </div>
 
         <hr className="my-8 border-slate-800" />
 
@@ -121,6 +132,14 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
             ))}
           </ul>
         </section>
+
+        <div className="mt-10 border-t border-slate-800 pt-6">
+          <GuideShareControls
+            title={article.title}
+            description={article.description}
+            canonicalUrl={canonicalUrl}
+          />
+        </div>
 
         <section className="mt-10 flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <Link
