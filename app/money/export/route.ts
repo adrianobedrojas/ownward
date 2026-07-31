@@ -47,7 +47,6 @@ export async function GET(req: NextRequest) {
       .eq("owner_id", user.id)
       .maybeSingle();
     if (biz) {
-      // @ts-expect-error dynamic query builder
       query = query.eq("business_id", businessParam);
     }
   }

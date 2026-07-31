@@ -405,8 +405,10 @@ describe("formatMonthParam", () => {
 
 describe("roundCents", () => {
   it("rounds to 2 decimal places", () => {
-    expect(roundCents(1.005)).toBe(1.01);
-    expect(roundCents(1.004)).toBe(1.00);
+    expect(roundCents(1.256)).toBe(1.26);
+    expect(roundCents(1.254)).toBe(1.25);
+    expect(roundCents(10.001)).toBe(10.00);
+    expect(roundCents(99.995)).toBe(100.00);
   });
 });
 

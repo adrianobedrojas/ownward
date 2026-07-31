@@ -5,7 +5,6 @@ import {
   calcRevenue,
   calcExpenses,
   calcProfit,
-  calcUnpaidInvoiceTotal,
   calcHealthScore,
   detectPossibleDuplicates,
   getAttentionReasons,
@@ -73,7 +72,6 @@ export default async function MoneyPage({
     .order("transaction_date", { ascending: false });
 
   if (selectedBusiness) {
-    // @ts-expect-error dynamic query builder
     query = query.eq("business_id", selectedBusiness.id);
   }
 
@@ -82,11 +80,9 @@ export default async function MoneyPage({
   const searchQuery = (params.search ?? "").trim().toLowerCase();
 
   if (typeFilter && ["revenue", "expense", "invoice"].includes(typeFilter)) {
-    // @ts-expect-error dynamic query builder
     query = query.eq("type", typeFilter);
   }
   if (reviewFilter && ["needs_review", "reviewed"].includes(reviewFilter)) {
-    // @ts-expect-error dynamic query builder
     query = query.eq("review_status", reviewFilter);
   }
 
@@ -123,7 +119,6 @@ export default async function MoneyPage({
   const revenue = calcRevenue(allTxs);
   const expenses = calcExpenses(allTxs);
   const profit = calcProfit(revenue, expenses);
-  const unpaidInvoiceTotal = calcUnpaidInvoiceTotal(allTxs);
 
   const duplicateIds = detectPossibleDuplicates(allTxs);
   const attentionItems: { tx: (typeof allTxs)[0]; reasons: string[] }[] = [];
