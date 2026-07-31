@@ -1,5 +1,6 @@
 'use server';
 
+import { createHash, randomBytes } from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from '@/lib/billing';
@@ -36,6 +37,8 @@ type ActivityEvent =
   | 'request_created'
   | 'request_updated'
   | 'request_completed';
+
+const INVITATION_TTL_HOURS = 72;
 
 /** Maximum deal-room document size: 50 MB */
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
@@ -88,6 +91,13 @@ function getFileExtension(filename: string): string {
   return filename.slice(idx + 1).toLowerCase();
 }
 
+function buildInvitation() {
+  const token = randomBytes(24).toString('hex');
+  const invitationTokenHash = createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(Date.now() + INVITATION_TTL_HOURS * 60 * 60 * 1000).toISOString();
+  return { token, invitationTokenHash, expiresAt };
+}
+
 /**
  * Insert a deal-room activity record.  Errors here are non-fatal – we log
  * them but do not surface them to the caller.
@@ -99,6 +109,9 @@ async function logActivity(
   eventType: ActivityEvent,
   metadata?: Record<string, unknown>,
 ): Promise<void> {
+  if (!(ACTIVITY_EVENTS as readonly string[]).includes(eventType)) {
+    return;
+  }
   const { error } = await supabase.from('deal_room_activity').insert({
     deal_room_id: dealRoomId,
     actor_id: actorId,
@@ -201,14 +214,17 @@ export async function createDealRoom(
     joined_at: new Date().toISOString(),
   });
 
-  // ── Add buyer as active member ───────────────────────────────────────────
+  const buyerInvitation = buildInvitation();
+
+  // ── Add buyer as pending invite (not active until accepted) ─────────────
   await supabase.from('deal_room_members').insert({
     deal_room_id: dealRoomId,
     user_id: conversation.buyer_id,
     role: 'buyer',
-    membership_status: 'active',
+    membership_status: 'pending',
     invited_by: user.id,
-    joined_at: new Date().toISOString(),
+    invitation_token_hash: buyerInvitation.invitationTokenHash,
+    invitation_expires_at: buyerInvitation.expiresAt,
   });
 
   // ── Advance conversation status ──────────────────────────────────────────
@@ -222,7 +238,7 @@ export async function createDealRoom(
     conversation_id: conversationId,
     sender_id: user.id,
     message_type: 'system',
-    body: `A Deal Room has been created for this conversation. Open it at /deals/${dealRoomId}`,
+    body: `A Deal Room has been created for this conversation. Accept your invitation at /deals/invite/${buyerInvitation.token} before ${new Date(buyerInvitation.expiresAt).toLocaleString()}.`,
   });
 
   // ── Activity log ─────────────────────────────────────────────────────────
@@ -409,6 +425,8 @@ export async function inviteDealRoomMember(
     return { error: 'Invalid user ID.' };
 
   // Prevent duplicate invite
+  const invitation = buildInvitation();
+
   if (invitedUserId) {
     const { data: existing } = await supabase
       .from('deal_room_members')
@@ -423,7 +441,17 @@ export async function inviteDealRoomMember(
       // Re-invite by resetting status
       const { error } = await supabase
         .from('deal_room_members')
-        .update({ membership_status: 'invited', role, invited_by: user.id })
+        .update({
+          membership_status: 'pending',
+          role,
+          invited_by: user.id,
+          invitation_token_hash: invitation.invitationTokenHash,
+          invitation_expires_at: invitation.expiresAt,
+          invitation_opened_at: null,
+          invitation_accepted_at: null,
+          invitation_declined_at: null,
+          invitation_revoked_at: null,
+        })
         .eq('id', existing.id);
       if (error) return { error: 'Could not re-invite member.' };
       await logActivity(supabase, dealRoomId, user.id, 'member_invited', {
@@ -431,7 +459,13 @@ export async function inviteDealRoomMember(
         role,
       });
       revalidatePath(`/deals/${dealRoomId}`);
-      return { data: { invited: true } };
+      return {
+        data: {
+          invited: true,
+          invitationPath: `/deals/invite/${invitation.token}`,
+          invitationExpiresAt: invitation.expiresAt,
+        },
+      };
     }
   }
 
@@ -440,8 +474,10 @@ export async function inviteDealRoomMember(
     user_id: invitedUserId ?? null,
     invited_email: invitedEmail ?? null,
     role,
-    membership_status: 'invited',
+    membership_status: 'pending',
     invited_by: user.id,
+    invitation_token_hash: invitation.invitationTokenHash,
+    invitation_expires_at: invitation.expiresAt,
   });
 
   if (error) return { error: 'Could not invite member. Please try again.' };
@@ -453,7 +489,13 @@ export async function inviteDealRoomMember(
   });
 
   revalidatePath(`/deals/${dealRoomId}`);
-  return { data: { invited: true } };
+  return {
+    data: {
+      invited: true,
+      invitationPath: `/deals/invite/${invitation.token}`,
+      invitationExpiresAt: invitation.expiresAt,
+    },
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -576,7 +618,19 @@ export async function uploadDealRoomDocument(
 
   // ── Sanitize and upload ──────────────────────────────────────────────────
   const sanitizedName = sanitizeDocumentFilename(file.name);
-  const objectName = `${dealRoomId}/${Date.now()}-${sanitizedName}`;
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  const checksum = createHash('sha256').update(fileBuffer).digest('hex');
+  const objectName = `${dealRoomId}/${Date.now()}-${randomBytes(8).toString('hex')}-${sanitizedName}`;
+
+  const { data: duplicateDoc } = await supabase
+    .from('deal_room_documents')
+    .select('id')
+    .eq('deal_room_id', dealRoomId)
+    .eq('sha256_checksum', checksum)
+    .is('deleted_at', null)
+    .maybeSingle();
+
+  if (duplicateDoc) return { error: 'This file already exists in this Deal Room.' };
 
   const { error: storageError } = await supabase.storage
     .from('deal-room-files')
@@ -597,6 +651,9 @@ export async function uploadDealRoomDocument(
       filesize: file.size,
       category: category ?? null,
       description: description ?? null,
+      sha256_checksum: checksum,
+      retention_status: 'active',
+      malware_scan_status: 'pending',
     })
     .select('id')
     .single();
@@ -632,7 +689,7 @@ export async function deleteDealRoomDocument(
 
   const { data: doc } = await supabase
     .from('deal_room_documents')
-    .select('id, deal_room_id, uploaded_by, deleted_at')
+    .select('id, deal_room_id, uploaded_by, deleted_at, storage_path')
     .eq('id', documentId)
     .maybeSingle();
 
@@ -653,7 +710,12 @@ export async function deleteDealRoomDocument(
 
   const { error } = await supabase
     .from('deal_room_documents')
-    .update({ deleted_at: new Date().toISOString() })
+    .update({
+      deleted_at: new Date().toISOString(),
+      deleted_by: user.id,
+      retention_status: 'soft_deleted',
+      quarantine_storage_path: doc.storage_path,
+    })
     .eq('id', documentId);
 
   if (error) return { error: 'Could not delete document. Please try again.' };
@@ -866,4 +928,244 @@ export async function completeDocumentRequest(
 
   revalidatePath(`/deals/${req.deal_room_id}`);
   return { data: { completed: true } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Invitation lifecycle
+// ─────────────────────────────────────────────────────────────────────────────
+export async function openDealRoomInvitation(token: string): Promise<ActionResult> {
+  if (!token) return { error: 'Invalid invitation token.' };
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const supabase = await createClient();
+
+  const nowIso = new Date().toISOString();
+  const { data: member } = await supabase
+    .from('deal_room_members')
+    .select('id, deal_room_id, membership_status, invitation_expires_at')
+    .eq('invitation_token_hash', tokenHash)
+    .maybeSingle();
+
+  if (!member) return { error: 'Invitation not found.' };
+  if (
+    member.invitation_expires_at &&
+    new Date(member.invitation_expires_at).getTime() < Date.now()
+  ) {
+    await supabase
+      .from('deal_room_members')
+      .update({ membership_status: 'expired' })
+      .eq('id', member.id);
+    return { error: 'Invitation has expired.' };
+  }
+
+  if (member.membership_status === 'pending') {
+    await supabase
+      .from('deal_room_members')
+      .update({ membership_status: 'opened', invitation_opened_at: nowIso })
+      .eq('id', member.id);
+  }
+
+  return { data: { dealRoomId: member.deal_room_id } };
+}
+
+export async function acceptDealRoomInvitation(formData: FormData): Promise<ActionResult> {
+  const token = trimOrNull(formData.get('token'));
+  if (!token) return { error: 'Invalid invitation token.' };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'You must sign in to accept an invitation.' };
+
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const { data: member } = await supabase
+    .from('deal_room_members')
+    .select('id, deal_room_id, user_id, invited_email, membership_status, invitation_expires_at, nda_required, nda_accepted_at')
+    .eq('invitation_token_hash', tokenHash)
+    .maybeSingle();
+
+  if (!member) return { error: 'Invitation not found.' };
+  if (!['pending', 'opened', 'accepted'].includes(member.membership_status))
+    return { error: 'Invitation is no longer active.' };
+
+  if (
+    member.invitation_expires_at &&
+    new Date(member.invitation_expires_at).getTime() < Date.now()
+  ) {
+    await supabase
+      .from('deal_room_members')
+      .update({ membership_status: 'expired' })
+      .eq('id', member.id);
+    return { error: 'Invitation has expired.' };
+  }
+
+  if (member.user_id && member.user_id !== user.id) {
+    return { error: 'This invitation is assigned to another account.' };
+  }
+
+  if (member.invited_email && user.email) {
+    if (member.invited_email.toLowerCase() !== user.email.toLowerCase()) {
+      return { error: 'This invitation email does not match your account email.' };
+    }
+  }
+
+  if (member.nda_required && !member.nda_accepted_at) {
+    return { error: 'You must accept the NDA before access is granted.' };
+  }
+
+  const nowIso = new Date().toISOString();
+  const { error } = await supabase
+    .from('deal_room_members')
+    .update({
+      user_id: user.id,
+      membership_status: 'active',
+      invitation_accepted_at: nowIso,
+      joined_at: nowIso,
+      invitation_token_hash: null,
+    })
+    .eq('id', member.id);
+
+  if (error) return { error: 'Could not accept invitation. Please try again.' };
+
+  await logActivity(supabase, member.deal_room_id as string, user.id, 'member_invited', {
+    accepted: true,
+    member_id: member.id,
+  });
+
+  revalidatePath(`/deals/${member.deal_room_id}`);
+  revalidatePath('/deals');
+  return { data: { accepted: true, dealRoomId: member.deal_room_id } };
+}
+
+export async function declineDealRoomInvitation(formData: FormData): Promise<ActionResult> {
+  const token = trimOrNull(formData.get('token'));
+  if (!token) return { error: 'Invalid invitation token.' };
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'You must sign in to decline an invitation.' };
+
+  const { data: member } = await supabase
+    .from('deal_room_members')
+    .select('id, deal_room_id, user_id, invited_email, membership_status')
+    .eq('invitation_token_hash', tokenHash)
+    .maybeSingle();
+
+  if (!member) return { error: 'Invitation not found.' };
+  if (!['pending', 'opened'].includes(member.membership_status))
+    return { error: 'Invitation is no longer active.' };
+  if (member.user_id && member.user_id !== user.id)
+    return { error: 'This invitation is assigned to another account.' };
+  if (member.invited_email && user.email) {
+    if (member.invited_email.toLowerCase() !== user.email.toLowerCase()) {
+      return { error: 'This invitation email does not match your account email.' };
+    }
+  }
+
+  const { error } = await supabase
+    .from('deal_room_members')
+    .update({
+      membership_status: 'declined',
+      invitation_declined_at: new Date().toISOString(),
+      invitation_token_hash: null,
+    })
+    .eq('id', member.id);
+
+  if (error) return { error: 'Could not decline invitation.' };
+
+  revalidatePath('/deals');
+  return { data: { declined: true } };
+}
+
+export async function revokeDealRoomInvitation(formData: FormData): Promise<ActionResult> {
+  const dealRoomId = trimOrNull(formData.get('dealRoomId'));
+  const memberId = trimOrNull(formData.get('memberId'));
+  if (!dealRoomId || !isValidUUID(dealRoomId) || !memberId || !isValidUUID(memberId)) {
+    return { error: 'Invalid request.' };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated.' };
+
+  const { data: sellerMember } = await supabase
+    .from('deal_room_members')
+    .select('id')
+    .eq('deal_room_id', dealRoomId)
+    .eq('user_id', user.id)
+    .eq('role', 'seller')
+    .eq('membership_status', 'active')
+    .maybeSingle();
+
+  if (!sellerMember) return { error: 'Only the seller may revoke invitations.' };
+
+  const { error } = await supabase
+    .from('deal_room_members')
+    .update({
+      membership_status: 'revoked',
+      invitation_revoked_at: new Date().toISOString(),
+      invitation_token_hash: null,
+    })
+    .eq('id', memberId)
+    .eq('deal_room_id', dealRoomId);
+
+  if (error) return { error: 'Could not revoke invitation.' };
+  revalidatePath(`/deals/${dealRoomId}`);
+  return { data: { revoked: true } };
+}
+
+export async function resendDealRoomInvitation(formData: FormData): Promise<ActionResult> {
+  const dealRoomId = trimOrNull(formData.get('dealRoomId'));
+  const memberId = trimOrNull(formData.get('memberId'));
+  if (!dealRoomId || !isValidUUID(dealRoomId) || !memberId || !isValidUUID(memberId)) {
+    return { error: 'Invalid request.' };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated.' };
+
+  const { data: sellerMember } = await supabase
+    .from('deal_room_members')
+    .select('id')
+    .eq('deal_room_id', dealRoomId)
+    .eq('user_id', user.id)
+    .eq('role', 'seller')
+    .eq('membership_status', 'active')
+    .maybeSingle();
+
+  if (!sellerMember) return { error: 'Only the seller may resend invitations.' };
+
+  const invitation = buildInvitation();
+  const { error } = await supabase
+    .from('deal_room_members')
+    .update({
+      membership_status: 'pending',
+      invitation_token_hash: invitation.invitationTokenHash,
+      invitation_expires_at: invitation.expiresAt,
+      invitation_opened_at: null,
+      invitation_accepted_at: null,
+      invitation_declined_at: null,
+      invitation_revoked_at: null,
+    })
+    .eq('id', memberId)
+    .eq('deal_room_id', dealRoomId);
+
+  if (error) return { error: 'Could not resend invitation.' };
+
+  revalidatePath(`/deals/${dealRoomId}`);
+  return {
+    data: {
+      resent: true,
+      invitationPath: `/deals/invite/${invitation.token}`,
+      invitationExpiresAt: invitation.expiresAt,
+    },
+  };
 }

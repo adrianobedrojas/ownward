@@ -1,15 +1,13 @@
 import type { NextConfig } from "next";
+import { getAllowedDevOrigins } from "./lib/config";
+
+const allowedOrigins = getAllowedDevOrigins();
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: [
-    "shiny-happiness-gxxpqxj79rwxhp5g-3000.app.github.dev",
-  ],
-
+  allowedDevOrigins: allowedOrigins,
   experimental: {
     serverActions: {
-      allowedOrigins: [
-        "shiny-happiness-gxxpqxj79rwxhp5g-3000.app.github.dev",
-      ],
+      allowedOrigins,
     },
   },
 };

@@ -7,7 +7,7 @@ import { calculateValuation } from "@/lib/valuation/engine";
 import { validateValuationInput } from "@/lib/valuation/normalization";
 import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
-import type { SaveEstimateInput, EstimateActionResult } from "@/app/valuation/types";
+import type { SaveEstimateInput, EstimateActionResult } from "./types";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -375,7 +375,6 @@ export async function archiveReportFormAction(formData: FormData): Promise<void>
 // ─────────────────────────────────────────────
 // Save estimate
 // ─────────────────────────────────────────────
-
 export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateActionResult> {
   const auth = await getAuthenticatedUser();
   if (!auth.authenticated) {
@@ -452,7 +451,6 @@ export async function deleteEstimate(id: string): Promise<EstimateActionResult> 
   }
 
   const { supabase, user } = auth;
-
   const { error } = await supabase
     .from("valuation_estimates")
     .delete()

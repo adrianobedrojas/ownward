@@ -808,8 +808,12 @@ function ParticipantsTab({
                   {ROLE_LABELS[m.role] ?? m.role} ·{" "}
                   {m.membership_status === "active"
                     ? "Active"
-                    : m.membership_status === "invited"
-                    ? "Invited"
+                    : m.membership_status === "pending"
+                    ? "Pending invite"
+                    : m.membership_status === "opened"
+                    ? "Invite opened"
+                    : m.membership_status === "accepted"
+                    ? "Accepted"
                     : m.membership_status}
                 </p>
               </div>

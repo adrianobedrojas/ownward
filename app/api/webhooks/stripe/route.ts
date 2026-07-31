@@ -41,6 +41,34 @@ export async function POST(req: Request) {
   }
 
   try {
+    const { data: existingEvent } = await supabaseAdmin
+      .from("stripe_events")
+      .select("event_id, processed_at")
+      .eq("event_id", event.id)
+      .maybeSingle();
+
+    if (existingEvent?.processed_at) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    const { error: eventInsertError } = await supabaseAdmin
+      .from("stripe_events")
+      .upsert(
+        {
+          event_id: event.id,
+          type: event.type,
+          stripe_created: event.created,
+          payload: JSON.parse(JSON.stringify(event)) as Record<string, unknown>,
+          processing_error: null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "event_id" }
+      );
+
+    if (eventInsertError) {
+      throw eventInsertError;
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -56,16 +84,25 @@ export async function POST(req: Request) {
         const subscriptionId = session.subscription as string;
         if (userId && subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const canceledAt = subscription.canceled_at
+            ? new Date(subscription.canceled_at * 1000).toISOString()
+            : null;
 
           const { error: upsertError } = await supabaseAdmin
             .from("subscriptions")
             .upsert({
               id: subscription.id,
               user_id: userId,
+              stripe_customer_id:
+                typeof subscription.customer === "string"
+                  ? subscription.customer
+                  : subscription.customer?.id ?? null,
               status: subscription.status,
               price_id: subscription.items.data[0].price.id,
               quantity: subscription.items.data[0].quantity ?? 1,
               cancel_at_period_end: subscription.cancel_at_period_end,
+              canceled_at: canceledAt,
+              last_stripe_event_created: event.created,
               updated_at: new Date().toISOString(),
             });
 
@@ -79,14 +116,36 @@ export async function POST(req: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
+        const { data: existingSubscription } = await supabaseAdmin
+          .from("subscriptions")
+          .select("id, last_stripe_event_created")
+          .eq("id", subscription.id)
+          .maybeSingle();
+
+        if (
+          existingSubscription &&
+          Number(existingSubscription.last_stripe_event_created ?? 0) > event.created
+        ) {
+          break;
+        }
+
+        const canceledAt = subscription.canceled_at
+          ? new Date(subscription.canceled_at * 1000).toISOString()
+          : null;
 
         const { error: updateError } = await supabaseAdmin
           .from("subscriptions")
           .update({
+            stripe_customer_id:
+              typeof subscription.customer === "string"
+                ? subscription.customer
+                : subscription.customer?.id ?? null,
             status: subscription.status,
             price_id: subscription.items.data[0].price.id,
             quantity: subscription.items.data[0].quantity ?? 1,
             cancel_at_period_end: subscription.cancel_at_period_end,
+            canceled_at: canceledAt,
+            last_stripe_event_created: event.created,
             updated_at: new Date().toISOString(),
           })
           .eq("id", subscription.id);
@@ -115,10 +174,28 @@ export async function POST(req: Request) {
         console.log(`Unhandled event type ${event.type}`);
     }
 
+    await supabaseAdmin
+      .from("stripe_events")
+      .update({
+        processed_at: new Date().toISOString(),
+        processing_error: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("event_id", event.id);
+
     return NextResponse.json({ received: true });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown webhook error";
     console.error("Webhook handler error:", message);
+    if (event?.id) {
+      await supabaseAdmin
+        .from("stripe_events")
+        .update({
+          processing_error: message,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("event_id", event.id);
+    }
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }
@@ -129,24 +206,21 @@ export async function POST(req: Request) {
 // ─────────────────────────────────────────────────────────────────────────────
 async function handleFeaturedListingCheckout(
   session: Stripe.Checkout.Session,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseAdmin: SupabaseClient<any>
+  supabaseAdmin: SupabaseClient
 ): Promise<void> {
   if (session.mode !== "payment" || session.payment_status !== "paid") {
-    console.warn(
-      `[featured_listing] Skipping session ${session.id}: mode=${session.mode}, payment_status=${session.payment_status}`
+    throw new Error(
+      `[featured_listing] Session ${session.id} is not a paid one-time checkout.`
     );
-    return;
   }
 
   const userId = session.metadata?.userId;
   const listingId = session.metadata?.listingId;
 
   if (!userId || !listingId) {
-    console.error(
+    throw new Error(
       `[featured_listing] Missing metadata on session ${session.id}`
     );
-    return;
   }
 
   // Idempotency: if a promotion for this checkout session already exists and
@@ -169,24 +243,21 @@ async function handleFeaturedListingCheckout(
     .maybeSingle();
 
   if (listingError || !listing) {
-    console.error(
+    throw new Error(
       `[featured_listing] Listing ${listingId} not found for session ${session.id}`
     );
-    return;
   }
 
   if (listing.user_id !== userId) {
-    console.error(
+    throw new Error(
       `[featured_listing] Listing ${listingId} does not belong to user ${userId}`
     );
-    return;
   }
 
   if (listing.status !== "published" || !listing.is_public) {
-    console.warn(
+    throw new Error(
       `[featured_listing] Listing ${listingId} is no longer public/published; skipping promotion`
     );
-    return;
   }
 
   // Calculate promotion window
@@ -236,11 +307,10 @@ async function handleFeaturedListingCheckout(
     );
 
   if (promotionError) {
-    console.error(
+    throw new Error(
       `[featured_listing] Failed to upsert promotion for session ${session.id}:`,
-      promotionError.message
+      { cause: promotionError }
     );
-    return;
   }
 
   // Update the listing's featured window
@@ -254,9 +324,9 @@ async function handleFeaturedListingCheckout(
     .eq("id", listingId);
 
   if (listingUpdateError) {
-    console.error(
+    throw new Error(
       `[featured_listing] Failed to update listing ${listingId}:`,
-      listingUpdateError.message
+      { cause: listingUpdateError }
     );
   }
 }
@@ -266,8 +336,7 @@ async function handleFeaturedListingCheckout(
 // ─────────────────────────────────────────────────────────────────────────────
 async function handleFeaturedListingRefund(
   paymentIntentId: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseAdmin: SupabaseClient<any>
+  supabaseAdmin: SupabaseClient
 ): Promise<void> {
   const { data: promotion, error } = await supabaseAdmin
     .from("listing_promotions")

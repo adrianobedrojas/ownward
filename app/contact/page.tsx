@@ -35,7 +35,7 @@ export default function ContactPage() {
       setMessage('');
     } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err instanceof Error ? err.message : 'An error occurred');
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to send message');
     }
   };
 

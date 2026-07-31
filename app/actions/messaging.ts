@@ -244,23 +244,6 @@ export async function submitListingInterest(formData: FormData): Promise<ActionR
   }
   const conversationId = convResult.conversationId;
 
-  // Save the structured submission
-  const { error: subError } = await supabase
-    .from('listing_interest_submissions')
-    .insert({
-      listing_id: listingId,
-      buyer_id: user.id,
-      goal,
-      budget_min: budgetMin,
-      budget_max: budgetMax,
-      timeline,
-      financing_status: financingStatus,
-      experience,
-      initial_question: initialQuestion,
-    });
-
-  if (subError) return { error: 'Could not save your submission. Please try again.' };
-
   // Build interest-summary message
   const goalLabels: Record<Goal, string> = {
     owner_operator: 'an owner-operated business',
@@ -282,16 +265,29 @@ export async function submitListingInterest(formData: FormData): Promise<ActionR
 
   const summaryBody = `${buyerName} shared interest in ${listing.business_name}. ${buyerName} is looking for ${goalLabels[goal]}${budgetText}${timelineText}.${questionText}`;
 
-  const { error: msgError } = await supabase
-    .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      sender_id: user.id,
-      message_type: 'interest_summary',
-      body: summaryBody,
-    });
+  const { error: submissionError } = await supabase.rpc(
+    'create_listing_interest_submission',
+    {
+      p_listing_id: listingId,
+      p_buyer_id: user.id,
+      p_goal: goal,
+      p_budget_min: budgetMin,
+      p_budget_max: budgetMax,
+      p_timeline: timeline,
+      p_financing_status: financingStatus,
+      p_experience: experience,
+      p_initial_question: initialQuestion,
+      p_conversation_id: conversationId,
+      p_message_body: summaryBody,
+    }
+  );
 
-  if (msgError) return { error: 'Submission saved but could not send interest summary.' };
+  if (submissionError) {
+    if (submissionError.code === '23505') {
+      return { error: 'You already submitted interest for this listing.' };
+    }
+    return { error: 'Could not save your submission. Please try again.' };
+  }
 
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath('/messages');

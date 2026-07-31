@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/require-user";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { createInvoice, markInvoicePaid } from "./actions";
 
 interface SearchParams {
@@ -14,18 +13,11 @@ export default async function InvoicesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  const { supabase, user } = await requireUser();
 
   const { data: invoices, error } = await supabase
     .from("invoices")
-    .select("*")
+    .select("id,user_id,customer_name,amount,status,due_date,created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

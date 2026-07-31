@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
+import { getSiteUrl } from "@/lib/config";
 
 function redirectTo(path: string) {
   return new Response(null, {
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+  const siteUrl = getSiteUrl();
 
   const { error } = await supabase.auth.signUp({
     email,
