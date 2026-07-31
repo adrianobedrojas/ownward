@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { capitalizeFirst } from "@/lib/documents";
 
 export const metadata: Metadata = {
   title: "Ownward Hub | All-in-One Business Platform",
@@ -7,7 +9,41 @@ export const metadata: Metadata = {
     "Manage your business, understand its value, prepare for a future sale, or discover your next opportunity—all through one connected platform.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  // Fetch up to 3 active featured listings for the homepage preview
+  const { data: featuredListings = [] } = await supabase
+    .from("business_listings")
+    .select("id, slug, business_name, category, location, summary, asking_price, annual_revenue, featured_until")
+    .eq("is_public", true)
+    .eq("status", "published")
+    .gt("featured_until", now)
+    .order("featured_until", { ascending: false })
+    .limit(3);
+
+  // If fewer than 3 featured, fill with newest non-featured published listings
+  const featuredIds = new Set((featuredListings ?? []).map((l) => l.id));
+  let fillListings: typeof featuredListings = [];
+
+  if ((featuredListings ?? []).length < 3) {
+    const needed = 3 - (featuredListings ?? []).length;
+    const { data: newer = [] } = await supabase
+      .from("business_listings")
+      .select("id, slug, business_name, category, location, summary, asking_price, annual_revenue, featured_until")
+      .eq("is_public", true)
+      .eq("status", "published")
+      .not("id", "in", `(${[...featuredIds, "00000000-0000-0000-0000-000000000000"].join(",")})`)
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(needed);
+    fillListings = newer ?? [];
+  }
+
+  const previewListings = [...(featuredListings ?? []), ...fillListings];
+  const hasLiveListings = previewListings.length > 0;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* 1. Hero Section */}
@@ -172,7 +208,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Featured Opportunities (Demo Listings) */}
+      {/* 3. Featured Opportunities (Live Marketplace Preview) */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 border-t border-slate-900">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
@@ -184,59 +220,84 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-center text-xs text-amber-200">
-          Note: The listings below are demonstration examples until verified sellers publish live opportunities.
-        </div>
-
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-            <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300">Cleaning Company</span>
-            <h3 className="mt-4 text-xl font-bold text-white">$180,000 Asking Price</h3>
-            <p className="mt-2 text-sm text-slate-400">Established commercial and residential cleaning service in the Southeast.</p>
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-sm">
-              <div>
-                <p className="text-slate-500 text-xs">Annual Revenue</p>
-                <p className="font-semibold text-white">$240,000</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-xs">Cash Flow / SDE</p>
-                <p className="font-semibold text-emerald-400">$75,000</p>
-              </div>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-            <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300">E-Commerce Brand</span>
-            <h3 className="mt-4 text-xl font-bold text-white">$95,000 Asking Price</h3>
-            <p className="mt-2 text-sm text-slate-400">Niche DTC physical products brand with automated fulfillment and strong margins.</p>
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-sm">
-              <div>
-                <p className="text-slate-500 text-xs">Annual Revenue</p>
-                <p className="font-semibold text-white">$150,000</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-xs">Cash Flow / SDE</p>
-                <p className="font-semibold text-emerald-400">$42,000</p>
-              </div>
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-            <span className="rounded-full bg-purple-400/10 px-3 py-1 text-xs font-medium text-purple-300">Local Service Business</span>
-            <h3 className="mt-4 text-xl font-bold text-white">Confidential Listing</h3>
-            <p className="mt-2 text-sm text-slate-400">Specialized regional trade contractor with long-term recurring maintenance contracts.</p>
-            <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-sm">
-              <div>
-                <p className="text-slate-500 text-xs">Annual Revenue</p>
-                <p className="font-semibold text-white">$820,000</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-xs">Cash Flow / SDE</p>
-                <p className="font-semibold text-emerald-400">$210,000</p>
-              </div>
-            </div>
-          </article>
-        </div>
+        {!hasLiveListings ? (
+          <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-12 text-center">
+            <p className="text-lg font-semibold text-white">No listings yet</p>
+            <p className="mt-2 text-sm text-slate-400">
+              Be the first to list your business on Ownward Hub.
+            </p>
+            <Link
+              href="/sell"
+              className="mt-6 inline-block rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
+            >
+              List your business
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {previewListings.map((listing) => {
+              const isFeatured =
+                listing.featured_until &&
+                new Date(listing.featured_until) > new Date(now);
+              return (
+                <article
+                  key={listing.id}
+                  className={`rounded-2xl border bg-slate-900/60 p-6 ${
+                    isFeatured
+                      ? "border-amber-500/40 ring-1 ring-amber-500/10"
+                      : "border-slate-800"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                      {listing.category ? capitalizeFirst(listing.category) : "Other"}
+                    </span>
+                    {isFeatured && (
+                      <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-300">
+                        ★ Featured
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-xl font-bold text-white">
+                    {listing.business_name}
+                  </h3>
+                  {listing.location && (
+                    <p className="mt-1 text-xs text-slate-400">{listing.location}</p>
+                  )}
+                  <p className="mt-2 text-sm text-slate-400 line-clamp-2">
+                    {listing.summary || ""}
+                  </p>
+                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-800 pt-4 text-sm">
+                    <div>
+                      <p className="text-slate-500 text-xs">Asking Price</p>
+                      <p className="font-semibold text-white">
+                        {listing.asking_price
+                          ? `$${Number(listing.asking_price).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 text-xs">Annual Revenue</p>
+                      <p className="font-semibold text-white">
+                        {listing.annual_revenue
+                          ? `$${Number(listing.annual_revenue).toLocaleString()}`
+                          : "Not set"}
+                      </p>
+                    </div>
+                  </div>
+                  {listing.slug && (
+                    <Link
+                      href={`/b/${listing.slug}`}
+                      className="mt-5 block rounded-lg bg-cyan-400/10 px-4 py-2.5 text-center text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950"
+                    >
+                      View details
+                    </Link>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* 4. Platform Capabilities */}
