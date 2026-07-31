@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -32,17 +31,7 @@ const accountTypes = [
   },
 ];
 
-interface SignupSearchParams {
-  next?: string;
-}
-
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: Promise<SignupSearchParams>;
-}) {
-  const params = await searchParams;
-
+export default function SignupPage() {
   return (
     <main className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-2">
       <section>
@@ -96,16 +85,7 @@ export default async function SignupPage({
           action="/api/signup"
           method="post"
           className="mt-8 space-y-6"
-          >
-          <SocialAuthButtons next={params.next} />
-
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-800" />
-            <p className="text-xs uppercase tracking-wider text-slate-500">
-              Or continue with email
-            </p>
-            <div className="h-px flex-1 bg-slate-800" />
-          </div>
+        >
 
           <div>
             <label

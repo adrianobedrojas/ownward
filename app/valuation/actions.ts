@@ -7,7 +7,7 @@ import { calculateValuation } from "@/lib/valuation/engine";
 import { validateValuationInput } from "@/lib/valuation/normalization";
 import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
-import type { EstimateActionResult, SaveEstimateInput, ValuationEstimate } from "./types";
+import type { SaveEstimateInput, EstimateActionResult } from "./types";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -372,7 +372,9 @@ export async function archiveReportFormAction(formData: FormData): Promise<void>
   redirect("/valuation");
 }
 
-// Legacy scenario-calculator compatibility helpers
+// ─────────────────────────────────────────────
+// Save estimate
+// ─────────────────────────────────────────────
 export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateActionResult> {
   const auth = await getAuthenticatedUser();
   if (!auth.authenticated) {
@@ -380,9 +382,10 @@ export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateAc
   }
 
   const { supabase, user } = auth;
+
   const payload = {
     user_id: user.id,
-    name: input.name?.trim() || "Untitled estimate",
+    name: (input.name ?? "Untitled estimate").trim().slice(0, 200) || "Untitled estimate",
     annual_revenue: input.annualRevenue ?? null,
     base_earnings: input.baseEarnings ?? null,
     owner_compensation: input.ownerCompensation ?? 0,
@@ -398,44 +401,54 @@ export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateAc
     low_estimate: input.lowEstimate ?? null,
     base_estimate: input.baseEstimate ?? null,
     high_estimate: input.highEstimate ?? null,
-    updated_at: new Date().toISOString(),
   };
 
+  // Update existing estimate
   if (input.id && isUuid(input.id)) {
     const { data, error } = await supabase
       .from("valuation_estimates")
       .update(payload)
       .eq("id", input.id)
       .eq("user_id", user.id)
-      .select("*")
-      .single();
+      .select()
+      .maybeSingle();
+
     if (error || !data) {
-      return { success: false, message: "Could not update estimate." };
+      return { success: false, message: "Failed to update estimate." };
     }
+
     revalidatePath("/valuation");
-    return { success: true, message: "Estimate updated.", estimate: data as ValuationEstimate };
+    return { success: true, message: "Estimate updated.", estimate: data };
   }
 
+  // Insert new estimate
   const { data, error } = await supabase
     .from("valuation_estimates")
     .insert(payload)
-    .select("*")
-    .single();
+    .select()
+    .maybeSingle();
 
   if (error || !data) {
-    return { success: false, message: "Could not save estimate." };
+    return { success: false, message: "Failed to save estimate." };
   }
 
   revalidatePath("/valuation");
-  return { success: true, message: "Estimate saved.", estimate: data as ValuationEstimate };
+  return { success: true, message: "Estimate saved.", estimate: data };
 }
+
+// ─────────────────────────────────────────────
+// Delete estimate
+// ─────────────────────────────────────────────
 
 export async function deleteEstimate(id: string): Promise<EstimateActionResult> {
   const auth = await getAuthenticatedUser();
   if (!auth.authenticated) {
-    return { success: false, message: "You must be signed in to delete estimates." };
+    return { success: false, message: "You must be signed in." };
   }
-  if (!isUuid(id)) return { success: false, message: "Invalid estimate id." };
+
+  if (!isUuid(id)) {
+    return { success: false, message: "Invalid estimate ID." };
+  }
 
   const { supabase, user } = auth;
   const { error } = await supabase
@@ -444,7 +457,9 @@ export async function deleteEstimate(id: string): Promise<EstimateActionResult> 
     .eq("id", id)
     .eq("user_id", user.id);
 
-  if (error) return { success: false, message: "Could not delete estimate." };
+  if (error) {
+    return { success: false, message: "Failed to delete estimate." };
+  }
 
   revalidatePath("/valuation");
   return { success: true, message: "Estimate deleted." };
