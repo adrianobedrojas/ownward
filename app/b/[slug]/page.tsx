@@ -13,7 +13,9 @@ export default async function PublicBusinessPage({ params }: Props) {
 
   const { data: listing, error } = await supabase
     .from("business_listings")
-    .select("*")
+    .select(
+      "id, slug, business_name, category, location, summary, asking_price, annual_revenue, year_established, user_id, featured_until"
+    )
     .eq("slug", slug)
     .eq("is_public", true)
     .eq("status", "published")
@@ -22,6 +24,9 @@ export default async function PublicBusinessPage({ params }: Props) {
   if (error || !listing) {
     notFound();
   }
+
+  const isActiveFeatured =
+    listing.featured_until && new Date(listing.featured_until) > new Date();
 
   // Check auth for interest panel
   const {
@@ -49,9 +54,16 @@ export default async function PublicBusinessPage({ params }: Props) {
         {/* Main listing content */}
         <div className="lg:col-span-2">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-2xl">
-            <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
-              {listing.category}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
+                {listing.category}
+              </span>
+              {isActiveFeatured && (
+                <span className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-semibold text-amber-300">
+                  ★ Featured · Promoted
+                </span>
+              )}
+            </div>
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">
               {listing.business_name}
             </h1>
