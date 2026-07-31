@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAllowedPriceIds, getPriceIdForPlan } from "@/lib/billing";
+import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription } from "@/lib/billing";
 import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
@@ -24,7 +24,8 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      // Return 401 so the client can redirect to /login
+      return NextResponse.json({ error: "Unauthorized", redirectTo: "/login" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -42,6 +43,32 @@ export async function POST(req: Request) {
     const allowedPriceIds = getAllowedPriceIds();
     if (!allowedPriceIds.has(resolvedPriceId)) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
+
+    // 2. Prevent duplicate subscriptions: active/trialing users must use portal
+    const { data: activeSub } = await supabase
+      .from("subscriptions")
+      .select("id, status, price_id")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (activeSub && isActiveSubscription(activeSub.status)) {
+      const siteUrlForPortal = getSiteUrl();
+      // If they're changing plans, send them to the portal
+      if (activeSub.price_id !== resolvedPriceId) {
+        return NextResponse.json({
+          error: "You already have an active subscription. Use the customer portal to change your plan.",
+          portalRedirect: true,
+          returnUrl: `${siteUrlForPortal}/pricing`,
+        }, { status: 409 });
+      }
+      // Same plan — already subscribed
+      return NextResponse.json({
+        error: "You are already subscribed to this plan.",
+        alreadySubscribed: true,
+      }, { status: 409 });
     }
 
     const siteUrl = getSiteUrl();
@@ -79,7 +106,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Create Stripe Checkout Session
+    // 3. Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -91,7 +118,7 @@ export async function POST(req: Request) {
       mode: "subscription",
       customer: stripeCustomerId,
       client_reference_id: user.id,
-      success_url: `${siteUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${siteUrl}/dashboard?success=subscribed`,
       cancel_url: `${siteUrl}/pricing`,
       metadata: {
         userId: user.id,

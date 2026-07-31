@@ -43,7 +43,8 @@ export default async function DocumentsPage() {
   const totalDocuments = documents.length;
   const totalBytes = documents.reduce((acc, doc) => acc + (doc.filesize || 0), 0);
   const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
-  const maxMB = maxDocuments * 50;
+  const maxStorageBytes = billing.entitlements.storageBytes;
+  const maxMB = maxStorageBytes > 0 ? (maxStorageBytes / (1024 * 1024)).toFixed(0) : null;
 
   const folderCounts: Record<string, number> = {};
   documents.forEach((doc) => {
@@ -85,6 +86,22 @@ export default async function DocumentsPage() {
           <p className="mt-2 text-3xl font-bold text-white">
             {totalDocuments}
           </p>
+          {maxDocuments > 0 && (
+            <div className="mt-2">
+              <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-all"
+                  style={{ width: `${Math.min(100, (totalDocuments / maxDocuments) * 100).toFixed(1)}%` }}
+                />
+              </div>
+              <p className="mt-1 text-xs text-slate-500">
+                {totalDocuments} of {maxDocuments} documents
+                {totalDocuments >= maxDocuments && (
+                  <> · <Link href="/pricing" className="text-cyan-400 hover:text-cyan-300">Upgrade for more</Link></>
+                )}
+              </p>
+            </div>
+          )}
         </article>
 
         <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
@@ -103,8 +120,21 @@ export default async function DocumentsPage() {
           </p>
 
           <p className="mt-2 text-3xl font-bold text-emerald-400">
-            {maxMB} MB
+            {maxMB !== null ? `${maxMB} MB` : "Unlimited"}
           </p>
+          {maxMB !== null && (
+            <div className="mt-2">
+              <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-cyan-400 transition-all"
+                  style={{
+                    width: `${Math.min(100, (parseFloat(totalMB) / parseFloat(maxMB)) * 100).toFixed(1)}%`,
+                  }}
+                />
+              </div>
+              <p className="mt-1 text-xs text-slate-500">{totalMB} MB used of {maxMB} MB</p>
+            </div>
+          )}
         </article>
       </div>
 

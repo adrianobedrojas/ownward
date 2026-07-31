@@ -153,13 +153,23 @@ export async function uploadVaultDocument(
   }
 
   const billing = await getUserBillingState(supabase, userId);
+  const entitlements = billing.entitlements;
+
+  // Free plan: no uploads allowed
+  if (entitlements.documentLimit === 0) {
+    throw new UploadServiceError(
+      "A paid plan is required to upload documents.",
+      "DOCUMENT_LIMIT_REACHED"
+    );
+  }
+
   const { count: documentCount } = await supabase
     .from("documents")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .is("deleted_at", null);
 
-  if ((documentCount ?? 0) >= billing.entitlements.documentLimit) {
+  if ((documentCount ?? 0) >= entitlements.documentLimit) {
     throw new UploadServiceError(
       "Document limit reached for your current plan.",
       "DOCUMENT_LIMIT_REACHED"
@@ -183,8 +193,8 @@ export async function uploadVaultDocument(
     (sum, row) => sum + Number(row.filesize ?? 0),
     0
   );
-  const maxBytes = Math.max(1, billing.entitlements.documentLimit) * DOCUMENT_MAX_FILE_BYTES;
-  if (currentBytes + file.size > maxBytes) {
+  // Enforce storageBytes directly (not documentLimit * 50MB)
+  if (currentBytes + file.size > entitlements.storageBytes) {
     throw new UploadServiceError(
       "Storage quota reached for your current plan.",
       "STORAGE_LIMIT_REACHED"

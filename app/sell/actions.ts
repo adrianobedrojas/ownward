@@ -7,6 +7,7 @@ import {
   MAX_SLUG_GENERATION_ATTEMPTS,
 } from "@/lib/listings";
 import { redirect } from "next/navigation";
+import { getUserBillingState, checkListingLimit } from "@/lib/billing";
 
 export async function saveListingDraft(formData: FormData) {
   const supabase = await createClient();
@@ -30,6 +31,19 @@ export async function saveListingDraft(formData: FormData) {
 
   if (!businessName || !category) {
     throw new Error("Business name and category are required.");
+  }
+
+  // Server-side listing limit enforcement
+  const billing = await getUserBillingState(supabase, user.id);
+  const { count: currentListingCount } = await supabase
+    .from("business_listings")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .neq("status", "deleted");
+
+  const limitError = checkListingLimit(billing.entitlements, currentListingCount ?? 0);
+  if (limitError) {
+    throw new Error(limitError.message);
   }
 
   for (let attempt = 0; attempt < MAX_SLUG_GENERATION_ATTEMPTS; attempt += 1) {
