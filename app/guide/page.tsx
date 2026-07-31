@@ -44,7 +44,7 @@ const categories = [
   {
     slug: "buy",
     name: "5. Buying a business",
-    description: "How to evaluate listings, verify revenue, spot red flags, and navigate due diligence.",
+    description: "How to evaluate listings, verify revenue, understand financing readiness, spot red flags, and navigate due diligence.",
     cta: "Browse active business listings and search by category or location.",
     ctaLink: "/buy",
     ctaLabel: "Browse marketplace",

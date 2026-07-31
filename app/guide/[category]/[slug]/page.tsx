@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import GuideShareControls from "@/components/GuideShareControls";
+import SbaLoanReadinessCheck from "@/components/SbaLoanReadinessCheck";
 import { getGuideArticle, getGuideCategory, guideArticles } from "@/lib/guide-content";
 
 interface GuideArticlePageProps {
@@ -75,11 +76,16 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
           {article.title}
         </h1>
         <p className="mt-3 text-base leading-7 text-slate-300">{article.description}</p>
-        <p className="mt-3 text-sm text-slate-400">
-          {article.publishedDate
-            ? `${article.publishedDate} · ${article.readingTime}`
-            : article.readingTime}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
+          {article.publishedDate ? (
+            <span>{article.publishedDate} · {article.readingTime}</span>
+          ) : (
+            <span>{article.readingTime}</span>
+          )}
+          {article.lastReviewed && (
+            <span>Last reviewed {article.lastReviewed}</span>
+          )}
+        </div>
         <div className="mt-5">
           <GuideShareControls
             title={article.title}
@@ -98,6 +104,8 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
             </p>
           ))}
         </section>
+
+        {article.interactiveTool === "sba-readiness" && <SbaLoanReadinessCheck />}
 
         <div className="mt-10 space-y-10">
           {article.sections.map((section) => (
@@ -165,6 +173,30 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
                     />
                     <span>{item}</span>
                   </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {article.sources && article.sources.length > 0 && (
+          <section className="mt-10">
+            <h2 className="text-2xl font-semibold text-white">Official sources</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              SBA policy and lender requirements can change. Verify the applicable rules with an
+              SBA-participating lender before making a financial or relocation decision.
+            </p>
+            <ul className="mt-4 space-y-2">
+              {article.sources.map((source) => (
+                <li key={source.href}>
+                  <a
+                    href={source.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="text-sm text-cyan-300 hover:text-cyan-200 hover:underline"
+                  >
+                    {source.label}
+                  </a>
                 </li>
               ))}
             </ul>
