@@ -67,15 +67,27 @@ export type PlanEntitlements = {
   /** Maximum milestones creatable per calendar month (0 = none). */
   milestoneMonthlyLimit: number;
   documentLimit: number;
-  /** Raw storage cap in bytes. */
+  /** Raw storage cap in bytes (combined Vault + Deal Room). */
   storageBytes: number;
   leadLimit: number;
+  /** Unique invited collaborators across owner account; owner excluded; deal room participants excluded. */
   teamMemberLimit: number;
   healthLevel: HealthLevel;
   valuationLevel: ValuationLevel;
   supportLevel: SupportLevel;
   bookkeeping: boolean;
   dealRooms: boolean;
+  /** Maximum concurrent active deal rooms (0 = none; closed/withdrawn excluded). */
+  activeDealRoomLimit: number;
+  // ── Pro-exclusive capabilities ────────────────────────────────────────────
+  /** Sale-Readiness Assessment engine (10-category 0–100 score). */
+  saleReadiness: boolean;
+  /** Customer Concentration Lab (HHI analysis + scenarios). */
+  customerConcentration: boolean;
+  /** Weekly Valuation Pulse (one official refresh per rolling 7 days). */
+  weeklyValuationRefresh: boolean;
+  /** Seller Command Center with pipeline, offers, and NBA widgets. */
+  sellerCommandCenter: boolean;
 };
 
 /** 500 MB expressed in bytes. */
@@ -95,6 +107,11 @@ const FREE_ENTITLEMENTS: PlanEntitlements = {
   supportLevel: "general",
   bookkeeping: false,
   dealRooms: false,
+  activeDealRoomLimit: 0,
+  saleReadiness: false,
+  customerConcentration: false,
+  weeklyValuationRefresh: false,
+  sellerCommandCenter: false,
 };
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
@@ -111,6 +128,11 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     supportLevel: "standard",
     bookkeeping: true,
     dealRooms: false,
+    activeDealRoomLimit: 0,
+    saleReadiness: false,
+    customerConcentration: false,
+    weeklyValuationRefresh: false,
+    sellerCommandCenter: false,
   },
   builder: {
     businessLimit: 2,
@@ -125,6 +147,11 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     supportLevel: "standard",
     bookkeeping: true,
     dealRooms: false,
+    activeDealRoomLimit: 0,
+    saleReadiness: false,
+    customerConcentration: false,
+    weeklyValuationRefresh: false,
+    sellerCommandCenter: false,
   },
   pro: {
     businessLimit: 5,
@@ -139,6 +166,11 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     supportLevel: "priority",
     bookkeeping: true,
     dealRooms: true,
+    activeDealRoomLimit: 3,
+    saleReadiness: true,
+    customerConcentration: true,
+    weeklyValuationRefresh: true,
+    sellerCommandCenter: true,
   },
 };
 
@@ -456,5 +488,184 @@ export function checkBookkeepingAccess(
     };
   }
   return { allowed: true };
+}
+
+// ─── Deal Room limit ──────────────────────────────────────────────────────────
+
+/**
+ * Returns an EntitlementError if the user cannot create another active deal room.
+ * Closed and withdrawn rooms are excluded from the count.
+ */
+export function checkDealRoomLimit(
+  entitlements: PlanEntitlements,
+  currentActiveCount: number
+): EntitlementError | null {
+  if (!entitlements.dealRooms || entitlements.activeDealRoomLimit === 0) {
+    return new EntitlementError(
+      "PLAN_REQUIRED",
+      "Deal Rooms require a Pro plan."
+    );
+  }
+  if (currentActiveCount >= entitlements.activeDealRoomLimit) {
+    return new EntitlementError(
+      "FEATURE_GATED",
+      `Your plan allows up to ${entitlements.activeDealRoomLimit} active Deal Room${entitlements.activeDealRoomLimit === 1 ? "" : "s"}. Close or withdraw existing rooms to create a new one.`
+    );
+  }
+  return null;
+}
+
+// ─── Pro feature gate ─────────────────────────────────────────────────────────
+
+export type ProFeatureKey =
+  | "saleReadiness"
+  | "customerConcentration"
+  | "weeklyValuationRefresh"
+  | "sellerCommandCenter";
+
+const PRO_FEATURE_LABELS: Record<ProFeatureKey, string> = {
+  saleReadiness: "Sale-Readiness Assessment",
+  customerConcentration: "Customer Concentration Lab",
+  weeklyValuationRefresh: "Weekly Valuation Pulse",
+  sellerCommandCenter: "Seller Command Center",
+};
+
+/**
+ * Returns an EntitlementError if the user does not have access to a Pro-only
+ * feature, else null.
+ */
+export function checkProFeature(
+  entitlements: PlanEntitlements,
+  feature: ProFeatureKey
+): EntitlementError | null {
+  if (!entitlements[feature]) {
+    return new EntitlementError(
+      "PLAN_REQUIRED",
+      `${PRO_FEATURE_LABELS[feature]} is available on the Pro plan only. Upgrade to unlock this feature.`
+    );
+  }
+  return null;
+}
+
+// ─── Plan catalog (public-facing) ─────────────────────────────────────────────
+
+/**
+ * Authoritative plan catalog entry — single source of truth for both the
+ * pricing page and billing enforcement.
+ */
+export type PlanCatalogEntry = {
+  key: BillingPlan;
+  name: string;
+  monthlyPrice: number;
+  tagline: string;
+  publicFeatures: string[];
+  upgradeOrder: number;
+  entitlements: PlanEntitlements;
+  supportLevel: SupportLevel;
+  storageDescription: string;
+  teamSeatDescription: string;
+  dealRoomDescription: string;
+  valuationRefreshDescription: string;
+};
+
+export const PLAN_CATALOG: PlanCatalogEntry[] = [
+  {
+    key: "free",
+    name: "Free",
+    monthlyPrice: 0,
+    tagline: "Just browsing or getting started",
+    publicFeatures: ["Browse the marketplace", "Basic valuation preview"],
+    upgradeOrder: 0,
+    entitlements: FREE_ENTITLEMENTS,
+    supportLevel: "general",
+    storageDescription: "No storage",
+    teamSeatDescription: "No team seats",
+    dealRoomDescription: "Not included",
+    valuationRefreshDescription: "Preview only",
+  },
+  {
+    key: "starter",
+    name: "Starter",
+    monthlyPrice: 5,
+    tagline: "New owners & explorers",
+    publicFeatures: [
+      "1 Business Profile",
+      "Timeline & 10 Milestones/mo",
+      "Basic Health Checklist",
+      "Basic Valuation Range",
+      "Up to 10 Documents",
+      "Up to 500 MB storage",
+      "1 Invited Collaborator",
+      "Standard Support",
+    ],
+    upgradeOrder: 1,
+    entitlements: PLAN_ENTITLEMENTS.starter,
+    supportLevel: "standard",
+    storageDescription: "500 MB (Vault)",
+    teamSeatDescription: "1 invited collaborator (owner excluded)",
+    dealRoomDescription: "Not included",
+    valuationRefreshDescription: "Basic range (on demand)",
+  },
+  {
+    key: "builder",
+    name: "Builder",
+    monthlyPrice: 10,
+    tagline: "Active owners building operations",
+    publicFeatures: [
+      "Up to 2 Businesses",
+      "Revenue & Expense Tracking",
+      "Tasks, Goals & 100 Active Leads",
+      "Advanced Health Report",
+      "Detailed Valuation Estimate",
+      "Up to 100 Documents",
+      "Up to 5 GB storage",
+      "2 Invited Collaborators (owner excluded)",
+      "Standard Support",
+    ],
+    upgradeOrder: 2,
+    entitlements: PLAN_ENTITLEMENTS.builder,
+    supportLevel: "standard",
+    storageDescription: "5 GB (Vault)",
+    teamSeatDescription: "2 invited collaborators (owner excluded)",
+    dealRoomDescription: "Not included",
+    valuationRefreshDescription: "Detailed estimate (on demand)",
+  },
+  {
+    key: "pro",
+    name: "Pro",
+    monthlyPrice: 20,
+    tagline: "Serious owners preparing to grow or sell",
+    publicFeatures: [
+      "Up to 5 Businesses",
+      "Sale-Readiness Score (10 categories)",
+      "Full Valuation Report + Weekly Refresh",
+      "Customer Concentration Lab",
+      "Seller Command Center & Pipeline",
+      "Up to 3 Active Deal Rooms",
+      "1,000 Active Leads",
+      "Up to 50 GB storage (Vault + Deal Rooms)",
+      "5 Invited Collaborators (owner excluded)",
+      "Priority Support",
+    ],
+    upgradeOrder: 3,
+    entitlements: PLAN_ENTITLEMENTS.pro,
+    supportLevel: "priority",
+    storageDescription: "50 GB combined (Vault + Deal Room files)",
+    teamSeatDescription:
+      "5 unique invited collaborators (owner excluded; deal room participants excluded)",
+    dealRoomDescription: "Up to 3 active Deal Rooms (closed/withdrawn excluded)",
+    valuationRefreshDescription:
+      "Enhanced report + 1 official refresh per rolling 7 days",
+  },
+];
+
+/** Returns the catalog entry for a given plan key. */
+export function getPlanCatalogEntry(plan: BillingPlan): PlanCatalogEntry {
+  const entry = PLAN_CATALOG.find((p) => p.key === plan);
+  if (!entry) {
+    // Should never happen; return free as safety fallback
+    return PLAN_CATALOG[0];
+  }
+  return entry;
 }
 
