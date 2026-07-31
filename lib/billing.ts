@@ -36,10 +36,31 @@ export function getFeaturedListingConfig(): {
 export const PLAN_KEYS = ["starter", "builder", "pro"] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
 
+/**
+ * Valuation feature levels.
+ * - basic: single-year SDE estimate, limited report sections
+ * - detailed: 3-year weighted average, full report sections
+ * - enhanced: full report + Value DNA, Buyer Lens, Value Bridge, and refresh entitlement
+ *
+ * A future one-time Enhanced Valuation purchase can be added safely by
+ * checking `hasOneTimeEnhanced` alongside the plan-based level here.
+ */
+export type ValuationLevel = "basic" | "detailed" | "enhanced";
+
 type PlanEntitlements = {
   documentLimit: number;
   listingLimit: number;
   dealRooms: boolean;
+  // ── Valuation entitlements ──────────────────
+  basicValuation: boolean;
+  detailedValuation: boolean;
+  enhancedValuation: boolean;
+  /**
+   * Minimum days between full valuation refreshes (null = no limit).
+   * Used by the enhanced interactive valuation feature to manage usage.
+   * A future one-time purchase can override this to null for the purchased period.
+   */
+  valuationRefreshDays: number | null;
 };
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
@@ -47,16 +68,28 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     documentLimit: 10,
     listingLimit: 1,
     dealRooms: false,
+    basicValuation: true,
+    detailedValuation: false,
+    enhancedValuation: false,
+    valuationRefreshDays: null,
   },
   builder: {
     documentLimit: 100,
     listingLimit: 2,
     dealRooms: false,
+    basicValuation: true,
+    detailedValuation: true,
+    enhancedValuation: false,
+    valuationRefreshDays: null,
   },
   pro: {
     documentLimit: 1000,
     listingLimit: 5,
     dealRooms: true,
+    basicValuation: true,
+    detailedValuation: true,
+    enhancedValuation: true,
+    valuationRefreshDays: 7,
   },
 };
 
