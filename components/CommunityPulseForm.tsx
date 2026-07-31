@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { getOrCreateVisitorToken } from '@/lib/visitor';
 import { submitPulseResponse } from '@/app/actions/pulse';
-import { ConsentGate, OpenPrivacyChoicesButton } from '@/components/PrivacyConsent';
 
 interface Props {
   businessId: string;
@@ -28,28 +27,7 @@ const INTENTS = [
 ];
 
 export default function CommunityPulseForm({ businessId }: Props) {
-  return (
-    <ConsentGate
-      categories="functionality"
-      fallback={
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
-          <h3 className="text-lg font-semibold text-white">Community Pulse requires functionality storage</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            To help prevent duplicate responses, Ownward uses an anonymous response token that
-            stays in this browser. Enable Functionality storage if you want to submit a Community
-            Pulse response from this device.
-          </p>
-          <div className="mt-4">
-            <OpenPrivacyChoicesButton>
-              Update privacy choices
-            </OpenPrivacyChoicesButton>
-          </div>
-        </div>
-      }
-    >
-      <CommunityPulseFormFields businessId={businessId} />
-    </ConsentGate>
-  );
+  return <CommunityPulseFormFields businessId={businessId} />;
 }
 
 function CommunityPulseFormFields({ businessId }: Props) {
@@ -71,11 +49,6 @@ function CommunityPulseFormFields({ businessId }: Props) {
     }
 
     const visitorToken = getOrCreateVisitorToken();
-
-    if (!visitorToken) {
-      setErrorMessage('Enable Functionality storage to submit a response from this browser.');
-      return;
-    }
 
     setIsSubmitting(true);
     setErrorMessage('');
