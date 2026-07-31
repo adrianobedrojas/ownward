@@ -11,6 +11,7 @@ import {
   monthStartIso,
   monthEndIso,
 } from "@/lib/bookkeeping";
+import { getUserBillingState, checkBookkeepingAccess } from "@/lib/billing";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -93,10 +94,23 @@ async function isPeriodClosed(
   return data?.status === "closed";
 }
 
+/** Enforce bookkeeping write access (Builder-or-higher). Redirects on failure. */
+async function requireBookkeepingWrite(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string
+): Promise<void> {
+  const billing = await getUserBillingState(supabase, userId);
+  const result = checkBookkeepingAccess(billing.entitlements);
+  if (!result.allowed) backToMoney({ error: "BookkeepingUpgradeRequired" });
+}
+
 // ─── Add transaction ─────────────────────────────────────────────────────────
 
 export async function addTransaction(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
+
+  // Enforce bookkeeping write access (server-side, never trust client)
+  await requireBookkeepingWrite(supabase, user.id);
 
   const title         = String(formData.get("title") ?? "").trim();
   const amountStr     = String(formData.get("amount") ?? "");
@@ -170,6 +184,9 @@ export async function addTransaction(formData: FormData) {
 export async function updateTransaction(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
 
+  // Enforce bookkeeping write access
+  await requireBookkeepingWrite(supabase, user.id);
+
   const transactionId = String(formData.get("transaction_id") ?? "").trim();
   const title         = String(formData.get("title") ?? "").trim();
   const amountStr     = String(formData.get("amount") ?? "");
@@ -188,8 +205,8 @@ export async function updateTransaction(formData: FormData) {
   if (!transactionId) redirect("/money?error=MissingId");
 
   // Verify ownership
-  const access = await verifyTransactionAccess(supabase, user.id, transactionId);
-  if (!access.ok) redirect("/money?error=NotFound");
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  if (!txAccess.ok) redirect("/money?error=NotFound");
 
   // Validate inputs
   if (!title || title.length > 250) redirect(`/money/${transactionId}/edit?error=InvalidTitle`);
@@ -216,11 +233,11 @@ export async function updateTransaction(formData: FormData) {
     redirect(`/money/${transactionId}/edit?error=InvalidDocument`);
 
   // Check original period is not closed
-  if (access.transaction && await isPeriodClosed(supabase, user.id, access.transaction.transaction_date))
+  if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
     redirect(`/money/${transactionId}/edit?error=PeriodClosed`);
 
   // If changing date, also check new period is not closed
-  if (txDate !== access.transaction?.transaction_date && await isPeriodClosed(supabase, user.id, txDate))
+  if (txDate !== txAccess.transaction?.transaction_date && await isPeriodClosed(supabase, user.id, txDate))
     redirect(`/money/${transactionId}/edit?error=PeriodClosed`);
 
   const { error: dbError } = await supabase
@@ -263,10 +280,10 @@ export async function deleteTransaction(formData: FormData) {
 
   if (!transactionId) backToMoney({ error: "MissingId" });
 
-  const access = await verifyTransactionAccess(supabase, user.id, transactionId);
-  if (!access.ok) backToMoney({ error: "NotFound" });
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
-  if (access.transaction && await isPeriodClosed(supabase, user.id, access.transaction.transaction_date))
+  if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
     backToMoney({ error: "PeriodClosed" });
 
   const { error: dbError } = await supabase
@@ -291,6 +308,9 @@ export async function deleteTransaction(formData: FormData) {
 export async function markTransactionReviewed(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
 
+  // Enforce bookkeeping write access
+  await requireBookkeepingWrite(supabase, user.id);
+
   const transactionId = String(formData.get("transaction_id") ?? "").trim();
   const reviewStatus  = String(formData.get("review_status") ?? "reviewed");
   const monthParam    = String(formData.get("month") ?? "").trim() || undefined;
@@ -298,10 +318,10 @@ export async function markTransactionReviewed(formData: FormData) {
   if (!transactionId || !isValidReviewStatus(reviewStatus))
     backToMoney({ error: "InvalidInput" });
 
-  const access = await verifyTransactionAccess(supabase, user.id, transactionId);
-  if (!access.ok) backToMoney({ error: "NotFound" });
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
-  if (access.transaction && await isPeriodClosed(supabase, user.id, access.transaction.transaction_date))
+  if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
     backToMoney({ error: "PeriodClosed" });
 
   await supabase
@@ -321,16 +341,19 @@ export async function markTransactionReviewed(formData: FormData) {
 export async function toggleTransactionReconciled(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
 
+  // Enforce bookkeeping write access
+  await requireBookkeepingWrite(supabase, user.id);
+
   const transactionId = String(formData.get("transaction_id") ?? "").trim();
   const reconcile     = formData.get("reconcile") === "true";
   const monthParam    = String(formData.get("month") ?? "").trim() || undefined;
 
   if (!transactionId) backToMoney({ error: "MissingId" });
 
-  const access = await verifyTransactionAccess(supabase, user.id, transactionId);
-  if (!access.ok) backToMoney({ error: "NotFound" });
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
-  if (access.transaction && await isPeriodClosed(supabase, user.id, access.transaction.transaction_date))
+  if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
     backToMoney({ error: "PeriodClosed" });
 
   await supabase
@@ -349,6 +372,9 @@ export async function toggleTransactionReconciled(formData: FormData) {
 
 export async function closeMonth(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
+
+  // Enforce bookkeeping write access
+  await requireBookkeepingWrite(supabase, user.id);
 
   const monthParam  = String(formData.get("month") ?? "").trim();
   const businessId  = String(formData.get("business_id") ?? "").trim() || null;
@@ -402,6 +428,9 @@ export async function closeMonth(formData: FormData) {
 
 export async function reopenMonth(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
+
+  // Enforce bookkeeping write access
+  await requireBookkeepingWrite(supabase, user.id);
 
   const monthParam  = String(formData.get("month") ?? "").trim();
   const businessId  = String(formData.get("business_id") ?? "").trim() || null;

@@ -255,20 +255,31 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   // Run the calculation entirely on the server
   const result = calculateValuation(input);
 
-  // Tier-limit the result_snapshot for non-enhanced tiers.
-  // For "basic" (Starter): cap recommended actions to 3, null out Pro-only fields.
-  // This ensures Pro-only data is never persisted for lower-tier reports.
+  // Tier-limit the result_snapshot.
+  // basic   (Starter): cap recommended actions to 3, null out Builder/Pro-only fields.
+  // detailed (Builder): full report except Pro-only fields (buyerInterpretations,
+  //                     valueBridgeScenarios, dnaScores).
+  // enhanced (Pro):     full report with all sections.
+  // This ensures higher-tier data is never persisted for lower-tier reports.
   const tieredResult =
     valuationLevel === "basic"
       ? {
           ...result,
           recommendedActions: result.recommendedActions.slice(0, 3),
-          // Pro-only sections — set null to avoid persisting enhanced data
+          // Builder/Pro-only sections — null out for Starter
           buyerInterpretations: null,
           valueBridgeScenarios: null,
-          valueDnaScorecard: null,
+          dnaScores: null,
         }
-      : result;
+      : valuationLevel === "detailed"
+        ? {
+            ...result,
+            // Pro-only sections — null out for Builder
+            buyerInterpretations: null,
+            valueBridgeScenarios: null,
+            dnaScores: null,
+          }
+        : result; // enhanced: full result
 
   const reportId = (formData.get("reportId") as string) ?? null;
   const existingReportId = isUuid(reportId) ? reportId : null;

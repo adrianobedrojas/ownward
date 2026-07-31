@@ -245,12 +245,16 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* ── Starter Launchpad ─────────────────────────────────────────────── */}
+      {/* ── Plan-named Launchpad ───────────────────────────────────────────── */}
       {billing.plan !== "free" && (
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">
-              Starter Launchpad
+              {billing.plan === "pro"
+                ? "Pro Deal Command Center"
+                : billing.plan === "builder"
+                  ? "Builder Operations Center"
+                  : "Starter Launchpad"}
             </h2>
             <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-400 capitalize">
               {billing.plan} Plan
@@ -281,7 +285,7 @@ export default async function DashboardPage({
             >
               <p className="text-xs text-slate-500 uppercase tracking-wider">Business</p>
               <p className="mt-1 text-xl font-bold text-white truncate">
-                {activeBizData?.name ?? (businessCount ?? 0) > 0 ? `${businessCount} workspace${(businessCount ?? 0) !== 1 ? "s" : ""}` : "None"}
+                {activeBizData?.name ?? ((businessCount ?? 0) > 0 ? `${businessCount} workspace${(businessCount ?? 0) !== 1 ? "s" : ""}` : "None")}
               </p>
               {activeBizData && (
                 <div className="mt-1.5 h-1 rounded-full bg-slate-800">

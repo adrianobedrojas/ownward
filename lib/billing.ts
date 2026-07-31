@@ -373,3 +373,88 @@ export function checkDocumentLimits(
   return null;
 }
 
+/**
+ * Returns an EntitlementError if the user has hit their active lead limit.
+ * "Active leads" are non-deleted rows with record_type = 'lead'.
+ */
+export function checkLeadLimit(
+  entitlements: PlanEntitlements,
+  currentActiveLeadCount: number
+): EntitlementError | null {
+  if (entitlements.leadLimit === 0) {
+    return new EntitlementError(
+      "PLAN_REQUIRED",
+      "A paid plan is required to track leads."
+    );
+  }
+  if (currentActiveLeadCount >= entitlements.leadLimit) {
+    return new EntitlementError(
+      "FEATURE_GATED",
+      `Your plan allows up to ${entitlements.leadLimit} active lead${entitlements.leadLimit === 1 ? "" : "s"}. Archive some or upgrade your plan.`
+    );
+  }
+  return null;
+}
+
+/**
+ * Returns an EntitlementError if the business has hit its invited-collaborator
+ * limit.  The owner is excluded from this count; only invited members/pending
+ * invitations count toward the limit.
+ */
+export function checkTeamMemberLimit(
+  entitlements: PlanEntitlements,
+  currentInvitedCount: number
+): EntitlementError | null {
+  if (entitlements.teamMemberLimit === 0) {
+    return new EntitlementError(
+      "PLAN_REQUIRED",
+      "A paid plan is required to invite team members."
+    );
+  }
+  if (currentInvitedCount >= entitlements.teamMemberLimit) {
+    return new EntitlementError(
+      "FEATURE_GATED",
+      `Your plan allows up to ${entitlements.teamMemberLimit} invited collaborator${entitlements.teamMemberLimit === 1 ? "" : "s"} per business. Upgrade to invite more.`
+    );
+  }
+  return null;
+}
+
+// ─── Bookkeeping access ───────────────────────────────────────────────────────
+
+export type BookkeepingAccessResult =
+  | { allowed: true }
+  | {
+      allowed: false;
+      code: UpgradeErrorCode;
+      message: string;
+      /** true when user has the feature on their plan */
+      featureEnabled: boolean;
+    };
+
+/**
+ * Checks whether a user's current billing state permits bookkeeping write
+ * operations (create/edit transactions, close months, reconcile, etc.).
+ *
+ * - Builder and Pro plans: write access allowed.
+ * - Starter: write access allowed (bookkeeping: true entitlement).
+ * - Free / downgraded: read/export/delete only, no writes.
+ *
+ * Returns a structured result — never throws.
+ */
+export function checkBookkeepingAccess(
+  entitlements: PlanEntitlements
+): BookkeepingAccessResult {
+  if (!entitlements.bookkeeping) {
+    return {
+      allowed: false,
+      code: "PLAN_REQUIRED",
+      message:
+        "Revenue and expense tracking requires a Builder or higher plan. " +
+        "You can still view, export, or delete your existing records.",
+      featureEnabled: false,
+    };
+  }
+  return { allowed: true };
+}
+
