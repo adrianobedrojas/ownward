@@ -18,7 +18,7 @@ export interface AcademyLesson {
 
 export interface PlannedAcademyModule {
   id: string;
-  title: string;
+  title: LocalizedAcademyText;
 }
 
 export interface AcademyCourse {
@@ -105,7 +105,7 @@ export const academyCourses: AcademyCourse[] = [
   },
   {
     slug: 'owner-life',
-    status: 'coming-soon',
+    status: 'available',
     level: 'beginner',
     title: {
       en: 'Owner Life',
@@ -115,17 +115,52 @@ export const academyCourses: AcademyCourse[] = [
       en: 'Navigate the personal side of running a business — urgency, relationships, identity, and decision-making under pressure.',
       es: 'Navega el lado personal de dirigir un negocio: la urgencia, las relaciones, la identidad y la toma de decisiones bajo presión.',
     },
+    estimatedMinutes: 24,
+    lessons: [
+      {
+        id: 'everything-feels-urgent',
+        guideCategory: 'owner-life',
+        guideArticleSlug: 'when-everything-feels-urgent',
+      },
+      {
+        id: 'love-is-not-governance',
+        guideCategory: 'owner-life',
+        guideArticleSlug: 'love-is-not-governance',
+      },
+    ],
     plannedModules: [
-      { id: 'everything-feels-urgent', title: 'When Everything Feels Urgent' },
-      { id: 'love-is-not-governance', title: 'Love Is Not Governance' },
-      { id: 'working-with-family', title: 'Working With Family Without Losing the Relationship' },
-      { id: 'business-not-identity', title: 'Your Business Is Not Your Entire Identity' },
-      { id: 'learning-in-public', title: 'Learning Business in Public' },
-      { id: 'decisions-under-uncertainty', title: 'Making Decisions During Uncertainty' },
+      {
+        id: 'working-with-family',
+        title: {
+          en: 'Working With Family Without Losing the Relationship',
+          es: 'Trabajar con la familia sin perder la relación',
+        },
+      },
+      {
+        id: 'business-not-identity',
+        title: {
+          en: 'Your Business Is Not Your Entire Identity',
+          es: 'Tu negocio no es toda tu identidad',
+        },
+      },
+      {
+        id: 'learning-in-public',
+        title: {
+          en: 'Learning Business in Public',
+          es: 'Aprender sobre negocios en público',
+        },
+      },
+      {
+        id: 'decisions-under-uncertainty',
+        title: {
+          en: 'Making Decisions During Uncertainty',
+          es: 'Tomar decisiones en la incertidumbre',
+        },
+      },
     ],
     disclosure: {
-      en: 'This future course will provide general educational information about everyday pressure and decision-making. It will not diagnose or treat medical or mental-health conditions.',
-      es: 'Este futuro curso proporcionará información educativa general sobre la presión cotidiana y la toma de decisiones. No diagnosticará ni tratará condiciones médicas ni de salud mental.',
+      en: 'This course provides general educational information about everyday pressure and decision-making. It does not diagnose or treat medical or mental-health conditions.',
+      es: 'Este curso ofrece información educativa general sobre la presión cotidiana y la toma de decisiones. No diagnostica ni trata condiciones médicas ni de salud mental.',
     },
   },
   {
@@ -141,14 +176,14 @@ export const academyCourses: AcademyCourse[] = [
       es: 'Comprende la mecánica de los mercados financieros: acciones, futuros, conceptos de trading y cómo pensar en el riesgo, sin el ruido.',
     },
     plannedModules: [
-      { id: 'what-a-stock-represents', title: 'What a Stock Represents' },
-      { id: 'how-futures-work', title: 'How Futures Contracts Work' },
-      { id: 'investing-vs-trading', title: 'Investing Versus Trading' },
-      { id: 'orders-spreads-volume', title: 'Orders, Spreads, Volume, and Liquidity' },
-      { id: 'margin-and-leverage', title: 'Margin and Leverage' },
-      { id: 'position-sizing', title: 'Position Sizing and Risk Capital' },
-      { id: 'paper-trading', title: 'Paper Trading and Journaling' },
-      { id: 'common-mistakes', title: 'Common Trading Mistakes' },
+      { id: 'what-a-stock-represents', title: { en: 'What a Stock Represents', es: 'Qué representa una acción' } },
+      { id: 'how-futures-work', title: { en: 'How Futures Contracts Work', es: 'Cómo funcionan los contratos de futuros' } },
+      { id: 'investing-vs-trading', title: { en: 'Investing Versus Trading', es: 'Invertir frente a hacer trading' } },
+      { id: 'orders-spreads-volume', title: { en: 'Orders, Spreads, Volume, and Liquidity', es: 'Órdenes, spreads, volumen y liquidez' } },
+      { id: 'margin-and-leverage', title: { en: 'Margin and Leverage', es: 'Margen y apalancamiento' } },
+      { id: 'position-sizing', title: { en: 'Position Sizing and Risk Capital', es: 'Tamaño de posición y capital de riesgo' } },
+      { id: 'paper-trading', title: { en: 'Paper Trading and Journaling', es: 'Trading en papel y registro' } },
+      { id: 'common-mistakes', title: { en: 'Common Trading Mistakes', es: 'Errores comunes en el trading' } },
     ],
     disclosure: {
       en: 'Educational information only. Ownward does not provide trade signals, personalized investment recommendations, brokerage services, or trade execution.',

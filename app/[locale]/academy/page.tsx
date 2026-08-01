@@ -29,8 +29,6 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 text-slate-100 sm:px-6">
-
-      {/* Hero */}
       <div className="max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('heroBadge')}</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">{t('heroTitle')}</h1>
@@ -45,7 +43,6 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
         </div>
       </div>
 
-      {/* Guide vs Academy comparison */}
       <section className="mt-16" aria-labelledby="guide-vs-academy-heading">
         <h2 id="guide-vs-academy-heading" className="text-2xl font-bold text-white">{t('guideVsAcademyTitle')}</h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
@@ -72,7 +69,6 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
         </div>
       </section>
 
-      {/* Courses */}
       <section id="courses" className="mt-16" aria-labelledby="courses-heading">
         <h2 id="courses-heading" className="text-2xl font-bold text-white">{t('coursesTitle')}</h2>
         <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -118,6 +114,9 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
                         <span>{t('lessonCount', { count: lessonCount })}</span>
                         {course.estimatedMinutes ? (
                           <span>{t('estimatedTime', { minutes: course.estimatedMinutes })}</span>
+                        ) : null}
+                        {moduleCount > 0 ? (
+                          <span>{t('upcomingModuleCount', { count: moduleCount })}</span>
                         ) : null}
                       </>
                     ) : (

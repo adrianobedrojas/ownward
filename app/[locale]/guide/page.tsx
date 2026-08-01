@@ -1,8 +1,20 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { guideCategoryContent, type GuideCategorySlug } from '@/lib/guide-content';
 
-const categorySlugs = ['run', 'grow', 'value', 'sell', 'buy', 'stories'] as const;
+const categorySlugs = Object.keys(guideCategoryContent) as GuideCategorySlug[];
+
+const ctaHref: Record<GuideCategorySlug, string> = {
+  run: '/dashboard',
+  grow: '/grow',
+  value: '/valuation',
+  sell: '/sell',
+  buy: '/buy',
+  'owner-life': '/guide/owner-life',
+  stories: '/guide/stories',
+  resources: '/guide/resources',
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -48,8 +60,8 @@ export default async function GuideIndexPage() {
                 <div className="mt-6 border-t border-slate-800 pt-4">
                   <p className="text-xs font-medium text-cyan-400">{category.cta}</p>
                   <div className="mt-3 flex items-center gap-4">
-                    {slug !== 'stories' ? <Link href={`/guide/${slug}`} className="inline-block text-sm font-semibold text-white hover:text-cyan-300">{t('browseCategory')}</Link> : null}
-                    <Link href={slug === 'run' ? '/dashboard' : slug === 'grow' ? '/grow' : slug === 'value' ? '/valuation' : slug === 'sell' ? '/sell' : slug === 'buy' ? '/buy' : '/guide/stories'} className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200">{category.ctaLabel} →</Link>
+                    <Link href={`/guide/${slug}`} className="inline-block text-sm font-semibold text-white hover:text-cyan-300">{t('browseCategory')}</Link>
+                    <Link href={ctaHref[slug]} className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200">{category.ctaLabel} →</Link>
                   </div>
                 </div>
               </article>
@@ -58,7 +70,6 @@ export default async function GuideIndexPage() {
         </div>
       </section>
 
-      {/* Academy callout */}
       <section className="mt-16 rounded-2xl border border-cyan-800/30 bg-cyan-950/20 p-6 sm:p-8">
         <h2 className="text-xl font-semibold text-white">{t('academyCalloutHeading')}</h2>
         <p className="mt-3 text-sm leading-6 text-slate-300">{t('academyCalloutDescription')}</p>

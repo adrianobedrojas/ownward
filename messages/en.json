@@ -518,6 +518,10 @@
         "href": "/guide/buy"
       },
       {
+        "label": "Handle pressure and difficult owner decisions",
+        "href": "/guide/owner-life"
+      },
+      {
         "label": "Learn from other owners",
         "href": "/guide/stories"
       }
@@ -554,14 +558,20 @@
         "cta": "Browse active business listings and search by category or location.",
         "ctaLabel": "Browse marketplace"
       },
+      "owner-life": {
+        "name": "6. Owner Life",
+        "description": "Practical guidance about pressure, relationships, identity, boundaries, and the personal decisions behind business ownership.",
+        "cta": "Explore frameworks for responding to pressure without allowing every difficult moment to control the next decision.",
+        "ctaLabel": "Explore Owner Life"
+      },
       "stories": {
-        "name": "6. Owner stories & founder notes",
+        "name": "7. Owner stories & founder notes",
         "description": "Real-world lessons, behind-the-scenes building notes, and relatable scenarios from business owners.",
         "cta": "Read stories and lessons from owners who have built, grown, bought, or sold businesses.",
         "ctaLabel": "Browse stories"
       },
       "resources": {
-        "name": "7. Interactive resources & checklists",
+        "name": "8. Interactive resources & checklists",
         "description": "Downloadable checklists, calculators, and assessments.",
         "cta": "Use practical tools to organize information and pressure-test decisions.",
         "ctaLabel": "Explore resources"
@@ -577,7 +587,7 @@
     "actionPlan": "30-day action plan",
     "checklist": "Checklist",
     "officialSources": "Official sources",
-    "sourcesDescription": "SBA policy and lender requirements can change. Verify the applicable rules with an SBA-participating lender before making a financial or relocation decision.",
+    "sourcesDescription": "Review the original sources below and verify time-sensitive information before relying on it.",
     "lastReviewed": "Last reviewed {date}",
     "academyCalloutHeading": "Prefer structured learning?",
     "academyCalloutDescription": "Ownward Academy organizes Guide articles into ordered learning paths with completion tracking. No account required.",
@@ -977,6 +987,43 @@
     "disclosureLabel": "Important notice",
     "learnMenuLabel": "Learn",
     "learnMenuGuideDescription": "Browse reference articles by topic",
-    "learnMenuAcademyDescription": "Follow ordered learning paths"
+    "learnMenuAcademyDescription": "Follow ordered learning paths",
+    "upcomingModuleCount": "{count} {count, plural, one {upcoming module} other {upcoming modules}}"
+  },
+  "UrgencyTriage": {
+    "heading": "Is this actually urgent?",
+    "description": "Answer four questions to identify what kind of response this situation actually requires.",
+    "yes": "Yes",
+    "no": "No",
+    "reset": "Start over",
+    "resultLabel": "Suggested response",
+    "questions": {
+      "q1": "Is someone in immediate danger, or are there new or severe physical symptoms that may require urgent medical attention?",
+      "q2": "Is there a real external deadline within the next 24 hours with a material consequence?",
+      "q3": "Is the decision difficult to reverse, expensive, public, contractual, or likely to affect another person significantly?",
+      "q4": "Can you preserve your options by communicating, requesting time, delegating, or taking a smaller temporary action?"
+    },
+    "outcomes": {
+      "protect": {
+        "title": "Protect",
+        "message": "Safety or immediate health is the priority. Address that first before considering anything else."
+      },
+      "preserve": {
+        "title": "Preserve",
+        "message": "A real deadline exists. Identify specifically what happens if you miss it, and decide based on that information."
+      },
+      "create-decision-space": {
+        "title": "Create decision space",
+        "message": "This decision carries weight. You have time to slow down, gather information, and make a more considered choice."
+      },
+      "schedule": {
+        "title": "Schedule",
+        "message": "This does not require an immediate response. Schedule a time to address it when you are in a better position to think clearly."
+      }
+    },
+    "appendMessages": {
+      "option-preserving": "You have identified a way to preserve options. Use that step before making the larger decision.",
+      "identify-help": "The next useful step may be to identify who has the authority, knowledge, or capacity to help."
+    }
   }
 }

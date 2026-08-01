@@ -50,7 +50,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   const statusLabel = isAvailable ? t('statusAvailable') : t('statusComingSoon');
 
-  // Resolve lesson articles for available courses
   const lessonsWithArticles = isAvailable
     ? (course.lessons ?? []).flatMap((lesson, index) => {
         const article = getAcademyLessonArticle(lesson);
@@ -59,9 +58,17 @@ export default async function CoursePage({ params }: CoursePageProps) {
       })
     : [];
 
+  const hasPlannedModules = (course.plannedModules ?? []).length > 0;
+
+  const upcomingModulesHeading = locale === 'es'
+    ? 'Próximos módulos en desarrollo'
+    : 'Next modules in development';
+  const upcomingModulesDescription = locale === 'es'
+    ? 'Las siguientes lecciones continúan formando parte del curso planificado y se agregarán cuando se publiquen como artículos completos de la Guía.'
+    : 'The lessons below remain part of the planned course and will be added as complete Guide articles are published.';
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 text-slate-100 sm:px-6">
-      {/* Breadcrumbs */}
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-slate-400">
         <Link href="/academy" className="hover:text-white transition">{t('breadcrumbAcademy')}</Link>
         <span aria-hidden="true">›</span>
@@ -69,7 +76,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
       </nav>
 
       <article>
-        {/* Header */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
             <span
@@ -104,7 +110,16 @@ export default async function CoursePage({ params }: CoursePageProps) {
           ) : null}
         </div>
 
-        {/* Available course: progress + lessons */}
+        {course.disclosure ? (
+          <aside
+            aria-label={t('disclosureLabel')}
+            className="mt-6 rounded-xl border border-slate-700 bg-slate-900/40 p-4 text-sm leading-6 text-slate-400"
+          >
+            <p className="font-semibold text-slate-300">{t('disclosureLabel')}</p>
+            <p className="mt-1">{getLocalizedAcademyText(course.disclosure, locale)}</p>
+          </aside>
+        ) : null}
+
         {isAvailable ? (
           <div className="mt-8">
             <CourseProgressPanel
@@ -115,16 +130,35 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </div>
         ) : null}
 
-        {/* Coming-soon course */}
+        {isAvailable && hasPlannedModules ? (
+          <section aria-labelledby="upcoming-modules-heading" className="mt-8">
+            <h2 id="upcoming-modules-heading" className="text-xl font-semibold text-white">
+              {upcomingModulesHeading}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">{upcomingModulesDescription}</p>
+            <ol className="mt-4 space-y-3">
+              {(course.plannedModules ?? []).map((module, i) => (
+                <li
+                  key={module.id}
+                  className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-3 opacity-60"
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-500">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-slate-400">{getLocalizedAcademyText(module.title, locale)}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
         {!isAvailable ? (
           <div className="mt-8 space-y-6">
-            {/* Coming soon notice */}
             <div className="rounded-2xl border border-amber-900/30 bg-amber-950/10 p-6">
               <h2 className="text-lg font-semibold text-amber-200">{t('comingSoonHeading')}</h2>
               <p className="mt-2 text-sm leading-6 text-amber-100/80">{t('comingSoonDescription')}</p>
             </div>
 
-            {/* Planned modules */}
             {course.plannedModules && course.plannedModules.length > 0 ? (
               <section aria-labelledby="planned-curriculum-heading">
                 <h2 id="planned-curriculum-heading" className="text-xl font-semibold text-white">
@@ -139,25 +173,13 @@ export default async function CoursePage({ params }: CoursePageProps) {
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-500">
                         {i + 1}
                       </span>
-                      <span className="text-sm text-slate-300">{module.title}</span>
+                      <span className="text-sm text-slate-300">{getLocalizedAcademyText(module.title, locale)}</span>
                     </li>
                   ))}
                 </ol>
               </section>
             ) : null}
 
-            {/* Disclosure */}
-            {course.disclosure ? (
-              <aside
-                aria-label={t('disclosureLabel')}
-                className="rounded-xl border border-slate-700 bg-slate-900/40 p-4 text-sm leading-6 text-slate-400"
-              >
-                <p className="font-semibold text-slate-300">{t('disclosureLabel')}</p>
-                <p className="mt-1">{getLocalizedAcademyText(course.disclosure, locale)}</p>
-              </aside>
-            ) : null}
-
-            {/* Guide CTA */}
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
               <p className="text-sm font-semibold text-white">{t('browseGuideInstead')}</p>
               <Link href="/guide" className="mt-3 inline-flex items-center text-sm font-semibold text-cyan-300 hover:text-cyan-200">
@@ -167,7 +189,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </div>
         ) : null}
 
-        {/* Back link */}
         <div className="mt-10 border-t border-slate-800 pt-6">
           <Link href="/academy" className="inline-flex items-center text-sm font-semibold text-cyan-300 hover:text-cyan-200">
             {t('backToAcademy')}
