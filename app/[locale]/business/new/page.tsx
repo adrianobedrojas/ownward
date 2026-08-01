@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function NewBusinessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; business_stage?: string }>;
 }) {
   const params = await searchParams;
   const { supabase, user } = await requireUser();
@@ -41,6 +41,12 @@ export default async function NewBusinessPage({
     .maybeSingle();
 
   const prefillName = (count ?? 0) === 0 ? (profile?.business_name ?? "") : "";
+
+  // Validate and prefill business_stage from search param
+  const allowedStages = new Set(['idea', 'pre_revenue', 'early', 'growth', 'established', 'mature', 'exit_ready']);
+  const prefillStage = params.business_stage && allowedStages.has(params.business_stage)
+    ? params.business_stage
+    : "";
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -153,6 +159,7 @@ export default async function NewBusinessPage({
           <select
             id="business_stage"
             name="business_stage"
+            defaultValue={prefillStage}
             className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
           >
             <option value="">Select stage...</option>

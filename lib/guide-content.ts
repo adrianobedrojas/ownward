@@ -1,4 +1,9 @@
 export const guideCategoryContent = {
+  start: {
+    title: "Start a Business",
+    description:
+      "Practical guidance for validating an idea, defining an offer, estimating startup costs, organizing formation tasks, and preparing for launch.",
+  },
   run: {
     title: "Run a Business",
     description:
@@ -1736,6 +1741,746 @@ export const guideArticles: GuideArticle[] = [
     categoryCtaLabel: "Back to Selling a Business",
     ownwardCtaHref: "/sell",
     ownwardCtaLabel: "Start preparing your business for sale",
+  },
+  // ─── Start a Business Articles ─────────────────────────────────────────────
+  {
+    slug: "validate-a-business-idea",
+    category: "start" as const,
+    title: "How to Validate a Business Idea Before Investing Heavily",
+    cardTitle: "How to Validate a Business Idea",
+    description:
+      "A practical guide to testing whether real customers will pay for your idea before you commit significant time or money.",
+    readingTime: "12 min read",
+    metadataDescription:
+      "Learn how to validate a business idea before investing heavily: define the customer problem, identify a narrow initial customer, conduct customer interviews, test assumptions, build simple prototypes, collect preorders, and distinguish genuine interest from willingness to pay.",
+    introduction: [
+      "Most business ideas fail not because the product or service was poorly built, but because the business never confirmed that enough customers wanted it and were willing to pay for it.",
+      "Validation is the process of collecting real-world evidence — before significant investment — that a business idea solves a real problem for real customers who will actually pay. It is not a guarantee of success, but it dramatically reduces the risk of building something nobody wants.",
+    ],
+    sections: [
+      {
+        title: "1. Define the customer problem clearly",
+        paragraphs: [
+          "Before testing anything, write a clear statement of the problem you believe your business will solve. Be specific. Vague problems produce vague answers.",
+          "A strong problem statement identifies who experiences the problem, what situation triggers it, why existing solutions fall short, and how often the problem occurs.",
+        ],
+        bullets: [
+          "Avoid inventing problems that exist only in your imagination",
+          "Focus on a problem you have observed directly or heard customers describe",
+          "Separate the symptom from the root cause",
+          "Identify how much the problem costs in time, money, or frustration",
+        ],
+      },
+      {
+        title: "2. Identify a narrow initial customer",
+        paragraphs: [
+          "Do not try to serve everyone at once. Early-stage businesses that focus on one narrow customer segment are easier to validate, easier to market to, and more likely to generate useful feedback.",
+          "Define the smallest specific group of people who experience this problem most acutely and who are most likely to buy first.",
+        ],
+        bullets: [
+          "Pick one specific type of customer to focus on first",
+          "Identify where they live, work, or gather",
+          "Consider who has the greatest urgency or frustration with the problem",
+          "Choose a segment you can reach without a large marketing budget",
+        ],
+      },
+      {
+        title: "3. Conduct customer interviews before building anything",
+        paragraphs: [
+          "Customer interviews are conversations — not surveys, not pitches. The goal is to learn how the customer currently experiences the problem, not to convince them to buy your solution.",
+          "Ask open-ended questions. Listen more than you speak. Focus on their past behavior, not hypothetical future behavior.",
+        ],
+        steps: [
+          "Identify 5–10 potential customers who fit your target profile",
+          "Ask: 'Tell me about the last time you experienced this problem.'",
+          "Ask: 'What do you currently do to solve it?'",
+          "Ask: 'How much does this problem cost you in time or money?'",
+          "Ask: 'What would an ideal solution look like for you?'",
+          "Record what you hear — not what you hoped to hear",
+        ],
+      },
+      {
+        title: "4. Test your assumptions before building",
+        paragraphs: [
+          "Every business idea rests on assumptions. Write them down explicitly and identify which ones are most critical — and most uncertain.",
+          "The most important assumptions to test are usually: customers have this problem, customers will pay for a solution, you can reach enough of them at a reasonable cost, and you can deliver the solution at a price that covers your costs.",
+        ],
+        bullets: [
+          "List your five most critical assumptions",
+          "Rank them by how uncertain you are",
+          "Design the cheapest possible test for each one",
+          "Accept disconfirming evidence — it is the most valuable kind",
+        ],
+      },
+      {
+        title: "5. Build a simple prototype or minimum test",
+        paragraphs: [
+          "A prototype does not need to be your final product. Its purpose is to generate feedback and test whether customers will engage with your proposed solution.",
+          "In many service businesses, the prototype is simply a description of the service, a one-page proposal, or a manually delivered version of what you eventually plan to automate.",
+        ],
+        bullets: [
+          "Create the simplest possible version you can show or describe to a potential customer",
+          "A landing page, a written description, a hand-drawn sketch, or a one-page summary can all serve as a prototype",
+          "The goal is learning, not impressing",
+          "Do not invest in branding, legal setup, or technology until you have validated the core idea",
+        ],
+      },
+      {
+        title: "6. Collect preorders or letters of intent",
+        paragraphs: [
+          "The strongest validation signal is money. A customer who pays, deposits, or signs a letter of intent is demonstrating genuine commitment — not just polite encouragement.",
+          "You do not need a finished product to take a preorder. Many businesses successfully presell services before launching, provided they are honest with customers about timing and what they are buying.",
+        ],
+        bullets: [
+          "Offer a discounted first session or early-access price",
+          "Ask for a small deposit to hold a spot",
+          "Request a written letter of intent to purchase",
+          "Count only commitments where money changed hands or a formal commitment was made",
+        ],
+      },
+      {
+        title: "7. Distinguish interest from willingness to pay",
+        paragraphs: [
+          "One of the most common validation mistakes is treating positive feedback as validation. People are naturally encouraging. A potential customer saying 'that sounds great' is not the same as paying for it.",
+          "Test willingness to pay by making a real ask. When you ask someone to actually pay, you get a far more accurate signal than when you ask whether they 'would' pay in a hypothetical scenario.",
+        ],
+        bullets: [
+          "Positive reactions and enthusiasm are encouraging but not validation",
+          "Email list signups are early interest signals, not purchase commitments",
+          "Actual payment, deposits, or signed commitments are the strongest signals",
+          "If no one will pay even a small amount at the test stage, revisit your price or problem definition",
+        ],
+      },
+      {
+        title: "8. Recognize warning signs",
+        paragraphs: [
+          "Not all feedback is equally useful. Watch for these warning signs that a business idea may need significant reconsideration before you invest further.",
+        ],
+        bullets: [
+          "Everyone says they like the idea but nobody will commit to paying",
+          "You can only describe a hypothetical customer but cannot find a real one to interview",
+          "The problem is not painful or urgent enough for customers to change their current behavior",
+          "Customers already have a free or nearly free solution they are happy with",
+          "The price you need to charge to cover your costs is much higher than what customers say they would pay",
+          "All your positive feedback comes from friends and family rather than your actual target customer",
+        ],
+      },
+    ],
+    actionPlan: [
+      { week: "Day 1–2", focus: "Write a clear problem statement and identify 10 potential customers to interview" },
+      { week: "Day 3–4", focus: "Conduct at least 5 customer interviews focused on the problem, not your solution" },
+      { week: "Day 5", focus: "Document what you learned and identify your most critical untested assumptions" },
+      { week: "Day 6–7", focus: "Build or describe the simplest possible version of your solution and make a real offer to 2–3 customers" },
+    ],
+    actionPlanTitle: "Seven-day validation plan",
+    checklist: [
+      "Customer problem described in one specific sentence",
+      "Initial customer segment identified and narrowed",
+      "At least 5 customer interviews completed",
+      "Interview responses documented honestly",
+      "Key assumptions listed and ranked by uncertainty",
+      "Simple prototype or description created",
+      "Real offer made to at least 3 potential customers",
+      "At least one preorder, deposit, or letter of intent collected",
+      "Warning signs reviewed and addressed",
+    ],
+    categoryCtaHref: "/guide/start",
+    categoryCtaLabel: "Back to Start a Business",
+    ownwardCtaHref: "/start",
+    ownwardCtaLabel: "Build your startup plan",
+  },
+  {
+    slug: "choose-a-business-model-and-first-offer",
+    category: "start" as const,
+    title: "How to Choose a Business Model and Create Your First Offer",
+    cardTitle: "Choose a Business Model and First Offer",
+    description:
+      "Learn how to select a revenue model, define a minimum viable offer, set a workable price, and test it with real customers.",
+    readingTime: "11 min read",
+    metadataDescription:
+      "A practical guide to choosing a business model and creating your first offer: product vs. service, one-time vs. recurring revenue, pricing logic, delivery costs, gross margin, and testing your offer with real customers.",
+    introduction: [
+      "A business model is a description of how your business creates value for customers and how it captures some of that value as revenue. Choosing the right model early simplifies pricing, delivery, marketing, and eventually, growth.",
+      "Your first offer does not need to be your final offer. It needs to be specific enough that a customer can say yes or no, simple enough that you can actually deliver it, and priced so that you understand whether you can make money.",
+    ],
+    sections: [
+      {
+        title: "1. Product versus service",
+        paragraphs: [
+          "The most basic distinction is whether you are selling a product (something physical or digital that customers take ownership of) or a service (something you do for or with a customer).",
+          "Products can often be scaled without proportional increases in labor. Services are typically constrained by the owner's time or team capacity. Many businesses combine both.",
+        ],
+        bullets: [
+          "Product: physical goods, digital downloads, software, courses, templates",
+          "Service: consulting, cleaning, tutoring, design, repair, coaching, installation",
+          "Product + service: a tool with implementation support, a product with a training program",
+        ],
+      },
+      {
+        title: "2. One-time versus recurring revenue",
+        paragraphs: [
+          "One-time transactions are straightforward but require you to continuously find new customers. Recurring revenue — subscriptions, retainers, service contracts, or memberships — creates more predictable income and higher business value over time.",
+          "Many service businesses can add a recurring element even if their core offering is project-based. A one-time setup service can add a monthly maintenance retainer.",
+        ],
+        bullets: [
+          "One-time: project fees, product sales, consulting engagements",
+          "Recurring: monthly subscriptions, service retainers, maintenance contracts, memberships",
+          "Hybrid: a one-time project followed by a monthly service agreement",
+        ],
+      },
+      {
+        title: "3. Pricing logic",
+        paragraphs: [
+          "Your price must cover your direct costs, contribute to your fixed operating costs, and leave a margin that justifies running the business.",
+          "At minimum, understand your cost floor (below which you lose money), your market context (what alternatives cost), and your value anchor (the specific benefit or time/money savings the customer receives).",
+        ],
+        bullets: [
+          "Cost floor: add up all direct costs to deliver this offer, then divide by volume",
+          "Market context: research what similar offerings cost in your target market",
+          "Value anchor: what is the outcome worth to the customer?",
+          "Test your price with real customers rather than guessing from a spreadsheet",
+          "Start with a price you can defend, then adjust based on what you learn",
+        ],
+      },
+      {
+        title: "4. Understand delivery costs",
+        paragraphs: [
+          "Before committing to a price, document every cost involved in delivering the offer: materials, labor time, software, travel, packaging, fulfillment, and any variable costs that increase with volume.",
+          "Many new businesses underprice their services because they forget to account for their own time, the cost of acquiring each customer, support costs, and rework.",
+        ],
+        bullets: [
+          "Materials or components",
+          "Your own time (at a realistic hourly rate)",
+          "Subcontractor or employee labor",
+          "Software and platform fees",
+          "Travel, shipping, or fulfillment",
+          "Customer acquisition cost",
+          "Support and follow-up time",
+        ],
+      },
+      {
+        title: "5. Gross margin and why it matters",
+        paragraphs: [
+          "Gross margin is the difference between your revenue and the direct costs of delivering your product or service. A business with thin gross margins has very little room for fixed costs, growth investment, or error.",
+          "Healthy gross margins vary by industry, but as a rough starting point, service businesses commonly target gross margins above 50%, while product businesses vary widely depending on distribution and manufacturing costs.",
+          "These are general concepts only, not specific financial advice. Review your specific cost structure with a qualified accountant.",
+        ],
+      },
+      {
+        title: "6. Define the scope and boundaries of your first offer",
+        paragraphs: [
+          "A common mistake in early-stage businesses is creating an offer that is too broad. A well-defined offer has a clear deliverable, a defined timeline, and specific boundaries that tell customers what is and is not included.",
+          "Scope creep — adding more work than originally agreed — is one of the most common reasons service businesses undercharge and burn out early.",
+        ],
+        bullets: [
+          "Define exactly what the customer receives",
+          "Define what is not included",
+          "Define the timeline and process",
+          "Define what the customer needs to provide",
+          "Write this down as a brief service description or scope of work",
+        ],
+      },
+      {
+        title: "7. Create a minimum viable offer",
+        paragraphs: [
+          "A minimum viable offer (MVO) is the simplest version of your service or product that delivers enough value for a customer to pay for it and that you can actually deliver in the near term.",
+          "The MVO is not the finished version of your business — it is the version that generates your first revenue and your first real customer feedback.",
+        ],
+        steps: [
+          "Write a one-paragraph description of exactly what the customer gets",
+          "State the price clearly",
+          "Describe the delivery process in 3–5 simple steps",
+          "List what the customer needs to provide or do",
+          "Remove any elements you cannot reliably deliver right now",
+        ],
+      },
+      {
+        title: "8. Test the offer with real customers",
+        paragraphs: [
+          "Once you have a written offer, present it to 3–5 potential customers and ask them to buy it. Do not ask whether they 'would' buy it in general — make the actual offer and observe the response.",
+          "Common responses to look for: immediate acceptance, price objections, scope confusion, feature requests, or rejection. Each response is useful information for refining the offer.",
+        ],
+      },
+    ],
+    checklist: [
+      "Decided whether the core offering is a product, service, or both",
+      "Identified the revenue model (one-time, recurring, or hybrid)",
+      "Listed all direct costs of delivering the first offer",
+      "Calculated a minimum price that covers costs and generates a margin",
+      "Researched what comparable offerings cost in the market",
+      "Wrote a clear description of the minimum viable offer",
+      "Defined the scope and what is not included",
+      "Made a real offer to at least 3 potential customers",
+    ],
+    categoryCtaHref: "/guide/start",
+    categoryCtaLabel: "Back to Start a Business",
+    ownwardCtaHref: "/start",
+    ownwardCtaLabel: "Build your startup plan",
+  },
+  {
+    slug: "write-a-one-page-business-plan",
+    category: "start" as const,
+    title: "How to Write a Practical One-Page Business Plan",
+    cardTitle: "How to Write a One-Page Business Plan",
+    description:
+      "A practical guide to writing a concise, useful business plan that captures the core of your idea on a single page.",
+    readingTime: "9 min read",
+    metadataDescription:
+      "Learn how to write a one-page business plan covering customer, problem, solution, offer, revenue model, sales channels, key costs, key activities, risks, and first 90-day priorities.",
+    introduction: [
+      "A long business plan rarely improves a business's chance of success. A concise, honest one-page plan that you actually use and update is far more valuable than a detailed document that sits in a folder untouched.",
+      "The goal of a one-page plan is to force clarity on the key decisions every business must answer: Who are you serving? What problem are you solving? How will you make money? What will it cost? What are the biggest risks? And what needs to happen in the next 90 days?",
+    ],
+    sections: [
+      {
+        title: "1. Customer",
+        paragraphs: [
+          "Describe your primary customer in one or two sentences. Be specific. 'Small business owners' is too broad. 'Independent restaurant owners with two to five locations in mid-sized U.S. cities' is more useful.",
+          "The clearer your customer definition, the easier it is to find them, reach them, and build an offer that fits their specific situation.",
+        ],
+      },
+      {
+        title: "2. Problem",
+        paragraphs: [
+          "Describe the specific problem your customer experiences. Explain why it matters to them and why existing solutions are inadequate.",
+          "Good problem statements are grounded in real customer evidence — ideally from interviews or direct observation — not in assumption.",
+        ],
+      },
+      {
+        title: "3. Solution",
+        paragraphs: [
+          "Describe how your business solves the customer's problem. Keep it simple. One or two sentences that describe the core mechanism of your solution.",
+          "This section should connect directly to the problem — make clear that your solution addresses the specific pain point you described.",
+        ],
+      },
+      {
+        title: "4. Offer",
+        paragraphs: [
+          "Describe what the customer actually buys. Include the product or service name, the primary deliverable, and the price or pricing model.",
+          "The offer is the commercial version of your solution — what goes on the invoice, what the customer pays for, and what they receive.",
+        ],
+      },
+      {
+        title: "5. Revenue model",
+        paragraphs: [
+          "Explain how the business earns money. One-time transactions? Monthly subscriptions? Project fees? Usage-based pricing? Commission?",
+          "A clear revenue model helps you forecast cash flow, set sales goals, and understand the financial consequences of growth or a slow month.",
+        ],
+      },
+      {
+        title: "6. Sales channels",
+        paragraphs: [
+          "Describe the two or three specific ways you will reach and convert customers. Be specific: direct outreach to local businesses, referrals from existing customers, social media advertising, search engine optimization, or in-person events.",
+          "Avoid listing channels you do not have a specific plan to use. One channel you will actually execute is worth more than ten channels listed on paper.",
+        ],
+      },
+      {
+        title: "7. Key costs",
+        paragraphs: [
+          "List the three to five most significant cost categories your business will incur. Separate one-time startup costs from recurring monthly costs.",
+          "Common categories include labor, materials, software, equipment, marketing, insurance, and facilities. Do not try to list every expense — focus on the ones that determine whether the business is financially viable.",
+        ],
+      },
+      {
+        title: "8. Key activities",
+        paragraphs: [
+          "List the two or three activities that are most critical to delivering your offer and generating revenue. These are the things you must do well every day or every week for the business to work.",
+          "For a service business this might be client work, follow-up, and invoicing. For a product business, it might be sourcing, fulfillment, and customer support.",
+        ],
+      },
+      {
+        title: "9. Risks",
+        paragraphs: [
+          "List the two or three biggest risks or uncertainties in your plan. A risk is a situation that could prevent the business from working even if you execute everything else correctly.",
+          "Identifying risks clearly is not pessimism — it is practical planning. A risk you have named is a risk you can monitor and manage.",
+        ],
+        bullets: [
+          "What if customer demand is lower than expected?",
+          "What if a key supplier or platform is unavailable?",
+          "What if a competitor responds aggressively to your entry?",
+          "What if the economics only work at a scale you cannot yet reach?",
+          "What if the owner cannot deliver the volume required to break even?",
+        ],
+      },
+      {
+        title: "10. First 90-day priorities",
+        paragraphs: [
+          "List three to five specific, measurable actions you will complete in the next 90 days to move the business forward. Each priority should be something you can complete or make clear progress on within that timeframe.",
+          "Effective priorities are actions, not goals. 'Complete three paid client projects' is an action priority. 'Grow the business' is not.",
+        ],
+      },
+      {
+        title: "Keep the plan honest and current",
+        paragraphs: [
+          "A one-page plan is only useful if it reflects your actual current understanding of the business. Update it when assumptions are proved wrong, when you learn something significant from customers, or when the market changes.",
+          "Review it monthly and revise as needed. A plan that does not reflect reality is just a document.",
+        ],
+      },
+    ],
+    checklist: [
+      "Customer clearly defined in one or two specific sentences",
+      "Problem grounded in real evidence or customer interviews",
+      "Solution clearly connected to the stated problem",
+      "Offer described with a specific deliverable and price",
+      "Revenue model clearly stated",
+      "Two or three specific sales channels identified",
+      "Key costs listed and separated into one-time and recurring",
+      "Key activities listed",
+      "Top two or three risks named",
+      "First 90-day priorities defined as specific actions",
+    ],
+    categoryCtaHref: "/guide/start",
+    categoryCtaLabel: "Back to Start a Business",
+    ownwardCtaHref: "/start",
+    ownwardCtaLabel: "Build your startup plan",
+  },
+  {
+    slug: "estimate-startup-costs-and-pricing",
+    category: "start" as const,
+    title: "How to Estimate Startup Costs and Set an Initial Price",
+    cardTitle: "Estimate Startup Costs and Set an Initial Price",
+    description:
+      "Learn how to estimate what it will cost to launch your business, understand your break-even point, and set a starting price that works.",
+    readingTime: "10 min read",
+    metadataDescription:
+      "A practical guide to estimating startup costs and setting an initial price: one-time and recurring costs, direct costs, owner compensation, contingency, contribution margin, break-even reasoning, and avoiding false financial precision.",
+    introduction: [
+      "Most new businesses underestimate what it costs to start. They focus on the obvious setup costs — equipment, website, registration — while forgetting slower-building costs like customer acquisition, software subscriptions, professional services, and the cost of their own time before the business becomes profitable.",
+      "A good startup cost estimate does not guarantee financial success. But an honest estimate helps you understand how much capital you need, how long you have before you must generate revenue, and what price you need to charge to cover your costs.",
+      "Nothing in this article is financial, tax, or accounting advice. Consult a qualified professional before making significant financial decisions.",
+    ],
+    sections: [
+      {
+        title: "1. One-time startup costs",
+        paragraphs: [
+          "One-time costs are expenses you pay to set up the business that do not recur monthly. List every item you need to launch and estimate a realistic cost for each.",
+        ],
+        bullets: [
+          "Equipment, tools, or machinery",
+          "Initial inventory or materials",
+          "Website design or development",
+          "Legal formation costs (entity registration, professional fees)",
+          "Initial branding and marketing materials",
+          "Deposits (rent, utilities, or equipment)",
+          "Initial training or certification",
+          "Software with annual or one-time pricing",
+          "Business banking setup costs",
+        ],
+      },
+      {
+        title: "2. Recurring monthly operating costs",
+        paragraphs: [
+          "Recurring costs are the expenses the business incurs every month regardless of how much revenue it generates. These are your fixed costs and must be covered before the business reaches profitability.",
+        ],
+        bullets: [
+          "Rent or workspace fees",
+          "Software subscriptions",
+          "Insurance premiums",
+          "Phone, internet, and utilities",
+          "Marketing spend (advertising, content, or promotion)",
+          "Accounting or bookkeeping services",
+          "Contractor or employee costs",
+          "Loan repayments",
+        ],
+      },
+      {
+        title: "3. Direct costs per unit of sale",
+        paragraphs: [
+          "Direct costs — also called cost of goods sold (COGS) or cost of revenue — are the costs that increase each time you deliver your product or service. These vary directly with volume.",
+        ],
+        bullets: [
+          "Materials or components per unit",
+          "Labor time per project or session",
+          "Packaging and shipping per order",
+          "Payment processing fees per transaction",
+          "Subcontractor costs per engagement",
+        ],
+      },
+      {
+        title: "4. Include owner compensation",
+        paragraphs: [
+          "Many new business owners forget to account for their own compensation when estimating costs. If you plan to work in the business, your time has a cost — even if you are not drawing a salary yet.",
+          "Include a realistic estimate of what your time is worth in your financial model, even if you defer paying yourself until the business has cash flow to support it.",
+        ],
+      },
+      {
+        title: "5. Add a contingency",
+        paragraphs: [
+          "Real costs consistently run higher than estimates. Equipment breaks. Services take longer. Marketing does not work as planned. Regulations require additional steps.",
+          "A conservative approach is to add a 15–25% contingency on top of your total cost estimate. This buffer reduces the chance that an unexpected expense derails the business in its early months.",
+        ],
+      },
+      {
+        title: "6. Understand contribution margin",
+        paragraphs: [
+          "Contribution margin is the amount of revenue left after direct costs per unit or transaction. It is the amount each sale contributes toward covering your fixed costs and eventually generating profit.",
+          "If your selling price is $100 and your direct costs per sale are $40, your contribution margin is $60. Divide your total monthly fixed costs by $60 to find the minimum number of sales required to break even.",
+          "This is a simplified illustration — actual margin calculations depend on your specific cost structure. Consult a qualified accountant for your specific situation.",
+        ],
+      },
+      {
+        title: "7. Think through break-even reasoning",
+        paragraphs: [
+          "Break-even is the point at which your total revenue equals your total costs. At break-even, you are covering all expenses but not yet generating net profit.",
+          "Break-even analysis helps you understand whether the business is financially viable at a realistic volume and price. If your break-even requires more customers or higher prices than your market reasonably supports, you need to reconsider the model before investing further.",
+        ],
+        bullets: [
+          "Total monthly fixed costs ÷ contribution margin per unit = break-even units per month",
+          "Compare break-even volume to realistic monthly demand in your target market",
+          "If break-even requires an unrealistic number of customers, revisit pricing or cost structure",
+          "A break-even calculation is a planning tool, not a guarantee of results",
+        ],
+      },
+      {
+        title: "8. Test your prices before finalizing them",
+        paragraphs: [
+          "Financial models estimate what should work in theory. Real pricing requires testing with real customers.",
+          "Before launching, make actual offers at your planned price to at least five potential customers. The responses — acceptance, hesitation, negotiation, or rejection — tell you far more than any spreadsheet.",
+        ],
+      },
+      {
+        title: "9. Avoid false precision",
+        paragraphs: [
+          "Startup financial estimates are inherently uncertain. A spreadsheet that calculates projected revenue to the dollar creates an illusion of precision that does not exist.",
+          "Use estimates as planning tools to understand the rough shape of the business economics. Do not treat them as forecasts. Update them as you learn from real customers and real expenses.",
+        ],
+      },
+    ],
+    checklist: [
+      "One-time startup costs listed and estimated",
+      "Monthly recurring costs listed and estimated",
+      "Direct costs per unit or project identified",
+      "Owner compensation included in the cost model",
+      "Contingency buffer added (15–25% recommended)",
+      "Contribution margin calculated",
+      "Break-even volume estimated and compared to realistic demand",
+      "Initial price tested with real potential customers",
+      "Total funding needed estimated",
+    ],
+    categoryCtaHref: "/guide/start",
+    categoryCtaLabel: "Back to Start a Business",
+    ownwardCtaHref: "/start",
+    ownwardCtaLabel: "Build your startup plan",
+  },
+  {
+    slug: "business-launch-checklist",
+    category: "start" as const,
+    title: "A Practical Checklist for Launching a Small Business",
+    cardTitle: "Small Business Launch Checklist",
+    description:
+      "A comprehensive pre-launch checklist covering validation, formation, operations, marketing, and your first-customer plan.",
+    readingTime: "10 min read",
+    metadataDescription:
+      "A practical checklist for launching a small business: idea validation, name research, legal structure research, registrations, licenses and permits, business banking, bookkeeping, contracts, insurance, website, payment collection, and a 30-day launch plan.",
+    introduction: [
+      "Launching a business involves dozens of tasks across legal, financial, operational, and marketing areas. Not all tasks are equal in importance or timing, and many requirements vary by industry, jurisdiction, and business type.",
+      "This checklist organizes common pre-launch tasks into logical groups. Not every item applies to every business — use it as a reference to identify what needs attention in your specific situation, and verify location-specific requirements through official government sources and qualified professionals.",
+    ],
+    sections: [
+      {
+        title: "Validation",
+        paragraphs: [
+          "Before investing in formation, equipment, or infrastructure, confirm that real customers want what you are offering.",
+        ],
+        bullets: [
+          "Customer problem clearly defined",
+          "At least 5 interviews or conversations with potential customers completed",
+          "Core assumptions identified and tested",
+          "Minimum viable offer created and presented to potential customers",
+          "At least one preorder, deposit, or commitment collected (where applicable)",
+          "Pricing tested with real customers",
+        ],
+      },
+      {
+        title: "Business name research",
+        paragraphs: [
+          "Before committing to a name, conduct basic research to avoid conflicts. Requirements and processes vary by jurisdiction.",
+        ],
+        bullets: [
+          "Business name availability checked in your state or jurisdiction",
+          "Federal trademark database reviewed (USPTO in the US — verify at the official USPTO website)",
+          "Domain name availability checked",
+          "Social media handles checked",
+          "DBA (doing business as) registration requirements reviewed if operating under a trade name",
+        ],
+      },
+      {
+        title: "Jurisdiction and legal structure research",
+        paragraphs: [
+          "Legal structure and registration requirements vary significantly by country, state, and business type. This checklist does not provide legal advice — verify all requirements with official government sources and a qualified professional.",
+        ],
+        bullets: [
+          "Formation jurisdiction identified (where you will form and operate)",
+          "Common legal structures researched for your situation (sole proprietorship, partnership, LLC, corporation, etc.)",
+          "Qualified legal or accounting professional consulted if uncertain",
+          "Registration requirements confirmed through official government sources",
+        ],
+      },
+      {
+        title: "Registrations",
+        paragraphs: [
+          "Required registrations depend on your legal structure, location, and industry. Consult your state, provincial, or national business registration authority.",
+        ],
+        bullets: [
+          "Entity registration completed (if forming an LLC, corporation, or other formal entity)",
+          "Employer Identification Number (EIN) or equivalent tax identification obtained (in the US, apply at IRS.gov)",
+          "State or local tax registration completed as required",
+          "DBA or trade name registration filed if operating under a different name",
+          "Foreign qualification filed if operating in multiple states",
+        ],
+      },
+      {
+        title: "Licenses and permits",
+        paragraphs: [
+          "Licenses and permits vary widely by industry, location, and activity. Research requirements through your local, state or provincial, and national government sources.",
+        ],
+        bullets: [
+          "General business license requirements checked for your city or county",
+          "Industry-specific license requirements researched",
+          "Professional license requirements verified if providing licensed services",
+          "Zoning and land-use requirements reviewed for your business location or home office",
+          "Health and safety permits investigated if preparing food, handling chemicals, or serving the public",
+          "Signage permits reviewed if applicable",
+        ],
+      },
+      {
+        title: "Business banking",
+        paragraphs: [
+          "Separating personal and business finances is a fundamental step for recordkeeping, liability protection, and tax compliance.",
+        ],
+        bullets: [
+          "Business checking account opened",
+          "Business credit card or debit card obtained (if desired)",
+          "Personal and business finances kept completely separate from day one",
+          "Authorized signers identified",
+        ],
+      },
+      {
+        title: "Bookkeeping and tax preparation",
+        paragraphs: [
+          "Accurate records are essential for understanding your financial position, preparing tax returns, and applying for loans. Requirements and frequency vary by location and entity type.",
+        ],
+        bullets: [
+          "Bookkeeping method selected (spreadsheet, accounting software, or professional service)",
+          "Chart of accounts created",
+          "Receipts and expense tracking process established",
+          "Invoice and payment tracking set up",
+          "Tax calendar reviewed — understand filing and payment deadlines for your jurisdiction",
+          "Qualified accountant or bookkeeper engaged if needed",
+        ],
+      },
+      {
+        title: "Contracts and operating policies",
+        paragraphs: [
+          "Basic agreements and policies protect the business and set clear expectations. Legal requirements for contracts vary — consult a lawyer for your specific situation.",
+        ],
+        bullets: [
+          "Client service agreement or contract template drafted",
+          "Refund or cancellation policy written",
+          "Privacy policy created if collecting customer data",
+          "Terms and conditions reviewed for your website or service",
+          "Independent contractor agreements prepared if using subcontractors",
+        ],
+      },
+      {
+        title: "Insurance",
+        paragraphs: [
+          "Insurance requirements vary by industry, location, and customer type. Consult a licensed insurance professional for your specific situation.",
+        ],
+        bullets: [
+          "General liability insurance investigated",
+          "Professional liability (errors and omissions) insurance investigated if providing professional advice",
+          "Commercial auto insurance investigated if using vehicles for business",
+          "Business property insurance investigated",
+          "Workers' compensation requirements verified if hiring employees",
+          "Health insurance options reviewed for owners and employees",
+        ],
+      },
+      {
+        title: "Website and communication channels",
+        paragraphs: [
+          "You do not need a complex website to launch. A simple, clear presence that communicates your offer and contact information is sufficient at the start.",
+        ],
+        bullets: [
+          "Domain name registered",
+          "Simple website or landing page live with a clear description of the offer and contact information",
+          "Business email address created",
+          "Key social profiles created (if relevant to your marketing strategy)",
+          "Google Business Profile created (if serving local customers)",
+        ],
+      },
+      {
+        title: "Payment collection",
+        paragraphs: [
+          "Set up the ability to accept payment before you start marketing. Discovering you cannot collect payment after a customer says yes is a costly delay.",
+        ],
+        bullets: [
+          "Payment processor selected and account set up",
+          "Invoice template created",
+          "Payment terms and late-payment process defined",
+          "Test transaction completed",
+        ],
+      },
+      {
+        title: "First-customer plan",
+        paragraphs: [
+          "Before launch, have a specific written plan for how you will get your first 3–5 paying customers.",
+        ],
+        bullets: [
+          "Target first customers identified by name or specific profile",
+          "Outreach approach written out step by step",
+          "First marketing channel selected and prepared",
+          "Referral request approach planned",
+          "First follow-up process defined",
+        ],
+      },
+      {
+        title: "Records and document storage",
+        paragraphs: [
+          "Establish a simple, consistent system for storing important business documents before you accumulate records without a clear organization system.",
+        ],
+        bullets: [
+          "Document storage system selected (cloud folder, document manager, or other system)",
+          "File naming convention defined",
+          "Access and backup procedures established",
+          "Sensitive documents separated and protected",
+          "Retention requirements reviewed for tax and legal documents",
+        ],
+      },
+      {
+        title: "30-day launch plan",
+        paragraphs: [
+          "Write a specific action plan for your first 30 days. Include only the actions most critical to generating your first revenue.",
+        ],
+        bullets: [
+          "First 30-day priorities written down (3–5 items only)",
+          "Target: first paying customer acquired",
+          "Target: first invoice sent and collected",
+          "Weekly check-in scheduled to review progress and adjust priorities",
+        ],
+      },
+    ],
+    checklist: [
+      "Business idea validated with real customer evidence",
+      "Business name researched and available",
+      "Legal structure researched and decided with professional input if needed",
+      "Required registrations completed",
+      "Licenses and permits researched and obtained",
+      "Business bank account opened",
+      "Bookkeeping system set up",
+      "Basic contract or service agreement created",
+      "Insurance coverage researched and obtained as appropriate",
+      "Simple website or online presence live",
+      "Payment collection set up and tested",
+      "First-customer plan written",
+      "Document storage system established",
+      "First 30-day action plan written",
+    ],
+    checklistTitle: "Pre-launch checklist",
+    categoryCtaHref: "/guide/start",
+    categoryCtaLabel: "Back to Start a Business",
+    ownwardCtaHref: "/business/new?business_stage=idea",
+    ownwardCtaLabel: "Create your business workspace",
   },
 ];
 

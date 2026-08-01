@@ -123,6 +123,22 @@ describe('i18n routing', () => {
     expect(getPathname({ locale: 'en', href: '/guide/buy/sba-loan-qualification' })).toBe('/guide/buy/sba-loan-qualification');
   });
 
+  it('supports /start route for English', () => {
+    expect(getPathname({ locale: 'en', href: '/start' })).toBe('/start');
+  });
+
+  it('supports /es/start route for Spanish', () => {
+    expect(getPathname({ locale: 'es', href: '/start' })).toBe('/es/start');
+  });
+
+  it('supports /guide/start for English', () => {
+    expect(getPathname({ locale: 'en', href: '/guide/start' })).toBe('/guide/start');
+  });
+
+  it('supports /es/guide/start for Spanish', () => {
+    expect(getPathname({ locale: 'es', href: '/guide/start' })).toBe('/es/guide/start');
+  });
+
   it('keeps checkout and download endpoints operational', () => {
     expect(isBypassedPath('/api/checkout')).toBe(true);
     expect(isBypassedPath('/api/documents/download')).toBe(true);

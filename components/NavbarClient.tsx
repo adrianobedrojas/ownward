@@ -16,6 +16,7 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
   const learnMenuRef = useRef<HTMLDetailsElement>(null);
   const t = useTranslations('Navigation');
   const navigation = [
+    { name: t('start'), href: '/start' },
     { name: t('buy'), href: '/buy' },
     { name: t('sell'), href: '/sell' },
     { name: t('features'), href: '/#features' },
