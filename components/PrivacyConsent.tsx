@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   createContext,
   useContext,
@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
+import { Link } from '@/i18n/navigation';
 import {
   PRIVACY_CONSENT_CHANGED_EVENT,
   PRIVACY_CONSENT_STORAGE_KEY,
@@ -39,6 +40,7 @@ function toDraft(consent: PrivacyConsentState | null) {
 }
 
 export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations('Privacy');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [draftConsent, setDraftConsent] = useState(toDraft(null));
@@ -85,10 +87,7 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
     }
 
     window.addEventListener(PRIVACY_PANEL_OPEN_EVENT, handleOpenPanel);
-
-    return () => {
-      window.removeEventListener(PRIVACY_PANEL_OPEN_EVENT, handleOpenPanel);
-    };
+    return () => window.removeEventListener(PRIVACY_PANEL_OPEN_EVENT, handleOpenPanel);
   }, [consent]);
 
   function commitConsent(nextConsent: typeof draftConsent) {
@@ -98,13 +97,34 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
     setIsCustomizing(false);
   }
 
-  const contextValue = useMemo<PrivacyConsentContextValue>(() => ({
-    consent,
-    hasSavedConsent: consent !== null,
-    openPanel: openPrivacyChoicesPanel,
-  }), [consent]);
+  const contextValue = useMemo<PrivacyConsentContextValue>(
+    () => ({
+      consent,
+      hasSavedConsent: consent !== null,
+      openPanel: openPrivacyChoicesPanel,
+    }),
+    [consent],
+  );
 
   const shouldShowPanel = isHydrated && (!contextValue.hasSavedConsent || isPanelOpen);
+
+  const options = [
+    {
+      key: 'functionality',
+      title: t('functionality'),
+      description: t('functionalityDescription'),
+    },
+    {
+      key: 'analytics',
+      title: t('analytics'),
+      description: t('analyticsDescription'),
+    },
+    {
+      key: 'marketing',
+      title: t('marketing'),
+      description: t('marketingDescription'),
+    },
+  ] as const;
 
   return (
     <PrivacyConsentContext.Provider value={contextValue}>
@@ -120,7 +140,7 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
           }}
           className="fixed bottom-4 left-4 z-40 rounded-full border border-slate-700 bg-slate-900/95 px-4 py-2 text-sm font-semibold text-cyan-300 shadow-lg shadow-slate-950/70 transition hover:border-cyan-400 hover:text-cyan-200"
         >
-          Privacy choices
+          {t('button')}
         </button>
       ) : null}
 
@@ -134,14 +154,9 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-                  Privacy choices
-                </p>
-                <h2 id="privacy-choices-title" className="mt-2 text-2xl font-bold text-white">
-                  Control optional storage on Ownward
-                </h2>
+                <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('panelBadge')}</p>
+                <h2 id="privacy-choices-title" className="mt-2 text-2xl font-bold text-white">{t('panelTitle')}</h2>
               </div>
-
               {contextValue.hasSavedConsent ? (
                 <button
                   type="button"
@@ -152,50 +167,25 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
                   }}
                   className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-600 hover:text-white"
                 >
-                  Close
+                  {t('close')}
                 </button>
               ) : null}
             </div>
 
-            <p className="mt-4 text-sm leading-6 text-slate-300">
-              Ownward always uses necessary storage so core site features work. Functionality,
-              analytics, and marketing stay off until you allow them. Your choices are stored only
-              in this browser.
-            </p>
+            <p className="mt-4 text-sm leading-6 text-slate-300">{t('panelDescription')}</p>
 
             <div className="mt-5 space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold text-white">Necessary</h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Keeps essential site behavior working.
-                  </p>
+                  <h3 className="font-semibold text-white">{t('necessary')}</h3>
+                  <p className="mt-1 text-sm text-slate-400">{t('necessaryDescription')}</p>
                 </div>
-                <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">
-                  Always on
-                </span>
+                <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-300">{t('alwaysOn')}</span>
               </div>
 
               {isCustomizing ? (
                 <div className="space-y-3 border-t border-slate-800 pt-4">
-                  {[
-                    {
-                      key: 'functionality',
-                      title: 'Functionality',
-                      description:
-                        'Allows optional local features such as the anonymous community response token.',
-                    },
-                    {
-                      key: 'analytics',
-                      title: 'Analytics',
-                      description: 'Allows optional measurement features if they are added later.',
-                    },
-                    {
-                      key: 'marketing',
-                      title: 'Marketing',
-                      description: 'Allows optional marketing-related storage if used later.',
-                    },
-                  ].map((option) => (
+                  {options.map((option) => (
                     <label key={option.key} className="flex items-start justify-between gap-4 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
                       <div>
                         <span className="block font-semibold text-white">{option.title}</span>
@@ -203,7 +193,7 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
                       </div>
                       <input
                         type="checkbox"
-                        checked={draftConsent[option.key as keyof typeof draftConsent]}
+                        checked={draftConsent[option.key]}
                         onChange={(event) =>
                           setDraftConsent((currentDraft) => ({
                             ...currentDraft,
@@ -224,43 +214,37 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
                 onClick={() => commitConsent({ functionality: false, analytics: false, marketing: false })}
                 className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-900"
               >
-                Reject nonessential
+                {t('reject')}
               </button>
-
               <button
                 type="button"
                 onClick={() => setIsCustomizing(true)}
                 className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-900"
               >
-                Customize
+                {t('customize')}
               </button>
-
               <button
                 type="button"
                 onClick={() => commitConsent({ functionality: true, analytics: true, marketing: true })}
                 className="rounded-lg bg-cyan-400 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
-                Accept all
+                {t('accept')}
               </button>
-
               {isCustomizing ? (
                 <button
                   type="button"
                   onClick={() => commitConsent(draftConsent)}
                   className="rounded-lg bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
-                  Save choices
+                  {t('saveChoices')}
                 </button>
               ) : null}
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-400">
-              <Link href="/privacy-choices" className="font-semibold text-cyan-300 hover:text-cyan-200">
-                Learn more
-              </Link>
-              <Link href="mailto:privacy@ownwardhub.com" className="font-semibold text-cyan-300 hover:text-cyan-200">
-                privacy@ownwardhub.com
-              </Link>
+              <Link href="/privacy" className="font-semibold text-cyan-300 hover:text-cyan-200">{t('pageBadge')}</Link>
+              <Link href="/privacy-choices" className="font-semibold text-cyan-300 hover:text-cyan-200">{t('choicesPageBadge')}</Link>
+              <Link href={`mailto:${t('contactEmail')}`} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('contactEmail')}</Link>
             </div>
           </section>
         </div>
@@ -298,11 +282,9 @@ interface OpenPrivacyChoicesButtonProps {
   className?: string;
 }
 
-export function OpenPrivacyChoicesButton({
-  children = 'Open privacy panel',
-  className,
-}: OpenPrivacyChoicesButtonProps) {
+export function OpenPrivacyChoicesButton({ children, className }: OpenPrivacyChoicesButtonProps) {
   const { openPanel } = usePrivacyConsent();
+  const t = useTranslations('Privacy');
 
   return (
     <button
@@ -313,7 +295,7 @@ export function OpenPrivacyChoicesButton({
         'rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200'
       }
     >
-      {children}
+      {children ?? t('choicesPageOpenPanel')}
     </button>
   );
 }

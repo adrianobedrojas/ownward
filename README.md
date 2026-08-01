@@ -15,6 +15,9 @@ Create `.env.local` with:
 - `STRIPE_PRICE_STARTER`
 - `STRIPE_PRICE_BUILDER`
 - `STRIPE_PRICE_PRO`
+- `STRIPE_PRICE_FEATURED_LISTING` — Stripe Price ID for the one-time featured-listing product (required to enable featured listing checkout)
+- `FEATURED_LISTING_DURATION_DAYS` — Number of days a paid featured promotion lasts (default: `30`; must be a positive integer)
+- `ALLOWED_DEV_ORIGINS` — Comma-separated dev origins allowed for Next.js server actions (example: `localhost:3000,example.github.dev`)
 
 ## Supabase setup notes
 
@@ -24,6 +27,26 @@ Create `.env.local` with:
 
 ## Stripe setup notes
 
-1. Checkout endpoint: `POST /api/checkout`
-2. Canonical webhook endpoint: `POST /api/webhooks/stripe`
-3. Configure Stripe products so the env price IDs above map to Starter, Builder, and Pro.
+1. Checkout endpoint: `POST /api/checkout` (subscription plans)
+2. Featured-listing checkout endpoint: `POST /api/featured-listings/checkout` (one-time payment)
+3. Canonical webhook endpoint: `POST /api/webhooks/stripe`
+4. Configure Stripe products so the env price IDs above map to Starter, Builder, Pro, and the featured-listing one-time product.
+5. Add `charge.refunded` to your Stripe webhook event subscriptions so refunded featured promotions are automatically cleared.
+
+## Reproducible local verification
+
+```bash
+npm ci
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+If Supabase CLI is installed, verify migrations on a clean database:
+
+```bash
+supabase db reset
+supabase db lint
+supabase gen types typescript --linked > types/database.generated.ts
+```

@@ -1,0 +1,982 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Ownward Hub | All-in-One Business Platform",
+      "description": "Manage your business, understand its value, prepare for a future sale, or discover your next opportunity—all through one connected platform."
+    },
+    "pricing": {
+      "title": "Plans & Pricing | Ownward",
+      "description": "Simple, scalable tools to build, manage, and increase your business value."
+    },
+    "buy": {
+      "title": "Buy Businesses | Ownward Hub",
+      "description": "Discover small businesses for sale and find what you want to own next."
+    },
+    "sell": {
+      "title": "Sell a Business",
+      "description": "Prepare your business, organize its records, and create a confidential listing for potential buyers."
+    },
+    "guide": {
+      "title": "Ownward Guide — Business Guidance, Tools, and Stories",
+      "description": "Practical guidance, tools, and stories for people building, growing, buying, or selling a small business."
+    },
+    "login": {
+      "title": "Log In",
+      "description": "Log in to Ownward to manage your business, marketplace activity, and documents."
+    },
+    "signup": {
+      "title": "Create Account",
+      "description": "Create an Ownward account to run, grow, buy, or prepare a business for sale."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Reset your Ownward account password."
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "description": "Set a new password for your Ownward account."
+    },
+    "checkEmail": {
+      "title": "Check Your Email",
+      "description": "Confirm your email address to finish creating your Ownward Hub account."
+    },
+    "contact": {
+      "title": "About & Contact | Ownward",
+      "description": "Contact Ownward about listings, deal rooms, or platform questions."
+    },
+    "privacy": {
+      "title": "Privacy Policy | Ownward Hub",
+      "description": "Learn how Ownward Hub collects, uses, shares, stores, and protects personal information."
+    },
+    "privacyChoices": {
+      "title": "Privacy Choices | Ownward Hub",
+      "description": "Review and manage optional privacy choices stored locally in your browser on Ownward."
+    },
+    "terms": {
+      "title": "Terms of Service | Ownward Hub",
+      "description": "Review the terms that govern the use of Ownward Hub services."
+    },
+    "academy": {
+      "title": "Ownward Academy — Structured Learning Paths for Business Owners",
+      "description": "Follow ordered learning paths on running, buying, and selling a small business. Built on trusted Guide content with lesson completion tracking."
+    }
+  },
+  "Common": {
+    "appName": "Ownward",
+    "platformName": "Ownward Hub",
+    "search": "Search",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "optional": "Optional"
+  },
+  "Navigation": {
+    "main": "Main navigation",
+    "buy": "Buy",
+    "sell": "Sell",
+    "features": "Features",
+    "pricing": "Pricing",
+    "guide": "Guide",
+    "dashboard": "Dashboard",
+    "books": "Books",
+    "vault": "Vault",
+    "messages": "Messages",
+    "logOut": "Log out",
+    "logIn": "Log in",
+    "createAccount": "Create account",
+    "menu": "Menu",
+    "selectLanguage": "Select language",
+    "tagline": "Run · Grow · Buy · Sell",
+    "academy": "Academy",
+    "learn": "Learn"
+  },
+  "Footer": {
+    "copyright": "© {year} Ownward Hub. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "privacyChoices": "Privacy Choices",
+    "terms": "Terms of Service",
+    "contact": "Contact",
+    "guide": "Guide",
+    "academy": "Academy"
+  },
+  "Home": {
+    "hero": {
+      "badge": "All-in-One Business Platform",
+      "title": "Run, grow, buy or sell a business—all in one place.",
+      "description": "Manage your business, understand its value, prepare for a future sale, or discover your next opportunity—all through one connected platform.",
+      "primaryCta": "Explore businesses",
+      "secondaryCta": "Sell a business",
+      "tertiaryCta": "Run your business",
+      "guideCta": "Learn how Ownward Hub works →"
+    },
+    "preview": {
+      "browserLabel": "ownwardhub.com/preview",
+      "tabs": [
+        "Run",
+        "Grow",
+        "Buy",
+        "Sell"
+      ],
+      "valueLabel": "Estimated Business Value",
+      "valueAmount": "$845,000",
+      "valueMeta": "Sale-readiness score: 82%",
+      "valueStatus": "Strong Operations",
+      "monthlyRevenueLabel": "Monthly Revenue",
+      "monthlyRevenueValue": "$42,500",
+      "documentsLabel": "Vault Documents",
+      "documentsValue": "24 Uploaded"
+    },
+    "journey": {
+      "badge": "Choose Your Path",
+      "title": "Where are you on your business journey?",
+      "cards": [
+        {
+          "emoji": "🏢",
+          "title": "Run",
+          "description": "Organize customers, documents, invoices, financial records, and daily operations.",
+          "cta": "Explore business tools",
+          "href": "/dashboard"
+        },
+        {
+          "emoji": "📈",
+          "title": "Grow",
+          "description": "Track performance, identify value drivers, and build a stronger business.",
+          "cta": "Explore growth tools",
+          "href": "/pricing"
+        },
+        {
+          "emoji": "🔍",
+          "title": "Buy",
+          "description": "Discover opportunities, compare businesses, and organize due diligence.",
+          "cta": "Browse businesses",
+          "href": "/buy"
+        },
+        {
+          "emoji": "🤝",
+          "title": "Sell",
+          "description": "Understand your value, prepare documentation, and connect with potential buyers.",
+          "cta": "Prepare to sell",
+          "href": "/sell"
+        }
+      ]
+    },
+    "marketplace": {
+      "badge": "Marketplace Preview",
+      "title": "Explore business opportunities",
+      "viewAll": "View all listings →",
+      "emptyTitle": "No listings yet",
+      "emptyDescription": "Be the first to list your business on Ownward Hub.",
+      "emptyCta": "List your business",
+      "categoryFallback": "Other",
+      "featured": "★ Featured",
+      "askingPrice": "Asking Price",
+      "annualRevenue": "Annual Revenue",
+      "notSet": "Not set",
+      "viewDetails": "View details"
+    },
+    "capabilities": {
+      "badge": "Platform Capabilities",
+      "title": "Everything you need in one unified ecosystem",
+      "cards": [
+        {
+          "title": "Business Operations",
+          "description": "Manage CRM relationships, generate professional invoices, track daily tasks, handle business money, and secure records in your Vault."
+        },
+        {
+          "title": "Business Value",
+          "description": "Organize your financial metrics, track valuation insights, monitor value drivers, and measure your ongoing sale readiness."
+        },
+        {
+          "title": "Transactions",
+          "description": "Publish confidential listings, connect with verified buyers, manage due-diligence requests, and collaborate inside secure deal rooms."
+        }
+      ]
+    },
+    "assessment": {
+      "title": "How prepared is your business for what comes next?",
+      "description": "Take our free interactive assessment to check your documentation, financial organization, and sale readiness.",
+      "cta": "Take the free sale-readiness check"
+    },
+    "articles": {
+      "badge": "Learn with Ownward Hub",
+      "title": "Practical guidance and real-world lessons",
+      "viewAll": "Explore the Ownward Guide →",
+      "cards": [
+        {
+          "badge": "Valuation Guide",
+          "title": "How Much Is Your Business Worth?",
+          "description": "Learn what affects value and how buyers evaluate your business.",
+          "cta": "Read article →",
+          "href": "/guide/value"
+        },
+        {
+          "badge": "Selling Guide",
+          "title": "Preparing Your Business for Sale",
+          "description": "Understand the records, systems, and documents buyers request.",
+          "cta": "Read article →",
+          "href": "/guide/sell"
+        },
+        {
+          "badge": "Financing Guide",
+          "title": "Could You Qualify for an SBA Loan?",
+          "description": "Understand eligibility, lender underwriting, residency rules, and the documents buyers should prepare.",
+          "cta": "Read article →",
+          "href": "/guide/buy/sba-loan-qualification"
+        },
+        {
+          "badge": "Owner Story",
+          "title": "The Owner-Dependence Problem",
+          "description": "Why a profitable business can still be difficult to transfer.",
+          "cta": "Read story →",
+          "href": "/guide/stories"
+        }
+      ]
+    },
+    "process": {
+      "badge": "Simple Process",
+      "title": "How Ownward Hub works",
+      "steps": [
+        {
+          "number": "1",
+          "title": "Create your profile",
+          "description": "Set up your business or buyer profile in minutes."
+        },
+        {
+          "number": "2",
+          "title": "Organize & explore",
+          "description": "Organize company records or browse verified market opportunities."
+        },
+        {
+          "number": "3",
+          "title": "Execute with clarity",
+          "description": "Grow, prepare, buy, or sell with complete confidence."
+        }
+      ]
+    },
+    "pricingPreview": {
+      "badge": "Transparent Plans",
+      "title": "Choose the right plan for your goals",
+      "mostPopular": "Most Popular",
+      "plans": [
+        {
+          "name": "Starter",
+          "price": "$5",
+          "description": "Essential organization and document vault features.",
+          "cta": "View Starter"
+        },
+        {
+          "name": "Builder",
+          "price": "$10",
+          "description": "Advanced growth tracking, valuation tools, and CRM workflows.",
+          "cta": "View Builder"
+        },
+        {
+          "name": "Pro",
+          "price": "$20",
+          "description": "Full transaction suite, deal rooms, and buyer matching.",
+          "cta": "View Pro"
+        }
+      ]
+    },
+    "finalCta": {
+      "title": "Own what comes next.",
+      "primary": "Create account",
+      "secondary": "Explore businesses"
+    }
+  },
+  "Pricing": {
+    "heroTitle": "Ownward Plans & Pricing",
+    "heroDescription": "Simple, scalable tools to build, manage, and increase your business value. Plans start at $5/month.",
+    "perMonth": "/ mo",
+    "mostPopular": "Most Popular",
+    "currentPlanBadge": "Current Plan",
+    "currentPlanSummary": "You are on the {plan} plan{suffix}.",
+    "renewsOn": " — renews {date}",
+    "cancelsOn": " — cancels {date}",
+    "manageSubscription": "Manage Subscription",
+    "managePlan": "Manage Plan",
+    "opening": "Opening…",
+    "openingPortal": "Opening portal…",
+    "processing": "Processing…",
+    "switchTo": "Switch to {plan}",
+    "signInToGet": "Sign in to get {plan}",
+    "buttons": {
+      "starter": "Get Starter",
+      "builder": "Start Builder Plan",
+      "pro": "Get Pro"
+    },
+    "errors": {
+      "billingPortal": "Unable to open billing portal.",
+      "samePlan": "You are already on this plan.",
+      "checkout": "Failed to initiate checkout.",
+      "unexpected": "An unexpected error occurred. Please try again."
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "tagline": "New owners & explorers",
+        "features": [
+          "1 Business Profile",
+          "Timeline & 10 Milestones/mo",
+          "Basic Health Checklist",
+          "Basic Valuation Range",
+          "Up to 10 Documents",
+          "Up to 500 MB storage",
+          "1 Invited Collaborator",
+          "Standard Support"
+        ]
+      },
+      "builder": {
+        "name": "Builder",
+        "tagline": "Active owners building operations",
+        "features": [
+          "Up to 2 Businesses",
+          "Revenue & Expense Tracking",
+          "Tasks, Goals & 100 Active Leads",
+          "Advanced Health Report",
+          "Detailed Valuation Estimate",
+          "Up to 100 Documents",
+          "Up to 5 GB storage",
+          "2 Invited Collaborators (owner excluded)",
+          "Standard Support"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "tagline": "Serious owners preparing to grow or sell",
+        "features": [
+          "Up to 5 Businesses",
+          "Sale-Readiness Score (10 categories)",
+          "Full Valuation Report + Weekly Refresh",
+          "Customer Concentration Lab",
+          "Seller Command Center & Pipeline",
+          "Up to 3 Active Deal Rooms",
+          "1,000 Active Leads",
+          "Up to 50 GB storage (Vault + Deal Rooms)",
+          "5 Invited Collaborators (owner excluded)",
+          "Priority Support"
+        ]
+      }
+    }
+  },
+  "Buy": {
+    "heroBadge": "Ownward Market",
+    "heroTitle": "Businesses for sale",
+    "heroDescription": "Discover small-business opportunities and find what you want to own next.",
+    "sellCta": "Sell a business",
+    "searchTitle": "Search opportunities",
+    "businessLabel": "Business",
+    "businessPlaceholder": "Search businesses",
+    "categoryLabel": "Category",
+    "locationLabel": "Location",
+    "locationPlaceholder": "City, state, or remote",
+    "searchButton": "Search",
+    "categories": {
+      "all": "All categories",
+      "services": "Services",
+      "food": "Food and beverage",
+      "retail": "Retail",
+      "construction": "Construction",
+      "marketing": "Marketing",
+      "technology": "Technology",
+      "other": "Other"
+    },
+    "featuredTitle": "Featured opportunities",
+    "featuredDescription": "Promoted listings from verified sellers.",
+    "featuredCount": "{count} featured",
+    "promoted": "Promoted",
+    "allTitle": "All business opportunities",
+    "allDescription": "Active listings available on the Ownward marketplace.",
+    "listingCount": "{count} listing{plural} found",
+    "noBusinessesTitle": "No businesses found",
+    "noBusinessesDescription": "Try adjusting your search filters or check back later for new opportunities.",
+    "allFeatured": "All matching listings are featured above.",
+    "categoryFallback": "Other",
+    "noSummary": "No summary provided yet.",
+    "askingPrice": "Asking price",
+    "revenue": "Revenue",
+    "established": "Established",
+    "notSet": "Not set",
+    "na": "N/A",
+    "viewDetails": "View details",
+    "buyersBadge": "For buyers",
+    "buyersTitle": "Find what you want to own next",
+    "buyersPoints": [
+      "Search businesses by category, location, and price.",
+      "Compare financial and operating information.",
+      "Request access to confidential business documents.",
+      "Organize offers and due-diligence tasks."
+    ],
+    "buyersCta": "Explore SBA loan qualification and lender readiness →",
+    "sellersBadge": "For sellers",
+    "sellersTitle": "Prepare and present your business",
+    "sellersPoints": [
+      "Create a confidential business listing.",
+      "Organize financial and operating records.",
+      "Prepare documents for buyer due diligence.",
+      "Connect with interested potential buyers."
+    ],
+    "sellersCta": "Start preparing to sell"
+  },
+  "Sell": {
+    "heroBadge": "Ownward Sellers",
+    "heroTitle": "Prepare your business for its next owner",
+    "heroDescription": "Organize your business information, improve sale readiness, and prepare a confidential listing for potential buyers.",
+    "draftBadge": "Listing draft",
+    "draftTitle": "Tell us about the business",
+    "draftDescription": "Start with general information. Confidential records should only be shared later through a secure deal room.",
+    "businessName": "Business name",
+    "businessNamePlaceholder": "Enter the business name",
+    "businessNameHint": "You will eventually be able to hide the business name from public listings.",
+    "businessCategory": "Business category",
+    "selectCategory": "Select a category",
+    "location": "Location",
+    "locationPlaceholder": "City, state, or remote",
+    "yearEstablished": "Year established",
+    "annualRevenue": "Annual revenue",
+    "askingPrice": "Asking price",
+    "businessSummary": "Business summary",
+    "summaryPlaceholder": "Describe what the business does, its customers, its strengths, and its opportunities for growth.",
+    "protectTitle": "Protect confidential information",
+    "protectDescription": "Do not include tax identification numbers, bank-account information, passwords, personal addresses, or confidential customer information in a public listing.",
+    "saveDraft": "Save draft listing",
+    "prepBadge": "Sale preparation",
+    "prepTitle": "Your preparation roadmap",
+    "prepSteps": [
+      {
+        "number": "1",
+        "title": "Business information",
+        "description": "Describe what the business does, where it operates, and how long it has been operating."
+      },
+      {
+        "number": "2",
+        "title": "Financial records",
+        "description": "Organize revenue, expenses, owner earnings, tax records, and outstanding obligations."
+      },
+      {
+        "number": "3",
+        "title": "Operations and assets",
+        "description": "Document equipment, systems, contracts, employees, vendors, and operating procedures."
+      },
+      {
+        "number": "4",
+        "title": "Confidential listing",
+        "description": "Prepare a summary that buyers can review without immediately revealing sensitive information."
+      }
+    ],
+    "recordsTitle": "Organize your records",
+    "recordsDescription": "Use Ownward Vault to organize contracts, financial records, receipts, tax documents, and operating information.",
+    "recordsCta": "Open Ownward Vault",
+    "reviewBadge": "Buyer review",
+    "reviewTitle": "Information buyers may review",
+    "reviewDescription": "A buyer will usually want enough information to understand the business’s financial condition, operations, customers, risks, and ownership.",
+    "reviewAreas": [
+      {
+        "title": "Financial information",
+        "description": "Revenue, expenses, profit, tax records, debts, and unpaid obligations."
+      },
+      {
+        "title": "Customers and sales",
+        "description": "Customer concentration, recurring revenue, contracts, and sales history."
+      },
+      {
+        "title": "Operations",
+        "description": "Employees, vendors, equipment, software, procedures, and daily responsibilities."
+      },
+      {
+        "title": "Legal and ownership",
+        "description": "Formation records, licenses, agreements, intellectual property, and ownership documentation."
+      }
+    ],
+    "importantTitle": "Important information",
+    "importantDescription": "Ownward is being designed as a software platform for organizing business information and connecting users. Business valuations, legal decisions, taxes, financing, negotiations, and ownership transfers may require assistance from qualified professionals."
+  },
+  "Guide": {
+    "heroBadge": "Ownward Guide",
+    "heroTitle": "Practical guidance, tools, and stories for business owners",
+    "heroDescription": "Understand your business, strengthen its core, know its value, and buy or sell with greater confidence.",
+    "situationsTitle": "What are you trying to do?",
+    "situations": [
+      {
+        "label": "Start or organize a business",
+        "href": "/guide/run"
+      },
+      {
+        "label": "Grow an existing business",
+        "href": "/guide/grow"
+      },
+      {
+        "label": "Understand what a business is worth",
+        "href": "/guide/value"
+      },
+      {
+        "label": "Prepare a business for sale",
+        "href": "/guide/sell"
+      },
+      {
+        "label": "Find a business to buy",
+        "href": "/guide/buy"
+      },
+      {
+        "label": "Learn from other owners",
+        "href": "/guide/stories"
+      }
+    ],
+    "categoriesTitle": "Primary Content Categories",
+    "categories": {
+      "run": {
+        "name": "1. Run a business",
+        "description": "Practical material for existing owners on organization, records, operations, and reducing owner dependence.",
+        "cta": "Access your business dashboard to manage tasks, customers, documents, and key metrics.",
+        "ctaLabel": "Open dashboard"
+      },
+      "grow": {
+        "name": "2. Grow a business",
+        "description": "Strategies on customer profitability, value drivers, recurring revenue, and 90-day growth planning.",
+        "cta": "Set measurable growth goals and track progress toward them with the 90-day planner.",
+        "ctaLabel": "Open growth planner"
+      },
+      "value": {
+        "name": "3. Business valuation",
+        "description": "Breakdowns of SDE, EBITDA multiples, revenue vs. profit, and valuation estimation factors.",
+        "cta": "Build a preliminary valuation scenario using your own financial inputs.",
+        "ctaLabel": "Estimate business value"
+      },
+      "sell": {
+        "name": "4. Selling a business",
+        "description": "Step-by-step guidance on confidential listings, due diligence, NDAs, CIMs, and closing.",
+        "cta": "Prepare your business for sale or create a confidential listing.",
+        "ctaLabel": "Create listing draft"
+      },
+      "buy": {
+        "name": "5. Buying a business",
+        "description": "How to evaluate listings, verify revenue, understand financing readiness, spot red flags, and navigate due diligence.",
+        "cta": "Browse active business listings and search by category or location.",
+        "ctaLabel": "Browse marketplace"
+      },
+      "stories": {
+        "name": "6. Owner stories & founder notes",
+        "description": "Real-world lessons, behind-the-scenes building notes, and relatable scenarios from business owners.",
+        "cta": "Read stories and lessons from owners who have built, grown, bought, or sold businesses.",
+        "ctaLabel": "Browse stories"
+      },
+      "resources": {
+        "name": "7. Interactive resources & checklists",
+        "description": "Downloadable checklists, calculators, and assessments.",
+        "cta": "Use practical tools to organize information and pressure-test decisions.",
+        "ctaLabel": "Explore resources"
+      }
+    },
+    "browseCategory": "Browse category →",
+    "backToGuide": "← Back to Ownward Guide",
+    "readArticle": "Read article →",
+    "articlesComingSoon": "Articles coming soon",
+    "articlesComingSoonDescription": "We are actively publishing foundational guides for this category. Check back shortly for our launch articles.",
+    "ownwardGuideLabel": "Ownward Guide",
+    "introduction": "Introduction",
+    "actionPlan": "30-day action plan",
+    "checklist": "Checklist",
+    "officialSources": "Official sources",
+    "sourcesDescription": "SBA policy and lender requirements can change. Verify the applicable rules with an SBA-participating lender before making a financial or relocation decision.",
+    "lastReviewed": "Last reviewed {date}",
+    "academyCalloutHeading": "Prefer structured learning?",
+    "academyCalloutDescription": "Ownward Academy organizes Guide articles into ordered learning paths with completion tracking. No account required.",
+    "academyCalloutCta": "Explore Academy"
+  },
+  "Authentication": {
+    "login": {
+      "badge": "Welcome back",
+      "title": "Continue your Ownward journey",
+      "description": "Access your business workspace, marketplace activity, financial records, documents, and acquisition tools.",
+      "ownersTitle": "For business owners",
+      "ownersDescription": "Manage customers, tasks, invoices, money, documents, and sale preparation.",
+      "buyersTitle": "For buyers",
+      "buyersDescription": "Review opportunities, organize due diligence, and manage potential acquisitions.",
+      "accountBadge": "Ownward account",
+      "formTitle": "Log in",
+      "formDescription": "Enter your account information to continue.",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Keep me logged in",
+      "submit": "Log in",
+      "secureNote": "Sign in securely with your Ownward account.",
+      "noAccount": "Do not have an Ownward account?",
+      "createAccount": "Create an account",
+      "returnHome": "Return to the Ownward homepage"
+    },
+    "signup": {
+      "badge": "Join Ownward",
+      "title": "Own what’s next",
+      "description": "Create an account to run your business, prepare it for sale, explore opportunities, or manage your next acquisition.",
+      "accountTypes": [
+        {
+          "title": "Business owner",
+          "description": "Run, grow, organize, and prepare your business for what comes next."
+        },
+        {
+          "title": "Business buyer",
+          "description": "Discover opportunities and organize your acquisition process."
+        },
+        {
+          "title": "Owner and buyer",
+          "description": "Manage your current business while looking for your next opportunity."
+        },
+        {
+          "title": "Advisor or agency",
+          "description": "Help business owners improve operations, grow, and prepare for a sale."
+        }
+      ],
+      "accountBadge": "Ownward account",
+      "formTitle": "Create your account",
+      "formDescription": "Tell us how you plan to use Ownward.",
+      "accountTypeLabel": "I want to use Ownward as a",
+      "selectAccountType": "Select an account type",
+      "passwordHint": "Your password must contain at least eight characters.",
+      "agreementStart": "I agree to the Ownward",
+      "terms": "terms of service",
+      "agreementMiddle": "and",
+      "privacy": "privacy policy",
+      "submit": "Create account",
+      "secureNote": "Create your secure Ownward account using Supabase authentication.",
+      "haveAccount": "Already have an Ownward account?",
+      "logIn": "Log in",
+      "returnHome": "Return to the Ownward homepage",
+      "accountTypeOptions": {
+        "owner": "Business owner",
+        "buyer": "Business buyer",
+        "owner-buyer": "Owner and buyer",
+        "advisor": "Advisor or agency"
+      }
+    },
+    "forgotPassword": {
+      "badge": "Ownward account",
+      "title": "Reset your password",
+      "description": "Enter your email address and we will send you a reset link.",
+      "checkEmailTitle": "Check your email",
+      "checkEmailDescription": "If an account exists for that address, a password reset link has been sent. Check your inbox and spam folder.",
+      "returnToLogin": "Return to login",
+      "submit": "Send reset link",
+      "missingEmail": "Please enter your email address.",
+      "genericError": "Something went wrong. Please try again."
+    },
+    "resetPassword": {
+      "badge": "Ownward account",
+      "title": "Set a new password",
+      "description": "Choose a new password for your Ownward account.",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Create a new password",
+      "confirmNewPassword": "Confirm new password",
+      "confirmNewPasswordPlaceholder": "Repeat your new password",
+      "passwordHint": "Your password must be at least 8 characters.",
+      "submit": "Update password",
+      "returnToLogin": "Return to login",
+      "errors": {
+        "weak-password": "Your password must be at least 8 characters.",
+        "password-mismatch": "Passwords do not match. Please try again.",
+        "update-failed": "Could not update your password. The reset link may have expired."
+      }
+    },
+    "checkEmail": {
+      "badge": "One more step",
+      "title": "Check your email",
+      "description": "Ownward Hub sent you a confirmation link. Open the email and select the link to activate your account.",
+      "helpTitle": "Did not receive the email?",
+      "helpPoints": [
+        "Check your spam or junk folder.",
+        "Make sure you entered the correct email address.",
+        "Allow a few minutes for the email to arrive."
+      ],
+      "returnToLogin": "Return to login",
+      "returnHome": "Return to the Ownward Hub homepage"
+    }
+  },
+  "Forms": {
+    "emailAddress": "Email address",
+    "password": "Password",
+    "fullName": "Full name",
+    "businessName": "Business name",
+    "message": "Message",
+    "confirmPassword": "Confirm password"
+  },
+  "Contact": {
+    "title": "About & Contact",
+    "founderTitle": "Hi, I’m Adrian",
+    "founderDescription": "Welcome to Ownward Hub. I built this platform to give business owners the tools, knowledge, and confidential deal rooms needed to manage, grow, and sell their companies.",
+    "cardTitle": "Get in Touch",
+    "cardDescription": "Have questions about listings, deal rooms, or articles? Send a secure message below. Your contact information will be used to review and respond to your message and handled according to our",
+    "privacyPolicy": "Privacy Policy",
+    "successTitle": "Message Sent Successfully!",
+    "successDescription": "Thank you for reaching out. I’ll get back to you as soon as possible.",
+    "sendAnother": "Send another message",
+    "nameLabel": "Your Name",
+    "namePlaceholder": "Jane Doe",
+    "emailLabel": "Your Email Address",
+    "emailPlaceholder": "jane@example.com",
+    "emailHint": "Only used so I can reply directly to you.",
+    "messagePlaceholder": "How can I help you today?",
+    "send": "Send Message",
+    "sending": "Sending message...",
+    "error": "An error occurred. Please try again.",
+    "sendFailed": "Failed to send message"
+  },
+  "Privacy": {
+    "button": "Privacy choices",
+    "panelBadge": "Privacy choices",
+    "panelTitle": "Control optional storage on Ownward",
+    "close": "Close",
+    "panelDescription": "Ownward always uses necessary storage so core site features work. Functionality, analytics, and marketing stay off until you allow them. Your choices are stored only in this browser.",
+    "necessary": "Necessary",
+    "necessaryDescription": "Keeps essential site behavior working.",
+    "alwaysOn": "Always on",
+    "functionality": "Functionality",
+    "functionalityDescription": "Allows optional local features such as the anonymous community response token.",
+    "analytics": "Analytics",
+    "analyticsDescription": "Allows optional measurement features if they are added later.",
+    "marketing": "Marketing",
+    "marketingDescription": "Allows optional marketing-related storage if used later.",
+    "reject": "Reject nonessential",
+    "customize": "Customize",
+    "accept": "Accept all",
+    "pageBadge": "Privacy Policy",
+    "pageTitle": "Ownward Hub Privacy Policy",
+    "effectiveDateLabel": "Effective date:",
+    "lastUpdatedLabel": "Last updated:",
+    "tocTitle": "Table of contents",
+    "sections": [
+      {
+        "id": "overview",
+        "label": "1. Overview",
+        "title": "1. Overview",
+        "body": [
+          "Ownward Hub (“Ownward,” “we,” “our,” or “us”) provides tools and services to help users run, grow, buy, and sell businesses. This Privacy Policy explains how we collect, use, disclose, and protect personal information when you use our websites, applications, and related services (collectively, the “Services”)."
+        ]
+      },
+      {
+        "id": "information-we-collect",
+        "label": "2. Information We Collect",
+        "title": "2. Information We Collect",
+        "bullets": [
+          "Information you provide: account details, profile information, contact form content, uploaded documents, and communications.",
+          "Transaction and service data: records related to subscriptions, billing interactions, and use of product features.",
+          "Technical data: device, browser, IP address, log and diagnostics data, and security telemetry.",
+          "Privacy settings data: your selected privacy choices, including consent preferences stored in your browser."
+        ]
+      },
+      {
+        "id": "how-we-use-information",
+        "label": "3. How We Use Information",
+        "title": "3. How We Use Information",
+        "bullets": [
+          "Provide, operate, and improve the Services.",
+          "Authenticate users, maintain account security, and prevent fraud or abuse.",
+          "Process requests, support inquiries, and other communications.",
+          "Comply with legal obligations and enforce our terms.",
+          "Operate optional functionality, analytics, or marketing technologies only where permitted."
+        ]
+      },
+      {
+        "id": "legal-bases",
+        "label": "4. Legal Bases for Processing",
+        "title": "4. Legal Bases for Processing",
+        "body": [
+          "Depending on your location, we may process personal information based on contract necessity, legitimate interests, legal obligations, and consent where required."
+        ]
+      },
+      {
+        "id": "how-we-share-information",
+        "label": "5. How We Share Information",
+        "title": "5. How We Share Information",
+        "body": [
+          "We may share personal information with:"
+        ],
+        "bullets": [
+          "Service providers that host infrastructure, support authentication, and process payments.",
+          "Professional advisors and authorities where required by law.",
+          "Parties involved in a merger, acquisition, financing, or other corporate transaction."
+        ]
+      },
+      {
+        "id": "cookies-and-storage",
+        "label": "6. Cookies and Local Storage",
+        "title": "6. Cookies and Local Storage",
+        "body": [
+          "Necessary storage supports authentication, security, requested workflows, and your privacy-choice record. Optional categories (functionality, analytics, and marketing) remain disabled unless you permit them."
+        ]
+      },
+      {
+        "id": "data-retention",
+        "label": "7. Data Retention",
+        "title": "7. Data Retention",
+        "body": [
+          "We retain personal information for as long as needed to provide Services, meet legal obligations, resolve disputes, and enforce agreements."
+        ]
+      },
+      {
+        "id": "data-security",
+        "label": "8. Data Security",
+        "title": "8. Data Security",
+        "body": [
+          "We use administrative, technical, and physical safeguards designed to protect personal information. No method of transmission or storage is fully secure, and we cannot guarantee absolute security."
+        ]
+      },
+      {
+        "id": "your-rights",
+        "label": "9. Your Privacy Rights and Choices",
+        "title": "9. Your Privacy Rights and Choices",
+        "body": [
+          "Depending on applicable law, you may have rights to access, correct, delete, restrict, object to, or export personal information. You may also update optional privacy preferences at any time."
+        ]
+      },
+      {
+        "id": "international-transfers",
+        "label": "10. International Data Transfers",
+        "title": "10. International Data Transfers",
+        "body": [
+          "We may process information in countries other than your own and apply safeguards as required by applicable law."
+        ]
+      },
+      {
+        "id": "children",
+        "label": "11. Children’s Privacy",
+        "title": "11. Children’s Privacy",
+        "body": [
+          "The Services are not directed to children under 13 (or higher age where required by local law), and we do not knowingly collect personal information from children."
+        ]
+      },
+      {
+        "id": "changes",
+        "label": "12. Changes to This Policy",
+        "title": "12. Changes to This Policy",
+        "body": [
+          "We may update this Privacy Policy from time to time. Material changes will be posted with an updated effective date and last-updated date."
+        ]
+      },
+      {
+        "id": "contact",
+        "label": "13. Contact Us",
+        "title": "13. Contact Us",
+        "body": [
+          "For privacy inquiries, support requests, legal notices, or security reports, contact us at"
+        ]
+      }
+    ],
+    "openChoices": "Open privacy choices",
+    "privacyChoicesPage": "Privacy choices page",
+    "contactEmail": "ownwardhub@gmail.com",
+    "choicesPageBadge": "Privacy choices",
+    "choicesPageTitle": "Manage optional storage on Ownward",
+    "choicesPageDescription": "Ownward stores your privacy choices locally in this browser using the key",
+    "choicesPageNecessaryTitle": "Necessary",
+    "choicesPageNecessaryDescription": "Required for essential site behavior and always enabled.",
+    "choicesPageFunctionalityTitle": "Functionality",
+    "choicesPageFunctionalityDescription": "Enables optional local features such as the anonymous community response token.",
+    "choicesPageAnalyticsTitle": "Analytics & marketing",
+    "choicesPageAnalyticsDescription": "Reserved for optional measurement or promotional storage if those features are used.",
+    "choicesPageOpenPanel": "Open privacy panel",
+    "choicesPageFooter": "You can revisit these choices at any time from the persistent Privacy choices button after saving a selection.",
+    "saveChoices": "Save choices"
+  },
+  "Terms": {
+    "badge": "Terms of Service",
+    "title": "Ownward Hub Terms of Service",
+    "paragraphs": [
+      "By creating or using an Ownward Hub account, you agree to use the platform lawfully, protect account credentials, and avoid misuse that harms others or the service.",
+      "You are responsible for information you provide, business content you publish, and compliance with applicable laws in your jurisdiction.",
+      "Ownward may update these terms from time to time. Continued use after updates means you accept the revised terms."
+    ],
+    "reviewPrivacy": "For data handling details, review our",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "Errors": {
+    "unsupportedLocale": "Unsupported locale."
+  },
+  "Notifications": {
+    "saved": "Saved successfully."
+  },
+  "Dashboard": {
+    "title": "Dashboard"
+  },
+  "Books": {
+    "title": "Books"
+  },
+  "Documents": {
+    "title": "Documents"
+  },
+  "Messages": {
+    "title": "Messages"
+  },
+  "Tasks": {
+    "title": "Tasks"
+  },
+  "Customers": {
+    "title": "Customers"
+  },
+  "Invoices": {
+    "title": "Invoices"
+  },
+  "Valuation": {
+    "title": "Valuation"
+  },
+  "SaleReadiness": {
+    "title": "Sale Readiness"
+  },
+  "DealRooms": {
+    "title": "Deal Rooms"
+  },
+  "Academy": {
+    "heroBadge": "Ownward Academy",
+    "heroTitle": "Learn what it takes to run, buy, or sell a business",
+    "heroDescription": "Structured learning paths built on the same trusted content as the Guide — but organized into ordered courses with completion tracking.",
+    "explorePathsCta": "Explore learning paths",
+    "browseGuideCta": "Browse the Guide",
+    "guideVsAcademyTitle": "Guide vs. Academy",
+    "guideCardTitle": "Ownward Guide",
+    "guideCardDescription": "Browse any topic in any order. Reference articles when you need them.",
+    "guideCardCta": "Browse the Guide",
+    "academyCardTitle": "Ownward Academy",
+    "academyCardDescription": "Follow structured learning paths with ordered lessons and completion tracking.",
+    "academyCardCta": "Explore Academy",
+    "coursesTitle": "Learning paths",
+    "statusAvailable": "Available",
+    "statusComingSoon": "Coming soon",
+    "levelBeginner": "Beginner",
+    "levelIntermediate": "Intermediate",
+    "levelAdvanced": "Advanced",
+    "lessonCount": "{count} {count, plural, one {lesson} other {lessons}}",
+    "moduleCount": "{count} planned {count, plural, one {module} other {modules}}",
+    "estimatedTime": "{minutes} min",
+    "viewPath": "View learning path",
+    "previewCurriculum": "Preview curriculum",
+    "backToAcademy": "← Back to Academy",
+    "breadcrumbAcademy": "Academy",
+    "progressLabel": "{completed} of {total} lessons complete",
+    "progressPercent": "{percent}%",
+    "startCourse": "Start course",
+    "continueCourse": "Continue course",
+    "reviewCourse": "Review course",
+    "markComplete": "Mark complete",
+    "markIncomplete": "Mark incomplete",
+    "resetProgress": "Reset progress",
+    "resetConfirm": "Reset all progress for this course?",
+    "resetYes": "Yes, reset",
+    "resetNo": "Cancel",
+    "lessonLinkLabel": "Read lesson in Guide",
+    "lessonCompleted": "Completed",
+    "lessonNotStarted": "Not started",
+    "noFunctionalityConsent": "Progress tracking requires Functionality cookies to be enabled. Your lessons are still available to read.",
+    "openPrivacyChoices": "Update Privacy Choices",
+    "consentRevokedNotice": "Progress data was removed when Functionality cookies were disabled.",
+    "startLesson": "Start lesson",
+    "continueLesson": "Continue lesson",
+    "reviewLesson": "Review lesson",
+    "spanishArticleNotice": "Academy interface is in Spanish. Some linked Guide articles are only available in English.",
+    "spanishArticleNoticeCta": "Browse Guide in English",
+    "comingSoonHeading": "Curriculum under development",
+    "comingSoonDescription": "This course is being developed. Below is the planned curriculum. Check back when it becomes available.",
+    "plannedCurriculum": "Planned curriculum",
+    "browseGuideInstead": "Browse the Guide while you wait",
+    "disclosureLabel": "Important notice",
+    "learnMenuLabel": "Learn",
+    "learnMenuGuideDescription": "Browse reference articles by topic",
+    "learnMenuAcademyDescription": "Follow ordered learning paths"
+  }
+}

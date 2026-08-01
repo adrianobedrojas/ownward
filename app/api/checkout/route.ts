@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAllowedPriceIds, getPriceIdForPlan } from "@/lib/billing";
+import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription } from "@/lib/billing";
+import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -23,7 +24,8 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      // Return 401 so the client can redirect to /login
+      return NextResponse.json({ error: "Unauthorized", redirectTo: "/login" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -43,9 +45,68 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    // 2. Prevent duplicate subscriptions: active/trialing users must use portal
+    const { data: activeSub } = await supabase
+      .from("subscriptions")
+      .select("id, status, price_id")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    // 2. Create Stripe Checkout Session
+    if (activeSub && isActiveSubscription(activeSub.status)) {
+      const siteUrlForPortal = getSiteUrl();
+      // If they're changing plans, send them to the portal
+      if (activeSub.price_id !== resolvedPriceId) {
+        return NextResponse.json({
+          error: "You already have an active subscription. Use the customer portal to change your plan.",
+          portalRedirect: true,
+          returnUrl: `${siteUrlForPortal}/pricing`,
+        }, { status: 409 });
+      }
+      // Same plan — already subscribed
+      return NextResponse.json({
+        error: "You are already subscribed to this plan.",
+        alreadySubscribed: true,
+      }, { status: 409 });
+    }
+
+    const siteUrl = getSiteUrl();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    let stripeCustomerId = profile?.stripe_customer_id ?? null;
+    if (stripeCustomerId) {
+      const customer = await stripe.customers.retrieve(stripeCustomerId);
+      if ("deleted" in customer && customer.deleted) {
+        stripeCustomerId = null;
+      }
+    }
+
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { userId: user.id },
+      });
+      stripeCustomerId = customer.id;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, stripe_customer_id: stripeCustomerId });
+
+      if (profileError) {
+        return NextResponse.json(
+          { error: "Unable to initialize billing profile" },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 3. Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -55,10 +116,10 @@ export async function POST(req: Request) {
         },
       ],
       mode: "subscription",
-      customer_email: user.email,
+      customer: stripeCustomerId,
       client_reference_id: user.id,
-      success_url: `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pricing`,
+      success_url: `${siteUrl}/dashboard?success=subscribed`,
+      cancel_url: `${siteUrl}/pricing`,
       metadata: {
         userId: user.id,
       },

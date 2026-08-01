@@ -22,7 +22,7 @@ export async function GET(
 
   const { data: document, error: documentError } = await supabase
     .from("documents")
-    .select("id,storage_path,user_id")
+    .select("id,storage_path,user_id,deleted_at,retention_status")
     .eq("id", id)
     .single();
 
@@ -34,6 +34,9 @@ export async function GET(
   }
 
   if (document.user_id !== user.id) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (document.deleted_at || (document.retention_status && document.retention_status !== "active")) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
