@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "../components/Navbar";
 import { PrivacyConsentProvider } from "@/components/PrivacyConsent";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Navbar />
           <main>{children}</main>
         </PrivacyConsentProvider>
+        <Analytics />
       </body>
     </html>
   );
