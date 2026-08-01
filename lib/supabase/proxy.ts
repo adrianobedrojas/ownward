@@ -1,10 +1,15 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+/**
+ * Refreshes the Supabase auth session and applies the resulting cookies
+ * to the provided response (or creates a new one if none is given).
+ */
+export async function updateSession(
+  request: NextRequest,
+  existingResponse?: NextResponse
+): Promise<NextResponse> {
+  let supabaseResponse = existingResponse ?? NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,28 +21,24 @@ export async function updateSession(request: NextRequest) {
         },
 
         setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
 
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = existingResponse ?? NextResponse.next({ request });
 
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
 
-          Object.entries(headers).forEach(([key, value]) =>
-            supabaseResponse.headers.set(key, value)
-          );
+          Object.entries(headers).forEach(([key, value]) => {
+            if (value !== undefined) {
+              supabaseResponse.headers.set(key, value);
+            }
+          });
         },
       },
     }
   );
 
-  // Keep this immediately after createServerClient.
-  // It verifies and refreshes the user's authentication session.
   await supabase.auth.getClaims();
 
   return supabaseResponse;

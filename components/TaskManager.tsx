@@ -6,12 +6,12 @@ import {
   deleteTask,
   toggleTaskCompletion,
   updateTask,
-} from "@/app/tasks/actions";
+} from "@/app/[locale]/tasks/actions";
 import {
   TASK_PRIORITIES,
   type Task,
   type TaskPriority,
-} from "@/app/tasks/types";
+} from "@/app/[locale]/tasks/types";
 
 type TaskFilter = "today" | "upcoming" | "completed" | "all";
 

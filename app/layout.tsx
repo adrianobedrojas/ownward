@@ -1,16 +1,12 @@
-import type { Metadata } from "next";
-import Navbar from "../components/Navbar";
-import Footer from "@/components/Footer";
-import { PrivacyConsentProvider } from "@/components/PrivacyConsent";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: "Ownward",
-    template: "%s | Ownward",
+    default: 'Ownward',
+    template: '%s | Ownward',
   },
-  description:
-    "Run, grow, buy, and sell small businesses in one connected platform.",
+  description: 'Run, grow, buy, and sell small businesses in one connected platform.',
 };
 
 export default function RootLayout({
@@ -18,15 +14,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        <PrivacyConsentProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </PrivacyConsentProvider>
-      </body>
-    </html>
-  );
+  return children;
 }
