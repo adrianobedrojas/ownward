@@ -13,13 +13,13 @@ interface NavbarClientProps {
 export default function NavbarClient({ signedIn }: NavbarClientProps) {
   const pathname = usePathname();
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const learnMenuRef = useRef<HTMLDetailsElement>(null);
   const t = useTranslations('Navigation');
   const navigation = [
     { name: t('buy'), href: '/buy' },
     { name: t('sell'), href: '/sell' },
     { name: t('features'), href: '/#features' },
     { name: t('pricing'), href: '/pricing' },
-    { name: t('guide'), href: '/guide' },
   ];
 
   function isActive(href: string) {
@@ -28,9 +28,17 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  const isLearnActive = isActive('/guide') || isActive('/academy');
+
   function closeMobileMenu() {
     if (detailsRef.current) {
       detailsRef.current.open = false;
+    }
+  }
+
+  function closeLearnMenu() {
+    if (learnMenuRef.current) {
+      learnMenuRef.current.open = false;
     }
   }
 
@@ -66,6 +74,53 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
               </Link>
             );
           })}
+
+          {/* Learn dropdown (Guide + Academy) */}
+          <details ref={learnMenuRef} className="relative" suppressHydrationWarning>
+            <summary
+              className={`cursor-pointer list-none rounded-lg px-3 py-2 text-sm font-medium transition select-none ${
+                isLearnActive
+                  ? 'bg-cyan-400/10 text-cyan-300'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+              aria-haspopup="menu"
+            >
+              {t('learn')} <span aria-hidden="true">▾</span>
+            </summary>
+            <div
+              role="menu"
+              className="absolute left-0 mt-2 w-56 rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl"
+            >
+              <Link
+                href="/guide"
+                role="menuitem"
+                onClick={closeLearnMenu}
+                aria-current={isActive('/guide') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/guide')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('guide')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('learnMenuGuideDescription')}</span>
+              </Link>
+              <Link
+                href="/academy"
+                role="menuitem"
+                onClick={closeLearnMenu}
+                aria-current={isActive('/academy') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/academy')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('academy')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('learnMenuAcademyDescription')}</span>
+              </Link>
+            </div>
+          </details>
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -110,6 +165,34 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
                   </Link>
                 );
               })}
+            </div>
+            {/* Mobile Learn section */}
+            <div className="mt-3 border-t border-slate-800 pt-3">
+              <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">{t('learn')}</p>
+              <Link
+                href="/guide"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/guide') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/guide')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('guide')}
+              </Link>
+              <Link
+                href="/academy"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/academy') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/academy')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('academy')}
+              </Link>
             </div>
             <div className="mt-3 border-t border-slate-800 pt-3">
               <LanguageSwitcher onSelect={closeMobileMenu} />

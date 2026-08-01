@@ -57,6 +57,17 @@ export default async function GuideIndexPage() {
           })}
         </div>
       </section>
+
+      {/* Academy callout */}
+      <section className="mt-16 rounded-2xl border border-cyan-800/30 bg-cyan-950/20 p-6 sm:p-8">
+        <h2 className="text-xl font-semibold text-white">{t('academyCalloutHeading')}</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-300">{t('academyCalloutDescription')}</p>
+        <div className="mt-5">
+          <Link href="/academy" className="inline-flex items-center rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
+            {t('academyCalloutCta')} →
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

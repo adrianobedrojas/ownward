@@ -55,6 +55,10 @@
     "terms": {
       "title": "Términos del servicio | Ownward Hub",
       "description": "Revisa los términos que rigen el uso de los servicios de Ownward Hub."
+    },
+    "academy": {
+      "title": "Ownward Academy — Rutas de aprendizaje para propietarios de negocios",
+      "description": "Sigue rutas de aprendizaje ordenadas sobre cómo operar, comprar y vender un pequeño negocio. Basadas en contenido de confianza de la Guía, con seguimiento de progreso."
     }
   },
   "Common": {
@@ -82,14 +86,18 @@
     "createAccount": "Crear cuenta",
     "menu": "Menú",
     "selectLanguage": "Seleccionar idioma",
-    "tagline": "Opera · Crece · Compra · Vende"
+    "tagline": "Opera · Crece · Compra · Vende",
+    "academy": "Academy",
+    "learn": "Aprender"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. Todos los derechos reservados.",
     "privacyPolicy": "Política de privacidad",
     "privacyChoices": "Opciones de privacidad",
     "terms": "Términos del servicio",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "guide": "Guía",
+    "academy": "Academy"
   },
   "Home": {
     "hero": {
@@ -570,7 +578,10 @@
     "checklist": "Lista de verificación",
     "officialSources": "Fuentes oficiales",
     "sourcesDescription": "Las políticas SBA y los requisitos de los prestamistas pueden cambiar. Verifica las reglas aplicables con un prestamista participante de la SBA antes de tomar una decisión financiera o de reubicación.",
-    "lastReviewed": "Última revisión {date}"
+    "lastReviewed": "Última revisión {date}",
+    "academyCalloutHeading": "¿Prefieres aprendizaje estructurado?",
+    "academyCalloutDescription": "Ownward Academy organiza los artículos de la Guía en rutas de aprendizaje ordenadas con seguimiento de progreso. No se requiere cuenta.",
+    "academyCalloutCta": "Explorar Academy"
   },
   "Authentication": {
     "login": {
@@ -910,5 +921,62 @@
   },
   "DealRooms": {
     "title": "Deal rooms"
+  },
+  "Academy": {
+    "heroBadge": "Ownward Academy",
+    "heroTitle": "Aprende lo que se necesita para operar, comprar o vender un negocio",
+    "heroDescription": "Rutas de aprendizaje estructuradas construidas sobre el mismo contenido de confianza que la Guía, organizadas en cursos ordenados con seguimiento de progreso.",
+    "explorePathsCta": "Explorar rutas de aprendizaje",
+    "browseGuideCta": "Explorar la Guía",
+    "guideVsAcademyTitle": "Guía vs. Academy",
+    "guideCardTitle": "Guía Ownward",
+    "guideCardDescription": "Explora cualquier tema en cualquier orden. Consulta artículos cuando los necesites.",
+    "guideCardCta": "Explorar la Guía",
+    "academyCardTitle": "Ownward Academy",
+    "academyCardDescription": "Sigue rutas de aprendizaje estructuradas con lecciones ordenadas y seguimiento de progreso.",
+    "academyCardCta": "Explorar Academy",
+    "coursesTitle": "Rutas de aprendizaje",
+    "statusAvailable": "Disponible",
+    "statusComingSoon": "Próximamente",
+    "levelBeginner": "Principiante",
+    "levelIntermediate": "Intermedio",
+    "levelAdvanced": "Avanzado",
+    "lessonCount": "{count} {count, plural, one {lección} other {lecciones}}",
+    "moduleCount": "{count} {count, plural, one {módulo planificado} other {módulos planificados}}",
+    "estimatedTime": "{minutes} min",
+    "viewPath": "Ver ruta de aprendizaje",
+    "previewCurriculum": "Ver plan de estudios",
+    "backToAcademy": "← Volver a Academy",
+    "breadcrumbAcademy": "Academy",
+    "progressLabel": "{completed} de {total} lecciones completadas",
+    "progressPercent": "{percent}%",
+    "startCourse": "Comenzar curso",
+    "continueCourse": "Continuar curso",
+    "reviewCourse": "Repasar curso",
+    "markComplete": "Marcar como completada",
+    "markIncomplete": "Marcar como no completada",
+    "resetProgress": "Restablecer progreso",
+    "resetConfirm": "¿Restablecer todo el progreso de este curso?",
+    "resetYes": "Sí, restablecer",
+    "resetNo": "Cancelar",
+    "lessonLinkLabel": "Leer lección en la Guía",
+    "lessonCompleted": "Completada",
+    "lessonNotStarted": "No iniciada",
+    "noFunctionalityConsent": "El seguimiento de progreso requiere que las cookies de Funcionalidad estén habilitadas. Las lecciones siguen disponibles para leer.",
+    "openPrivacyChoices": "Actualizar opciones de privacidad",
+    "consentRevokedNotice": "Los datos de progreso fueron eliminados al deshabilitar las cookies de Funcionalidad.",
+    "startLesson": "Comenzar lección",
+    "continueLesson": "Continuar lección",
+    "reviewLesson": "Repasar lección",
+    "spanishArticleNotice": "La interfaz de Academy está en español. Algunos artículos de la Guía vinculados solo están disponibles en inglés.",
+    "spanishArticleNoticeCta": "Explorar Guía en inglés",
+    "comingSoonHeading": "Plan de estudios en desarrollo",
+    "comingSoonDescription": "Este curso está en desarrollo. A continuación se muestra el plan de estudios previsto. Vuelve a consultarlo cuando esté disponible.",
+    "plannedCurriculum": "Plan de estudios previsto",
+    "browseGuideInstead": "Explora la Guía mientras tanto",
+    "disclosureLabel": "Aviso importante",
+    "learnMenuLabel": "Aprender",
+    "learnMenuGuideDescription": "Explora artículos de referencia por tema",
+    "learnMenuAcademyDescription": "Sigue rutas de aprendizaje ordenadas"
   }
 }

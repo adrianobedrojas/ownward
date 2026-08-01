@@ -55,6 +55,10 @@
     "terms": {
       "title": "Terms of Service | Ownward Hub",
       "description": "Review the terms that govern the use of Ownward Hub services."
+    },
+    "academy": {
+      "title": "Ownward Academy — Structured Learning Paths for Business Owners",
+      "description": "Follow ordered learning paths on running, buying, and selling a small business. Built on trusted Guide content with lesson completion tracking."
     }
   },
   "Common": {
@@ -82,14 +86,18 @@
     "createAccount": "Create account",
     "menu": "Menu",
     "selectLanguage": "Select language",
-    "tagline": "Run · Grow · Buy · Sell"
+    "tagline": "Run · Grow · Buy · Sell",
+    "academy": "Academy",
+    "learn": "Learn"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "privacyChoices": "Privacy Choices",
     "terms": "Terms of Service",
-    "contact": "Contact"
+    "contact": "Contact",
+    "guide": "Guide",
+    "academy": "Academy"
   },
   "Home": {
     "hero": {
@@ -570,7 +578,10 @@
     "checklist": "Checklist",
     "officialSources": "Official sources",
     "sourcesDescription": "SBA policy and lender requirements can change. Verify the applicable rules with an SBA-participating lender before making a financial or relocation decision.",
-    "lastReviewed": "Last reviewed {date}"
+    "lastReviewed": "Last reviewed {date}",
+    "academyCalloutHeading": "Prefer structured learning?",
+    "academyCalloutDescription": "Ownward Academy organizes Guide articles into ordered learning paths with completion tracking. No account required.",
+    "academyCalloutCta": "Explore Academy"
   },
   "Authentication": {
     "login": {
@@ -910,5 +921,62 @@
   },
   "DealRooms": {
     "title": "Deal Rooms"
+  },
+  "Academy": {
+    "heroBadge": "Ownward Academy",
+    "heroTitle": "Learn what it takes to run, buy, or sell a business",
+    "heroDescription": "Structured learning paths built on the same trusted content as the Guide — but organized into ordered courses with completion tracking.",
+    "explorePathsCta": "Explore learning paths",
+    "browseGuideCta": "Browse the Guide",
+    "guideVsAcademyTitle": "Guide vs. Academy",
+    "guideCardTitle": "Ownward Guide",
+    "guideCardDescription": "Browse any topic in any order. Reference articles when you need them.",
+    "guideCardCta": "Browse the Guide",
+    "academyCardTitle": "Ownward Academy",
+    "academyCardDescription": "Follow structured learning paths with ordered lessons and completion tracking.",
+    "academyCardCta": "Explore Academy",
+    "coursesTitle": "Learning paths",
+    "statusAvailable": "Available",
+    "statusComingSoon": "Coming soon",
+    "levelBeginner": "Beginner",
+    "levelIntermediate": "Intermediate",
+    "levelAdvanced": "Advanced",
+    "lessonCount": "{count} {count, plural, one {lesson} other {lessons}}",
+    "moduleCount": "{count} planned {count, plural, one {module} other {modules}}",
+    "estimatedTime": "{minutes} min",
+    "viewPath": "View learning path",
+    "previewCurriculum": "Preview curriculum",
+    "backToAcademy": "← Back to Academy",
+    "breadcrumbAcademy": "Academy",
+    "progressLabel": "{completed} of {total} lessons complete",
+    "progressPercent": "{percent}%",
+    "startCourse": "Start course",
+    "continueCourse": "Continue course",
+    "reviewCourse": "Review course",
+    "markComplete": "Mark complete",
+    "markIncomplete": "Mark incomplete",
+    "resetProgress": "Reset progress",
+    "resetConfirm": "Reset all progress for this course?",
+    "resetYes": "Yes, reset",
+    "resetNo": "Cancel",
+    "lessonLinkLabel": "Read lesson in Guide",
+    "lessonCompleted": "Completed",
+    "lessonNotStarted": "Not started",
+    "noFunctionalityConsent": "Progress tracking requires Functionality cookies to be enabled. Your lessons are still available to read.",
+    "openPrivacyChoices": "Update Privacy Choices",
+    "consentRevokedNotice": "Progress data was removed when Functionality cookies were disabled.",
+    "startLesson": "Start lesson",
+    "continueLesson": "Continue lesson",
+    "reviewLesson": "Review lesson",
+    "spanishArticleNotice": "Academy interface is in Spanish. Some linked Guide articles are only available in English.",
+    "spanishArticleNoticeCta": "Browse Guide in English",
+    "comingSoonHeading": "Curriculum under development",
+    "comingSoonDescription": "This course is being developed. Below is the planned curriculum. Check back when it becomes available.",
+    "plannedCurriculum": "Planned curriculum",
+    "browseGuideInstead": "Browse the Guide while you wait",
+    "disclosureLabel": "Important notice",
+    "learnMenuLabel": "Learn",
+    "learnMenuGuideDescription": "Browse reference articles by topic",
+    "learnMenuAcademyDescription": "Follow ordered learning paths"
   }
 }
