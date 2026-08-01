@@ -1,6 +1,8 @@
-import type { NextConfig } from "next";
-import { getAllowedDevOrigins } from "./lib/config";
+import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+import { getAllowedDevOrigins } from './lib/config';
 
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const allowedOrigins = getAllowedDevOrigins();
 
 const nextConfig: NextConfig = {
@@ -12,4 +14,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
