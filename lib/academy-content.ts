@@ -37,6 +37,47 @@ export interface AcademyCourse {
 
 export const academyCourses: AcademyCourse[] = [
   {
+    slug: 'start-a-business-foundations',
+    status: 'available',
+    level: 'beginner',
+    title: {
+      en: 'Start a Business Foundations',
+      es: 'Fundamentos para iniciar un negocio',
+    },
+    description: {
+      en: 'Build a practical path from business idea to validation, first offer, startup budget, and launch.',
+      es: 'Crea una ruta práctica desde la idea de negocio hasta la validación, la primera oferta, el presupuesto inicial y el lanzamiento.',
+    },
+    estimatedMinutes: 42,
+    lessons: [
+      {
+        id: 'validate-idea',
+        guideCategory: 'start',
+        guideArticleSlug: 'validate-a-business-idea',
+      },
+      {
+        id: 'business-model-offer',
+        guideCategory: 'start',
+        guideArticleSlug: 'choose-a-business-model-and-first-offer',
+      },
+      {
+        id: 'one-page-plan',
+        guideCategory: 'start',
+        guideArticleSlug: 'write-a-one-page-business-plan',
+      },
+      {
+        id: 'startup-costs',
+        guideCategory: 'start',
+        guideArticleSlug: 'estimate-startup-costs-and-pricing',
+      },
+      {
+        id: 'launch-checklist',
+        guideCategory: 'start',
+        guideArticleSlug: 'business-launch-checklist',
+      },
+    ],
+  },
+  {
     slug: 'business-foundations',
     status: 'available',
     level: 'beginner',

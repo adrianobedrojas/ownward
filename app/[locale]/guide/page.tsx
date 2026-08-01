@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
-const categorySlugs = ['run', 'grow', 'value', 'sell', 'buy', 'stories'] as const;
+const categorySlugs = ['start', 'run', 'grow', 'value', 'sell', 'buy', 'stories'] as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -49,7 +49,7 @@ export default async function GuideIndexPage() {
                   <p className="text-xs font-medium text-cyan-400">{category.cta}</p>
                   <div className="mt-3 flex items-center gap-4">
                     {slug !== 'stories' ? <Link href={`/guide/${slug}`} className="inline-block text-sm font-semibold text-white hover:text-cyan-300">{t('browseCategory')}</Link> : null}
-                    <Link href={slug === 'run' ? '/dashboard' : slug === 'grow' ? '/grow' : slug === 'value' ? '/valuation' : slug === 'sell' ? '/sell' : slug === 'buy' ? '/buy' : '/guide/stories'} className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200">{category.ctaLabel} →</Link>
+                    <Link href={slug === 'run' ? '/dashboard' : slug === 'grow' ? '/grow' : slug === 'value' ? '/valuation' : slug === 'sell' ? '/sell' : slug === 'buy' ? '/buy' : slug === 'start' ? '/start' : '/guide/stories'} className="inline-block text-sm font-semibold text-cyan-300 hover:text-cyan-200">{category.ctaLabel} →</Link>
                   </div>
                 </div>
               </article>

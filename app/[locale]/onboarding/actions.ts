@@ -92,5 +92,9 @@ export async function completeOnboarding(formData: FormData) {
     }
   }
 
+  if (currentStage === "start") {
+    redirect("/start?welcome=1");
+  }
+
   redirect("/dashboard?success=onboarding-complete");
 }

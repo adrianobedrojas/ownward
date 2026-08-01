@@ -59,6 +59,10 @@
     "academy": {
       "title": "Ownward Academy — Structured Learning Paths for Business Owners",
       "description": "Follow ordered learning paths on running, buying, and selling a small business. Built on trusted Guide content with lesson completion tracking."
+    },
+    "start": {
+      "title": "Start a Business | Ownward Hub",
+      "description": "Validate your business idea, define your first offer, estimate startup costs, and build a practical launch plan."
     }
   },
   "Common": {
@@ -86,7 +90,7 @@
     "createAccount": "Create account",
     "menu": "Menu",
     "selectLanguage": "Select language",
-    "tagline": "Run · Grow · Buy · Sell",
+    "tagline": "Start · Run · Grow · Buy · Sell",
     "academy": "Academy",
     "learn": "Learn"
   },
@@ -130,6 +134,13 @@
       "badge": "Choose Your Path",
       "title": "Where are you on your business journey?",
       "cards": [
+        {
+          "emoji": "🚀",
+          "title": "Start a Business",
+          "description": "Validate an idea, define your first offer, estimate startup costs, and organize a practical launch plan.",
+          "cta": "Start planning",
+          "href": "/start"
+        },
         {
           "emoji": "🏢",
           "title": "Run",
@@ -498,8 +509,8 @@
     "situationsTitle": "What are you trying to do?",
     "situations": [
       {
-        "label": "Start or organize a business",
-        "href": "/guide/run"
+        "label": "Start a business",
+        "href": "/guide/start"
       },
       {
         "label": "Grow an existing business",
@@ -524,44 +535,50 @@
     ],
     "categoriesTitle": "Primary Content Categories",
     "categories": {
+      "start": {
+        "name": "1. Start a business",
+        "description": "Practical guidance for validating an idea, defining an offer, estimating startup costs, organizing formation tasks, and preparing for launch.",
+        "cta": "Turn your idea into a practical startup roadmap.",
+        "ctaLabel": "Open startup planner"
+      },
       "run": {
-        "name": "1. Run a business",
+        "name": "2. Run a business",
         "description": "Practical material for existing owners on organization, records, operations, and reducing owner dependence.",
         "cta": "Access your business dashboard to manage tasks, customers, documents, and key metrics.",
         "ctaLabel": "Open dashboard"
       },
       "grow": {
-        "name": "2. Grow a business",
+        "name": "3. Grow a business",
         "description": "Strategies on customer profitability, value drivers, recurring revenue, and 90-day growth planning.",
         "cta": "Set measurable growth goals and track progress toward them with the 90-day planner.",
         "ctaLabel": "Open growth planner"
       },
       "value": {
-        "name": "3. Business valuation",
+        "name": "4. Business valuation",
         "description": "Breakdowns of SDE, EBITDA multiples, revenue vs. profit, and valuation estimation factors.",
         "cta": "Build a preliminary valuation scenario using your own financial inputs.",
         "ctaLabel": "Estimate business value"
       },
       "sell": {
-        "name": "4. Selling a business",
+        "name": "5. Selling a business",
         "description": "Step-by-step guidance on confidential listings, due diligence, NDAs, CIMs, and closing.",
         "cta": "Prepare your business for sale or create a confidential listing.",
         "ctaLabel": "Create listing draft"
       },
       "buy": {
-        "name": "5. Buying a business",
+        "name": "6. Buying a business",
         "description": "How to evaluate listings, verify revenue, understand financing readiness, spot red flags, and navigate due diligence.",
         "cta": "Browse active business listings and search by category or location.",
         "ctaLabel": "Browse marketplace"
       },
       "stories": {
-        "name": "6. Owner stories & founder notes",
+        "name": "7. Owner stories & founder notes",
         "description": "Real-world lessons, behind-the-scenes building notes, and relatable scenarios from business owners.",
         "cta": "Read stories and lessons from owners who have built, grown, bought, or sold businesses.",
         "ctaLabel": "Browse stories"
       },
       "resources": {
-        "name": "7. Interactive resources & checklists",
+        "name": "8. Interactive resources & checklists",
         "description": "Downloadable checklists, calculators, and assessments.",
         "cta": "Use practical tools to organize information and pressure-test decisions.",
         "ctaLabel": "Explore resources"
@@ -582,6 +599,59 @@
     "academyCalloutHeading": "Prefer structured learning?",
     "academyCalloutDescription": "Ownward Academy organizes Guide articles into ordered learning paths with completion tracking. No account required.",
     "academyCalloutCta": "Explore Academy"
+  },
+  "StartBusiness": {
+    "metadata": {
+      "title": "Start a Business | Ownward Hub",
+      "description": "Validate your business idea, define your first offer, estimate startup costs, and build a practical launch plan."
+    },
+    "heroBadge": "Start a Business",
+    "heroTitle": "Turn an idea into a business you can operate.",
+    "heroDescription": "Validate your idea, define your offer, estimate startup costs, organize formation tasks, and build a practical launch plan.",
+    "primaryCta": "Build my startup plan",
+    "secondaryCta": "Browse startup guides",
+    "welcomeBanner": "Your account is ready. Begin by building your startup roadmap.",
+    "welcomeDismiss": "Dismiss",
+    "stagesTitle": "A clear path from idea to launch",
+    "stagesDescription": "Starting a business involves seven core areas. Work through each one to reduce risk and build a stronger foundation.",
+    "stages": [
+      "Define the idea and customer problem",
+      "Identify the target customer",
+      "Create the first offer and business model",
+      "Validate demand before investing heavily",
+      "Estimate startup costs, pricing, and monthly expenses",
+      "Organize legal, operational, and recordkeeping requirements",
+      "Plan the launch and first-customer strategy"
+    ],
+    "plannerTitle": "Startup Planner",
+    "plannerDescription": "Work through your plan step by step. Your progress is saved automatically in your browser.",
+    "plannerStorageNote": "Your plan is saved locally in your browser. It is not sent to any server unless you create a business workspace.",
+    "stepOf": "Step {current} of {total}",
+    "progressPercent": "{percent}% complete",
+    "back": "Back",
+    "next": "Next",
+    "reviewPlan": "Review my plan",
+    "resetPlan": "Reset plan",
+    "resetConfirmTitle": "Reset your plan?",
+    "resetConfirmDescription": "This will permanently delete all entries in your plan from this browser. This action cannot be undone.",
+    "resetConfirm": "Yes, reset plan",
+    "resetCancel": "Cancel",
+    "exportText": "Export as text",
+    "exportJson": "Export as JSON",
+    "printPlan": "Print plan",
+    "planSummaryTitle": "Your Startup Plan Summary",
+    "notFilled": "(not filled)",
+    "finishTitle": "Ready to take the next step?",
+    "finishDescription": "Use your plan to organize your business workspace, track milestones, and access startup guides.",
+    "ctaCreateAccount": "Create a free account",
+    "ctaCreateWorkspace": "Create a business workspace",
+    "ctaAddMilestones": "Add startup milestones",
+    "ctaBrowseGuides": "Browse startup guides",
+    "guidesTitle": "Startup Guide",
+    "guidesDescription": "Read practical articles on validating your idea, building your first offer, estimating startup costs, and launching.",
+    "guidesCta": "Browse all startup guides →",
+    "financialDisclaimer": "Financial estimates in this planner are rough planning inputs only. They are not financial advice, guarantees, or forecasts. Consult a qualified financial professional for advice specific to your situation.",
+    "legalDisclaimer": "Formation, licensing, tax, employment, and insurance requirements vary by jurisdiction and must be verified through official government sources and qualified professionals. Nothing in this planner is legal or tax advice."
   },
   "Authentication": {
     "login": {
@@ -976,6 +1046,7 @@
     "browseGuideInstead": "Browse the Guide while you wait",
     "disclosureLabel": "Important notice",
     "learnMenuLabel": "Learn",
+    "start": "Start",
     "learnMenuGuideDescription": "Browse reference articles by topic",
     "learnMenuAcademyDescription": "Follow ordered learning paths"
   }

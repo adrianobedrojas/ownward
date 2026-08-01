@@ -31,9 +31,23 @@ export type LaunchpadInput = {
   oldestIncompleteMilestone?: string | null;
   /** Optional: lowest scoring health category label */
   lowestHealthCategory?: string | null;
+  /** Optional: current profile stage (e.g., "start", "run", "sell", "buy") */
+  currentStage?: string | null;
 };
 
 export function getNextBestAction(input: LaunchpadInput): NextBestAction {
+  // Rule 0: Starting stage with no business → Build Startup Roadmap
+  if (input.currentStage === 'start' && input.businessCount === 0) {
+    return {
+      rule: 1,
+      title: "Build Your Startup Roadmap",
+      description:
+        "Define your idea, customer, first offer, startup costs, and launch priorities before creating your workspace.",
+      href: "/start",
+      cta: "Start Planning",
+    };
+  }
+
   // Rule 1: No business
   if (input.businessCount === 0) {
     return {
