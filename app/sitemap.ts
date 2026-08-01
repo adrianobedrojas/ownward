@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { guideArticles } from '@/lib/guide-content';
+import { academyCourses } from '@/lib/academy-content';
 import { routing } from '@/i18n/routing';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -9,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/buy',
     '/sell',
     '/guide',
+    '/academy',
     '/pricing',
     '/privacy',
     '/privacy-choices',
@@ -41,5 +43,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   );
 
-  return [...localizedRoutes, ...articleRoutes];
+  const academyCourseRoutes = routing.locales.flatMap((locale) =>
+    academyCourses.map((course) => ({
+      url: `${siteUrl}${locale === routing.defaultLocale ? '' : `/${locale}`}/academy/${course.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  );
+
+  return [...localizedRoutes, ...articleRoutes, ...academyCourseRoutes];
 }
