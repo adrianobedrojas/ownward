@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { PrivacyConsentProvider } from '@/components/PrivacyConsent';
+import VercelWebAnalytics from '@/components/VercelWebAnalytics';
 import { routing } from '@/i18n/routing';
 
 export function generateStaticParams() {
@@ -33,6 +34,7 @@ export default async function LocaleLayout({
             <Navbar />
             <main>{children}</main>
             <Footer />
+            <VercelWebAnalytics />
           </PrivacyConsentProvider>
         </NextIntlClientProvider>
       </body>
