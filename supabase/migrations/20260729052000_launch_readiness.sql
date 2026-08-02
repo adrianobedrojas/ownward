@@ -144,10 +144,25 @@ SET name = EXCLUDED.name,
     public = false;
 
 -- Users can CRUD only their own files in vault
+-- Drop both old names (applied in production) and new names before recreating.
+-- Old names (various policy names that may exist in production):
+DROP POLICY IF EXISTS "vault: owner INSERT"  ON storage.objects;
+DROP POLICY IF EXISTS "vault: owner SELECT"  ON storage.objects;
+DROP POLICY IF EXISTS "vault: owner UPDATE"  ON storage.objects;
+DROP POLICY IF EXISTS "vault: owner DELETE"  ON storage.objects;
+DROP POLICY IF EXISTS "Give users access to their own vault folder 1" ON storage.objects;
+DROP POLICY IF EXISTS "Give users access to their own vault folder 2" ON storage.objects;
+DROP POLICY IF EXISTS "Give users access to their own vault folder 3" ON storage.objects;
+DROP POLICY IF EXISTS "Give users access to their own vault folder 4" ON storage.objects;
+DROP POLICY IF EXISTS "Vault users can insert own files"  ON storage.objects;
+DROP POLICY IF EXISTS "Vault users can select own files"  ON storage.objects;
+DROP POLICY IF EXISTS "Vault users can update own files"  ON storage.objects;
+DROP POLICY IF EXISTS "Vault users can delete own files"  ON storage.objects;
+-- New names (this migration):
 DROP POLICY IF EXISTS "Users can upload to own vault folder" ON storage.objects;
-DROP POLICY IF EXISTS "Users can view own vault files" ON storage.objects;
-DROP POLICY IF EXISTS "Users can update own vault files" ON storage.objects;
-DROP POLICY IF EXISTS "Users can delete own vault files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own vault files"       ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own vault files"     ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own vault files"     ON storage.objects;
 
 CREATE POLICY "Users can upload to own vault folder"
   ON storage.objects
