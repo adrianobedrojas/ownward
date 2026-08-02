@@ -144,7 +144,9 @@ export async function createTask(input: CreateTaskInput): Promise<TaskActionResu
         due_date: dueDateResult.value,
         priority: priorityResult.value,
       })
-      .select("id, user_id, title, description, due_date, priority, status, created_at, updated_at")
+      .select(
+        "id, user_id, title, description, due_date, priority, status, pairwise_rating, pairwise_comparison_count, pairwise_win_count, created_at, updated_at"
+      )
       .single<Task>();
 
     if (error) {
@@ -191,7 +193,9 @@ export async function toggleTaskCompletion(
       })
       .eq("id", input.id)
       .eq("user_id", authResult.user.id)
-      .select("id, user_id, title, description, due_date, priority, status, created_at, updated_at")
+      .select(
+        "id, user_id, title, description, due_date, priority, status, pairwise_rating, pairwise_comparison_count, pairwise_win_count, created_at, updated_at"
+      )
       .maybeSingle<Task>();
 
     if (error) {
@@ -277,7 +281,9 @@ export async function updateTask(input: UpdateTaskInput): Promise<TaskActionResu
       })
       .eq("id", input.id)
       .eq("user_id", authResult.user.id)
-      .select("id, user_id, title, description, due_date, priority, status, created_at, updated_at")
+      .select(
+        "id, user_id, title, description, due_date, priority, status, pairwise_rating, pairwise_comparison_count, pairwise_win_count, created_at, updated_at"
+      )
       .maybeSingle<Task>();
 
     if (error) {

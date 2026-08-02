@@ -12,6 +12,9 @@ export interface Task {
   due_date: string | null;
   priority: TaskPriority;
   status: TaskStatus;
+  pairwise_rating: number;
+  pairwise_comparison_count: number;
+  pairwise_win_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -52,4 +55,17 @@ export interface TaskActionResult {
     status?: string;
     id?: string;
   };
+}
+
+export type TaskPriorityActionCode =
+  | "choiceSaved"
+  | "genericError"
+  | "invalidTaskIds"
+  | "notAuthenticated"
+  | "rankingLoaded";
+
+export interface TaskPriorityActionResult {
+  success: boolean;
+  code: TaskPriorityActionCode;
+  tasks?: Task[];
 }

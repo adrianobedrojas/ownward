@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import TaskManager from "@/components/TaskManager";
 import { requireUser } from "@/lib/require-user";
 import type { Task } from "./types";
 
-export const metadata: Metadata = {
-  title: "Tasks | Ownward Hub",
-  description: "Track and complete your business tasks in Ownward Hub.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+
+  return {
+    title: t("tasks.title"),
+    description: t("tasks.description"),
+  };
+}
 
 function sortTasks(tasks: Task[]) {
   return [...tasks].sort((a, b) => {
@@ -38,7 +48,9 @@ export default async function TasksPage() {
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, user_id, title, description, due_date, priority, status, created_at, updated_at")
+    .select(
+      "id, user_id, title, description, due_date, priority, status, pairwise_rating, pairwise_comparison_count, pairwise_win_count, created_at, updated_at"
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

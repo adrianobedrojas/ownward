@@ -63,6 +63,10 @@
     "start": {
       "title": "Iniciar un negocio | Ownward Hub",
       "description": "Valida tu idea de negocio, define tu primera oferta, estima costos iniciales y crea un plan de lanzamiento práctico."
+    },
+    "tasks": {
+      "title": "Tareas | Ownward Hub",
+      "description": "Organiza, compara y prioriza las tareas de tu negocio en Ownward Hub."
     }
   },
   "Common": {
@@ -990,7 +994,73 @@
     "title": "Mensajes"
   },
   "Tasks": {
-    "title": "Tareas"
+    "title": "Tareas",
+    "priorityCompare": {
+      "eyebrow": "Comparador de prioridades",
+      "heading": "Comparador de prioridades",
+      "description": "Compara dos tareas pendientes a la vez para aclarar cuál debería ir primero sin reemplazar tus prioridades manuales.",
+      "progress": "{current} de {total} comparaciones",
+      "questionLabel": "Herramienta privada de apoyo para decisiones",
+      "question": "¿Qué tarea debería ir primero?",
+      "priorities": {
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta"
+      },
+      "actions": {
+        "skipPair": "Omitir este par",
+        "finishComparing": "Terminar de comparar",
+        "startAnotherRound": "Comenzar otra ronda"
+      },
+      "emptyState": {
+        "heading": "Necesitas al menos dos tareas pendientes",
+        "description": "El comparador de prioridades solo funciona con tus propias tareas pendientes que todavía están marcadas como por hacer.",
+        "cta": "Agregar tarea"
+      },
+      "roundComplete": {
+        "heading": "Esta ronda terminó",
+        "limitReached": "Llegaste al límite de siete comparaciones para esta ronda.",
+        "noPairs": "Ya revisaste cada par disponible en esta ronda.",
+        "finished": "Elegiste terminar de comparar por ahora."
+      },
+      "taskCard": {
+        "manualPriorityLabel": "Prioridad manual",
+        "comparisonsLabel": "Comparaciones previas",
+        "dueDateLabel": "Fecha límite",
+        "noDueDate": "Sin fecha límite",
+        "noDescription": "No se agregó una descripción.",
+        "chooseTask": "Elegir esta tarea primero",
+        "chooseTaskAriaLabel": "Elegir {title} para que vaya primero"
+      },
+      "ranking": {
+        "heading": "Tu orden de prioridades",
+        "description": "Las tareas pendientes se ordenan por calificación por pares, de mayor a menor.",
+        "disclaimer": "Esta clasificación refleja las decisiones que tomaste entre tareas. Los plazos, las obligaciones legales, los problemas de seguridad y los riesgos financieros urgentes aún pueden necesitar ir primero.",
+        "empty": "Las clasificaciones aparecerán aquí cuando tengas al menos una tarea pendiente.",
+        "liveRegionLabel": "Clasificación actualizada de prioridades de tareas",
+        "guidanceLabel": "Clasificada según tus decisiones",
+        "ratingLabel": "Calificación por pares",
+        "comparisonsLabel": "Comparaciones completadas",
+        "manualPriorityLabel": "Prioridad manual",
+        "dueDateValue": "Fecha límite: {date}",
+        "noDueDate": "Fecha límite: Sin fecha límite",
+        "winsValue": "Victorias: {count}"
+      },
+      "feedback": {
+        "choiceSaved": "Decisión guardada. Mostrando el siguiente par.",
+        "genericError": "No pudimos guardar esa comparación en este momento. Inténtalo de nuevo.",
+        "invalidTaskIds": "Elige dos tareas pendientes diferentes para compararlas.",
+        "notAuthenticated": "Debes iniciar sesión para comparar tareas.",
+        "rankingLoaded": "Se actualizó la clasificación de prioridades.",
+        "sessionComplete": "Decisión guardada. Completaste esta ronda.",
+        "sessionFinished": "La ronda terminó. Puedes comenzar otra ronda cuando quieras.",
+        "pairSkipped": "Par omitido. Mostrando la siguiente comparación disponible.",
+        "roundReset": "Una nueva ronda de comparación está lista."
+      },
+      "loading": {
+        "savingChoice": "Guardando decisión..."
+      }
+    }
   },
   "Customers": {
     "title": "Clientes"
