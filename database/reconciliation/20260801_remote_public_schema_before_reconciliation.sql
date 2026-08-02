@@ -13,35 +13,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 
+CREATE SCHEMA IF NOT EXISTS "public";
+
+
+ALTER SCHEMA "public" OWNER TO "pg_database_owner";
+
+
 COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
-
 
 
 
@@ -107,7 +85,10 @@ CREATE TABLE IF NOT EXISTS "public"."business_listings" (
     "summary" "text",
     "status" "text" DEFAULT 'draft'::"text" NOT NULL,
     "created_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "timezone"('utc'::"text", "now"()) NOT NULL,
+    "slug" "text",
+    "is_public" boolean DEFAULT false NOT NULL,
+    "published_at" timestamp with time zone
 );
 
 
@@ -246,7 +227,13 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "id" "uuid" NOT NULL,
     "updated_at" timestamp with time zone,
     "stripe_customer_id" "text",
-    "subscription_status" "text" DEFAULT 'inactive'::"text"
+    "subscription_status" "text" DEFAULT 'inactive'::"text",
+    "onboarding_complete" boolean DEFAULT false NOT NULL,
+    "onboarding_completed_at" timestamp with time zone,
+    "current_stage" "text" DEFAULT 'start'::"text" NOT NULL,
+    "account_type" "text",
+    "full_name" "text",
+    "business_name" "text"
 );
 
 
@@ -356,6 +343,10 @@ ALTER TABLE ONLY "public"."transactions"
 
 
 
+CREATE UNIQUE INDEX "business_listings_slug_key" ON "public"."business_listings" USING "btree" ("slug");
+
+
+
 CREATE INDEX "business_visits_business_date_index" ON "public"."business_visits" USING "btree" ("business_id", "created_at" DESC);
 
 
@@ -448,6 +439,10 @@ CREATE POLICY "Public can view public businesses" ON "public"."businesses" FOR S
 
 
 
+CREATE POLICY "Public can view published business listings" ON "public"."business_listings" FOR SELECT TO "authenticated", "anon" USING ((("is_public" = true) AND ("status" = 'published'::"text")));
+
+
+
 CREATE POLICY "Users can delete their own invoices" ON "public"."invoices" FOR DELETE USING (("auth"."uid"() = "user_id"));
 
 
@@ -460,15 +455,15 @@ CREATE POLICY "Users can insert their own invoices" ON "public"."invoices" FOR I
 
 
 
-CREATE POLICY "Users can insert their own listings" ON "public"."business_listings" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
-
-
-
 CREATE POLICY "Users can insert their own transactions" ON "public"."transactions" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
 
 
 
-CREATE POLICY "Users can manage their own documents" ON "public"."documents" TO "authenticated" USING (("auth"."uid"() = "user_id")) WITH CHECK (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can manage their own documents" ON "public"."documents" TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
+
+
+
+CREATE POLICY "Users can manage their own listings" ON "public"."business_listings" TO "authenticated" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
 
@@ -480,19 +475,11 @@ CREATE POLICY "Users can update their own invoices" ON "public"."invoices" FOR U
 
 
 
-CREATE POLICY "Users can update their own listings" ON "public"."business_listings" FOR UPDATE TO "authenticated" USING (("auth"."uid"() = "user_id"));
-
-
-
 CREATE POLICY "Users can view own profile" ON "public"."profiles" FOR SELECT USING (("auth"."uid"() = "id"));
 
 
 
 CREATE POLICY "Users can view their own invoices" ON "public"."invoices" FOR SELECT USING (("auth"."uid"() = "user_id"));
-
-
-
-CREATE POLICY "Users can view their own listings" ON "public"."business_listings" FOR SELECT TO "authenticated" USING (("auth"."uid"() = "user_id"));
 
 
 
@@ -555,11 +542,6 @@ ALTER TABLE "public"."subscriptions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."transactions" ENABLE ROW LEVEL SECURITY;
 
 
-
-
-ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
@@ -567,171 +549,9 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."business_listings" TO "anon";
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."business_listings" TO "authenticated";
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."business_listings" TO "service_role";
+GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."business_listings" TO "anon";
+GRANT ALL ON TABLE "public"."business_listings" TO "authenticated";
+GRANT ALL ON TABLE "public"."business_listings" TO "service_role";
 
 
 
@@ -760,7 +580,7 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."community_pulse_re
 
 
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."documents" TO "anon";
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."documents" TO "authenticated";
+GRANT ALL ON TABLE "public"."documents" TO "authenticated";
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."documents" TO "service_role";
 
 
@@ -784,20 +604,14 @@ GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."profiles" TO "serv
 
 
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."subscriptions" TO "anon";
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."subscriptions" TO "authenticated";
-GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."subscriptions" TO "service_role";
+GRANT SELECT,REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."subscriptions" TO "authenticated";
+GRANT ALL ON TABLE "public"."subscriptions" TO "service_role";
 
 
 
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."transactions" TO "anon";
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."transactions" TO "authenticated";
 GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLE "public"."transactions" TO "service_role";
-
-
-
-
-
-
 
 
 
@@ -819,34 +633,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT REFERENCES,TRIGGER,TRUNCATE,MAINTAIN ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
