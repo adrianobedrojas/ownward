@@ -368,6 +368,10 @@
           "Priority Support"
         ]
       }
+    },
+    "cardPayment": {
+      "title": "Pay with a credit or debit card",
+      "description": "No Stripe account is required. Enter your card details in the secure checkout and Stripe will process the payment for Ownward."
     }
   },
   "Buy": {

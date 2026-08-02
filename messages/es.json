@@ -369,6 +369,10 @@
           "Soporte prioritario"
         ]
       }
+    },
+    "cardPayment": {
+      "title": "Paga con tarjeta de crédito o débito",
+      "description": "No necesitas una cuenta de Stripe. Ingresa los datos de tu tarjeta en el pago seguro y Stripe procesará el pago para Ownward."
     }
   },
   "Buy": {
