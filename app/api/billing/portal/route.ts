@@ -34,7 +34,7 @@ export async function POST() {
       .eq("id", user.id)
       .maybeSingle();
 
-    const stripeCustomerId = profile?.stripe_customer_id ?? null;
+    let stripeCustomerId = profile?.stripe_customer_id ?? null;
     if (!stripeCustomerId) {
       return NextResponse.json(
         { error: "No billing account found. Please subscribe first." },
@@ -54,11 +54,12 @@ export async function POST() {
     }
 
     if (staleCustomer) {
-      const { error: clearProfileError } = await supabase
+      const { data: clearedProfiles, error: clearProfileError } = await supabase
         .from("profiles")
         .update({ stripe_customer_id: null })
         .eq("id", user.id)
-        .eq("stripe_customer_id", stripeCustomerId);
+        .eq("stripe_customer_id", stripeCustomerId)
+        .select("stripe_customer_id");
 
       if (clearProfileError) {
         return NextResponse.json(
@@ -67,13 +68,38 @@ export async function POST() {
         );
       }
 
-      return NextResponse.json(
-        {
-          error:
-            "Your previous billing account is no longer available. Please start a new subscription checkout.",
-        },
-        { status: 409 }
-      );
+      if ((clearedProfiles?.length ?? 0) === 0) {
+        const { data: latestProfile, error: latestProfileError } = await supabase
+          .from("profiles")
+          .select("stripe_customer_id")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (latestProfileError) {
+          return NextResponse.json(
+            { error: "Unable to update billing profile. Please try again." },
+            { status: 500 }
+          );
+        }
+
+        const latestStripeCustomerId = latestProfile?.stripe_customer_id ?? null;
+        if (latestStripeCustomerId && latestStripeCustomerId !== stripeCustomerId) {
+          stripeCustomerId = latestStripeCustomerId;
+        } else {
+          return NextResponse.json(
+            { error: "Your billing profile changed. Please try again." },
+            { status: 409 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          {
+            error:
+              "Your previous billing account is no longer available. Please start a new subscription checkout.",
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const siteUrl = getSiteUrl();

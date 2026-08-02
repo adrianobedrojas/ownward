@@ -112,11 +112,12 @@ export async function POST(req: Request) {
 
     if (!stripeCustomerId) {
       if (obsoleteStripeCustomerId) {
-        const { error: clearProfileError } = await supabase
+        const { data: clearedProfiles, error: clearProfileError } = await supabase
           .from("profiles")
           .update({ stripe_customer_id: null })
           .eq("id", user.id)
-          .eq("stripe_customer_id", obsoleteStripeCustomerId);
+          .eq("stripe_customer_id", obsoleteStripeCustomerId)
+          .select("stripe_customer_id");
 
         if (clearProfileError) {
           return NextResponse.json(
@@ -124,23 +125,50 @@ export async function POST(req: Request) {
             { status: 500 }
           );
         }
+
+        if ((clearedProfiles?.length ?? 0) === 0) {
+          const { data: latestProfile, error: latestProfileError } = await supabase
+            .from("profiles")
+            .select("stripe_customer_id")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (latestProfileError) {
+            return NextResponse.json(
+              { error: "Unable to update billing profile. Please try again." },
+              { status: 500 }
+            );
+          }
+
+          const latestStripeCustomerId = latestProfile?.stripe_customer_id ?? null;
+          if (latestStripeCustomerId && latestStripeCustomerId !== obsoleteStripeCustomerId) {
+            stripeCustomerId = latestStripeCustomerId;
+          } else {
+            return NextResponse.json(
+              { error: "Your billing profile changed. Please try again." },
+              { status: 409 }
+            );
+          }
+        }
       }
 
-      const customer = await stripe.customers.create({
-        email: user.email ?? undefined,
-        metadata: { userId: user.id },
-      });
-      stripeCustomerId = customer.id;
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create({
+          email: user.email ?? undefined,
+          metadata: { userId: user.id },
+        });
+        stripeCustomerId = customer.id;
 
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, stripe_customer_id: stripeCustomerId });
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({ id: user.id, stripe_customer_id: stripeCustomerId });
 
-      if (profileError) {
-        return NextResponse.json(
-          { error: "Unable to update billing profile. Please try again." },
-          { status: 500 }
-        );
+        if (profileError) {
+          return NextResponse.json(
+            { error: "Unable to update billing profile. Please try again." },
+            { status: 500 }
+          );
+        }
       }
     }
 

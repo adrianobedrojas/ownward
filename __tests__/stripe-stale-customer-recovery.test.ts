@@ -14,6 +14,8 @@ type MockState = {
   userId: string;
   email: string;
   profileStripeCustomerId: string | null;
+  profileStripeCustomerIdReads?: Array<string | null>;
+  profileGuardedUpdateMatches?: number;
   activeSubscription: { id: string; status: string; price_id: string } | null;
   profileUpdateError: { message: string } | null;
   profileUpsertError: { message: string } | null;
@@ -26,6 +28,14 @@ type StripeState = {
   checkoutUrl: string;
   portalUrl: string;
 };
+
+function readProfileStripeCustomerId(state: MockState) {
+  if (state.profileStripeCustomerIdReads?.length) {
+    return state.profileStripeCustomerIdReads.shift() ?? null;
+  }
+
+  return state.profileStripeCustomerId;
+}
 
 function makeSupabaseMock(state: MockState) {
   return {
@@ -47,16 +57,6 @@ function makeSupabaseMock(state: MockState) {
               }),
             }),
           }),
-          upsert: async (payload: unknown) => {
-            state.writes.push({ table, op: "upsert", payload, filters: [] });
-            return { error: null };
-          },
-          update: (payload: unknown) => ({
-            eq: async (column: string, value: unknown) => {
-              state.writes.push({ table, op: "update", payload, filters: [[column, value]] });
-              return { error: null };
-            },
-          }),
         };
       }
 
@@ -67,7 +67,7 @@ function makeSupabaseMock(state: MockState) {
               maybeSingle: async () => ({
                 data:
                   column === "id" && value === state.userId
-                    ? { stripe_customer_id: state.profileStripeCustomerId }
+                    ? { stripe_customer_id: readProfileStripeCustomerId(state) }
                     : null,
                 error: null,
               }),
@@ -75,22 +75,56 @@ function makeSupabaseMock(state: MockState) {
           }),
           update: (payload: unknown) => ({
             eq: (column1: string, value1: unknown) => ({
-              eq: async (column2: string, value2: unknown) => {
-                state.writes.push({
-                  table,
-                  op: "update",
-                  payload,
-                  filters: [
-                    [column1, value1],
-                    [column2, value2],
-                  ],
-                });
-                return { error: state.profileUpdateError };
-              },
+              eq: (column2: string, value2: unknown) => ({
+                select: async () => {
+                  state.writes.push({
+                    table,
+                    op: "update",
+                    payload,
+                    filters: [
+                      [column1, value1],
+                      [column2, value2],
+                    ],
+                  });
+
+                  if (state.profileUpdateError) {
+                    return { data: null, error: state.profileUpdateError };
+                  }
+
+                  const matchedRows = state.profileGuardedUpdateMatches ?? 1;
+                  if (
+                    matchedRows > 0 &&
+                    column1 === "id" &&
+                    value1 === state.userId &&
+                    column2 === "stripe_customer_id" &&
+                    payload &&
+                    typeof payload === "object" &&
+                    "stripe_customer_id" in payload
+                  ) {
+                    state.profileStripeCustomerId =
+                      (payload as { stripe_customer_id: string | null }).stripe_customer_id;
+                  }
+
+                  return {
+                    data: Array.from({ length: matchedRows }, () => ({
+                      stripe_customer_id: null,
+                    })),
+                    error: null,
+                  };
+                },
+              }),
             }),
           }),
           upsert: async (payload: unknown) => {
             state.writes.push({ table, op: "upsert", payload, filters: [] });
+            if (
+              payload &&
+              typeof payload === "object" &&
+              "stripe_customer_id" in payload
+            ) {
+              state.profileStripeCustomerId =
+                (payload as { stripe_customer_id: string | null }).stripe_customer_id;
+            }
             return { error: state.profileUpsertError };
           },
         };
@@ -102,16 +136,6 @@ function makeSupabaseMock(state: MockState) {
             maybeSingle: async () => ({ data: null, error: null }),
           }),
         }),
-        update: (payload: unknown) => ({
-          eq: async (column: string, value: unknown) => {
-            state.writes.push({ table, op: "update", payload, filters: [[column, value]] });
-            return { error: null };
-          },
-        }),
-        upsert: async (payload: unknown) => {
-          state.writes.push({ table, op: "upsert", payload, filters: [] });
-          return { error: null };
-        },
       };
     },
   };
@@ -133,6 +157,19 @@ function makeStripeMock(state: StripeState) {
         create: jest.fn(async () => ({ url: state.portalUrl })),
       },
     },
+  };
+}
+
+function makeState(overrides: Partial<MockState> = {}): MockState {
+  return {
+    userId: "user-1",
+    email: "user@example.com",
+    profileStripeCustomerId: null,
+    activeSubscription: null,
+    profileUpdateError: null,
+    profileUpsertError: null,
+    writes: [],
+    ...overrides,
   };
 }
 
@@ -180,15 +217,7 @@ describe("Stripe stale-customer recovery", () => {
   }
 
   it("preserves a valid existing customer in checkout", async () => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
-      profileStripeCustomerId: "cus_valid",
-      activeSubscription: null,
-      profileUpdateError: null,
-      profileUpsertError: null,
-      writes: [],
-    };
+    const state = makeState({ profileStripeCustomerId: "cus_valid" });
 
     const { response, stripeMock } = await runCheckout(state, {
       retrieveImpl: async () => ({ id: "cus_valid", object: "customer" }),
@@ -205,16 +234,8 @@ describe("Stripe stale-customer recovery", () => {
     expect(state.writes).toEqual([]);
   });
 
-  it("recovers checkout when Stripe returns a deleted customer", async () => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
-      profileStripeCustomerId: "cus_obsolete",
-      activeSubscription: null,
-      profileUpdateError: null,
-      profileUpsertError: null,
-      writes: [],
-    };
+  it("recovers checkout when Stripe returns a deleted customer object", async () => {
+    const state = makeState({ profileStripeCustomerId: "cus_obsolete" });
 
     const { response, stripeMock } = await runCheckout(state, {
       retrieveImpl: async () => ({ id: "cus_obsolete", deleted: true }),
@@ -224,11 +245,15 @@ describe("Stripe stale-customer recovery", () => {
     });
 
     expect(response.status).toBe(200);
-    const updateWrite = state.writes.find((w) => w.table === "profiles" && w.op === "update");
-    expect(updateWrite?.filters).toEqual([
-      ["id", "user-1"],
-      ["stripe_customer_id", "cus_obsolete"],
-    ]);
+    expect(state.writes).toContainEqual({
+      table: "profiles",
+      op: "update",
+      payload: { stripe_customer_id: null },
+      filters: [
+        ["id", "user-1"],
+        ["stripe_customer_id", "cus_obsolete"],
+      ],
+    });
     expect(stripeMock.customers.create).toHaveBeenCalledWith({
       email: "user@example.com",
       metadata: { userId: "user-1" },
@@ -239,27 +264,48 @@ describe("Stripe stale-customer recovery", () => {
       payload: { id: "user-1", stripe_customer_id: "cus_replacement" },
       filters: [],
     });
-    expect(state.writes.some((w) => w.table === "subscriptions" && w.op !== "select")).toBe(false);
   });
 
-  it("recovers checkout on Stripe resource_missing customer error", async () => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
-      profileStripeCustomerId: "cus_obsolete",
-      activeSubscription: null,
-      profileUpdateError: null,
-      profileUpsertError: null,
-      writes: [],
-    };
+  it.each(["id", "customer"] as const)(
+    "recovers checkout on Stripe resource_missing customer error with param %s",
+    async (param) => {
+      const state = makeState({ profileStripeCustomerId: "cus_obsolete" });
 
-    const { response } = await runCheckout(state, {
+      const { response, stripeMock } = await runCheckout(state, {
+        retrieveImpl: async () => {
+          throw {
+            type: "StripeInvalidRequestError",
+            code: "resource_missing",
+            param,
+            message: "No such customer: 'cus_obsolete'",
+          };
+        },
+        createCustomerId: "cus_replacement",
+        checkoutUrl: "https://checkout.stripe.test/session",
+        portalUrl: "https://portal.stripe.test/session",
+      });
+
+      expect(response.status).toBe(200);
+      expect(stripeMock.customers.create).toHaveBeenCalledTimes(1);
+      expect(state.writes).toContainEqual({
+        table: "profiles",
+        op: "upsert",
+        payload: { id: "user-1", stripe_customer_id: "cus_replacement" },
+        filters: [],
+      });
+    }
+  );
+
+  it("does not classify a missing price as a missing customer", async () => {
+    const state = makeState({ profileStripeCustomerId: "cus_existing" });
+
+    const { response, stripeMock } = await runCheckout(state, {
       retrieveImpl: async () => {
         throw {
           type: "StripeInvalidRequestError",
           code: "resource_missing",
-          param: "customer",
-          message: "No such customer: 'cus_obsolete'",
+          param: "id",
+          message: "No such price: 'price_missing'",
         };
       },
       createCustomerId: "cus_replacement",
@@ -267,25 +313,16 @@ describe("Stripe stale-customer recovery", () => {
       portalUrl: "https://portal.stripe.test/session",
     });
 
-    expect(response.status).toBe(200);
-    expect(state.writes).toContainEqual({
-      table: "profiles",
-      op: "upsert",
-      payload: { id: "user-1", stripe_customer_id: "cus_replacement" },
-      filters: [],
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unable to start checkout. Please try again.",
     });
+    expect(stripeMock.customers.create).not.toHaveBeenCalled();
+    expect(state.writes).toEqual([]);
   });
 
   it("does not classify unrelated Stripe errors as stale-customer in checkout", async () => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
-      profileStripeCustomerId: "cus_existing",
-      activeSubscription: null,
-      profileUpdateError: null,
-      profileUpsertError: null,
-      writes: [],
-    };
+    const state = makeState({ profileStripeCustomerId: "cus_existing" });
 
     const { response, stripeMock } = await runCheckout(state, {
       retrieveImpl: async () => {
@@ -307,16 +344,43 @@ describe("Stripe stale-customer recovery", () => {
     expect(state.writes).toEqual([]);
   });
 
-  it("returns a safe error when replacement customer persistence fails", async () => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
+  it("does not overwrite a newer customer id or create a duplicate customer after a guarded checkout update misses", async () => {
+    const state = makeState({
       profileStripeCustomerId: "cus_obsolete",
-      activeSubscription: null,
-      profileUpdateError: null,
+      profileStripeCustomerIdReads: ["cus_obsolete", "cus_current"],
+      profileGuardedUpdateMatches: 0,
+    });
+
+    const { response, stripeMock } = await runCheckout(state, {
+      retrieveImpl: async () => ({ id: "cus_obsolete", deleted: true }),
+      createCustomerId: "cus_replacement",
+      checkoutUrl: "https://checkout.stripe.test/session",
+      portalUrl: "https://portal.stripe.test/session",
+    });
+
+    expect(response.status).toBe(200);
+    expect(stripeMock.customers.create).not.toHaveBeenCalled();
+    expect(stripeMock.checkout.sessions.create).toHaveBeenCalledWith(
+      expect.objectContaining({ customer: "cus_current" })
+    );
+    expect(state.writes).toEqual([
+      {
+        table: "profiles",
+        op: "update",
+        payload: { stripe_customer_id: null },
+        filters: [
+          ["id", "user-1"],
+          ["stripe_customer_id", "cus_obsolete"],
+        ],
+      },
+    ]);
+  });
+
+  it("returns a safe error when replacement customer persistence fails", async () => {
+    const state = makeState({
+      profileStripeCustomerId: "cus_obsolete",
       profileUpsertError: { message: "db write failed" },
-      writes: [],
-    };
+    });
 
     const { response, stripeMock } = await runCheckout(state, {
       retrieveImpl: async () => ({ id: "cus_obsolete", deleted: true }),
@@ -332,35 +396,11 @@ describe("Stripe stale-customer recovery", () => {
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
-  it.each([
-    {
-      name: "deleted customer",
-      retrieveImpl: async () => ({ id: "cus_portal_old", deleted: true }),
-    },
-    {
-      name: "resource_missing customer error",
-      retrieveImpl: async () => {
-        throw {
-          type: "StripeInvalidRequestError",
-          code: "resource_missing",
-          param: "customer",
-          message: "No such customer: 'cus_portal_old'",
-        };
-      },
-    },
-  ])("returns actionable response for stale customer in billing portal (%s)", async ({ retrieveImpl }) => {
-    const state: MockState = {
-      userId: "user-1",
-      email: "user@example.com",
-      profileStripeCustomerId: "cus_portal_old",
-      activeSubscription: null,
-      profileUpdateError: null,
-      profileUpsertError: null,
-      writes: [],
-    };
+  it("returns actionable response for a deleted customer object in billing portal", async () => {
+    const state = makeState({ profileStripeCustomerId: "cus_portal_old" });
 
     const { response, stripeMock } = await runPortal(state, {
-      retrieveImpl,
+      retrieveImpl: async () => ({ id: "cus_portal_old", deleted: true }),
       createCustomerId: "cus_unused",
       checkoutUrl: "https://checkout.stripe.test/session",
       portalUrl: "https://portal.stripe.test/session",
@@ -372,10 +412,72 @@ describe("Stripe stale-customer recovery", () => {
         "Your previous billing account is no longer available. Please start a new subscription checkout.",
     });
     expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
-    const updateWrite = state.writes.find((w) => w.table === "profiles" && w.op === "update");
-    expect(updateWrite?.filters).toEqual([
-      ["id", "user-1"],
-      ["stripe_customer_id", "cus_portal_old"],
-    ]);
+    expect(state.writes).toContainEqual({
+      table: "profiles",
+      op: "update",
+      payload: { stripe_customer_id: null },
+      filters: [
+        ["id", "user-1"],
+        ["stripe_customer_id", "cus_portal_old"],
+      ],
+    });
+  });
+
+  it("recovers billing portal when a concurrent request already replaced the stale customer", async () => {
+    const state = makeState({
+      profileStripeCustomerId: "cus_portal_old",
+      profileStripeCustomerIdReads: ["cus_portal_old", "cus_portal_current"],
+      profileGuardedUpdateMatches: 0,
+    });
+
+    const { response, stripeMock } = await runPortal(state, {
+      retrieveImpl: async () => ({ id: "cus_portal_old", deleted: true }),
+      createCustomerId: "cus_unused",
+      checkoutUrl: "https://checkout.stripe.test/session",
+      portalUrl: "https://portal.stripe.test/session",
+    });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      url: "https://portal.stripe.test/session",
+    });
+    expect(stripeMock.billingPortal.sessions.create).toHaveBeenCalledWith({
+      customer: "cus_portal_current",
+      return_url: "https://ownward.example/dashboard",
+    });
+  });
+
+  it("recovers billing portal on Stripe resource_missing customer error with param id", async () => {
+    const state = makeState({ profileStripeCustomerId: "cus_portal_old" });
+
+    const { response, stripeMock } = await runPortal(state, {
+      retrieveImpl: async () => {
+        throw {
+          type: "StripeInvalidRequestError",
+          code: "resource_missing",
+          param: "id",
+          message: "No such customer: 'cus_portal_old'",
+        };
+      },
+      createCustomerId: "cus_unused",
+      checkoutUrl: "https://checkout.stripe.test/session",
+      portalUrl: "https://portal.stripe.test/session",
+    });
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error:
+        "Your previous billing account is no longer available. Please start a new subscription checkout.",
+    });
+    expect(stripeMock.billingPortal.sessions.create).not.toHaveBeenCalled();
+    expect(state.writes).toContainEqual({
+      table: "profiles",
+      op: "update",
+      payload: { stripe_customer_id: null },
+      filters: [
+        ["id", "user-1"],
+        ["stripe_customer_id", "cus_portal_old"],
+      ],
+    });
   });
 });

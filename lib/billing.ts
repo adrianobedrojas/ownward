@@ -4,7 +4,7 @@ import type Stripe from "stripe";
 type StripeMissingCustomerError = {
   type: "StripeInvalidRequestError";
   code: "resource_missing";
-  param: "customer";
+  param: "id" | "customer";
   message: string;
 };
 
@@ -29,7 +29,7 @@ export function isObsoleteStripeCustomer(
     "message" in value &&
     value.type === "StripeInvalidRequestError" &&
     value.code === "resource_missing" &&
-    value.param === "customer" &&
+    (value.param === "id" || value.param === "customer") &&
     typeof value.message === "string" &&
     value.message.includes("No such customer")
   ) {
