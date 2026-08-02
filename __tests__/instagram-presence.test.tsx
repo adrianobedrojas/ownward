@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 jest.mock('next-intl/server', () => ({
   getTranslations: jest.fn(),
 }));
@@ -8,7 +10,11 @@ jest.mock('next-intl', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ alt, src, ...props }: { alt: string; src: string }) => <img alt={alt} src={src} {...props} />,
+  default: (props: { alt: string; src: string; fill?: boolean }) => {
+    const { alt, src, fill: _fill, ...rest } = props;
+    void _fill;
+    return <img alt={alt} src={src} {...rest} />;
+  },
 }));
 
 jest.mock('@/i18n/navigation', () => ({
@@ -117,8 +123,8 @@ function renderContact(locale: 'en' | 'es' = 'en') {
 
 describe('Instagram presence', () => {
   beforeEach(() => {
-    mockedGetTranslations.mockImplementation(async ((namespace: keyof Messages) =>
-      translator(namespace, currentLocale)) as typeof getTranslations);
+    mockedGetTranslations.mockImplementation((((namespace: keyof Messages) =>
+      Promise.resolve(translator(namespace, currentLocale))) as unknown) as typeof getTranslations);
     mockedUseTranslations.mockImplementation(((namespace: keyof Messages) =>
       translator(namespace, currentLocale)) as typeof useTranslations);
     mockedCreateClient.mockResolvedValue({
@@ -164,7 +170,7 @@ describe('Instagram presence', () => {
       englishMarkup.indexOf('Follow Ownward as it grows'),
     );
     expect(englishMarkup.indexOf('Follow Ownward as it grows')).toBeLessThan(
-      englishMarkup.indexOf('How Ownward works'),
+      englishMarkup.indexOf('How Ownward Hub works'),
     );
 
     expect(spanishMarkup).toContain('DETRÁS DE OWNWARD');
