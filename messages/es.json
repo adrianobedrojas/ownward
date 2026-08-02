@@ -91,7 +91,7 @@
     "menu": "Menú",
     "selectLanguage": "Seleccionar idioma",
     "tagline": "Inicia · Opera · Crece · Compra · Vende",
-    "academy": "Academy",
+    "academy": "Academia",
     "learn": "Aprender",
     "start": "Iniciar"
   },
@@ -102,7 +102,7 @@
     "terms": "Términos del servicio",
     "contact": "Contacto",
     "guide": "Guía",
-    "academy": "Academy"
+    "academy": "Academia"
   },
   "Home": {
     "hero": {
@@ -530,6 +530,10 @@
         "href": "/guide/buy"
       },
       {
+        "label": "Manejar la presión y las decisiones difíciles del propietario",
+        "href": "/guide/owner-life"
+      },
+      {
         "label": "Aprender de otros dueños",
         "href": "/guide/stories"
       }
@@ -572,6 +576,12 @@
         "cta": "Explora publicaciones activas y busca por categoría o ubicación.",
         "ctaLabel": "Explorar mercado"
       },
+      "owner-life": {
+        "name": "6. Vida del propietario",
+        "description": "Orientación práctica sobre la presión, las relaciones, la identidad, los límites y las decisiones personales detrás de ser propietario de un negocio.",
+        "cta": "Explora marcos para responder a la presión sin permitir que cada momento difícil controle la siguiente decisión.",
+        "ctaLabel": "Explorar la vida del propietario"
+      },
       "stories": {
         "name": "7. Historias de dueños y notas del fundador",
         "description": "Lecciones reales, notas detrás de escena y escenarios cercanos de dueños de negocios.",
@@ -595,11 +605,11 @@
     "actionPlan": "Plan de acción de 30 días",
     "checklist": "Lista de verificación",
     "officialSources": "Fuentes oficiales",
-    "sourcesDescription": "Las políticas SBA y los requisitos de los prestamistas pueden cambiar. Verifica las reglas aplicables con un prestamista participante de la SBA antes de tomar una decisión financiera o de reubicación.",
+    "sourcesDescription": "Consulta las fuentes originales a continuación y verifica la información que pueda cambiar con el tiempo antes de depender de ella.",
     "lastReviewed": "Última revisión {date}",
     "academyCalloutHeading": "¿Prefieres aprendizaje estructurado?",
     "academyCalloutDescription": "Ownward Academy organiza los artículos de la Guía en rutas de aprendizaje ordenadas con seguimiento de progreso. No se requiere cuenta.",
-    "academyCalloutCta": "Explorar Academy"
+    "academyCalloutCta": "Explorar la Academia"
   },
   "StartBusiness": {
     "metadata": {
@@ -999,13 +1009,13 @@
     "heroDescription": "Rutas de aprendizaje estructuradas construidas sobre el mismo contenido de confianza que la Guía, organizadas en cursos ordenados con seguimiento de progreso.",
     "explorePathsCta": "Explorar rutas de aprendizaje",
     "browseGuideCta": "Explorar la Guía",
-    "guideVsAcademyTitle": "Guía vs. Academy",
+    "guideVsAcademyTitle": "Guía vs. Academia",
     "guideCardTitle": "Guía Ownward",
     "guideCardDescription": "Explora cualquier tema en cualquier orden. Consulta artículos cuando los necesites.",
     "guideCardCta": "Explorar la Guía",
     "academyCardTitle": "Ownward Academy",
     "academyCardDescription": "Sigue rutas de aprendizaje estructuradas con lecciones ordenadas y seguimiento de progreso.",
-    "academyCardCta": "Explorar Academy",
+    "academyCardCta": "Explorar la Academia",
     "coursesTitle": "Rutas de aprendizaje",
     "statusAvailable": "Disponible",
     "statusComingSoon": "Próximamente",
@@ -1017,8 +1027,8 @@
     "estimatedTime": "{minutes} min",
     "viewPath": "Ver ruta de aprendizaje",
     "previewCurriculum": "Ver plan de estudios",
-    "backToAcademy": "← Volver a Academy",
-    "breadcrumbAcademy": "Academy",
+    "backToAcademy": "← Volver a la Academia",
+    "breadcrumbAcademy": "Academia",
     "progressLabel": "{completed} de {total} lecciones completadas",
     "progressPercent": "{percent}%",
     "startCourse": "Comenzar curso",
@@ -1039,7 +1049,7 @@
     "startLesson": "Comenzar lección",
     "continueLesson": "Continuar lección",
     "reviewLesson": "Repasar lección",
-    "spanishArticleNotice": "La interfaz de Academy está en español. Algunos artículos de la Guía vinculados solo están disponibles en inglés.",
+    "spanishArticleNotice": "La interfaz de la Academia está en español. Algunos artículos de la Guía vinculados solo están disponibles en inglés.",
     "spanishArticleNoticeCta": "Explorar Guía en inglés",
     "comingSoonHeading": "Plan de estudios en desarrollo",
     "comingSoonDescription": "Este curso está en desarrollo. A continuación se muestra el plan de estudios previsto. Vuelve a consultarlo cuando esté disponible.",
@@ -1048,6 +1058,43 @@
     "disclosureLabel": "Aviso importante",
     "learnMenuLabel": "Aprender",
     "learnMenuGuideDescription": "Explora artículos de referencia por tema",
-    "learnMenuAcademyDescription": "Sigue rutas de aprendizaje ordenadas"
+    "learnMenuAcademyDescription": "Sigue rutas de aprendizaje ordenadas",
+    "upcomingModuleCount": "{count} {count, plural, one {próximo módulo} other {próximos módulos}}"
+  },
+  "UrgencyTriage": {
+    "heading": "¿Es realmente urgente esto?",
+    "description": "Responde cuatro preguntas para identificar qué tipo de respuesta requiere realmente esta situación.",
+    "yes": "Sí",
+    "no": "No",
+    "reset": "Comenzar de nuevo",
+    "resultLabel": "Respuesta sugerida",
+    "questions": {
+      "q1": "¿Alguien está en peligro inmediato, o hay síntomas físicos nuevos o graves que puedan requerir atención médica urgente?",
+      "q2": "¿Existe un plazo externo real dentro de las próximas 24 horas con una consecuencia importante?",
+      "q3": "¿Es la decisión difícil de revertir, costosa, pública, contractual o susceptible de afectar significativamente a otra persona?",
+      "q4": "¿Puedes preservar tus opciones comunicándote, solicitando tiempo, delegando o tomando una acción temporal más pequeña?"
+    },
+    "outcomes": {
+      "protect": {
+        "title": "Proteger",
+        "message": "La seguridad o la salud inmediata es la prioridad. Atiende eso primero antes de considerar cualquier otra cosa."
+      },
+      "preserve": {
+        "title": "Preservar",
+        "message": "Existe un plazo real. Identifica específicamente qué sucede si lo incumples y decide basándote en esa información."
+      },
+      "create-decision-space": {
+        "title": "Crear espacio de decisión",
+        "message": "Esta decisión tiene peso. Tienes tiempo para ir más despacio, recopilar información y tomar una decisión más reflexiva."
+      },
+      "schedule": {
+        "title": "Programar",
+        "message": "Esto no requiere una respuesta inmediata. Programa un momento para atenderlo cuando estés en mejor posición para pensar con claridad."
+      }
+    },
+    "appendMessages": {
+      "option-preserving": "Has identificado una forma de preservar opciones. Usa ese paso antes de tomar la decisión más importante.",
+      "identify-help": "El siguiente paso útil puede ser identificar quién tiene la autoridad, el conocimiento o la capacidad para ayudar."
+    }
   }
 }

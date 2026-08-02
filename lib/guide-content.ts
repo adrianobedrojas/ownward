@@ -29,6 +29,11 @@ export const guideCategoryContent = {
     description:
       "How to evaluate listings, verify revenue, understand financing readiness, spot red flags, and navigate acquisitions.",
   },
+  "owner-life": {
+    title: "Owner Life",
+    description:
+      "Practical guidance about pressure, relationships, identity, boundaries, and decision-making behind business ownership.",
+  },
   stories: {
     title: "Owner Stories & Founder Notes",
     description: "Real-world lessons and behind-the-scenes building notes.",
@@ -81,8 +86,12 @@ export interface GuideArticle {
   actionPlanTitle?: string;
   checklistTitle?: string;
   lastReviewed?: string;
+  contentNotice?: string;
+  sourceNotice?: string;
+  learningObjectives?: string[];
+  reflectionPrompts?: string[];
   sources?: GuideArticleSource[];
-  interactiveTool?: "sba-readiness";
+  interactiveTool?: "sba-readiness" | "urgency-triage";
 }
 
 export const guideArticles: GuideArticle[] = [
@@ -1257,6 +1266,8 @@ export const guideArticles: GuideArticle[] = [
       "Understand the basic SBA eligibility rules, how lenders evaluate an acquisition, what documents buyers should prepare, and which issues to address before contacting a lender.",
     readingTime: "12 min read",
     lastReviewed: "July 31, 2026",
+    sourceNotice:
+      "SBA policy and lender requirements can change. Verify the applicable rules with an SBA-participating lender before making a financial or relocation decision.",
     metadataDescription:
       "Learn how SBA loan qualification works when buying a small business, including 7(a) eligibility, citizenship and residency rules, personal guarantees, lender underwriting, required documents, common red flags, and a practical readiness checklist.",
     interactiveTool: "sba-readiness",
@@ -1741,6 +1752,223 @@ export const guideArticles: GuideArticle[] = [
     categoryCtaLabel: "Back to Selling a Business",
     ownwardCtaHref: "/sell",
     ownwardCtaLabel: "Start preparing your business for sale",
+  },
+  {
+    slug: "when-everything-feels-urgent",
+    category: "owner-life",
+    title: "When Everything Feels Urgent: A Framework for Owners Under Pressure",
+    cardTitle: "When Everything Feels Urgent",
+    description:
+      "Not every business problem is an emergency. This framework helps owners distinguish genuine urgency from pressure that only feels immediate.",
+    readingTime: "9 min read",
+    metadataDescription:
+      "A practical framework for small business owners to separate genuine emergencies from pressure that only feels urgent, with actionable steps for clearer decision-making.",
+    publishedDate: "July 31, 2026",
+    lastReviewed: "July 31, 2026",
+    contentNotice:
+      "This article addresses the emotional and cognitive experience of pressure in business ownership. It is not a substitute for medical or mental health care. If you are experiencing a mental health crisis, please contact a qualified professional or a crisis resource.",
+    learningObjectives: [
+      "Distinguish between genuine emergencies and manufactured urgency",
+      "Apply a four-question triage framework to high-pressure decisions",
+      "Identify the conditions that create false urgency in a business",
+      "Preserve decision-making quality when you are under pressure",
+    ],
+    introduction: [
+      "Running a business produces a steady stream of demands that all seem equally urgent. A vendor needs an answer. A customer is upset. An employee brings a conflict. A payment is due. An opportunity appears and seems to be expiring.",
+      "Experienced owners learn that this feeling — that everything requires an immediate response — is often inaccurate. Many things that feel urgent are not genuine emergencies. And treating them all as emergencies causes real harm: rushed decisions, exhausted judgment, and a business that reacts constantly instead of moving forward.",
+      "This framework is not about ignoring real problems. It is about separating the ones that actually require your immediate attention from the ones that do not.",
+    ],
+    introductionTitle: "The cost of treating everything as urgent",
+    sections: [
+      {
+        title: "1. What genuine urgency looks like",
+        paragraphs: [
+          "Genuine urgency involves one of a small number of real conditions: someone is in danger, a hard external deadline exists with a material consequence, or waiting will cause significant harm that cannot be undone.",
+          "Examples of genuine urgency: a safety incident on your premises, a legal notice with a response deadline today, a supplier stopping delivery that will halt operations within hours.",
+          "Most business pressure does not meet this bar. It feels urgent because it is unresolved, because someone is unhappy, or because the situation is uncomfortable. That discomfort is real. It is not the same as urgency.",
+        ],
+      },
+      {
+        title: "2. What manufactured urgency looks like",
+        paragraphs: [
+          "Manufactured urgency is pressure created by framing, not by facts. It appears in offers that expire at midnight, requests that arrive with a tone of emergency, and your own internal state when you are tired, frustrated, or uncertain.",
+          "It also appears in patterns that many owners recognize: checking every notification immediately, making decisions in the middle of a heated conversation, and responding to every message the moment it arrives.",
+          "None of this reflects real urgency. It reflects an environment in which urgency has become the default mode.",
+        ],
+        bullets: [
+          "Artificial deadlines on low-stakes decisions",
+          "Emotional tone substituted for factual necessity",
+          "Requests framed as emergencies by others who benefit from your quick response",
+          "Your own discomfort with unresolved situations",
+          "Competitive pressure presented without a specific, verifiable consequence",
+        ],
+      },
+      {
+        title: "3. A four-question triage framework",
+        paragraphs: [
+          "When pressure arrives and you are not sure how to respond, work through four questions in order. Stop when you reach a yes.",
+        ],
+        steps: [
+          "Is someone in immediate danger, or are there new or severe physical symptoms that may require urgent medical attention? If yes, that is the only priority.",
+          "Is there a real external deadline within the next 24 hours with a material consequence? If yes, identify specifically what happens if you miss it — then decide.",
+          "Is the decision difficult to reverse, expensive, public, contractual, or likely to affect another person significantly? If yes, you have time to create some decision space before proceeding.",
+          "Can you preserve your options by communicating, requesting time, delegating, or taking a smaller temporary action? If yes, that is your next move.",
+        ],
+      },
+      {
+        title: "4. What to do when the answer is 'no' to all four",
+        paragraphs: [
+          "If none of the four questions produces a yes, the appropriate response is to schedule the decision — not to dismiss the issue, but to address it at a time and in a state of mind that supports better judgment.",
+          "Many of the most expensive decisions owners regret were made when everything felt urgent and nothing actually was.",
+        ],
+      },
+      {
+        title: "5. Protecting your decision-making capacity",
+        paragraphs: [
+          "Decision-making quality degrades under sustained pressure. Owners who treat every problem as an emergency are not making better decisions — they are making faster ones under worse conditions.",
+          "Creating even small amounts of structure helps. A defined time for handling non-urgent communications, a brief pause before responding to emotionally charged messages, and a habit of writing down a decision before making it — these are not inefficiencies. They are the conditions for judgment.",
+        ],
+        bullets: [
+          "Define response windows instead of reacting to every message immediately",
+          "Write the decision down before you make it",
+          "Separate the emotional charge from the factual question",
+          "Identify who else has the authority, knowledge, or capacity to help",
+          "Distinguish between your discomfort and an actual deadline",
+        ],
+      },
+    ],
+    reflectionPrompts: [
+      "Think of a recent decision you made under pressure. Was it actually urgent, or did it feel urgent? What was the difference?",
+      "What conditions in your business or communication habits create false urgency most often?",
+      "What would it look like to have a defined response time for non-urgent messages instead of responding immediately?",
+    ],
+    checklist: [
+      "Applied the four-question triage to the current pressure",
+      "Identified whether the urgency is genuine or manufactured",
+      "Created at least a brief pause before responding to emotionally charged requests",
+      "Written down the decision before making it",
+      "Identified who else has authority, knowledge, or capacity to help",
+      "Scheduled non-urgent decisions for a better time and state",
+    ],
+    categoryCtaHref: "/guide/owner-life",
+    categoryCtaLabel: "Back to Owner Life",
+    ownwardCtaHref: "/academy/owner-life",
+    ownwardCtaLabel: "Continue in Owner Life course",
+    interactiveTool: "urgency-triage",
+    sources: [
+      {
+        label: "American Psychological Association — Stress effects on the body",
+        href: "https://www.apa.org/topics/stress/body",
+      },
+      {
+        label: "National Institute of Mental Health — Stress",
+        href: "https://www.nimh.nih.gov/health/publications/stress",
+      },
+    ],
+    sourceNotice:
+      "Review the original sources below and verify time-sensitive information before relying on it.",
+  },
+  {
+    slug: "love-is-not-governance",
+    category: "owner-life",
+    title:
+      "Love Is Not Governance: Keeping Family Relationships Intact When Running a Business Together",
+    cardTitle: "Love Is Not Governance",
+    description:
+      "Family businesses often struggle not because the family doesn't care, but because love and governance operate on different rules. This article explains the difference.",
+    readingTime: "10 min read",
+    metadataDescription:
+      "A practical guide for family business owners on separating personal relationships from governance structures, defining roles, and making decisions that protect both the business and the family.",
+    publishedDate: "July 31, 2026",
+    lastReviewed: "July 31, 2026",
+    contentNotice:
+      "This article addresses interpersonal dynamics in family-owned businesses. It is educational in nature and is not a substitute for legal advice, professional mediation, or family counseling.",
+    learningObjectives: [
+      "Identify where love-based decision-making and business governance conflict",
+      "Define roles and authority in a way the whole family can understand",
+      "Separate personal loyalty from professional accountability",
+      "Create basic governance structures that protect both the business and the relationship",
+    ],
+    introduction: [
+      "Family businesses carry a particular kind of pressure. The people sitting across the table from you are not just co-workers — they are people you love, people you owe something to, people whose opinions of you matter beyond any professional standard.",
+      "That closeness is often the family business's greatest asset. It is also the source of some of its most difficult problems. When the same relationship that sustains your business also governs it, the two sets of rules can collide in ways that are expensive, damaging, and — without some deliberate structure — often avoidable.",
+      "This article is not about removing love from a family business. It is about understanding why love and governance operate on different rules, and what to do when they come into conflict.",
+    ],
+    introductionTitle: "When two sets of rules run the same business",
+    sections: [
+      {
+        title: "1. The structural difference between love and governance",
+        paragraphs: [
+          "Love is unconditional, at least ideally. Governance is not. A business requires accountability, clear authority, and consequences that apply consistently regardless of relationship.",
+          "When a business is governed by love, accountability becomes conditional. Compensation reflects history instead of contribution. Roles are assigned based on family position rather than capability. Consequences that would apply to any other employee are softened or avoided entirely for family members.",
+          "None of this happens because the family is acting badly. It happens because they are applying a different set of rules — one that works well for maintaining relationships, and one that does not work well for running a business.",
+        ],
+      },
+      {
+        title: "2. Common patterns where the two sets of rules collide",
+        paragraphs: [
+          "Most family business conflicts follow recognizable patterns. Recognizing them does not resolve them, but it can help you see the structure underneath the emotional content.",
+        ],
+        bullets: [
+          "Compensation based on need or loyalty rather than role and contribution",
+          "Titles and authority that reflect family hierarchy rather than business function",
+          "Decisions made to avoid upsetting a family member rather than to serve the business",
+          "Accountability withheld because enforcing it would damage a personal relationship",
+          "Disagreements that cannot be resolved in business terms because they are really about something personal",
+          "Informal agreements that were never documented because 'we're family'",
+          "Succession decisions delayed or distorted by family dynamics rather than business needs",
+        ],
+      },
+      {
+        title: "3. Why documenting roles actually protects relationships",
+        paragraphs: [
+          "One of the most consistent findings in family business practice is that families who create written role definitions, operating agreements, and decision-making frameworks report fewer damaging conflicts — not because the documents eliminate disagreement, but because they move disagreements out of the relational space and into the business space.",
+          "When expectations are written down, a disagreement about performance is a conversation about the document, not a personal judgment on a family member. When authority is defined, a decision that overrides someone's preference is the result of a process, not a personal slight.",
+          "Documentation does not remove the personal dimension. It gives you a surface to work on that is separate from the relationship.",
+        ],
+        bullets: [
+          "Write down each family member's role, responsibilities, and decision-making authority",
+          "Establish compensation based on role and market rate, not family position",
+          "Create an operating agreement or similar document defining ownership rights and obligations",
+          "Define what decisions require consensus, which ones can be made unilaterally, and by whom",
+          "Agree in advance on how disputes will be resolved — ideally before one exists",
+        ],
+      },
+      {
+        title: "4. Separating personal loyalty from professional accountability",
+        paragraphs: [
+          "Holding a family member accountable does not mean you love them less. This is easy to say and genuinely difficult to act on when you are in the middle of a performance conversation with a sibling or a parent.",
+          "One useful distinction: accountability in a business context is about the role, not the person. A role has responsibilities. A person filling that role has agreed — or should agree — to meet them. When the role's responsibilities are not being met, the conversation is about the role.",
+          "This is not a technique for removing emotional content from the conversation. It is a structure that makes the conversation possible without requiring either party to interpret it as a personal attack.",
+        ],
+      },
+      {
+        title: "5. When to involve a third party",
+        paragraphs: [
+          "Some family business conflicts cannot be resolved from the inside. When the same conversation is recurring without resolution, when a family member's role is creating consistent operational harm and the family cannot agree on what to do, or when succession is creating significant anxiety and disagreement — these are situations where a neutral outside perspective often helps.",
+          "Business attorneys, CPAs, family business advisors, mediators, and in some cases family therapists all play roles in these situations. The appropriate resource depends on whether the conflict is primarily legal, financial, relational, or operational.",
+          "Involving a third party is not a sign that the family has failed. It is a recognition that some conflicts require tools and perspectives that people inside the conflict do not have.",
+        ],
+      },
+    ],
+    reflectionPrompts: [
+      "Are there roles in your business currently defined by family position rather than business function? What would they look like if you defined them by function instead?",
+      "What decisions in your business are being avoided or delayed because of their potential impact on a personal relationship?",
+      "If you were to write down each family member's role, authority, and accountability today, what would be the hardest part to commit to paper?",
+    ],
+    checklist: [
+      "Roles and responsibilities defined in writing for each family member",
+      "Compensation reviewed against role and market rate",
+      "Decision-making authority documented: who decides what, and how",
+      "Operating agreement or equivalent reviewed or drafted",
+      "Dispute resolution process defined before a dispute exists",
+      "Succession expectations discussed and, where possible, documented",
+      "Identified which issues may benefit from outside professional support",
+    ],
+    categoryCtaHref: "/guide/owner-life",
+    categoryCtaLabel: "Back to Owner Life",
+    ownwardCtaHref: "/academy/owner-life",
+    ownwardCtaLabel: "Continue in Owner Life course",
   },
   // ─── Start a Business Articles ─────────────────────────────────────────────
   {

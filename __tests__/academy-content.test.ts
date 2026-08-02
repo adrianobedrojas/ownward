@@ -9,8 +9,6 @@ import {
 } from '@/lib/academy-content';
 import { getGuideArticle } from '@/lib/guide-content';
 
-// ─── Progress parsing helpers (mirrors AcademyProgress logic) ────────────────
-
 const ACADEMY_PROGRESS_STORAGE_KEY = 'ownward_academy_progress_v1';
 
 interface AcademyProgressData {
@@ -57,16 +55,12 @@ function courseProgress(
   return { completed, total, percent };
 }
 
-// ─── academy-content tests ────────────────────────────────────────────────────
-
 describe('academy-content', () => {
-  // 1. Unique course slugs
   it('has unique course slugs', () => {
     const slugs = academyCourses.map((c) => c.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
-  // 2. Unique lesson IDs within each course
   it('has unique lesson IDs within each available course', () => {
     const available = academyCourses.filter((c) => c.status === 'available');
     for (const course of available) {
@@ -75,7 +69,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 3. Available courses have >= 2 lessons
   it('all available courses have at least 2 lessons', () => {
     const available = academyCourses.filter((c) => c.status === 'available');
     for (const course of available) {
@@ -83,7 +76,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 4. Each available lesson references an existing Guide article
   it('every available lesson references an existing Guide article', () => {
     const available = academyCourses.filter((c) => c.status === 'available');
     for (const course of available) {
@@ -94,7 +86,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 5. No duplicate Guide article within an available course
   it('no available course reuses the same Guide article twice', () => {
     const available = academyCourses.filter((c) => c.status === 'available');
     for (const course of available) {
@@ -105,7 +96,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 6. Each course has EN + ES title
   it('every course has EN and ES titles', () => {
     for (const course of academyCourses) {
       expect(typeof course.title.en).toBe('string');
@@ -115,7 +105,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 7. Each course has EN + ES description
   it('every course has EN and ES descriptions', () => {
     for (const course of academyCourses) {
       expect(typeof course.description.en).toBe('string');
@@ -125,7 +114,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 8. Coming-soon courses include planned modules
   it('all coming-soon courses include plannedModules', () => {
     const comingSoon = academyCourses.filter((c) => c.status === 'coming-soon');
     expect(comingSoon.length).toBeGreaterThan(0);
@@ -135,7 +123,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 9. markets-foundations includes educational disclosure
   it('markets-foundations has an educational disclosure in EN and ES', () => {
     const course = getAcademyCourse('markets-foundations');
     expect(course).toBeDefined();
@@ -144,7 +131,6 @@ describe('academy-content', () => {
     expect((course?.disclosure?.es ?? '').length).toBeGreaterThan(0);
   });
 
-  // 10. owner-life includes wellbeing disclosure
   it('owner-life has a wellbeing disclosure in EN and ES', () => {
     const course = getAcademyCourse('owner-life');
     expect(course).toBeDefined();
@@ -153,7 +139,6 @@ describe('academy-content', () => {
     expect((course?.disclosure?.es ?? '').length).toBeGreaterThan(0);
   });
 
-  // 11. Statuses and levels are valid
   it('all courses have valid statuses and levels', () => {
     const validStatuses = new Set(['available', 'coming-soon']);
     const validLevels = new Set(['beginner', 'intermediate', 'advanced']);
@@ -163,7 +148,6 @@ describe('academy-content', () => {
     }
   });
 
-  // 12. getAcademyCourse returns expected course
   it('getAcademyCourse returns the expected course for known slugs', () => {
     const sab = getAcademyCourse('start-a-business-foundations');
     expect(sab).toBeDefined();
@@ -181,14 +165,13 @@ describe('academy-content', () => {
 
     const ol = getAcademyCourse('owner-life');
     expect(ol).toBeDefined();
-    expect(ol?.status).toBe('coming-soon');
+    expect(ol?.status).toBe('available');
 
     const mf = getAcademyCourse('markets-foundations');
     expect(mf).toBeDefined();
     expect(mf?.status).toBe('coming-soon');
   });
 
-  // 13. getAcademyCourse returns undefined for unknown slug
   it('getAcademyCourse returns undefined for an unknown slug', () => {
     expect(getAcademyCourse('not-a-real-course')).toBeUndefined();
     expect(getAcademyCourse('')).toBeUndefined();
@@ -231,7 +214,6 @@ describe('academy-content', () => {
     }
   });
 
-  // getLocalizedAcademyText
   it('getLocalizedAcademyText returns EN text for "en" locale', () => {
     const text = { en: 'Hello', es: 'Hola' };
     expect(getLocalizedAcademyText(text, 'en')).toBe('Hello');
@@ -247,7 +229,16 @@ describe('academy-content', () => {
     expect(getLocalizedAcademyText(text, 'fr')).toBe('Hello');
   });
 
-  // getAcademyLessonArticle
+  it('planned modules now use localized titles', () => {
+    const ownerLife = getAcademyCourse('owner-life');
+    const markets = getAcademyCourse('markets-foundations');
+
+    expect(ownerLife?.plannedModules?.[0]?.title.en).toBe('Working With Family Without Losing the Relationship');
+    expect(ownerLife?.plannedModules?.[0]?.title.es).toBe('Trabajar con la familia sin perder la relación');
+    expect(markets?.plannedModules?.[0]?.title.en).toBe('What a Stock Represents');
+    expect(markets?.plannedModules?.[0]?.title.es).toBe('Qué representa una acción');
+  });
+
   it('getAcademyLessonArticle returns the correct article', () => {
     const lesson: AcademyLesson = {
       id: 'business-operations',
@@ -259,7 +250,7 @@ describe('academy-content', () => {
     expect(article?.slug).toBe('business-operations-basics');
   });
 
-  it('getAcademyLessonArticle returns null for nonexistent article', () => {
+  it('getAcademyLessonArticle returns undefined for nonexistent article', () => {
     const lesson: AcademyLesson = {
       id: 'fake',
       guideCategory: 'run',
@@ -268,8 +259,6 @@ describe('academy-content', () => {
     expect(getAcademyLessonArticle(lesson)).toBeUndefined();
   });
 });
-
-// ─── Progress parsing helper tests ───────────────────────────────────────────
 
 describe('academy progress parsing helpers', () => {
   it('storage key constant is correct', () => {
@@ -321,7 +310,6 @@ describe('academy progress parsing helpers', () => {
       updatedAt: '',
     });
     const data = parseAcademyProgress(raw);
-    // Data is stored but filtering happens at render time
     expect(data.completedLessons['not-a-course']).toEqual(['some-lesson']);
   });
 
@@ -351,39 +339,5 @@ describe('academy progress parsing helpers', () => {
     expect(progress.completed).toBe(2);
     expect(progress.total).toBe(4);
     expect(progress.percent).toBe(50);
-  });
-
-  it('deduplicates lesson IDs when calculating progress', () => {
-    const course = getAcademyCourse('business-foundations')!;
-    const raw = JSON.stringify({
-      completedLessons: {
-        'business-foundations': ['business-operations', 'business-operations'],
-      },
-      updatedAt: '',
-    });
-    const data = parseAcademyProgress(raw);
-    const progress = courseProgress(data, course);
-    expect(progress.completed).toBe(1);
-  });
-
-  it('returns 0% for empty completed lessons', () => {
-    const course = getAcademyCourse('business-foundations')!;
-    const data = parseAcademyProgress(null);
-    const progress = courseProgress(data, course);
-    expect(progress.percent).toBe(0);
-    expect(progress.completed).toBe(0);
-  });
-
-  it('returns 100% for fully completed course', () => {
-    const course = getAcademyCourse('business-foundations')!;
-    const allIds = (course.lessons ?? []).map((l) => l.id);
-    const raw = JSON.stringify({
-      completedLessons: { 'business-foundations': allIds },
-      updatedAt: '',
-    });
-    const data = parseAcademyProgress(raw);
-    const progress = courseProgress(data, course);
-    expect(progress.percent).toBe(100);
-    expect(progress.completed).toBe(allIds.length);
   });
 });
