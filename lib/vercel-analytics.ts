@@ -32,23 +32,40 @@ const ROUTE_PATTERNS: Array<[pattern: RegExp, replacement: string]> = [
   [/^(\/[^/]+\/blog\/)([^/]+)$/, '$1[slug]'],
 ];
 
+function sanitizePathname(pathname: string): string {
+  for (const [pattern, replacement] of ROUTE_PATTERNS) {
+    if (pattern.test(pathname)) {
+      return pathname.replace(pattern, replacement);
+    }
+  }
+
+  return pathname;
+}
+
 /**
  * Sanitizes a URL for Vercel Analytics by:
  * 1. Stripping query parameters and hash fragments to avoid leaking PII.
  * 2. Replacing known dynamic route segments (IDs, tokens, slugs) with their
  *    bracket-notation placeholders so aggregate metrics stay meaningful.
+ *
+ * Supports both absolute URLs (which Vercel may provide) and relative paths.
  */
 export function sanitizeAnalyticsUrl(url: string): string {
-  // Strip query string and hash
-  const withoutQuery = url.split('?')[0].split('#')[0];
+  try {
+    // Vercel may provide a complete absolute URL.
+    const parsedUrl = new URL(url);
 
-  for (const [pattern, replacement] of ROUTE_PATTERNS) {
-    if (pattern.test(withoutQuery)) {
-      return withoutQuery.replace(pattern, replacement);
-    }
+    parsedUrl.pathname = sanitizePathname(parsedUrl.pathname);
+    parsedUrl.search = '';
+    parsedUrl.hash = '';
+
+    return parsedUrl.toString();
+  } catch {
+    // Continue supporting relative paths such as /en/business/123.
+    const pathname = url.split(/[?#]/, 1)[0];
+
+    return sanitizePathname(pathname);
   }
-
-  return withoutQuery;
 }
 
 /**
