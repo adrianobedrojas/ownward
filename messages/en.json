@@ -92,7 +92,10 @@
     "selectLanguage": "Select language",
     "tagline": "Start · Run · Grow · Buy · Sell",
     "academy": "Academy",
-    "learn": "Learn"
+    "learn": "Learn",
+    "start": "Start",
+    "learnMenuGuideDescription": "Practical articles, tools, and business guidance",
+    "learnMenuAcademyDescription": "Structured courses and learning paths"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. All rights reserved.",
