@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import InstagramLink from '@/components/InstagramLink';
 
 export default async function Footer() {
   const t = await getTranslations('Footer');
@@ -16,6 +17,12 @@ export default async function Footer() {
             <Link href="/privacy-choices" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('privacyChoices')}</Link>
             <Link href="/terms" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('terms')}</Link>
             <Link href="/contact" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('contact')}</Link>
+            <InstagramLink
+              text={t('instagramHandle')}
+              ariaLabel={t('instagramAriaLabel')}
+              className="font-medium text-slate-400 hover:text-cyan-300"
+              iconClassName="text-slate-500"
+            />
           </nav>
         </div>
       </div>

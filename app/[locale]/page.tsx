@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import InstagramLink from '@/components/InstagramLink';
 import { createClient } from '@/lib/supabase/server';
 import { capitalizeFirst } from '@/lib/documents';
 
@@ -220,6 +221,21 @@ export default async function HomePage() {
               <Link href={card.href} className="mt-4 text-xs font-semibold text-cyan-300 hover:underline">{card.cta}</Link>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl border-t border-slate-900 px-4 py-16 sm:px-6">
+        <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/40 p-8 shadow-xl shadow-cyan-950/10 sm:p-10">
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">{t('instagramPresence.eyebrow')}</p>
+            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">{t('instagramPresence.title')}</h2>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">{t('instagramPresence.description')}</p>
+            <InstagramLink
+              text={t('instagramPresence.cta')}
+              ariaLabel={t('instagramPresence.ariaLabel')}
+              className="mt-6 bg-cyan-400/10 px-4 py-3 font-semibold text-cyan-300 hover:bg-cyan-400 hover:text-slate-950"
+            />
+          </div>
         </div>
       </section>
 
