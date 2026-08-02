@@ -45,10 +45,10 @@ export const academyCourses: AcademyCourse[] = [
       es: 'Fundamentos para iniciar un negocio',
     },
     description: {
-      en: 'Build a practical path from business idea to validation, first offer, startup budget, and launch.',
-      es: 'Crea una ruta práctica desde la idea de negocio hasta la validación, la primera oferta, el presupuesto inicial y el lanzamiento.',
+      en: 'Build a practical path from business idea to validation, first offer, startup budget, LLC formation, and launch.',
+      es: 'Crea una ruta práctica desde la idea de negocio hasta la validación, la primera oferta, el presupuesto inicial, la formación de una LLC y el lanzamiento.',
     },
-    estimatedMinutes: 42,
+    estimatedMinutes: 56,
     lessons: [
       {
         id: 'validate-idea',
@@ -69,6 +69,11 @@ export const academyCourses: AcademyCourse[] = [
         id: 'startup-costs',
         guideCategory: 'start',
         guideArticleSlug: 'estimate-startup-costs-and-pricing',
+      },
+      {
+        id: 'form-an-llc',
+        guideCategory: 'start',
+        guideArticleSlug: 'how-to-start-an-llc',
       },
       {
         id: 'launch-checklist',
