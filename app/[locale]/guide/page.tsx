@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { guideCategoryContent, type GuideCategorySlug } from '@/lib/guide-content';
+import GuideExplorer from '@/components/guide/GuideExplorer';
+import { guideArticles, guideCategoryContent, type GuideCategorySlug } from '@/lib/guide-content';
+import { getRecommendedStartingArticle, orderGuideArticles } from '@/lib/guide-discovery';
 
 const categorySlugs = Object.keys(guideCategoryContent) as GuideCategorySlug[];
 
@@ -26,6 +28,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function GuideIndexPage() {
   const t = await getTranslations('Guide');
   const situations = t.raw('situations') as Array<Record<string, string>>;
+  const orderedArticles = orderGuideArticles(guideArticles);
+  const categoryOptions = categorySlugs.map((slug) => ({
+    value: slug,
+    label: (t.raw(`categories.${slug}`) as Record<string, string>).name,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 text-slate-100 sm:px-6">
@@ -52,11 +59,19 @@ export default async function GuideIndexPage() {
         <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {categorySlugs.map((slug) => {
             const category = t.raw(`categories.${slug}`) as Record<string, string>;
+            const count = guideArticles.filter((article) => article.category === slug).length;
+            const recommended = getRecommendedStartingArticle(guideArticles, slug);
             return (
               <article key={slug} className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-6 transition hover:border-slate-700 hover:bg-slate-900">
                 <div>
                   <h3 className="text-xl font-semibold text-white">{category.name}</h3>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{category.description}</p>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">{t('articleCount', { count })}</p>
+                  {recommended ? (
+                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                      <span className="font-semibold text-slate-200">{t('recommendedStart')}:</span> {recommended.cardTitle ?? recommended.title}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="mt-6 border-t border-slate-800 pt-4">
                   <p className="text-xs font-medium text-cyan-400">{category.cta}</p>
@@ -70,6 +85,19 @@ export default async function GuideIndexPage() {
           })}
         </div>
       </section>
+
+      <div className="mt-16">
+        <GuideExplorer
+          articles={orderedArticles}
+          categories={categoryOptions}
+          allCategoriesLabel={t('allCategories')}
+          searchLabel={t('explorerTitle')}
+          searchPlaceholder={t('searchPlaceholder')}
+          noResultsTitle={t('noResultsTitle')}
+          noResultsBody={t('noResultsBody')}
+          clearFiltersLabel={t('clearFilters')}
+        />
+      </div>
 
       <section className="mt-16 rounded-2xl border border-cyan-800/30 bg-cyan-950/20 p-6 sm:p-8">
         <h2 className="text-xl font-semibold text-white">{t('academyCalloutHeading')}</h2>

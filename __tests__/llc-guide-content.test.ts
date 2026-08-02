@@ -33,7 +33,7 @@ describe('how-to-start-an-llc guide article', () => {
   it('has the correct publishedDate and lastReviewed', () => {
     const article = getGuideArticle(ARTICLE_CATEGORY, ARTICLE_SLUG);
     expect(article?.publishedDate).toBe('August 1, 2026');
-    expect(article?.lastReviewed).toBe('August 1, 2026');
+    expect(article?.lastReviewed).toBe('August 2, 2026');
   });
 
   it('has a metadataDescription containing required SEO terms', () => {

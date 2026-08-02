@@ -114,6 +114,18 @@ describe('academy-content', () => {
     }
   });
 
+
+  it('every course has localized summaries, outcomes, and deliverables', () => {
+    for (const course of academyCourses) {
+      expect(course.summary.en.length).toBeGreaterThan(0);
+      expect(course.summary.es.length).toBeGreaterThan(0);
+      expect(course.outcomes.en.length).toBeGreaterThan(0);
+      expect(course.outcomes.es.length).toBeGreaterThan(0);
+      expect(course.deliverable.en.length).toBeGreaterThan(0);
+      expect(course.deliverable.es.length).toBeGreaterThan(0);
+    }
+  });
+
   it('all coming-soon courses include plannedModules', () => {
     const comingSoon = academyCourses.filter((c) => c.status === 'coming-soon');
     expect(comingSoon.length).toBeGreaterThan(0);

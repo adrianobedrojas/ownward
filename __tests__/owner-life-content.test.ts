@@ -48,7 +48,7 @@ describe('owner-life guide content', () => {
     expect(article?.cardTitle).toBe('When Everything Feels Urgent');
     expect(article?.readingTime).toBe('9 min read');
     expect(article?.publishedDate).toBe('July 31, 2026');
-    expect(article?.lastReviewed).toBe('July 31, 2026');
+    expect(article?.lastReviewed).toBe('August 2, 2026');
     expect(article?.interactiveTool).toBe('urgency-triage');
     expect(article?.contentNotice).toContain('not a substitute');
     expect(article?.learningObjectives).toHaveLength(4);
@@ -70,7 +70,7 @@ describe('owner-life guide content', () => {
     expect(article?.cardTitle).toBe('Love Is Not Governance');
     expect(article?.readingTime).toBe('10 min read');
     expect(article?.publishedDate).toBe('July 31, 2026');
-    expect(article?.lastReviewed).toBe('July 31, 2026');
+    expect(article?.lastReviewed).toBe('August 2, 2026');
     expect(article?.contentNotice).toContain('family counseling');
     expect(article?.learningObjectives).toHaveLength(4);
     expect(article?.reflectionPrompts).toHaveLength(3);

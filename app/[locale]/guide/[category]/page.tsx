@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 import { getGuideArticlesByCategory, getGuideCategory, guideCategoryContent } from '@/lib/guide-content';
+import { getRecommendedStartingArticle, orderGuideArticles } from '@/lib/guide-discovery';
 
 interface CategoryPageProps {
   params: Promise<{ locale: string; category: string }>;
@@ -27,27 +28,44 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 export default async function GuideCategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
   const catInfo = getGuideCategory(category);
-  const categoryArticles = getGuideArticlesByCategory(category);
+  const categoryArticles = orderGuideArticles(getGuideArticlesByCategory(category));
   const t = await getTranslations('Guide');
 
   if (!catInfo) notFound();
 
   const translated = t.raw(`categories.${category}`) as Record<string, string>;
+  const recommended = getRecommendedStartingArticle(categoryArticles, category as keyof typeof guideCategoryContent);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 text-slate-100 sm:px-6">
-      <div className="mb-8">
+      <div className="mb-8 max-w-3xl">
         <Link href="/guide" className="text-sm font-semibold text-cyan-400 hover:underline">{t('backToGuide')}</Link>
         <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">{translated?.name ?? catInfo.title}</h1>
-        <p className="mt-2 text-lg text-slate-300">{translated?.description ?? catInfo.description}</p>
+        <p className="mt-3 text-lg leading-7 text-slate-300">{translated?.description ?? catInfo.description}</p>
+        <p className="mt-4 text-sm leading-6 text-slate-400">{t('categoryIntro')}</p>
+        {recommended ? (
+          <div className="mt-6 rounded-2xl border border-cyan-800/30 bg-cyan-950/20 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-300">{t('recommendedStart')}</p>
+            <h2 className="mt-2 text-lg font-semibold text-white">{recommended.cardTitle ?? recommended.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{recommended.learningOutcome ?? recommended.description}</p>
+            <Link href={`/guide/${recommended.category}/${recommended.slug}`} className="mt-3 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200">
+              {t('readArticle')}
+            </Link>
+          </div>
+        ) : null}
       </div>
       {categoryArticles.length > 0 ? (
         <section aria-label={`${catInfo.title} articles`} className="grid gap-6 md:grid-cols-2">
           {categoryArticles.map((article) => (
             <Link key={article.slug} href={`/guide/${article.category}/${article.slug}`} className="group block rounded-2xl border border-slate-800 bg-slate-900/60 p-6 transition hover:border-slate-700 hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
-              <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">{translated?.name ?? catInfo.title}</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                <span>{translated?.name ?? catInfo.title}</span>
+                <span aria-hidden="true">•</span>
+                <span>{article.articleType ?? t('instructionalLabel')}</span>
+              </div>
               <h2 className="mt-3 text-2xl font-semibold text-white group-hover:text-cyan-200">{article.cardTitle ?? article.title}</h2>
               <p className="mt-3 text-sm leading-6 text-slate-300">{article.description}</p>
+              {article.learningOutcome ? <p className="mt-3 text-sm leading-6 text-slate-400">{article.learningOutcome}</p> : null}
               <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
                 <span className="text-sm text-slate-400">{article.readingTime}</span>
                 <span className="text-sm font-semibold text-cyan-300">{t('readArticle')}</span>
@@ -58,7 +76,7 @@ export default async function GuideCategoryPage({ params }: CategoryPageProps) {
       ) : (
         <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 p-12 text-center">
           <h2 className="text-xl font-semibold text-white">{t('articlesComingSoon')}</h2>
-          <p className="mt-2 text-sm text-slate-400">{t('articlesComingSoonDescription')}</p>
+          <p className="mt-2 text-sm text-slate-400">{category === 'resources' ? t('resourcesComingSoonHonest') : t('articlesComingSoonDescription')}</p>
         </div>
       )}
     </main>

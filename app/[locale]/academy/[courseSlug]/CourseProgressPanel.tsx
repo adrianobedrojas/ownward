@@ -47,16 +47,14 @@ export function CourseProgressPanel({ course, lessons, locale }: CourseProgressP
   } = useAcademyProgress(course);
 
   const isSpanish = locale === 'es';
+  const nextIncomplete = lessons.find(({ lesson }) => !isLessonComplete(lesson.id));
 
   return (
     <div className="space-y-6">
-      {/* Progress summary */}
       {hasFunctionalConsent ? (
         <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm font-semibold text-white">
-              {LessonCtaLabel(t, completed, total)}
-            </span>
+            <span className="text-sm font-semibold text-white">{LessonCtaLabel(t, completed, total)}</span>
             {isReady && (
               <ResetProgressControl
                 confirming={confirming}
@@ -68,17 +66,31 @@ export function CourseProgressPanel({ course, lessons, locale }: CourseProgressP
               />
             )}
           </div>
-          {isReady && (
-            <div className="mt-3">
+          {isReady ? (
+            <div className="mt-3 space-y-4">
               <AcademyProgressBar completed={completed} total={total} percent={percent} />
+              {nextIncomplete ? (
+                <div className="rounded-xl border border-cyan-800/30 bg-cyan-950/20 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-cyan-300">{t('nextIncompleteLesson')}</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{nextIncomplete.article.cardTitle ?? nextIncomplete.article.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-300">{nextIncomplete.article.learningOutcome ?? nextIncomplete.article.description}</p>
+                  <Link href={`/guide/${nextIncomplete.lesson.guideCategory}/${nextIncomplete.lesson.guideArticleSlug}`} className="mt-3 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200">
+                    {t('continueNextIncomplete')} →
+                  </Link>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-emerald-700/30 bg-emerald-950/20 p-4">
+                  <p className="text-sm font-semibold text-emerald-300">{t('courseCompletedHeading')}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-300">{t('courseCompletedBody')}</p>
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
         </div>
       ) : (
         <AcademyNoConsentNotice />
       )}
 
-      {/* Spanish article notice */}
       {isSpanish && (
         <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-4 text-sm text-slate-300">
           <p>{t('spanishArticleNotice')}</p>
@@ -88,44 +100,24 @@ export function CourseProgressPanel({ course, lessons, locale }: CourseProgressP
         </div>
       )}
 
-      {/* Lessons list */}
-      <ol className="space-y-4" aria-label="Course lessons">
+      <ol className="space-y-4" aria-label={t('courseLessonsAriaLabel')}>
         {lessons.map(({ lesson, article, index }) => {
           const isComplete = isLessonComplete(lesson.id);
 
           return (
-            <li
-              key={lesson.id}
-              className={`rounded-2xl border p-5 transition ${
-                isComplete
-                  ? 'border-cyan-800/40 bg-cyan-950/20'
-                  : 'border-slate-800 bg-slate-900/60'
-              }`}
-            >
+            <li key={lesson.id} className={`rounded-2xl border p-5 transition ${isComplete ? 'border-cyan-800/40 bg-cyan-950/20' : 'border-slate-800 bg-slate-900/60'}`}>
               <div className="flex items-start gap-4">
-                <span
-                  className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                    isComplete
-                      ? 'bg-cyan-400 text-slate-950'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                  aria-hidden="true"
-                >
+                <span className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${isComplete ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-400'}`} aria-hidden="true">
                   {isComplete ? '✓' : index + 1}
                 </span>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {lesson.guideCategory}
-                    </span>
-                    {isComplete && (
-                      <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-xs font-semibold text-cyan-300">
-                        {t('lessonCompleted')}
-                      </span>
-                    )}
+                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500">{lesson.guideCategory}</span>
+                    {isComplete ? <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-xs font-semibold text-cyan-300">{t('lessonCompleted')}</span> : null}
                   </div>
                   <h3 className="mt-1 text-base font-semibold text-white">{article.title}</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-300">{article.description}</p>
+                  {article.learningOutcome ? <p className="mt-2 text-sm leading-6 text-slate-400">{article.learningOutcome}</p> : null}
                   <p className="mt-1 text-xs text-slate-500">{article.readingTime}</p>
 
                   <div className="mt-4 flex flex-wrap items-center gap-3">
