@@ -97,7 +97,9 @@
     "tagline": "Inicia · Opera · Crece · Compra · Vende",
     "academy": "Academia",
     "learn": "Aprender",
-    "start": "Iniciar"
+    "start": "Iniciar",
+    "learnMenuGuideDescription": "Artículos, herramientas y orientación empresarial",
+    "learnMenuAcademyDescription": "Cursos estructurados y rutas de aprendizaje"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. Todos los derechos reservados.",
