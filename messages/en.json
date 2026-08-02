@@ -372,6 +372,15 @@
     "cardPayment": {
       "title": "Pay with a credit or debit card",
       "description": "No Stripe account is required. Enter your card details in the secure checkout and Stripe will process the payment for Ownward."
+    },
+    "perYear": "/ yr",
+    "annualEquivalentSuffix": "/mo equivalent",
+    "annualBilledOnce": "Full annual amount billed once per year",
+    "billingToggle": {
+      "label": "Billing period",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "savingsBadge": "Save ~17% — 2 months free"
     }
   },
   "Buy": {
