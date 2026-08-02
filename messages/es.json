@@ -116,7 +116,9 @@
     "terms": "Términos del servicio",
     "contact": "Contacto",
     "guide": "Guía",
-    "academy": "Academia"
+    "academy": "Academia",
+    "instagramHandle": "@ownwardhub",
+    "instagramAriaLabel": "Visita Ownward Hub en Instagram"
   },
   "Home": {
     "hero": {
@@ -257,6 +259,13 @@
           "href": "/guide/stories"
         }
       ]
+    },
+    "instagramPresence": {
+      "eyebrow": "DETRÁS DE OWNWARD",
+      "title": "Sigue el crecimiento de Ownward",
+      "description": "Descubre avances detrás de escena, ideas prácticas para negocios, lecciones del fundador y nuevas funciones de Ownward Hub.",
+      "cta": "Sigue a @ownwardhub en Instagram",
+      "ariaLabel": "Sigue a Ownward Hub en Instagram"
     },
     "process": {
       "badge": "Proceso simple",
@@ -899,6 +908,10 @@
     "title": "Acerca de y contacto",
     "founderTitle": "Hola, soy Adrian",
     "founderDescription": "Bienvenido a Ownward Hub. Construí esta plataforma para dar a los dueños de negocios las herramientas, el conocimiento y los deal rooms confidenciales necesarios para gestionar, hacer crecer y vender sus empresas.",
+    "founderImageAlt": "Adrian, fundador de Ownward Hub",
+    "instagramHeading": "Sigue el proceso de construir Ownward Hub",
+    "instagramCta": "@ownwardhub",
+    "instagramAriaLabel": "Visita @ownwardhub en Instagram",
     "cardTitle": "Ponte en contacto",
     "cardDescription": "¿Tienes preguntas sobre publicaciones, deal rooms o artículos? Envía un mensaje seguro abajo. Tu información de contacto se usará para revisar y responder tu mensaje y se manejará según nuestra",
     "privacyPolicy": "Política de privacidad",

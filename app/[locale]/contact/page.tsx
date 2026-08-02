@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import InstagramLink from '@/components/InstagramLink';
 
 
 export default function ContactPage() {
@@ -46,11 +47,17 @@ export default function ContactPage() {
       <h1 className="mb-6 text-4xl font-bold">{t('title')}</h1>
       <div className="mb-12 flex flex-col items-center gap-8 md:flex-row">
         <div className="relative h-48 w-48 flex-shrink-0 overflow-hidden rounded-full border-2 border-cyan-500">
-          <Image src="/profile.jpg" alt="Founder Headshot" fill className="object-cover object-top translate-y-1 scale-115" />
+          <Image src="/profile.jpg" alt={t('founderImageAlt')} fill className="object-cover object-top translate-y-1 scale-115" />
         </div>
         <div>
           <h2 className="mb-2 text-2xl font-semibold">{t('founderTitle')}</h2>
           <p className="leading-relaxed text-slate-300">{t('founderDescription')}</p>
+          <p className="mt-4 text-sm font-medium uppercase tracking-[0.18em] text-cyan-400">{t('instagramHeading')}</p>
+          <InstagramLink
+            text={t('instagramCta')}
+            ariaLabel={t('instagramAriaLabel')}
+            className="mt-3 font-semibold text-cyan-300 hover:text-cyan-200"
+          />
         </div>
       </div>
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
