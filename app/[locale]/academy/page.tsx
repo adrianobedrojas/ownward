@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: AcademyPageProps): Promise<Me
   return { title: t('academy.title'), description: t('academy.description') };
 }
 
-function levelLabel(level: AcademyCourse['level'], t: ReturnType<typeof getTranslations> extends Promise<infer U> ? U : never) {
+function levelLabel(level: AcademyCourse['level'], t: Awaited<ReturnType<typeof getTranslations>>) {
   if (level === 'intermediate') return t('levelIntermediate');
   if (level === 'advanced') return t('levelAdvanced');
   return t('levelBeginner');
@@ -75,6 +75,9 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
           {academyCourses.map((course) => {
             const title = getLocalizedAcademyText(course.title, locale);
             const description = getLocalizedAcademyText(course.description, locale);
+            const summary = getLocalizedAcademyText(course.summary, locale);
+            const deliverable = getLocalizedAcademyText(course.deliverable, locale);
+            const outcomes = locale === 'es' ? course.outcomes.es : course.outcomes.en;
             const isAvailable = course.status === 'available';
             const statusLabel = isAvailable ? t('statusAvailable') : t('statusComingSoon');
             const lessonCount = course.lessons?.length ?? 0;
@@ -92,13 +95,7 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        isAvailable
-                          ? 'bg-cyan-400/10 text-cyan-300'
-                          : 'bg-amber-400/10 text-amber-300'
-                      }`}
-                    >
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isAvailable ? 'bg-cyan-400/10 text-cyan-300' : 'bg-amber-400/10 text-amber-300'}`}>
                       {statusLabel}
                     </span>
                     <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-400">
@@ -107,17 +104,26 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
                   </div>
                   <h3 className="mt-3 text-lg font-semibold text-white">{title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-300">{description}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-400">{summary}</p>
+                  <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t('courseDeliverable')}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{deliverable}</p>
+                  </div>
+                  <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
+                    {outcomes.slice(0, 3).map((outcome) => (
+                      <li key={outcome} className="flex gap-2">
+                        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-400" aria-hidden="true" />
+                        <span>{outcome}</span>
+                      </li>
+                    ))}
+                  </ul>
 
                   <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
                     {isAvailable ? (
                       <>
                         <span>{t('lessonCount', { count: lessonCount })}</span>
-                        {course.estimatedMinutes ? (
-                          <span>{t('estimatedTime', { minutes: course.estimatedMinutes })}</span>
-                        ) : null}
-                        {moduleCount > 0 ? (
-                          <span>{t('upcomingModuleCount', { count: moduleCount })}</span>
-                        ) : null}
+                        {course.estimatedMinutes ? <span>{t('estimatedTime', { minutes: course.estimatedMinutes })}</span> : null}
+                        {moduleCount > 0 ? <span>{t('upcomingModuleCount', { count: moduleCount })}</span> : null}
                       </>
                     ) : (
                       <span>{t('moduleCount', { count: moduleCount })}</span>
@@ -126,14 +132,7 @@ export default async function AcademyPage({ params }: AcademyPageProps) {
                 </div>
 
                 <div className="mt-6 border-t border-slate-800/60 pt-4">
-                  <Link
-                    href={`/academy/${course.slug}`}
-                    className={`inline-flex items-center text-sm font-semibold transition ${
-                      isAvailable
-                        ? 'text-cyan-300 hover:text-cyan-200'
-                        : 'text-amber-300 hover:text-amber-200'
-                    }`}
-                  >
+                  <Link href={`/academy/${course.slug}`} className={`inline-flex items-center text-sm font-semibold transition ${isAvailable ? 'text-cyan-300 hover:text-cyan-200' : 'text-amber-300 hover:text-amber-200'}`}>
                     {cta} →
                   </Link>
                 </div>

@@ -1,3 +1,5 @@
+import { guideArticleEnhancements } from './guide-enhancements';
+
 export const guideCategoryContent = {
   start: {
     title: "Start a Business",
@@ -46,7 +48,7 @@ export const guideCategoryContent = {
 
 export type GuideCategorySlug = keyof typeof guideCategoryContent;
 
-interface GuideArticleSection {
+export interface GuideArticleSection {
   title: string;
   paragraphs: string[];
   bullets?: string[];
@@ -54,14 +56,88 @@ interface GuideArticleSection {
   quote?: string;
 }
 
-interface GuideActionPlanWeek {
+export interface GuideActionPlanWeek {
   week: string;
   focus: string;
 }
 
-interface GuideArticleSource {
+export interface GuideArticleSource {
   label: string;
   href: string;
+}
+
+export type GuideArticleKind = 'instructional' | 'story' | 'owner-life';
+export type GuideArticleVisualKind =
+  | 'process'
+  | 'timeline'
+  | 'comparison'
+  | 'decision-map'
+  | 'matrix'
+  | 'formula'
+  | 'evidence-ladder'
+  | 'scorecard';
+
+export interface GuideVisualBase {
+  kind: GuideArticleVisualKind;
+  title: string;
+  caption: string;
+  accessibleLabel: string;
+  accessibleDescription: string;
+  section?: string;
+}
+
+export interface GuideProcessVisual extends GuideVisualBase {
+  kind: 'process' | 'timeline' | 'decision-map' | 'evidence-ladder';
+  steps: Array<{ label: string; detail: string }>;
+}
+
+export interface GuideComparisonVisual extends GuideVisualBase {
+  kind: 'comparison' | 'matrix' | 'scorecard';
+  columns: string[];
+  rows: Array<{ label: string; values: string[] }>;
+}
+
+export interface GuideFormulaVisual extends GuideVisualBase {
+  kind: 'formula';
+  expression: string;
+  terms: Array<{ term: string; meaning: string }>;
+}
+
+export type GuideArticleVisual =
+  | GuideProcessVisual
+  | GuideComparisonVisual
+  | GuideFormulaVisual;
+
+export interface GuideRelatedArticleRef {
+  category: GuideCategorySlug;
+  slug: string;
+  reason: string;
+}
+
+export interface GuideWorkedExample {
+  title: string;
+  summary: string;
+  assumptions: string[];
+  steps: Array<{ label: string; detail: string }>;
+  takeaway: string;
+}
+
+export interface GuideImportantNotice {
+  title: string;
+  body: string;
+  tone?: 'info' | 'warning' | 'critical';
+}
+
+export interface GuideNextAction {
+  title: string;
+  description: string;
+  href: string;
+  label: string;
+}
+
+export interface GuidePlainTerm {
+  term: string;
+  definition: string;
 }
 
 export interface GuideArticle {
@@ -81,20 +157,31 @@ export interface GuideArticle {
   ownwardCtaHref: string;
   ownwardCtaLabel: string;
   articleType?: string;
+  articleKind?: GuideArticleKind;
   publishedDate?: string;
   introductionTitle?: string;
   actionPlanTitle?: string;
   checklistTitle?: string;
   lastReviewed?: string;
   contentNotice?: string;
+  importantNotices?: GuideImportantNotice[];
   sourceNotice?: string;
   learningObjectives?: string[];
+  learningOutcome?: string;
+  keyTakeaways?: string[];
+  targetAudience?: string;
   reflectionPrompts?: string[];
+  terms?: GuidePlainTerm[];
   sources?: GuideArticleSource[];
+  workedExample?: GuideWorkedExample;
+  relatedArticles?: GuideRelatedArticleRef[];
+  academyCourseSlugs?: string[];
+  visuals?: GuideArticleVisual[];
+  nextAction?: GuideNextAction;
   interactiveTool?: "sba-readiness" | "urgency-triage";
 }
 
-export const guideArticles: GuideArticle[] = [
+const baseGuideArticles: GuideArticle[] = [
   {
     slug: "business-operations-basics",
     category: "run",
@@ -3059,6 +3146,45 @@ export const guideArticles: GuideArticle[] = [
     ownwardCtaLabel: "Create your business workspace",
   },
 ];
+
+function mergeSources(
+  baseSources: GuideArticleSource[] | undefined,
+  enhancementSources: GuideArticleSource[] | undefined,
+) {
+  const merged = [...(baseSources ?? []), ...(enhancementSources ?? [])];
+  const seen = new Set<string>();
+  return merged.filter((source) => {
+    if (seen.has(source.href)) return false;
+    seen.add(source.href);
+    return true;
+  });
+}
+
+function applyGuideArticleEnhancements(article: GuideArticle): GuideArticle {
+  const enhancement = guideArticleEnhancements[article.slug];
+  if (!enhancement) return article;
+
+  return {
+    ...article,
+    ...enhancement,
+    sections: [...article.sections, ...(enhancement.supplementalSections ?? [])],
+    sources: mergeSources(article.sources, enhancement.sources),
+    learningObjectives: enhancement.learningObjectives ?? article.learningObjectives,
+    reflectionPrompts: enhancement.reflectionPrompts ?? article.reflectionPrompts,
+    checklist: enhancement.checklist ?? article.checklist,
+    actionPlan: enhancement.actionPlan ?? article.actionPlan,
+    keyTakeaways: enhancement.keyTakeaways ?? article.keyTakeaways,
+    visuals: enhancement.visuals ?? article.visuals,
+    relatedArticles: enhancement.relatedArticles ?? article.relatedArticles,
+    importantNotices: enhancement.importantNotices ?? article.importantNotices,
+    academyCourseSlugs: enhancement.academyCourseSlugs ?? article.academyCourseSlugs,
+    terms: enhancement.terms ?? article.terms,
+    workedExample: enhancement.workedExample ?? article.workedExample,
+    nextAction: enhancement.nextAction ?? article.nextAction,
+  };
+}
+
+export const guideArticles: GuideArticle[] = baseGuideArticles.map((article) => applyGuideArticleEnhancements(article));
 
 export function getGuideCategory(slug: string) {
   return guideCategoryContent[slug as GuideCategorySlug] ?? null;
