@@ -60,7 +60,7 @@ describe("task pairwise ranking helpers", () => {
     });
 
     expect(upsetWin.winnerRating - 1000).toBeGreaterThan(expectedWin.winnerRating - 1200);
-    expect(1000 - upsetWin.loserRating).toBeGreaterThan(1200 - expectedWin.loserRating);
+    expect(1200 - upsetWin.loserRating).toBeGreaterThan(1000 - expectedWin.loserRating);
   });
 
   it("returns integer ratings", () => {
