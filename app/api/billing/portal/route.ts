@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isObsoleteStripeCustomer } from "@/lib/billing";
 import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
@@ -41,6 +42,40 @@ export async function POST() {
       );
     }
 
+    let staleCustomer = false;
+    try {
+      const customer = await stripe.customers.retrieve(stripeCustomerId);
+      staleCustomer = isObsoleteStripeCustomer(customer);
+    } catch (error: unknown) {
+      if (!isObsoleteStripeCustomer(error)) {
+        throw error;
+      }
+      staleCustomer = true;
+    }
+
+    if (staleCustomer) {
+      const { error: clearProfileError } = await supabase
+        .from("profiles")
+        .update({ stripe_customer_id: null })
+        .eq("id", user.id)
+        .eq("stripe_customer_id", stripeCustomerId);
+
+      if (clearProfileError) {
+        return NextResponse.json(
+          { error: "Unable to update billing profile. Please try again." },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          error:
+            "Your previous billing account is no longer available. Please start a new subscription checkout.",
+        },
+        { status: 409 }
+      );
+    }
+
     const siteUrl = getSiteUrl();
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
@@ -52,6 +87,9 @@ export async function POST() {
     const message =
       err instanceof Error ? err.message : "Internal server error";
     console.error("Billing portal error:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to open billing portal. Please try again." },
+      { status: 500 }
+    );
   }
 }

@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription, type BillingInterval } from "@/lib/billing";
+import {
+  getAllowedPriceIds,
+  getPriceIdForPlan,
+  isActiveSubscription,
+  isObsoleteStripeCustomer,
+  type BillingInterval,
+} from "@/lib/billing";
 import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
@@ -87,14 +93,39 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     let stripeCustomerId = profile?.stripe_customer_id ?? null;
+    let obsoleteStripeCustomerId: string | null = null;
     if (stripeCustomerId) {
-      const customer = await stripe.customers.retrieve(stripeCustomerId);
-      if ("deleted" in customer && customer.deleted) {
+      try {
+        const customer = await stripe.customers.retrieve(stripeCustomerId);
+        if (isObsoleteStripeCustomer(customer)) {
+          obsoleteStripeCustomerId = stripeCustomerId;
+          stripeCustomerId = null;
+        }
+      } catch (error: unknown) {
+        if (!isObsoleteStripeCustomer(error)) {
+          throw error;
+        }
+        obsoleteStripeCustomerId = stripeCustomerId;
         stripeCustomerId = null;
       }
     }
 
     if (!stripeCustomerId) {
+      if (obsoleteStripeCustomerId) {
+        const { error: clearProfileError } = await supabase
+          .from("profiles")
+          .update({ stripe_customer_id: null })
+          .eq("id", user.id)
+          .eq("stripe_customer_id", obsoleteStripeCustomerId);
+
+        if (clearProfileError) {
+          return NextResponse.json(
+            { error: "Unable to update billing profile. Please try again." },
+            { status: 500 }
+          );
+        }
+      }
+
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
         metadata: { userId: user.id },
@@ -107,7 +138,7 @@ export async function POST(req: Request) {
 
       if (profileError) {
         return NextResponse.json(
-          { error: "Unable to initialize billing profile" },
+          { error: "Unable to update billing profile. Please try again." },
           { status: 500 }
         );
       }
@@ -139,7 +170,7 @@ export async function POST(req: Request) {
     const message = err instanceof Error ? err.message : "Internal server error";
     console.error("Stripe checkout error:", message);
     return NextResponse.json(
-      { error: message },
+      { error: "Unable to start checkout. Please try again." },
       { status: 500 }
     );
   }
