@@ -441,39 +441,14 @@ DROP POLICY IF EXISTS "Deal room participants can view checklist" ON public.deal
 CREATE POLICY "Deal room participants can view checklist"
   ON public.deal_room_checklist_items
   FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_checklist_items.deal_room_id
-        AND (
-          dr.owner_user_id = auth.uid()
-          OR EXISTS (
-            SELECT 1 FROM public.deal_room_participants p
-            WHERE p.deal_room_id = dr.id AND p.user_id = auth.uid()
-              AND p.status = 'active'
-          )
-        )
-    )
-  );
+  USING (public.is_active_deal_room_member(deal_room_id));
 
 DROP POLICY IF EXISTS "Deal room owner manages checklist" ON public.deal_room_checklist_items;
 CREATE POLICY "Deal room owner manages checklist"
   ON public.deal_room_checklist_items
   FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_checklist_items.deal_room_id
-        AND dr.owner_user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_checklist_items.deal_room_id
-        AND dr.owner_user_id = auth.uid()
-    )
-  );
+  USING (public.is_deal_room_seller(deal_room_id))
+  WITH CHECK (public.is_deal_room_seller(deal_room_id));
 
 CREATE OR REPLACE FUNCTION public.drci_set_updated_at()
 RETURNS trigger
@@ -531,36 +506,14 @@ DROP POLICY IF EXISTS "Deal room owner manages document versions" ON public.deal
 CREATE POLICY "Deal room owner manages document versions"
   ON public.deal_room_document_versions
   FOR ALL TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_document_versions.deal_room_id
-        AND dr.owner_user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_document_versions.deal_room_id
-        AND dr.owner_user_id = auth.uid()
-    )
-  );
+  USING (public.is_deal_room_seller(deal_room_id))
+  WITH CHECK (public.is_deal_room_seller(deal_room_id));
 
 DROP POLICY IF EXISTS "Deal room participants view document versions" ON public.deal_room_document_versions;
 CREATE POLICY "Deal room participants view document versions"
   ON public.deal_room_document_versions
   FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_document_versions.deal_room_id
-        AND EXISTS (
-          SELECT 1 FROM public.deal_room_participants p
-          WHERE p.deal_room_id = dr.id AND p.user_id = auth.uid()
-            AND p.status = 'active'
-        )
-    )
-  );
+  USING (public.is_active_deal_room_member(deal_room_id));
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 10. Deal Room Access Events
@@ -598,20 +551,17 @@ DROP POLICY IF EXISTS "Deal room owner views access events" ON public.deal_room_
 CREATE POLICY "Deal room owner views access events"
   ON public.deal_room_access_events
   FOR SELECT TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.deal_rooms dr
-      WHERE dr.id = deal_room_access_events.deal_room_id
-        AND dr.owner_user_id = auth.uid()
-    )
-  );
+  USING (public.is_deal_room_seller(deal_room_id));
 
 -- Users can insert their own events
 DROP POLICY IF EXISTS "Users insert own access events" ON public.deal_room_access_events;
 CREATE POLICY "Users insert own access events"
   ON public.deal_room_access_events
   FOR INSERT TO authenticated
-  WITH CHECK (user_id = auth.uid());
+  WITH CHECK (
+    user_id = auth.uid()
+    AND public.is_active_deal_room_member(deal_room_id)
+  );
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 11. Business Activity Events
@@ -728,8 +678,8 @@ ALTER TABLE public.deal_rooms
   ADD COLUMN IF NOT EXISTS last_activity_at   timestamptz DEFAULT now();
 
 -- Index for active room count enforcement
-CREATE INDEX IF NOT EXISTS deal_rooms_owner_active_idx
-  ON public.deal_rooms (owner_user_id, status)
+CREATE INDEX IF NOT EXISTS deal_rooms_seller_active_idx
+  ON public.deal_rooms (seller_id, status)
   WHERE status NOT IN ('closed', 'withdrawn');
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -753,9 +703,8 @@ SET search_path = public
 AS $$
   SELECT COUNT(*)::integer
   FROM public.deal_rooms
-  WHERE owner_user_id = p_user_id
-    AND status NOT IN ('closed', 'withdrawn')
-    AND deleted_at IS NULL;
+  WHERE seller_id = p_user_id
+    AND status NOT IN ('closed', 'withdrawn');
 $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
