@@ -41,12 +41,12 @@ BEGIN
 END
 $$;
 
--- indexes for workspace queries
-CREATE INDEX IF NOT EXISTS businesses_user_id_idx
-  ON public.businesses (user_id);
+-- indexes for workspace queries (use owner_id — the correct ownership column)
+CREATE INDEX IF NOT EXISTS businesses_owner_id_idx
+  ON public.businesses (owner_id);
 
-CREATE INDEX IF NOT EXISTS businesses_deleted_idx
-  ON public.businesses (user_id, deleted_at)
+CREATE INDEX IF NOT EXISTS businesses_owner_deleted_idx
+  ON public.businesses (owner_id, deleted_at)
   WHERE deleted_at IS NULL;
 
 -- auto-update updated_at

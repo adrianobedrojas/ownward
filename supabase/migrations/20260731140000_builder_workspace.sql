@@ -44,8 +44,10 @@ CREATE INDEX IF NOT EXISTS businesses_owner_deleted_idx
   WHERE deleted_at IS NULL;
 
 -- Ensure RLS policy on businesses uses owner_id (idempotent drop/create)
+-- Drop both the baseline policy name and the forward-migration name before recreating.
 ALTER TABLE public.businesses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Owners can manage their businesses" ON public.businesses;
 DROP POLICY IF EXISTS "Users manage own businesses" ON public.businesses;
 CREATE POLICY "Users manage own businesses"
   ON public.businesses
