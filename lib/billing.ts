@@ -1,4 +1,43 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type Stripe from "stripe";
+
+type StripeMissingCustomerError = {
+  type: "StripeInvalidRequestError";
+  code: "resource_missing";
+  param: "customer";
+  message: string;
+};
+
+export function isObsoleteStripeCustomer(
+  value: Stripe.Customer | Stripe.DeletedCustomer | unknown
+): value is Stripe.DeletedCustomer | StripeMissingCustomerError {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "deleted" in value &&
+    value.deleted === true
+  ) {
+    return true;
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    "code" in value &&
+    "param" in value &&
+    "message" in value &&
+    value.type === "StripeInvalidRequestError" &&
+    value.code === "resource_missing" &&
+    value.param === "customer" &&
+    typeof value.message === "string" &&
+    value.message.includes("No such customer")
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 // ─── Featured-listing one-time product ───────────────────────────────────────
 
@@ -690,4 +729,3 @@ export function getPlanCatalogEntry(plan: BillingPlan): PlanCatalogEntry {
   }
   return entry;
 }
-
