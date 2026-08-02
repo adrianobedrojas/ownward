@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription } from "@/lib/billing";
+import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription, type BillingInterval } from "@/lib/billing";
 import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
@@ -32,8 +32,15 @@ export async function POST(req: Request) {
     const requestedPlan = String(body?.plan ?? "").toLowerCase();
     const requestedPriceId = String(body?.priceId ?? "");
 
+    // Validate and default billing interval
+    const rawInterval = body?.interval;
+    if (rawInterval !== undefined && rawInterval !== "monthly" && rawInterval !== "annual") {
+      return NextResponse.json({ error: "Invalid billing interval" }, { status: 400 });
+    }
+    const billingInterval: BillingInterval = rawInterval ?? "monthly";
+
     const resolvedPriceId =
-      (requestedPlan ? getPriceIdForPlan(requestedPlan) : null) ??
+      (requestedPlan ? getPriceIdForPlan(requestedPlan, billingInterval) : null) ??
       requestedPriceId;
 
     if (!resolvedPriceId) {
@@ -122,6 +129,8 @@ export async function POST(req: Request) {
       cancel_url: `${siteUrl}/pricing`,
       metadata: {
         userId: user.id,
+        plan: requestedPlan,
+        interval: billingInterval,
       },
     });
 
