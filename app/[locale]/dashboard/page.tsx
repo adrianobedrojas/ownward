@@ -29,11 +29,12 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("active_business_id")
+    .select("active_business_id, current_stage")
     .eq("id", user.id)
     .maybeSingle();
 
   const activeBizId = profile?.active_business_id;
+  const currentStage = profile?.current_stage ?? null;
 
   // Business data
   const { count: businessCount } = await supabase
@@ -134,6 +135,7 @@ export default async function DashboardPage({
     hasValuation: (valuationCount ?? 0) > 0,
     oldestIncompleteMilestone: oldestMilestone?.title ?? null,
     lowestHealthCategory,
+    currentStage,
   });
 
   // ── Listings ─────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ describe('owner-life guide content', () => {
     expect(guideCategoryContent['owner-life'].title).toBe('Owner Life');
     expect(guideCategoryContent['owner-life'].description).toContain('pressure');
     expect(Object.keys(guideCategoryContent)).toEqual([
+      'start',
       'run',
       'grow',
       'value',

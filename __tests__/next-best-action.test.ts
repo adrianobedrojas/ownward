@@ -136,6 +136,53 @@ describe("getNextBestAction", () => {
     expect(action.rule).toBe(1);
   });
 
+  it("Start stage with no business returns Build Your Startup Roadmap", () => {
+    const action = getNextBestAction({
+      ...baseInput,
+      businessCount: 0,
+      businessCompletion: null,
+      currentStage: 'start',
+    });
+    expect(action.rule).toBe(1);
+    expect(action.href).toBe('/start');
+    expect(action.title).toBe('Build Your Startup Roadmap');
+    expect(action.cta).toBe('Start Planning');
+  });
+
+  it("Start stage with existing business falls through to normal rules", () => {
+    const action = getNextBestAction({
+      ...baseInput,
+      currentStage: 'start',
+      // businessCount > 0, so start-specific rule should not fire
+    });
+    // Should fall through to rule 7 (all conditions satisfied)
+    expect(action.rule).toBe(7);
+  });
+
+  it("Non-start stage with no business still returns Create Business Passport", () => {
+    const action = getNextBestAction({
+      ...baseInput,
+      businessCount: 0,
+      businessCompletion: null,
+      currentStage: 'run',
+    });
+    expect(action.rule).toBe(1);
+    expect(action.href).toBe('/business/new');
+  });
+
+  it("currentStage undefined (legacy) preserves Create Business Passport behavior", () => {
+    const action = getNextBestAction({
+      businessCount: 0,
+      businessCompletion: null,
+      hasHealthAssessment: false,
+      milestoneCount: 0,
+      documentCount: 0,
+      hasValuation: false,
+    });
+    expect(action.rule).toBe(1);
+    expect(action.href).toBe('/business/new');
+  });
+
   it("Rule 2 is checked before Rule 3", () => {
     const action = getNextBestAction({
       ...baseInput,

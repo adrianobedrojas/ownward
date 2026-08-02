@@ -6,6 +6,7 @@ import { guideCategoryContent, type GuideCategorySlug } from '@/lib/guide-conten
 const categorySlugs = Object.keys(guideCategoryContent) as GuideCategorySlug[];
 
 const ctaHref: Record<GuideCategorySlug, string> = {
+  start: '/start',
   run: '/dashboard',
   grow: '/grow',
   value: '/valuation',

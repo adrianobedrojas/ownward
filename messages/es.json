@@ -59,6 +59,10 @@
     "academy": {
       "title": "Ownward Academy — Rutas de aprendizaje para propietarios de negocios",
       "description": "Sigue rutas de aprendizaje ordenadas sobre cómo operar, comprar y vender un pequeño negocio. Basadas en contenido de confianza de la Guía, con seguimiento de progreso."
+    },
+    "start": {
+      "title": "Iniciar un negocio | Ownward Hub",
+      "description": "Valida tu idea de negocio, define tu primera oferta, estima costos iniciales y crea un plan de lanzamiento práctico."
     }
   },
   "Common": {
@@ -86,9 +90,10 @@
     "createAccount": "Crear cuenta",
     "menu": "Menú",
     "selectLanguage": "Seleccionar idioma",
-    "tagline": "Opera · Crece · Compra · Vende",
+    "tagline": "Inicia · Opera · Crece · Compra · Vende",
     "academy": "Academia",
-    "learn": "Aprender"
+    "learn": "Aprender",
+    "start": "Iniciar"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. Todos los derechos reservados.",
@@ -130,6 +135,13 @@
       "badge": "Elige tu camino",
       "title": "¿En qué etapa de tu camino empresarial estás?",
       "cards": [
+        {
+          "emoji": "🚀",
+          "title": "Iniciar un negocio",
+          "description": "Valida una idea, define tu primera oferta, estima costos iniciales y organiza un plan de lanzamiento práctico.",
+          "cta": "Comenzar a planificar",
+          "href": "/start"
+        },
         {
           "emoji": "🏢",
           "title": "Operar",
@@ -498,8 +510,8 @@
     "situationsTitle": "¿Qué estás tratando de hacer?",
     "situations": [
       {
-        "label": "Iniciar u organizar un negocio",
-        "href": "/guide/run"
+        "label": "Iniciar un negocio",
+        "href": "/guide/start"
       },
       {
         "label": "Hacer crecer un negocio existente",
@@ -528,32 +540,38 @@
     ],
     "categoriesTitle": "Categorías principales de contenido",
     "categories": {
+      "start": {
+        "name": "1. Iniciar un negocio",
+        "description": "Orientación práctica para validar una idea, definir una oferta, estimar costos iniciales, organizar tareas de constitución y prepararse para el lanzamiento.",
+        "cta": "Convierte tu idea en una hoja de ruta práctica para iniciar tu negocio.",
+        "ctaLabel": "Abrir planificador de inicio"
+      },
       "run": {
-        "name": "1. Operar un negocio",
+        "name": "2. Operar un negocio",
         "description": "Material práctico para dueños actuales sobre organización, registros, operaciones y reducción de la dependencia del dueño.",
         "cta": "Accede al panel de tu negocio para gestionar tareas, clientes, documentos y métricas clave.",
         "ctaLabel": "Abrir panel"
       },
       "grow": {
-        "name": "2. Hacer crecer un negocio",
+        "name": "3. Hacer crecer un negocio",
         "description": "Estrategias sobre rentabilidad de clientes, impulsores de valor, ingresos recurrentes y planificación de crecimiento a 90 días.",
         "cta": "Define metas de crecimiento medibles y sigue el progreso con el planificador de 90 días.",
         "ctaLabel": "Abrir planificador de crecimiento"
       },
       "value": {
-        "name": "3. Valuación del negocio",
+        "name": "4. Valuación del negocio",
         "description": "Explicaciones sobre múltiplos de SDE, EBITDA, ingresos frente a utilidad y factores de estimación.",
         "cta": "Construye un escenario preliminar de valuación con tus propios datos financieros.",
         "ctaLabel": "Estimar valor del negocio"
       },
       "sell": {
-        "name": "4. Vender un negocio",
+        "name": "5. Vender un negocio",
         "description": "Orientación paso a paso sobre publicaciones confidenciales, debida diligencia, NDAs, CIMs y cierre.",
         "cta": "Prepara tu negocio para la venta o crea una publicación confidencial.",
         "ctaLabel": "Crear borrador de publicación"
       },
       "buy": {
-        "name": "5. Comprar un negocio",
+        "name": "6. Comprar un negocio",
         "description": "Cómo evaluar publicaciones, verificar ingresos, entender preparación financiera, detectar alertas y navegar la debida diligencia.",
         "cta": "Explora publicaciones activas y busca por categoría o ubicación.",
         "ctaLabel": "Explorar mercado"
@@ -592,6 +610,59 @@
     "academyCalloutHeading": "¿Prefieres aprendizaje estructurado?",
     "academyCalloutDescription": "Ownward Academy organiza los artículos de la Guía en rutas de aprendizaje ordenadas con seguimiento de progreso. No se requiere cuenta.",
     "academyCalloutCta": "Explorar la Academia"
+  },
+  "StartBusiness": {
+    "metadata": {
+      "title": "Iniciar un negocio | Ownward Hub",
+      "description": "Valida tu idea de negocio, define tu primera oferta, estima costos iniciales y crea un plan de lanzamiento práctico."
+    },
+    "heroBadge": "Iniciar un negocio",
+    "heroTitle": "Convierte una idea en un negocio que puedas operar.",
+    "heroDescription": "Valida tu idea, define tu oferta, estima costos iniciales, organiza tareas de constitución y crea un plan de lanzamiento práctico.",
+    "primaryCta": "Crear mi plan de inicio",
+    "secondaryCta": "Ver guías de inicio",
+    "welcomeBanner": "Tu cuenta está lista. Comienza creando la hoja de ruta de tu negocio.",
+    "welcomeDismiss": "Cerrar",
+    "stagesTitle": "Un camino claro de la idea al lanzamiento",
+    "stagesDescription": "Iniciar un negocio implica siete áreas clave. Trabaja en cada una para reducir el riesgo y construir una base más sólida.",
+    "stages": [
+      "Define la idea y el problema del cliente",
+      "Identifica al cliente objetivo",
+      "Crea la primera oferta y el modelo de negocio",
+      "Valida la demanda antes de invertir fuertemente",
+      "Estima costos iniciales, precios y gastos mensuales",
+      "Organiza los requisitos legales, operativos y de registro",
+      "Planifica el lanzamiento y la estrategia del primer cliente"
+    ],
+    "plannerTitle": "Planificador de inicio",
+    "plannerDescription": "Trabaja en tu plan paso a paso. Tu progreso se guarda automáticamente en tu navegador.",
+    "plannerStorageNote": "Tu plan se guarda localmente en tu navegador. No se envía a ningún servidor a menos que crees un espacio de trabajo empresarial.",
+    "stepOf": "Paso {current} de {total}",
+    "progressPercent": "{percent}% completado",
+    "back": "Anterior",
+    "next": "Siguiente",
+    "reviewPlan": "Revisar mi plan",
+    "resetPlan": "Reiniciar plan",
+    "resetConfirmTitle": "¿Reiniciar tu plan?",
+    "resetConfirmDescription": "Esto eliminará permanentemente todas las entradas de tu plan en este navegador. Esta acción no se puede deshacer.",
+    "resetConfirm": "Sí, reiniciar plan",
+    "resetCancel": "Cancelar",
+    "exportText": "Exportar como texto",
+    "exportJson": "Exportar como JSON",
+    "printPlan": "Imprimir plan",
+    "planSummaryTitle": "Resumen de tu plan de inicio",
+    "notFilled": "(sin completar)",
+    "finishTitle": "¿Listo para dar el siguiente paso?",
+    "finishDescription": "Usa tu plan para organizar tu espacio de trabajo empresarial, seguir hitos y acceder a guías de inicio.",
+    "ctaCreateAccount": "Crear una cuenta gratuita",
+    "ctaCreateWorkspace": "Crear un espacio de trabajo empresarial",
+    "ctaAddMilestones": "Agregar hitos de inicio",
+    "ctaBrowseGuides": "Ver guías de inicio",
+    "guidesTitle": "Guía de inicio",
+    "guidesDescription": "Lee artículos prácticos sobre cómo validar tu idea, crear tu primera oferta, estimar costos iniciales y lanzar.",
+    "guidesCta": "Ver todas las guías de inicio →",
+    "financialDisclaimer": "Las estimaciones financieras en este planificador son solo entradas de planificación aproximadas. No son asesoramiento financiero, garantías ni pronósticos. Consulta a un profesional financiero calificado para obtener asesoramiento específico para tu situación.",
+    "legalDisclaimer": "Los requisitos de constitución, licencias, impuestos, empleo y seguros varían según la jurisdicción y deben verificarse a través de fuentes gubernamentales oficiales y profesionales calificados. Nada en este planificador es asesoramiento legal o fiscal."
   },
   "Authentication": {
     "login": {

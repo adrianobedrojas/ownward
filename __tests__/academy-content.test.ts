@@ -149,6 +149,11 @@ describe('academy-content', () => {
   });
 
   it('getAcademyCourse returns the expected course for known slugs', () => {
+    const sab = getAcademyCourse('start-a-business-foundations');
+    expect(sab).toBeDefined();
+    expect(sab?.slug).toBe('start-a-business-foundations');
+    expect(sab?.status).toBe('available');
+
     const bf = getAcademyCourse('business-foundations');
     expect(bf).toBeDefined();
     expect(bf?.slug).toBe('business-foundations');
@@ -172,6 +177,36 @@ describe('academy-content', () => {
     expect(getAcademyCourse('')).toBeUndefined();
   });
 
+  // 14. start-a-business-foundations course exists and is available
+  it('start-a-business-foundations is available and has the correct slug', () => {
+    const course = getAcademyCourse('start-a-business-foundations');
+    expect(course).toBeDefined();
+    expect(course?.status).toBe('available');
+    expect(course?.slug).toBe('start-a-business-foundations');
+  });
+
+  it('start-a-business-foundations has EN and ES title', () => {
+    const course = getAcademyCourse('start-a-business-foundations');
+    expect(course?.title.en.length).toBeGreaterThan(0);
+    expect(course?.title.es.length).toBeGreaterThan(0);
+  });
+
+  it('start-a-business-foundations every lesson resolves to a real Guide article', () => {
+    const course = getAcademyCourse('start-a-business-foundations');
+    expect(course).toBeDefined();
+    for (const lesson of course?.lessons ?? []) {
+      const article = getGuideArticle(lesson.guideCategory, lesson.guideArticleSlug);
+      expect(article).toBeDefined();
+    }
+  });
+
+  it('start-a-business-foundations lesson IDs are unique', () => {
+    const course = getAcademyCourse('start-a-business-foundations');
+    const ids = (course?.lessons ?? []).map((l) => l.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  // getAvailableAcademyCourses
   it('getAvailableAcademyCourses returns only available courses', () => {
     const available = getAvailableAcademyCourses();
     for (const c of available) {

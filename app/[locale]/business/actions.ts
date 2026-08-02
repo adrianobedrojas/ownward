@@ -140,6 +140,34 @@ export async function createBusiness(
     .update({ active_business_id: data.id })
     .eq("id", user.id);
 
+  // Create initial startup milestones for idea/pre_revenue stage
+  if (businessStage === 'idea' || businessStage === 'pre_revenue') {
+    const milestones = [
+      { title: 'Interview five potential customers', category: 'customer' },
+      { title: 'Define the first paid offer', category: 'customer' },
+      { title: 'Estimate startup costs', category: 'finance' },
+      { title: 'Research registration and license requirements', category: 'formation' },
+      { title: 'Set up bookkeeping and payment collection', category: 'operations' },
+      { title: 'Create a first-customer outreach plan', category: 'marketing' },
+      { title: 'Choose a target launch date', category: 'operations' },
+    ];
+    try {
+      // Use upsert with onConflict to avoid duplicates on retry
+      await supabase.from('business_milestones').insert(
+        milestones.map((m) => ({
+          user_id: user.id,
+          business_id: data.id,
+          title: m.title,
+          category: m.category,
+          status: 'planned',
+        }))
+      );
+    } catch (milestoneErr) {
+      // Non-critical — log but do not fail business creation
+      console.error('createBusiness milestone insert error:', milestoneErr);
+    }
+  }
+
   revalidatePath("/business");
   revalidatePath("/dashboard");
   return { success: true, businessId: data.id };
