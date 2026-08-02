@@ -12,6 +12,7 @@ import {
   type Task,
   type TaskPriority,
 } from "@/app/[locale]/tasks/types";
+import TaskPriorityCompare from "@/components/tasks/TaskPriorityCompare";
 
 type TaskFilter = "today" | "upcoming" | "completed" | "all";
 
@@ -255,6 +256,18 @@ export default function TaskManager({ initialTasks, initialError }: TaskManagerP
     });
   }
 
+  function upsertTasks(nextTasks: Task[]) {
+    setTasks((currentTasks) => {
+      const taskMap = new Map(currentTasks.map((task) => [task.id, task]));
+
+      nextTasks.forEach((task) => {
+        taskMap.set(task.id, task);
+      });
+
+      return sortTasks(Array.from(taskMap.values()));
+    });
+  }
+
   function validateFormInput() {
     const nextErrors: typeof formErrors = {};
 
@@ -436,6 +449,12 @@ export default function TaskManager({ initialTasks, initialError }: TaskManagerP
           <p className="mt-2 text-3xl font-bold text-white">{counts.completed}</p>
         </article>
       </div>
+
+      <TaskPriorityCompare
+        tasks={tasks}
+        onOpenCreateTask={openCreateModal}
+        onTasksUpdated={upsertTasks}
+      />
 
       <div className="mt-8 flex flex-wrap gap-2" role="tablist" aria-label="Task filters">
         {(Object.keys(FILTER_LABELS) as TaskFilter[]).map((filter) => {

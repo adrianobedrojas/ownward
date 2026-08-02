@@ -63,6 +63,10 @@
     "start": {
       "title": "Start a Business | Ownward Hub",
       "description": "Validate your business idea, define your first offer, estimate startup costs, and build a practical launch plan."
+    },
+    "tasks": {
+      "title": "Tasks | Ownward Hub",
+      "description": "Track, compare, and prioritize your business tasks in Ownward Hub."
     }
   },
   "Common": {
@@ -989,7 +993,73 @@
     "title": "Messages"
   },
   "Tasks": {
-    "title": "Tasks"
+    "title": "Tasks",
+    "priorityCompare": {
+      "eyebrow": "Priority Compare",
+      "heading": "Priority Compare",
+      "description": "Compare two unfinished tasks at a time to clarify what should come first without replacing your manual priority settings.",
+      "progress": "{current} of {total} comparisons",
+      "questionLabel": "Private decision-support tool",
+      "question": "Which task should come first?",
+      "priorities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "actions": {
+        "skipPair": "Skip this pair",
+        "finishComparing": "Finish comparing",
+        "startAnotherRound": "Start another round"
+      },
+      "emptyState": {
+        "heading": "You need at least two unfinished tasks",
+        "description": "Priority Compare only works with your own unfinished tasks that are still marked as to do.",
+        "cta": "Add a task"
+      },
+      "roundComplete": {
+        "heading": "This round is complete",
+        "limitReached": "You reached the seven-comparison limit for this round.",
+        "noPairs": "You already reviewed each available pair in this round.",
+        "finished": "You chose to finish comparing for now."
+      },
+      "taskCard": {
+        "manualPriorityLabel": "Manual priority",
+        "comparisonsLabel": "Previous comparisons",
+        "dueDateLabel": "Due date",
+        "noDueDate": "No due date",
+        "noDescription": "No description added.",
+        "chooseTask": "Choose this task first",
+        "chooseTaskAriaLabel": "Choose {title} to come first"
+      },
+      "ranking": {
+        "heading": "Your priority order",
+        "description": "Unfinished tasks are ranked by pairwise rating, highest first.",
+        "disclaimer": "This ranking reflects the choices you made between tasks. Deadlines, legal obligations, safety issues, and urgent financial risks may still need to come first.",
+        "empty": "Rankings will appear here once you have at least one unfinished task.",
+        "liveRegionLabel": "Updated task priority ranking",
+        "guidanceLabel": "Ranked from your choices",
+        "ratingLabel": "Pairwise rating",
+        "comparisonsLabel": "Comparisons completed",
+        "manualPriorityLabel": "Manual priority",
+        "dueDateValue": "Due: {date}",
+        "noDueDate": "Due: No due date",
+        "winsValue": "Wins: {count}"
+      },
+      "feedback": {
+        "choiceSaved": "Choice saved. Showing the next pair.",
+        "genericError": "We could not save that comparison right now. Please try again.",
+        "invalidTaskIds": "Choose two different unfinished tasks to compare.",
+        "notAuthenticated": "You must be signed in to compare tasks.",
+        "rankingLoaded": "Priority ranking refreshed.",
+        "sessionComplete": "Choice saved. You completed this round.",
+        "sessionFinished": "Round finished. You can start another round anytime.",
+        "pairSkipped": "Pair skipped. Showing the next available comparison.",
+        "roundReset": "A new comparison round is ready."
+      },
+      "loading": {
+        "savingChoice": "Saving choice..."
+      }
+    }
   },
   "Customers": {
     "title": "Customers"
