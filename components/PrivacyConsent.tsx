@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   createContext,
   useContext,
@@ -35,11 +35,12 @@ function toDraft(consent: PrivacyConsentState | null) {
   return {
     functionality: consent?.functionality ?? false,
     analytics: consent?.analytics ?? false,
-    marketing: consent?.marketing ?? false,
   };
 }
 
 export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
+  const locale = useLocale();
+  const isSpanish = locale === 'es';
   const t = useTranslations('Privacy');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
@@ -112,17 +113,16 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
     {
       key: 'functionality',
       title: t('functionality'),
-      description: t('functionalityDescription'),
+      description: isSpanish
+        ? 'Permite guardar progreso local opcional (Academy, plan de inicio y token de visitante).'
+        : 'Allows optional local progress storage (Academy, startup planner, and visitor token).',
     },
     {
       key: 'analytics',
       title: t('analytics'),
-      description: t('analyticsDescription'),
-    },
-    {
-      key: 'marketing',
-      title: t('marketing'),
-      description: t('marketingDescription'),
+      description: isSpanish
+        ? 'Permite Vercel Web Analytics con redacción de query/hash e identificadores dinámicos conocidos.'
+        : 'Enables Vercel Web Analytics with query/hash and known dynamic-ID redaction.',
     },
   ] as const;
 
@@ -172,7 +172,11 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
               ) : null}
             </div>
 
-            <p className="mt-4 text-sm leading-6 text-slate-300">{t('panelDescription')}</p>
+            <p className="mt-4 text-sm leading-6 text-slate-300">
+              {isSpanish
+                ? 'Ownward siempre usa almacenamiento necesario para autenticación, seguridad y preferencias básicas. Funcionalidad y analítica se mantienen desactivadas hasta que las permitas.'
+                : 'Ownward always uses necessary storage for authentication, security, and core preferences. Functionality and analytics remain disabled until you allow them.'}
+            </p>
 
             <div className="mt-5 space-y-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
               <div className="flex items-start justify-between gap-4">
@@ -211,7 +215,7 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={() => commitConsent({ functionality: false, analytics: false, marketing: false })}
+                onClick={() => commitConsent({ functionality: false, analytics: false })}
                 className="rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-900"
               >
                 {t('reject')}
@@ -225,7 +229,7 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
               </button>
               <button
                 type="button"
-                onClick={() => commitConsent({ functionality: true, analytics: true, marketing: true })}
+                onClick={() => commitConsent({ functionality: true, analytics: true })}
                 className="rounded-lg bg-cyan-400 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 {t('accept')}

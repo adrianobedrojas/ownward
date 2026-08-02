@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { CURRENT_POLICY_VERSION } from "@/lib/auth";
+import { CURRENT_PRIVACY_VERSION, CURRENT_TERMS_VERSION } from "@/lib/auth";
+import { getPolicyAcceptanceRequirements } from "@/lib/policies";
 import { createClient } from "@/lib/supabase/server";
 
 const allowedStages = new Set(["start", "run", "sell", "buy"]);
@@ -39,7 +40,7 @@ export async function completeOnboarding(formData: FormData) {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, terms_accepted_at, privacy_accepted_at")
+    .select("id, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -47,10 +48,9 @@ export async function completeOnboarding(formData: FormData) {
     redirect("/error");
   }
 
-  const needsPolicyConsent =
-    !profile?.terms_accepted_at || !profile?.privacy_accepted_at;
+  const { needsTermsAcceptance, needsPrivacyAcknowledgment } = getPolicyAcceptanceRequirements(profile);
 
-  if (needsPolicyConsent && (!acceptedTerms || !acceptedPrivacy)) {
+  if ((needsTermsAcceptance && !acceptedTerms) || (needsPrivacyAcknowledgment && !acceptedPrivacy)) {
     redirect("/error");
   }
 
@@ -65,11 +65,17 @@ export async function completeOnboarding(formData: FormData) {
     updated_at: now,
   };
 
-  if (needsPolicyConsent) {
-    profileUpdate.terms_accepted_at = now;
-    profileUpdate.privacy_accepted_at = now;
-    profileUpdate.terms_version = CURRENT_POLICY_VERSION;
-    profileUpdate.privacy_version = CURRENT_POLICY_VERSION;
+  if (needsTermsAcceptance) {
+    profileUpdate.terms_version = CURRENT_TERMS_VERSION;
+    if (!profile?.terms_accepted_at) {
+      profileUpdate.terms_accepted_at = now;
+    }
+  }
+  if (needsPrivacyAcknowledgment) {
+    profileUpdate.privacy_version = CURRENT_PRIVACY_VERSION;
+    if (!profile?.privacy_accepted_at) {
+      profileUpdate.privacy_accepted_at = now;
+    }
   }
 
   const { error } = await supabase
