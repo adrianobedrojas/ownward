@@ -203,17 +203,18 @@ describe('Instagram presence', () => {
   });
 
   it('does not add Instagram embeds, tracking scripts, pixels, or API integrations', () => {
+    const repoRoot = path.resolve(__dirname, '..');
     const files = [
-      '/home/runner/work/ownward/ownward/components/InstagramLink.tsx',
-      '/home/runner/work/ownward/ownward/components/Footer.tsx',
-      '/home/runner/work/ownward/ownward/app/[locale]/page.tsx',
-      '/home/runner/work/ownward/ownward/app/[locale]/contact/page.tsx',
-      '/home/runner/work/ownward/ownward/messages/en.json',
-      '/home/runner/work/ownward/ownward/messages/es.json',
+      'components/InstagramLink.tsx',
+      'components/Footer.tsx',
+      'app/[locale]/page.tsx',
+      'app/[locale]/contact/page.tsx',
+      'messages/en.json',
+      'messages/es.json',
     ];
 
     const combined = files
-      .map((file) => fs.readFileSync(path.resolve(file), 'utf8'))
+      .map((file) => fs.readFileSync(path.resolve(repoRoot, file), 'utf8'))
       .join('\n')
       .toLowerCase();
 
