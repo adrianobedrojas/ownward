@@ -1,18 +1,20 @@
-export const PRIVACY_CONSENT_STORAGE_KEY = 'ownward_privacy_consent_v1';
+export const PRIVACY_CONSENT_STORAGE_KEY = 'ownward_privacy_consent_v2';
+export const LEGACY_PRIVACY_CONSENT_STORAGE_KEY = 'ownward_privacy_consent_v1';
 export const PRIVACY_CONSENT_CHANGED_EVENT = 'ownward:privacy-consent-changed';
 export const PRIVACY_PANEL_OPEN_EVENT = 'ownward:privacy-panel-open';
 
 const OWNWARD_VISITOR_TOKEN_KEY = 'ownward_visitor_token';
 const LEGACY_VISITOR_TOKEN_KEY = 'onward_visitor_token';
+const ACADEMY_PROGRESS_STORAGE_KEY = 'ownward_academy_progress_v1';
+const START_BUSINESS_STORAGE_KEY = 'ownward_start_business_plan_v1';
 
-export type PrivacyConsentCategory = 'necessary' | 'functionality' | 'analytics' | 'marketing';
+export type PrivacyConsentCategory = 'necessary' | 'functionality' | 'analytics';
 export type OptionalPrivacyConsentCategory = Exclude<PrivacyConsentCategory, 'necessary'>;
 
 export interface PrivacyConsentState {
   necessary: true;
   functionality: boolean;
   analytics: boolean;
-  marketing: boolean;
   updatedAt: string;
 }
 
@@ -28,7 +30,6 @@ export function getDefaultPrivacyConsent(): PrivacyConsentState {
     necessary: true,
     functionality: false,
     analytics: false,
-    marketing: false,
     updatedAt: '',
   };
 }
@@ -44,7 +45,6 @@ function normalizePrivacyConsent(value: unknown): PrivacyConsentState | null {
     necessary: true,
     functionality: Boolean(record.functionality),
     analytics: Boolean(record.analytics),
-    marketing: Boolean(record.marketing),
     updatedAt: typeof record.updatedAt === 'string' ? record.updatedAt : '',
   };
 }
@@ -55,23 +55,37 @@ export function readPrivacyConsent(): PrivacyConsentState | null {
   }
 
   try {
-    const stored = window.localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
+    let stored = window.localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
+    let parsed: PrivacyConsentState | null = null;
 
     if (stored === cachedPrivacyConsentRaw) {
       return cachedPrivacyConsent;
     }
 
-    if (!stored) {
+    if (stored) {
+      parsed = normalizePrivacyConsent(JSON.parse(stored));
+    } else {
+      const legacyStored = window.localStorage.getItem(LEGACY_PRIVACY_CONSENT_STORAGE_KEY);
+      if (legacyStored) {
+        parsed = normalizePrivacyConsent(JSON.parse(legacyStored));
+        if (parsed) {
+          window.localStorage.setItem(PRIVACY_CONSENT_STORAGE_KEY, JSON.stringify(parsed));
+          window.localStorage.removeItem(LEGACY_PRIVACY_CONSENT_STORAGE_KEY);
+          stored = window.localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
+        }
+      }
+    }
+
+    if (!stored || !parsed) {
       cachedPrivacyConsentRaw = stored;
       cachedPrivacyConsent = null;
       return null;
     }
 
-    const normalizedConsent = normalizePrivacyConsent(JSON.parse(stored));
     cachedPrivacyConsentRaw = stored;
-    cachedPrivacyConsent = normalizedConsent;
+    cachedPrivacyConsent = parsed;
 
-    return normalizedConsent;
+    return parsed;
   } catch {
     cachedPrivacyConsentRaw = undefined;
     cachedPrivacyConsent = null;
@@ -102,7 +116,7 @@ export function consentAllowsCategories(
 }
 
 export function savePrivacyConsent(
-  nextConsent: Pick<PrivacyConsentState, 'functionality' | 'analytics' | 'marketing'>,
+  nextConsent: Pick<PrivacyConsentState, 'functionality' | 'analytics'>,
 ): PrivacyConsentState | null {
   if (!isBrowser()) {
     return null;
@@ -112,7 +126,6 @@ export function savePrivacyConsent(
     necessary: true,
     functionality: Boolean(nextConsent.functionality),
     analytics: Boolean(nextConsent.analytics),
-    marketing: Boolean(nextConsent.marketing),
     updatedAt: new Date().toISOString(),
   };
 
@@ -123,6 +136,8 @@ export function savePrivacyConsent(
   if (!savedConsent.functionality) {
     window.localStorage.removeItem(OWNWARD_VISITOR_TOKEN_KEY);
     window.localStorage.removeItem(LEGACY_VISITOR_TOKEN_KEY);
+    window.localStorage.removeItem(ACADEMY_PROGRESS_STORAGE_KEY);
+    window.localStorage.removeItem(START_BUSINESS_STORAGE_KEY);
   }
 
   window.dispatchEvent(

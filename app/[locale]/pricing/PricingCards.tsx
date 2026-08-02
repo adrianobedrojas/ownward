@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
 import { PLAN_CATALOG } from '@/lib/billing';
 
@@ -13,6 +14,7 @@ const PLAN_KEYS = ['starter', 'builder', 'pro'] as const;
 
 export default function PricingCards({ billingState }: PricingCardsProps) {
   const locale = useLocale();
+  const isSpanish = locale === 'es';
   const t = useTranslations('Pricing');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{
@@ -34,6 +36,23 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
   const currentPlan = billingState?.plan ?? null;
   const isSignedIn = billingState !== null;
+  const disclosure = isSpanish
+    ? {
+        recurring: 'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+        cancel: 'Gestiona o cancela en Stripe Customer Portal. La cancelación normalmente aplica al final del período pagado.',
+        legalLead: 'Al continuar aceptas los',
+        terms: 'Términos',
+        and: 'y la',
+        privacy: 'Política de privacidad',
+      }
+    : {
+        recurring: 'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+        cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
+        legalLead: 'By continuing you agree to the',
+        terms: 'Terms',
+        and: 'and the',
+        privacy: 'Privacy Policy',
+      };
 
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(locale, {
@@ -234,6 +253,21 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
                       : t(`buttons.${plan.key}`)}
                 </button>
               )}
+              <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-xs leading-5 text-slate-400">
+                <p>{disclosure.recurring}</p>
+                <p className="mt-1">{disclosure.cancel}</p>
+                <p className="mt-2">
+                  {disclosure.legalLead}{' '}
+                  <Link href="/terms" className="font-semibold text-cyan-300 hover:text-cyan-200">
+                    {disclosure.terms}
+                  </Link>{' '}
+                  {disclosure.and}{' '}
+                  <Link href="/privacy" className="font-semibold text-cyan-300 hover:text-cyan-200">
+                    {disclosure.privacy}
+                  </Link>
+                  .
+                </p>
+              </div>
             </div>
           );
         })}
