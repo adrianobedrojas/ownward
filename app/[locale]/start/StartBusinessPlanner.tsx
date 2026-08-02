@@ -3,6 +3,12 @@
 import { useReducer, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { OpenPrivacyChoicesButton, usePrivacyConsent } from '@/components/PrivacyConsent';
+import {
+  consentAllowsCategories,
+  PRIVACY_CONSENT_CHANGED_EVENT,
+  PRIVACY_CONSENT_STORAGE_KEY,
+} from '@/lib/privacy-consent';
 import {
   startBusinessSteps,
   getDefaultPlan,
@@ -97,30 +103,53 @@ const initialState: PlannerState = {
 
 export default function StartBusinessPlanner({ locale, isSignedIn, showWelcome }: StartBusinessPlannerProps) {
   const t = useTranslations('StartBusiness');
+  const { consent } = usePrivacyConsent();
+  const hasFunctionalityConsent = consentAllowsCategories(consent, 'functionality');
   const [state, dispatch] = useReducer(plannerReducer, initialState);
   const topRef = useRef<HTMLDivElement>(null);
 
   const { plan, currentStep, showSummary, showResetConfirm, welcomeDismissed, hydrated } = state;
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount when functionality consent is enabled.
   useEffect(() => {
+    if (!hasFunctionalityConsent) {
+      dispatch({ type: 'hydrate', plan: getDefaultPlan() });
+      return;
+    }
     try {
       const raw = localStorage.getItem(START_BUSINESS_STORAGE_KEY);
       dispatch({ type: 'hydrate', plan: parsePlanFromStorage(raw) });
     } catch {
       dispatch({ type: 'hydrate', plan: getDefaultPlan() });
     }
-  }, []);
+  }, [hasFunctionalityConsent]);
 
-  // Auto-save whenever plan changes (after hydration)
+  // Auto-save whenever plan changes (after hydration) and functionality consent is enabled.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !hasFunctionalityConsent) return;
     try {
       localStorage.setItem(START_BUSINESS_STORAGE_KEY, JSON.stringify(plan));
     } catch {
       // localStorage unavailable — silently continue
     }
-  }, [plan, hydrated]);
+  }, [plan, hydrated, hasFunctionalityConsent]);
+
+  // Remove saved plan immediately when functionality consent is revoked.
+  useEffect(() => {
+    function handleConsentChange() {
+      try {
+        const raw = localStorage.getItem(PRIVACY_CONSENT_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) as { functionality?: boolean } : null;
+        if (!parsed?.functionality) {
+          localStorage.removeItem(START_BUSINESS_STORAGE_KEY);
+        }
+      } catch {
+        // noop
+      }
+    }
+    window.addEventListener(PRIVACY_CONSENT_CHANGED_EVENT, handleConsentChange);
+    return () => window.removeEventListener(PRIVACY_CONSENT_CHANGED_EVENT, handleConsentChange);
+  }, []);
 
   const handleFieldChange = useCallback((stepId: string, fieldId: string, value: string) => {
     dispatch({ type: 'field', stepId, fieldId, value });
@@ -414,6 +443,16 @@ export default function StartBusinessPlanner({ locale, isSignedIn, showWelcome }
 
             {/* Storage note */}
             <p className="mt-4 text-xs text-slate-500">{t('plannerStorageNote')}</p>
+            {!hasFunctionalityConsent ? (
+              <div className="mt-3 rounded-lg border border-amber-800/40 bg-amber-950/25 p-3 text-xs text-amber-200">
+                <p>{locale === 'es' ? 'Activa Funcionalidad para guardar este plan localmente en tu navegador.' : 'Enable Functionality to save this plan locally in your browser.'}</p>
+                <div className="mt-2">
+                  <OpenPrivacyChoicesButton className="rounded-lg border border-amber-700/50 px-3 py-1.5 text-xs font-semibold text-amber-300 transition hover:border-amber-500 hover:text-amber-200">
+                    {locale === 'es' ? 'Abrir opciones de privacidad' : 'Open privacy choices'}
+                  </OpenPrivacyChoicesButton>
+                </div>
+              </div>
+            ) : null}
 
             {/* Navigation */}
             <div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">

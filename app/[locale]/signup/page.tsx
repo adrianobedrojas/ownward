@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from '@/lib/auth';
 
@@ -10,6 +10,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function SignupPage() {
+  const locale = await getLocale();
+  const isSpanish = locale === 'es';
   const t = await getTranslations('Authentication.signup');
   const forms = await getTranslations('Forms');
   const accountTypes = t.raw('accountTypes') as Array<Record<string, string>>;
@@ -43,7 +45,7 @@ export default async function SignupPage() {
             <div><label htmlFor="confirm-password" className="block text-sm font-semibold text-slate-300">{forms('confirmPassword')}</label><input id="confirm-password" name="confirmPassword" type="password" autoComplete="new-password" placeholder="••••••••" minLength={8} required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400" /></div>
           </div>
           <p className="text-xs text-slate-500">{t('passwordHint')}</p>
-          <label className="flex items-start gap-3 text-sm text-slate-300"><input name="agreement" type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400" /><span>{t('agreementStart')} <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('terms')}</Link> {t('agreementMiddle')} <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('privacy')}</Link>.</span></label>
+          <label className="flex items-start gap-3 text-sm text-slate-300"><input name="agreement" type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400" /><span>{isSpanish ? 'Acepto los ' : 'I agree to the '}<Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('terms')}</Link>{isSpanish ? ' y reconozco la ' : ' and acknowledge the '}<Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('privacy')}</Link>.</span></label>
           <button type="submit" className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('submit')}</button>
           <p className="text-center text-xs text-slate-500">{t('secureNote')}</p>
         </form>

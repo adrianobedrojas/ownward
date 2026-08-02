@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from "@/lib/auth";
+import { getPolicyAcceptanceRequirements } from "@/lib/policies";
 import { createClient } from "@/lib/supabase/server";
 import { completeOnboarding } from "./actions";
 
 export default async function OnboardingPage() {
+  const locale = await getLocale();
+  const isSpanish = locale === "es";
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,7 +21,7 @@ export default async function OnboardingPage() {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select(
-      "full_name, account_type, business_name, current_stage, terms_accepted_at, privacy_accepted_at"
+      "full_name, account_type, business_name, current_stage, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -36,24 +40,69 @@ export default async function OnboardingPage() {
     profile?.business_name ??
     String(user.user_metadata?.business_name ?? "").trim();
   const currentStage = profile?.current_stage ?? "run";
-  const needsPolicyConsent =
-    !profile?.terms_accepted_at || !profile?.privacy_accepted_at;
+  const { needsTermsAcceptance, needsPrivacyAcknowledgment } = getPolicyAcceptanceRequirements(profile);
+
+  const copy = isSpanish
+    ? {
+        welcome: "Bienvenido a Ownward",
+        title: "Completa tu onboarding",
+        description: "Cuéntanos en qué etapa estás para personalizar tu espacio de trabajo.",
+        fullName: "Nombre completo",
+        accountType: "Tipo de cuenta",
+        selectAccountType: "Selecciona un tipo de cuenta",
+        owner: "Dueño de negocio",
+        buyer: "Comprador de negocio",
+        ownerBuyer: "Dueño y comprador",
+        advisor: "Asesor o agencia",
+        businessName: "Nombre del negocio",
+        optional: "Opcional",
+        currentStage: "Etapa actual",
+        stageStart: "Iniciando",
+        stageRun: "Operando",
+        stageSell: "Preparando venta",
+        stageBuy: "Buscando comprar",
+        termsAgree: "Acepto los",
+        privacyAck: "Reconozco la",
+        continue: "Continuar al panel",
+      }
+    : {
+        welcome: "Welcome to Ownward",
+        title: "Finish onboarding",
+        description: "Tell us where you are in your journey so we can personalize your workspace.",
+        fullName: "Full name",
+        accountType: "Account type",
+        selectAccountType: "Select an account type",
+        owner: "Business owner",
+        buyer: "Business buyer",
+        ownerBuyer: "Owner and buyer",
+        advisor: "Advisor or agency",
+        businessName: "Business name",
+        optional: "Optional",
+        currentStage: "Current stage",
+        stageStart: "Starting",
+        stageRun: "Running",
+        stageSell: "Preparing to sell",
+        stageBuy: "Looking to buy",
+        termsAgree: "I agree to the",
+        privacyAck: "I acknowledge the",
+        continue: "Continue to dashboard",
+      };
 
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
-          Welcome to Ownward
+          {copy.welcome}
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-white">Finish onboarding</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white">{copy.title}</h1>
         <p className="mt-3 text-slate-300">
-          Tell us where you are in your journey so we can personalize your workspace.
+          {copy.description}
         </p>
 
         <form action={completeOnboarding} className="mt-8 space-y-6">
           <div>
             <label htmlFor="fullName" className="block text-sm font-semibold text-slate-300">
-              Full name
+              {copy.fullName}
             </label>
             <input
               id="fullName"
@@ -68,7 +117,7 @@ export default async function OnboardingPage() {
 
           <div>
             <label htmlFor="accountType" className="block text-sm font-semibold text-slate-300">
-              Account type
+              {copy.accountType}
             </label>
             <select
               id="accountType"
@@ -78,32 +127,32 @@ export default async function OnboardingPage() {
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
             >
               <option value="" disabled>
-                Select an account type
+                {copy.selectAccountType}
               </option>
-              <option value="owner">Business owner</option>
-              <option value="buyer">Business buyer</option>
-              <option value="owner-buyer">Owner and buyer</option>
-              <option value="advisor">Advisor or agency</option>
+              <option value="owner">{copy.owner}</option>
+              <option value="buyer">{copy.buyer}</option>
+              <option value="owner-buyer">{copy.ownerBuyer}</option>
+              <option value="advisor">{copy.advisor}</option>
             </select>
           </div>
 
           <div>
             <label htmlFor="businessName" className="block text-sm font-semibold text-slate-300">
-              Business name
+              {copy.businessName}
             </label>
             <input
               id="businessName"
               name="businessName"
               type="text"
               defaultValue={prefilledBusinessName}
-              placeholder="Optional"
+              placeholder={copy.optional}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600"
             />
           </div>
 
           <div>
             <label htmlFor="currentStage" className="block text-sm font-semibold text-slate-300">
-              Current stage
+              {copy.currentStage}
             </label>
             <select
               id="currentStage"
@@ -111,16 +160,16 @@ export default async function OnboardingPage() {
               defaultValue={currentStage}
               className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300"
             >
-              <option value="start">Starting</option>
-              <option value="run">Running</option>
-              <option value="sell">Preparing to sell</option>
-              <option value="buy">Looking to buy</option>
+              <option value="start">{copy.stageStart}</option>
+              <option value="run">{copy.stageRun}</option>
+              <option value="sell">{copy.stageSell}</option>
+              <option value="buy">{copy.stageBuy}</option>
             </select>
           </div>
 
-          {needsPolicyConsent && (
+          {(needsTermsAcceptance || needsPrivacyAcknowledgment) && (
             <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-              <label className="flex items-start gap-3 text-sm text-slate-300">
+              {needsTermsAcceptance ? <label className="flex items-start gap-3 text-sm text-slate-300">
                 <input
                   name="acceptTerms"
                   type="checkbox"
@@ -128,15 +177,15 @@ export default async function OnboardingPage() {
                   className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
                 />
                 <span>
-                  I agree to the{" "}
+                  {copy.termsAgree}{" "}
                   <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                    Terms of Service
+                    {isSpanish ? "Términos del servicio" : "Terms of Service"}
                   </Link>
                   .
                 </span>
-              </label>
+              </label> : null}
 
-              <label className="flex items-start gap-3 text-sm text-slate-300">
+              {needsPrivacyAcknowledgment ? <label className="flex items-start gap-3 text-sm text-slate-300">
                 <input
                   name="acceptPrivacy"
                   type="checkbox"
@@ -144,13 +193,13 @@ export default async function OnboardingPage() {
                   className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
                 />
                 <span>
-                  I acknowledge the{" "}
+                  {copy.privacyAck}{" "}
                   <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                    Privacy Policy
+                    {isSpanish ? "Política de privacidad" : "Privacy Policy"}
                   </Link>
                   .
                 </span>
-              </label>
+              </label> : null}
             </div>
           )}
 
@@ -158,7 +207,7 @@ export default async function OnboardingPage() {
             type="submit"
             className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
-            Continue to dashboard
+            {copy.continue}
           </button>
         </form>
       </div>
