@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { ResendConfirmationForm } from '@/components/ResendConfirmationForm';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -20,6 +21,9 @@ export default async function CheckEmailPage() {
         <h1 className="mt-3 text-3xl font-bold text-white">{t('title')}</h1>
         <p className="mt-4 leading-7 text-slate-300">{t('description')}</p>
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-5 text-left"><h2 className="font-semibold text-white">{t('helpTitle')}</h2><ul className="mt-3 space-y-2 text-sm text-slate-400">{helpPoints.map((point) => <li key={point}>• {point}</li>)}</ul></div>
+        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-5 text-left">
+          <ResendConfirmationForm />
+        </div>
         <Link href="/login" className="mt-8 inline-block rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('returnToLogin')}</Link>
         <Link href="/" className="mt-5 block text-sm font-semibold text-slate-400 hover:text-white">{t('returnHome')}</Link>
       </section>

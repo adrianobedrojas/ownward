@@ -67,6 +67,14 @@
     "tasks": {
       "title": "Tareas | Ownward Hub",
       "description": "Organiza, compara y prioriza las tareas de tu negocio en Ownward Hub."
+    },
+    "authError": {
+      "title": "Error de autenticación",
+      "description": "Ocurrió un error de autenticación con tu cuenta de Ownward."
+    },
+    "confirmEmail": {
+      "title": "Confirma tu correo",
+      "description": "Haz clic en el botón para confirmar la dirección de correo de tu cuenta Ownward."
     }
   },
   "Common": {
@@ -822,7 +830,61 @@
         "Espera unos minutos para que llegue el correo."
       ],
       "returnToLogin": "Volver al inicio de sesión",
-      "returnHome": "Volver al inicio de Ownward Hub"
+      "returnHome": "Volver al inicio de Ownward Hub",
+      "resend": {
+        "title": "Reenviar correo de confirmación",
+        "description": "Ingresa tu correo y te enviaremos un nuevo enlace de confirmación.",
+        "emailLabel": "Correo electrónico",
+        "submit": "Enviar correo de confirmación",
+        "submitting": "Enviando…",
+        "successTitle": "Correo de confirmación enviado",
+        "successMessage": "Si existe una cuenta para esa dirección, se ha enviado un nuevo correo de confirmación. Revisa tu bandeja de entrada y spam.",
+        "cooldownMessage": "Por favor espera {seconds} segundos antes de intentar nuevamente.",
+        "genericError": "Algo salió mal. Por favor, intenta de nuevo."
+      }
+    },
+    "authError": {
+      "badge": "Error de autenticación",
+      "resendConfirmation": "Solicitar un nuevo correo de confirmación",
+      "returnToSignup": "Volver al registro",
+      "returnToLogin": "Volver al inicio de sesión",
+      "errors": {
+        "otp_expired": {
+          "heading": "Enlace de confirmación expirado",
+          "description": "Tu enlace de confirmación ha expirado o ya fue utilizado. Solicita uno nuevo a continuación."
+        },
+        "access_denied": {
+          "heading": "Enlace de confirmación rechazado",
+          "description": "Tu enlace de confirmación fue rechazado. Esto suele ocurrir si el enlace ya fue utilizado."
+        },
+        "exchange-failed": {
+          "heading": "No se pudo crear la sesión",
+          "description": "No pudimos completar tu inicio de sesión. Por favor, intenta confirmar tu correo nuevamente."
+        },
+        "invalid-link": {
+          "heading": "Enlace de confirmación inválido",
+          "description": "Al enlace de confirmación le falta información requerida. Revisa tu correo para encontrar el enlace original."
+        },
+        "invalid-token": {
+          "heading": "Enlace de confirmación inválido",
+          "description": "El enlace de confirmación no es válido. Solicita uno nuevo o vuelve al registro."
+        },
+        "generic": {
+          "heading": "Error de autenticación",
+          "description": "Algo salió mal durante la autenticación. Por favor, intenta de nuevo o contacta a soporte."
+        }
+      }
+    },
+    "confirmEmail": {
+      "badge": "Casi listo",
+      "title": "Confirma tu dirección de correo",
+      "description": "Haz clic en el botón para activar tu cuenta Ownward. Este paso verifica que el correo te pertenece.",
+      "confirm": "Confirmar mi correo",
+      "returnToSignup": "Volver al registro",
+      "invalidBadge": "Enlace inválido",
+      "invalidTitle": "Este enlace de confirmación no es válido",
+      "invalidDescription": "Al enlace le falta información requerida. Por favor, usa el enlace de tu correo de confirmación o solicita uno nuevo.",
+      "resendLink": "Solicitar un nuevo correo de confirmación"
     }
   },
   "Forms": {
