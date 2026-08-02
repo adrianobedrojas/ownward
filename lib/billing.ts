@@ -203,6 +203,46 @@ export function getAllowedPriceIds() {
   return new Set(prices);
 }
 
+export type StripeInvalidRequestParam = "id" | "customer";
+
+export type StripeInvalidRequestErrorLike = {
+  type?: string;
+  code?: string;
+  param?: StripeInvalidRequestParam | string;
+  message?: string;
+};
+
+/**
+ * Returns true only for stale/missing Stripe customer references.
+ * This intentionally excludes other `resource_missing` errors like prices,
+ * products, subscriptions, etc.
+ */
+export function isObsoleteStripeCustomer(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  if ("deleted" in value && (value as { deleted?: unknown }).deleted === true) {
+    return true;
+  }
+
+  const error = value as StripeInvalidRequestErrorLike;
+  if (error.code !== "resource_missing") {
+    return false;
+  }
+
+  if (error.param !== "id" && error.param !== "customer") {
+    return false;
+  }
+
+  const message = error.message;
+  if (typeof message !== "string") {
+    return false;
+  }
+
+  return message.toLowerCase().includes("no such customer");
+}
+
 export function getPriceIdForPlan(plan: string, interval: BillingInterval = "monthly") {
   const normalizedPlan = plan.toLowerCase() as PlanKey;
   if (!PLAN_KEYS.includes(normalizedPlan)) {

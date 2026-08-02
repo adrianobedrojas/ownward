@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getAllowedPriceIds, getPriceIdForPlan, isActiveSubscription, type BillingInterval } from "@/lib/billing";
+import {
+  getAllowedPriceIds,
+  getPriceIdForPlan,
+  isActiveSubscription,
+  isObsoleteStripeCustomer,
+  type BillingInterval,
+} from "@/lib/billing";
 import { getSiteUrl } from "@/lib/config";
 import Stripe from "stripe";
 
@@ -87,29 +93,120 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     let stripeCustomerId = profile?.stripe_customer_id ?? null;
+    let obsoleteCustomerId: string | null = null;
     if (stripeCustomerId) {
-      const customer = await stripe.customers.retrieve(stripeCustomerId);
-      if ("deleted" in customer && customer.deleted) {
-        stripeCustomerId = null;
+      try {
+        const customer = await stripe.customers.retrieve(stripeCustomerId);
+        if (isObsoleteStripeCustomer(customer)) {
+          obsoleteCustomerId = stripeCustomerId;
+          stripeCustomerId = null;
+        }
+      } catch (error: unknown) {
+        if (isObsoleteStripeCustomer(error)) {
+          obsoleteCustomerId = stripeCustomerId;
+          stripeCustomerId = null;
+        } else {
+          throw error;
+        }
       }
     }
 
     if (!stripeCustomerId) {
+      if (obsoleteCustomerId) {
+        const { data: claimRows, error: claimError } = await supabase
+          .from("profiles")
+          .update({ stripe_customer_id: null })
+          .eq("id", user.id)
+          .eq("stripe_customer_id", obsoleteCustomerId)
+          .select("id");
+
+        if (claimError) {
+          return NextResponse.json(
+            { error: "Unable to initialize billing profile" },
+            { status: 500 }
+          );
+        }
+
+        if (!claimRows || claimRows.length === 0) {
+          const { data: latestProfile, error: latestProfileError } = await supabase
+            .from("profiles")
+            .select("stripe_customer_id")
+            .eq("id", user.id)
+            .maybeSingle();
+
+          if (latestProfileError) {
+            return NextResponse.json(
+              { error: "Unable to initialize billing profile" },
+              { status: 500 }
+            );
+          }
+
+          stripeCustomerId = latestProfile?.stripe_customer_id ?? null;
+          if (!stripeCustomerId) {
+            return NextResponse.json(
+              { error: "Billing profile updated concurrently. Please retry." },
+              { status: 409 }
+            );
+          }
+        }
+      }
+
+      if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
         metadata: { userId: user.id },
       });
-      stripeCustomerId = customer.id;
+        stripeCustomerId = customer.id;
 
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, stripe_customer_id: stripeCustomerId });
+        if (obsoleteCustomerId) {
+          const { data: assignRows, error: assignError } = await supabase
+            .from("profiles")
+            .update({ stripe_customer_id: stripeCustomerId })
+            .eq("id", user.id)
+            .is("stripe_customer_id", null)
+            .select("id");
 
-      if (profileError) {
-        return NextResponse.json(
-          { error: "Unable to initialize billing profile" },
-          { status: 500 }
-        );
+          if (assignError) {
+            return NextResponse.json(
+              { error: "Unable to initialize billing profile" },
+              { status: 500 }
+            );
+          }
+
+          if (!assignRows || assignRows.length === 0) {
+            const { data: latestProfile, error: latestProfileError } = await supabase
+              .from("profiles")
+              .select("stripe_customer_id")
+              .eq("id", user.id)
+              .maybeSingle();
+
+            if (latestProfileError) {
+              return NextResponse.json(
+                { error: "Unable to initialize billing profile" },
+                { status: 500 }
+              );
+            }
+
+            stripeCustomerId = latestProfile?.stripe_customer_id ?? null;
+            if (!stripeCustomerId) {
+              return NextResponse.json(
+                { error: "Billing profile updated concurrently. Please retry." },
+                { status: 409 }
+              );
+            }
+          }
+        } else {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({ id: user.id, stripe_customer_id: stripeCustomerId });
+
+          if (profileError) {
+            return NextResponse.json(
+              { error: "Unable to initialize billing profile" },
+              { status: 500 }
+            );
+          }
+        }
       }
     }
 
@@ -136,10 +233,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error";
-    console.error("Stripe checkout error:", message);
+    console.error("Stripe checkout error:", err);
     return NextResponse.json(
-      { error: message },
+      { error: "Unable to start checkout. Please try again." },
       { status: 500 }
     );
   }
