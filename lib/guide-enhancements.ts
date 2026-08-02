@@ -3,7 +3,6 @@ import type {
   GuideArticle,
   GuideArticleSection,
   GuideArticleSource,
-  GuideArticleVisual,
   GuideImportantNotice,
   GuideNextAction,
   GuidePlainTerm,

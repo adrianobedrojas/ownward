@@ -93,7 +93,6 @@ export default async function GuideIndexPage() {
           allCategoriesLabel={t('allCategories')}
           searchLabel={t('explorerTitle')}
           searchPlaceholder={t('searchPlaceholder')}
-          resultCountLabel={t('resultCount')}
           noResultsTitle={t('noResultsTitle')}
           noResultsBody={t('noResultsBody')}
           clearFiltersLabel={t('clearFilters')}

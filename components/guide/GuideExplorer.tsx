@@ -12,7 +12,6 @@ interface GuideExplorerProps {
   allCategoriesLabel: string;
   searchLabel: string;
   searchPlaceholder: string;
-  resultCountLabel: string;
   noResultsTitle: string;
   noResultsBody: string;
   clearFiltersLabel: string;
@@ -24,7 +23,6 @@ export default function GuideExplorer({
   allCategoriesLabel,
   searchLabel,
   searchPlaceholder,
-  resultCountLabel,
   noResultsTitle,
   noResultsBody,
   clearFiltersLabel,
@@ -43,7 +41,7 @@ export default function GuideExplorer({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-white">{searchLabel}</h2>
-          <p className="mt-1 text-sm text-slate-400">{resultCountLabel.replace('{count}', String(results.length))}</p>
+          <p className="mt-1 text-sm text-slate-400">{t('resultCount', { count: results.length })}</p>
         </div>
         <button
           type="button"

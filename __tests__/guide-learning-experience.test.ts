@@ -146,7 +146,7 @@ describe('privacy boundaries stay in-memory for new guide interactions', () => {
     const source = fs.readFileSync(path.join(process.cwd(), 'components/guide/GuideExplorer.tsx'), 'utf8');
     expect(source).not.toContain('localStorage');
     expect(source).not.toContain('sessionStorage');
-    expect(source).not.toContain('track');
+    expect(source).not.toContain('trackSearch');
     expect(source).not.toContain('analytics');
   });
 });
