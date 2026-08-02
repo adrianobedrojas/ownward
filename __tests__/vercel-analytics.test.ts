@@ -101,4 +101,40 @@ describe('sanitizeAnalyticsUrl', () => {
     expect(sanitizeAnalyticsUrl('/es/business/999')).toBe('/es/business/[businessId]');
     expect(sanitizeAnalyticsUrl('/es/deals/invite/xyz')).toBe('/es/deals/invite/[token]');
   });
+
+  // ── Absolute URLs ─────────────────────────────────────────────────────────
+
+  it('sanitizes an absolute static URL and removes query parameters and hash', () => {
+    expect(
+      sanitizeAnalyticsUrl(
+        'https://ownwardhub.com/en/dashboard?tab=overview#activity',
+      ),
+    ).toBe('https://ownwardhub.com/en/dashboard');
+  });
+
+  it('normalizes a business ID in an absolute URL', () => {
+    expect(
+      sanitizeAnalyticsUrl(
+        'https://ownwardhub.com/en/business/business-123?ref=email',
+      ),
+    ).toBe('https://ownwardhub.com/en/business/[businessId]');
+  });
+
+  it('redacts an invitation token in an absolute URL', () => {
+    expect(
+      sanitizeAnalyticsUrl(
+        'https://ownwardhub.com/en/deals/invite/private-token-123?preview=1',
+      ),
+    ).toBe('https://ownwardhub.com/en/deals/invite/[token]');
+  });
+
+  it('normalizes a money transaction edit URL', () => {
+    expect(
+      sanitizeAnalyticsUrl(
+        'https://ownwardhub.com/en/money/transaction-456/edit?source=dashboard',
+      ),
+    ).toBe(
+      'https://ownwardhub.com/en/money/[transactionId]/edit',
+    );
+  });
 });
