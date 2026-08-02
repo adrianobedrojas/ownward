@@ -67,6 +67,14 @@
     "tasks": {
       "title": "Tasks | Ownward Hub",
       "description": "Track, compare, and prioritize your business tasks in Ownward Hub."
+    },
+    "authError": {
+      "title": "Authentication Error",
+      "description": "An authentication error occurred with your Ownward account."
+    },
+    "confirmEmail": {
+      "title": "Confirm Your Email",
+      "description": "Click the button below to confirm your Ownward account email address."
     }
   },
   "Common": {
@@ -822,7 +830,61 @@
         "Allow a few minutes for the email to arrive."
       ],
       "returnToLogin": "Return to login",
-      "returnHome": "Return to the Ownward Hub homepage"
+      "returnHome": "Return to the Ownward Hub homepage",
+      "resend": {
+        "title": "Resend confirmation email",
+        "description": "Enter your email address and we will send a new confirmation link.",
+        "emailLabel": "Email address",
+        "submit": "Send confirmation email",
+        "submitting": "Sending…",
+        "successTitle": "Confirmation email sent",
+        "successMessage": "If an account exists for that address, a new confirmation email has been sent. Check your inbox and spam folder.",
+        "cooldownMessage": "Please wait {seconds} seconds before trying again.",
+        "genericError": "Something went wrong. Please try again."
+      }
+    },
+    "authError": {
+      "badge": "Authentication Error",
+      "resendConfirmation": "Request a new confirmation email",
+      "returnToSignup": "Return to sign up",
+      "returnToLogin": "Return to login",
+      "errors": {
+        "otp_expired": {
+          "heading": "Confirmation link expired",
+          "description": "Your confirmation link has expired or has already been used. Request a new one below."
+        },
+        "access_denied": {
+          "heading": "Confirmation link denied",
+          "description": "Your confirmation link was rejected. This usually happens if the link has already been used."
+        },
+        "exchange-failed": {
+          "heading": "Session could not be created",
+          "description": "We were unable to complete your sign-in. Please try confirming your email again."
+        },
+        "invalid-link": {
+          "heading": "Invalid confirmation link",
+          "description": "The confirmation link is missing required information. Please check your email for the original link."
+        },
+        "invalid-token": {
+          "heading": "Invalid confirmation link",
+          "description": "The confirmation link is not valid. Please request a new one or return to sign up."
+        },
+        "generic": {
+          "heading": "Authentication failed",
+          "description": "Something went wrong during authentication. Please try again or contact support."
+        }
+      }
+    },
+    "confirmEmail": {
+      "badge": "Almost there",
+      "title": "Confirm your email address",
+      "description": "Click the button below to activate your Ownward account. This step ensures your email belongs to you.",
+      "confirm": "Confirm my email",
+      "returnToSignup": "Return to sign up",
+      "invalidBadge": "Invalid link",
+      "invalidTitle": "This confirmation link is not valid",
+      "invalidDescription": "The link is missing required information. Please use the link from your confirmation email or request a new one.",
+      "resendLink": "Request a new confirmation email"
     }
   },
   "Forms": {
