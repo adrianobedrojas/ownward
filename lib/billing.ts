@@ -36,11 +36,14 @@ export function getFeaturedListingConfig(): {
 /**
  * All billing plans.
  * - "free"    : internal (no Stripe sub required)
- * - "starter" : $5/mo Stripe subscription
- * - "builder" : $10/mo Stripe subscription
- * - "pro"     : $20/mo Stripe subscription
+ * - "starter" : $5/mo or $50/yr Stripe subscription
+ * - "builder" : $10/mo or $100/yr Stripe subscription
+ * - "pro"     : $20/mo or $200/yr Stripe subscription
  */
 export type BillingPlan = "free" | "starter" | "builder" | "pro";
+
+/** Billing recurrence interval. Monthly is the default. */
+export type BillingInterval = "monthly" | "annual";
 
 /** Stripe-billed plans only (no internal "free"). */
 export const PLAN_KEYS = ["starter", "builder", "pro"] as const;
@@ -184,27 +187,40 @@ export function getPlanPriceMap() {
   };
 }
 
+export function getPlanPriceMapAnnual() {
+  return {
+    starter: process.env.STRIPE_PRICE_STARTER_ANNUAL,
+    builder: process.env.STRIPE_PRICE_BUILDER_ANNUAL,
+    pro: process.env.STRIPE_PRICE_PRO_ANNUAL,
+  };
+}
+
 export function getAllowedPriceIds() {
-  const prices = Object.values(getPlanPriceMap()).filter(
-    (value): value is string => Boolean(value)
-  );
+  const prices = [
+    ...Object.values(getPlanPriceMap()),
+    ...Object.values(getPlanPriceMapAnnual()),
+  ].filter((value): value is string => Boolean(value));
   return new Set(prices);
 }
 
-export function getPriceIdForPlan(plan: string) {
+export function getPriceIdForPlan(plan: string, interval: BillingInterval = "monthly") {
   const normalizedPlan = plan.toLowerCase() as PlanKey;
   if (!PLAN_KEYS.includes(normalizedPlan)) {
     return null;
   }
 
+  if (interval === "annual") {
+    return getPlanPriceMapAnnual()[normalizedPlan] ?? null;
+  }
   return getPlanPriceMap()[normalizedPlan] ?? null;
 }
 
 export function getPlanByPriceId(priceId: string): PlanKey | null {
-  const planPriceMap = getPlanPriceMap();
+  const monthlyMap = getPlanPriceMap();
+  const annualMap = getPlanPriceMapAnnual();
 
   for (const plan of PLAN_KEYS) {
-    if (planPriceMap[plan] === priceId) {
+    if (monthlyMap[plan] === priceId || annualMap[plan] === priceId) {
       return plan;
     }
   }
@@ -557,6 +573,8 @@ export type PlanCatalogEntry = {
   key: BillingPlan;
   name: string;
   monthlyPrice: number;
+  /** Full price billed once per year. 0 for free. */
+  annualPrice: number;
   tagline: string;
   publicFeatures: string[];
   upgradeOrder: number;
@@ -573,6 +591,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "free",
     name: "Free",
     monthlyPrice: 0,
+    annualPrice: 0,
     tagline: "Just browsing or getting started",
     publicFeatures: ["Browse the marketplace", "Basic valuation preview"],
     upgradeOrder: 0,
@@ -587,6 +606,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "starter",
     name: "Starter",
     monthlyPrice: 5,
+    annualPrice: 50,
     tagline: "New owners & explorers",
     publicFeatures: [
       "1 Business Profile",
@@ -610,6 +630,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "builder",
     name: "Builder",
     monthlyPrice: 10,
+    annualPrice: 100,
     tagline: "Active owners building operations",
     publicFeatures: [
       "Up to 2 Businesses",
@@ -634,6 +655,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "pro",
     name: "Pro",
     monthlyPrice: 20,
+    annualPrice: 200,
     tagline: "Serious owners preparing to grow or sell",
     publicFeatures: [
       "Up to 5 Businesses",

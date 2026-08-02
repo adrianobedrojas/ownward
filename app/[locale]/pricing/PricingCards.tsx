@@ -12,6 +12,13 @@ interface PricingCardsProps {
 
 const PLAN_KEYS = ['starter', 'builder', 'pro'] as const;
 
+// Annual equivalent monthly rates (annualPrice / 12, rounded to 2 decimal places)
+const ANNUAL_EQUIVALENT_MONTHLY: Record<string, string> = {
+  starter: '4.17',
+  builder: '8.33',
+  pro: '16.67',
+};
+
 export default function PricingCards({ billingState }: PricingCardsProps) {
   const locale = useLocale();
   const isSpanish = locale === 'es';
@@ -21,12 +28,17 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
     type: 'error' | 'info';
     text: string;
   } | null>(null);
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
+
+  const isAnnual = billingInterval === 'annual';
 
   const plans = PLAN_KEYS.map((key) => {
     const plan = PLAN_CATALOG.find((entry) => entry.key === key)!;
     return {
       key,
-      price: `$${plan.monthlyPrice}`,
+      monthlyPrice: `$${plan.monthlyPrice}`,
+      annualPrice: `$${plan.annualPrice}`,
+      annualEquivalentMonthly: ANNUAL_EQUIVALENT_MONTHLY[key],
       featured: key === 'builder',
       name: t(`plans.${key}.name`),
       tagline: t(`plans.${key}.tagline`),
@@ -38,7 +50,9 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
   const isSignedIn = billingState !== null;
   const disclosure = isSpanish
     ? {
-        recurring: 'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+        recurring: isAnnual
+          ? 'Cobro anual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.'
+          : 'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
         cancel: 'Gestiona o cancela en Stripe Customer Portal. La cancelación normalmente aplica al final del período pagado.',
         legalLead: 'Al continuar aceptas los',
         terms: 'Términos',
@@ -46,7 +60,9 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         privacy: 'Política de privacidad',
       }
     : {
-        recurring: 'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+        recurring: isAnnual
+          ? 'Billed annually unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.'
+          : 'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',
@@ -74,7 +90,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planKey }),
+        body: JSON.stringify({ plan: planKey, interval: billingInterval }),
       });
       const data = await res.json();
 
@@ -160,6 +176,39 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         </div>
       ) : null}
 
+      {/* Billing interval toggle */}
+      <div className="mt-8 flex items-center justify-center gap-3" role="group" aria-label={t('billingToggle.label')}>
+        <button
+          type="button"
+          aria-pressed={billingInterval === 'monthly'}
+          onClick={() => setBillingInterval('monthly')}
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+            billingInterval === 'monthly'
+              ? 'bg-cyan-400 text-slate-950'
+              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+          }`}
+        >
+          {t('billingToggle.monthly')}
+        </button>
+        <button
+          type="button"
+          aria-pressed={billingInterval === 'annual'}
+          onClick={() => setBillingInterval('annual')}
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+            billingInterval === 'annual'
+              ? 'bg-cyan-400 text-slate-950'
+              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+          }`}
+        >
+          {t('billingToggle.annual')}
+        </button>
+        {isAnnual ? (
+          <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
+            {t('billingToggle.savingsBadge')}
+          </span>
+        ) : null}
+      </div>
+
       {isSignedIn && currentPlan && currentPlan !== 'free' ? (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
           <span>{t('currentPlanSummary', { plan: currentPlan, suffix: currentPlanSuffix })}</span>
@@ -199,9 +248,22 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
               <div>
                 <h2 className={`text-xl font-semibold ${plan.featured ? 'text-cyan-400' : ''}`}>{plan.name}</h2>
                 <p className="text-xs text-slate-400 mt-1">{plan.tagline}</p>
-                <p className="mt-4 text-3xl font-bold">
-                  {plan.price} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
-                </p>
+                {isAnnual ? (
+                  <>
+                    <p className="mt-4 text-3xl font-bold">
+                      {plan.annualPrice}{' '}
+                      <span className="text-sm font-normal text-slate-400">{t('perYear')}</span>
+                    </p>
+                    <p className="mt-1 text-sm text-emerald-300">
+                      ${plan.annualEquivalentMonthly}{t('annualEquivalentSuffix')}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-500">{t('annualBilledOnce')}</p>
+                  </>
+                ) : (
+                  <p className="mt-4 text-3xl font-bold">
+                    {plan.monthlyPrice} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
+                  </p>
+                )}
                 <ul className="mt-6 space-y-3 text-sm text-slate-300">
                   {plan.features.map((feature) => (
                     <li key={feature}>✓ {feature}</li>

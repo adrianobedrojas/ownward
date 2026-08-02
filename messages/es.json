@@ -377,6 +377,15 @@
     "cardPayment": {
       "title": "Paga con tarjeta de crédito o débito",
       "description": "No necesitas una cuenta de Stripe. Ingresa los datos de tu tarjeta en el pago seguro y Stripe procesará el pago para Ownward."
+    },
+    "perYear": "/ año",
+    "annualEquivalentSuffix": "/mes equivalente",
+    "annualBilledOnce": "Monto anual completo cobrado una vez al año",
+    "billingToggle": {
+      "label": "Período de facturación",
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "savingsBadge": "Ahorra ~17% — 2 meses gratis"
     }
   },
   "Buy": {
