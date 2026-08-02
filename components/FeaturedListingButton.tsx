@@ -55,8 +55,8 @@ export default function FeaturedListingButton({
       </button>
       <p className="max-w-xs text-[11px] leading-5 text-slate-500">
         {isSpanish
-          ? "Compra única promocional salvo indicación distinta en checkout. No se garantizan vistas, contactos u ofertas. "
-          : "One-time promotional purchase unless checkout states otherwise. Views, leads, and offers are not guaranteed. "}
+          ? "Paga con tarjeta de crédito o débito; no necesitas cuenta de Stripe. Compra única promocional salvo indicación distinta en checkout. No se garantizan vistas, contactos u ofertas. "
+          : "Pay with a credit or debit card — no Stripe account required. One-time promotional purchase unless checkout states otherwise. Views, leads, and offers are not guaranteed. "}
         <Link href="/terms" className="text-cyan-300 hover:text-cyan-200">{isSpanish ? "Términos" : "Terms"}</Link>
         {" · "}
         <Link href="/privacy" className="text-cyan-300 hover:text-cyan-200">{isSpanish ? "Privacidad" : "Privacy"}</Link>
