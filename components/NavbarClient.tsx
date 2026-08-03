@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
+import PersonalControlCenter, { type ControlCenterData } from './control-center/PersonalControlCenter';
 
 interface NavbarClientProps {
   signedIn: boolean;
+  controlCenterData: ControlCenterData | null;
 }
 
-export default function NavbarClient({ signedIn }: NavbarClientProps) {
+export default function NavbarClient({ signedIn, controlCenterData }: NavbarClientProps) {
   const pathname = usePathname();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const learnMenuRef = useRef<HTMLDetailsElement>(null);
@@ -213,16 +215,12 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
 
         <div className="hidden items-center gap-3 lg:flex">
           <LanguageSwitcher />
-          {signedIn ? (
-            <>
-              <Link href="/dashboard" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('dashboard')}</Link>
-              <Link href="/money" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('books')}</Link>
-              <Link href="/documents" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('vault')}</Link>
-              <Link href="/messages" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('messages')}</Link>
-              <form action="/auth/signout" method="post">
-                <button type="submit" className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('logOut')}</button>
-              </form>
-            </>
+          {signedIn && controlCenterData ? (
+            <PersonalControlCenter data={controlCenterData} />
+          ) : signedIn ? (
+            <form action="/auth/signout" method="post">
+              <button type="submit" className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('logOut')}</button>
+            </form>
           ) : (
             <>
               <Link href="/login" className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white">{t('logIn')}</Link>
@@ -341,9 +339,9 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
               {signedIn ? (
                 <>
                   <Link href="/dashboard" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('dashboard')}</Link>
-                  <Link href="/money" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('books')}</Link>
-                  <Link href="/documents" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('vault')}</Link>
                   <Link href="/messages" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('messages')}</Link>
+                  <Link href="/profile" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('profile')}</Link>
+                  <Link href="/settings" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('settings')}</Link>
                   <form action="/auth/signout" method="post">
                     <button type="submit" onClick={closeMobileMenu} className="block w-full rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('logOut')}</button>
                   </form>

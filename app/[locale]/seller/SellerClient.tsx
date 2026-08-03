@@ -13,11 +13,21 @@ interface Business { id: string; name: string; profile_completion: number; annua
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
 
+interface InterestEvent {
+  id: string;
+  listing_id: string;
+  event_type: string;
+  conversation_id: string | null;
+  created_at: string;
+  listing_name?: string;
+}
+
 interface Props {
   businesses: Business[];
   opportunities: AnyRecord[];
   pendingOffers: AnyRecord[];
   recentAssessments: AnyRecord[];
+  interestEvents?: InterestEvent[];
 }
 
 function dbToOpportunity(r: AnyRecord): SellerOpportunity {
@@ -54,6 +64,7 @@ export default function SellerClient({
   opportunities: rawOpps,
   pendingOffers,
   recentAssessments,
+  interestEvents = [],
 }: Props) {
   const [selectedBusinessId, setSelectedBusinessId] = useState<string>(
     businesses[0]?.id ?? ''
@@ -161,6 +172,63 @@ export default function SellerClient({
           </div>
         )}
       </div>
+
+      {/* Buyer-Interest Activity */}
+      {interestEvents.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-white mb-3">Buyer Interest Activity</h2>
+          <div className="rounded-xl border border-slate-700 bg-slate-900 overflow-hidden">
+            <div className="divide-y divide-slate-800">
+              {interestEvents.slice(0, 10).map((ev) => {
+                const isIdentified = ev.conversation_id != null;
+                const eventLabel =
+                  ev.event_type === 'qualified_view' ? 'Qualified view' :
+                  ev.event_type === 'repeat_view' ? 'Repeat view' :
+                  ev.event_type === 'saved' ? 'Saved listing' :
+                  ev.event_type === 'maybe_interested' ? 'Needs more info' :
+                  ev.event_type === 'interested' ? 'Expressed interest' :
+                  ev.event_type === 'requested_information' ? 'Requested details' :
+                  ev.event_type;
+
+                return (
+                  <div key={ev.id} className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+                    <div>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium mr-2 ${
+                        ev.event_type === 'interested' ? 'bg-cyan-400/20 text-cyan-300' :
+                        ev.event_type === 'maybe_interested' ? 'bg-amber-400/20 text-amber-300' :
+                        'bg-slate-700 text-slate-400'
+                      }`}>
+                        {eventLabel}
+                      </span>
+                      {ev.listing_name && (
+                        <span className="text-slate-400 text-xs">{ev.listing_name}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs text-slate-500">
+                        {new Date(ev.created_at).toLocaleDateString()}
+                      </span>
+                      {isIdentified && ev.conversation_id ? (
+                        <Link
+                          href={`/messages/${ev.conversation_id}`}
+                          className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
+                        >
+                          View conversation
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-slate-600 italic">Anonymous</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Anonymous views: buyer identity protected. Identified leads show when buyer explicitly contacts you.
+          </p>
+        </div>
+      )}
 
       {/* Quick links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
