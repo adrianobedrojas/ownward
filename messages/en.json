@@ -1758,5 +1758,64 @@
       "deletePhotoLabel": "Delete photo",
       "previewLabel": "Buyer preview"
     }
+  },
+  "AccountProducts": {
+    "pageTitle": "My Products | Ownward",
+    "pageDescription": "View your purchased Ownward products and access your workspaces.",
+    "heading": "My Products",
+    "subheading": "Products you have purchased appear here. Click Open Product to access your workspace.",
+    "emptyState": "You have not purchased any products yet.",
+    "exploreCta": "Explore Value Action Sprint",
+    "openProduct": "Open Product",
+    "paymentStatus": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "refunded": "Refunded",
+      "failed": "Failed"
+    },
+    "fulfillmentStatus": {
+      "fulfilled": "Ready",
+      "pending": "Processing",
+      "failed": "Fulfillment failed",
+      "refunded": "Refunded"
+    }
+  },
+  "ValueActionSprint": {
+    "pageTitle": "Value Action Sprint | Ownward",
+    "pageDescription": "A structured 30-day planning and execution sprint to identify and act on your highest-value business priorities.",
+    "badge": "One-time purchase",
+    "heading": "Value Action Sprint",
+    "tagline": "Identify and act on your highest-value business priorities in 30 focused days.",
+    "whatItIsTitle": "What is the Value Action Sprint?",
+    "whatItIsBody": "The Value Action Sprint is a structured 30-day planning and execution workspace that guides you through identifying your most impactful business priorities and taking concrete action on them. It combines prioritization frameworks with accountability tracking to help you move from ideas to results.",
+    "whatYouGetTitle": "What you get",
+    "whatYouGetItems": [
+      "A dedicated 30-day sprint workspace",
+      "Prioritized action list based on business impact",
+      "Progress tracking and status updates",
+      "Access to your workspace at any time after purchase"
+    ],
+    "price": "One-time purchase",
+    "priceNote": "Secure checkout powered by Stripe",
+    "purchaseCta": "Get started",
+    "loginCta": "Sign in to purchase",
+    "alreadyPurchased": "You already own this product",
+    "openProduct": "Open your workspace",
+    "processing": "Redirecting to checkout…",
+    "errorPrefix": "Error:",
+    "unknownError": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again.",
+    "disclaimerTitle": "Important — Please Read",
+    "disclaimerBody": "Value Action Sprint is a business planning and execution tool. It is not a certified appraisal, legal service, tax service, financial advisory service, or guarantee of business value or results. All prioritization and planning decisions remain your responsibility."
+  },
+  "AccountProductWorkspace": {
+    "pageTitle": "Value Action Sprint Workspace | Ownward",
+    "pageDescription": "Access your Value Action Sprint workspace.",
+    "backToProducts": "← Back to My Products",
+    "heading": "Value Action Sprint Workspace",
+    "body": "Your workspace is active. Use this purchase as your dedicated planning and execution area.",
+    "statusLabel": "Workspace status:",
+    "pendingTitle": "Workspace is still being prepared",
+    "pendingBody": "Your payment is recorded, and fulfillment is still processing. Refresh this page in a moment."
   }
 }
