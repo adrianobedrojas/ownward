@@ -53,7 +53,6 @@ describe("Stripe webhook route", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
     process.env = { ...originalEnv };
     process.env.STRIPE_SECRET_KEY = "sk_test_123";

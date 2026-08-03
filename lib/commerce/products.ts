@@ -1,4 +1,6 @@
-import "server-only";
+if (typeof window !== "undefined") {
+  throw new Error("lib/commerce/products must only be imported on the server.");
+}
 
 /**
  * Server-only product registry for one-time purchasable products.

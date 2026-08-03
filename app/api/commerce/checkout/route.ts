@@ -3,8 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveProduct, getStripePriceId } from "@/lib/commerce/products";
 import { getSiteUrl } from "@/lib/config";
 import { isObsoleteStripeCustomer } from "@/lib/billing";
-import { routing } from "@/i18n/routing";
 import Stripe from "stripe";
+
+const SUPPORTED_LOCALES = ["en", "es"] as const;
+const DEFAULT_LOCALE = "en";
 
 export async function POST(req: Request) {
   try {
@@ -48,10 +50,10 @@ export async function POST(req: Request) {
             .trim()
             .toLowerCase()
         : "";
-    const locale = routing.locales.includes(requestedLocale as "en" | "es")
+    const locale = SUPPORTED_LOCALES.includes(requestedLocale as "en" | "es")
       ? requestedLocale
-      : routing.defaultLocale;
-    const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+      : DEFAULT_LOCALE;
+    const localePrefix = locale === DEFAULT_LOCALE ? "" : `/${locale}`;
 
     if (!productKey) {
       return NextResponse.json({ error: "productKey is required" }, { status: 400 });

@@ -54,7 +54,6 @@ describe("Commerce checkout route", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.resetModules();
     jest.clearAllMocks();
     process.env = { ...originalEnv };
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
@@ -89,10 +88,15 @@ describe("Commerce checkout route", () => {
 
     expect(response.status).toBe(200);
     expect(stripeMock.checkout.sessions.create).toHaveBeenCalledTimes(1);
-    const payload = stripeMock.checkout.sessions.create.mock.calls[0][0];
-    expect(payload.success_url).toBe("https://ownward.example/es/account/products?success=purchased");
-    expect(payload.cancel_url).toBe("https://ownward.example/es/products/value-action-sprint");
-    expect(payload.mode).toBe("payment");
+    const payload = (stripeMock.checkout.sessions.create.mock.calls as unknown[][])[0]?.[0] as
+      | Record<string, unknown>
+      | undefined;
+    expect(payload).toBeDefined();
+    expect(payload?.success_url).toBe(
+      "https://ownward.example/es/account/products?success=purchased"
+    );
+    expect(payload?.cancel_url).toBe("https://ownward.example/es/products/value-action-sprint");
+    expect(payload?.mode).toBe("payment");
   });
 
   it("normalizes unsupported locale to default locale", async () => {
@@ -102,9 +106,12 @@ describe("Commerce checkout route", () => {
     });
 
     expect(response.status).toBe(200);
-    const payload = stripeMock.checkout.sessions.create.mock.calls[0][0];
-    expect(payload.success_url).toBe("https://ownward.example/account/products?success=purchased");
-    expect(payload.cancel_url).toBe("https://ownward.example/products/value-action-sprint");
+    const payload = (stripeMock.checkout.sessions.create.mock.calls as unknown[][])[0]?.[0] as
+      | Record<string, unknown>
+      | undefined;
+    expect(payload).toBeDefined();
+    expect(payload?.success_url).toBe("https://ownward.example/account/products?success=purchased");
+    expect(payload?.cancel_url).toBe("https://ownward.example/products/value-action-sprint");
   });
 
   it("returns a controlled server error when price config is missing", async () => {
@@ -132,11 +139,18 @@ describe("Commerce checkout route", () => {
     });
 
     expect(response.status).toBe(200);
-    const payload = stripeMock.checkout.sessions.create.mock.calls[0][0];
-    expect(payload.client_reference_id).toBe("user-1");
-    expect(payload.line_items).toEqual([{ price: "price_vas_123", quantity: 1 }]);
-    expect(payload.metadata.userId).toBe("user-1");
-    expect(payload.metadata.productKey).toBe("value_action_sprint");
-    expect(payload.metadata.purchaseType).toBe("one_time_product");
+    const payload = (stripeMock.checkout.sessions.create.mock.calls as unknown[][])[0]?.[0] as
+      | {
+          client_reference_id?: string;
+          line_items?: Array<{ price: string; quantity: number }>;
+          metadata?: Record<string, string>;
+        }
+      | undefined;
+    expect(payload).toBeDefined();
+    expect(payload?.client_reference_id).toBe("user-1");
+    expect(payload?.line_items).toEqual([{ price: "price_vas_123", quantity: 1 }]);
+    expect(payload?.metadata?.userId).toBe("user-1");
+    expect(payload?.metadata?.productKey).toBe("value_action_sprint");
+    expect(payload?.metadata?.purchaseType).toBe("one_time_product");
   });
 });
