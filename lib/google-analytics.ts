@@ -126,20 +126,20 @@ export function sanitizeGoogleAnalyticsPage(url: string, origin?: string): Sanit
   }
 }
 
-export function sanitizeGoogleAnalyticsReferrer(referrer: string, origin: string): string | undefined {
+export function sanitizeGoogleAnalyticsReferrer(referrer: string, origin: string): string {
   if (!referrer) {
-    return undefined;
+    return '';
   }
 
   try {
     const parsed = new URL(referrer, origin);
     if (parsed.origin !== origin) {
-      return undefined;
+      return new URL(parsed.origin).toString();
     }
 
     return sanitizeGoogleAnalyticsPage(parsed.toString(), origin).pageLocation;
   } catch {
-    return undefined;
+    return '';
   }
 }
 
@@ -301,7 +301,7 @@ export class GoogleAnalyticsController {
 
     const sanitizedPage = sanitizeGoogleAnalyticsPage(url, this.origin);
     const sanitizedReferrer = sanitizeGoogleAnalyticsReferrer(referrer, this.origin);
-    const pageKey = `${sanitizedPage.pageLocation}|${sanitizedReferrer ?? ''}`;
+    const pageKey = sanitizedPage.pageLocation;
 
     if (pageKey === this.lastPageViewKey) {
       return;
@@ -311,7 +311,7 @@ export class GoogleAnalyticsController {
     const payload = {
       page_location: sanitizedPage.pageLocation,
       page_path: sanitizedPage.pagePath,
-      ...(sanitizedReferrer ? { page_referrer: sanitizedReferrer } : {}),
+      page_referrer: sanitizedReferrer,
     };
 
     this.gtag('set', payload);
