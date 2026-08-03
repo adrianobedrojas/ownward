@@ -132,21 +132,31 @@ export type PlanEntitlements = {
   sellerCommandCenter: boolean;
   /** Maximum listing photos per listing (0 = none). */
   listingImageLimit: number;
+  /** Maximum listings a buyer/explorer can save across the marketplace. */
+  savedListingLimit: number;
+  /** Maximum number of listings a user can compare at once. */
+  listingComparisonLimit: number;
+  /** Whether the user can create or view confidential listings. */
+  confidentialListings: boolean;
 };
 
-/** 500 MB expressed in bytes. */
+/** 1 MB expressed in bytes. */
 const MB = 1024 * 1024;
 const GB = 1024 * MB;
 
+/**
+ * Explorer (free) plan entitlements.
+ * Internal key remains "free"; public-facing label is "Explorer".
+ */
 const FREE_ENTITLEMENTS: PlanEntitlements = {
-  businessLimit: 0,
-  listingLimit: 0,
-  milestoneMonthlyLimit: 0,
-  documentLimit: 0,
-  storageBytes: 0,
-  leadLimit: 0,
+  businessLimit: 1,
+  listingLimit: 1,
+  milestoneMonthlyLimit: 3,
+  documentLimit: 3,
+  storageBytes: 100 * MB,
+  leadLimit: 5,
   teamMemberLimit: 0,
-  healthLevel: "none",
+  healthLevel: "basic",
   valuationLevel: "preview",
   supportLevel: "general",
   bookkeeping: false,
@@ -156,7 +166,10 @@ const FREE_ENTITLEMENTS: PlanEntitlements = {
   customerConcentration: false,
   weeklyValuationRefresh: false,
   sellerCommandCenter: false,
-  listingImageLimit: 0,
+  listingImageLimit: 3,
+  savedListingLimit: 5,
+  listingComparisonLimit: 2,
+  confidentialListings: false,
 };
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
@@ -166,7 +179,7 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     milestoneMonthlyLimit: 10,
     documentLimit: 10,
     storageBytes: 500 * MB,
-    leadLimit: 10,
+    leadLimit: 25,
     teamMemberLimit: 1,
     healthLevel: "basic",
     valuationLevel: "basic",
@@ -178,7 +191,10 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: false,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
-    listingImageLimit: 5,
+    listingImageLimit: 10,
+    savedListingLimit: 25,
+    listingComparisonLimit: 3,
+    confidentialListings: true,
   },
   builder: {
     businessLimit: 2,
@@ -198,7 +214,10 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: false,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
-    listingImageLimit: 10,
+    listingImageLimit: 20,
+    savedListingLimit: 100,
+    listingComparisonLimit: 5,
+    confidentialListings: true,
   },
   pro: {
     businessLimit: 5,
@@ -218,7 +237,10 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: true,
     weeklyValuationRefresh: true,
     sellerCommandCenter: true,
-    listingImageLimit: 20,
+    listingImageLimit: 40,
+    savedListingLimit: 1000,
+    listingComparisonLimit: 10,
+    confidentialListings: true,
   },
 };
 
@@ -364,6 +386,10 @@ export type UpgradeErrorCode =
   | "MILESTONE_MONTHLY_LIMIT"
   | "DOCUMENT_LIMIT"
   | "STORAGE_LIMIT"
+  | "SAVED_LISTING_LIMIT"
+  | "COMPARISON_LIMIT"
+  | "CONFIDENTIAL_LISTING_GATED"
+  | "READ_ONLY_OVER_LIMIT"
   | "FEATURE_GATED"
   | "PLAN_REQUIRED";
 
@@ -629,6 +655,60 @@ export function checkProFeature(
   return null;
 }
 
+// ─── Saved listing limit ──────────────────────────────────────────────────────
+
+/**
+ * Returns an EntitlementError if the user cannot save another listing.
+ * Duplicate saves do not consume additional capacity (checked before calling).
+ */
+export function checkSavedListingLimit(
+  entitlements: PlanEntitlements,
+  currentSavedCount: number
+): EntitlementError | null {
+  if (currentSavedCount >= entitlements.savedListingLimit) {
+    return new EntitlementError(
+      "SAVED_LISTING_LIMIT",
+      `Your plan allows up to ${entitlements.savedListingLimit} saved listing${entitlements.savedListingLimit === 1 ? "" : "s"}. Remove some or upgrade to save more.`
+    );
+  }
+  return null;
+}
+
+// ─── Listing comparison limit ─────────────────────────────────────────────────
+
+/**
+ * Returns an EntitlementError if the user cannot compare this many listings.
+ */
+export function checkListingComparisonLimit(
+  entitlements: PlanEntitlements,
+  requestedCount: number
+): EntitlementError | null {
+  if (requestedCount > entitlements.listingComparisonLimit) {
+    return new EntitlementError(
+      "COMPARISON_LIMIT",
+      `Your plan allows comparing up to ${entitlements.listingComparisonLimit} listing${entitlements.listingComparisonLimit === 1 ? "" : "s"} at a time. Upgrade to compare more.`
+    );
+  }
+  return null;
+}
+
+// ─── Confidential listing access ──────────────────────────────────────────────
+
+/**
+ * Returns an EntitlementError if the user's plan does not permit confidential listings.
+ */
+export function checkConfidentialListingAccess(
+  entitlements: PlanEntitlements
+): EntitlementError | null {
+  if (!entitlements.confidentialListings) {
+    return new EntitlementError(
+      "CONFIDENTIAL_LISTING_GATED",
+      "Confidential listings are available on Starter and higher plans. Upgrade to create or view private listings."
+    );
+  }
+  return null;
+}
+
 // ─── Plan catalog (public-facing) ─────────────────────────────────────────────
 
 /**
@@ -655,15 +735,25 @@ export type PlanCatalogEntry = {
 export const PLAN_CATALOG: PlanCatalogEntry[] = [
   {
     key: "free",
-    name: "Free",
+    name: "Explorer",
     monthlyPrice: 0,
     annualPrice: 0,
-    tagline: "Just browsing or getting started",
-    publicFeatures: ["Browse the marketplace", "Basic valuation preview"],
+    tagline: "Your first meaningful step — free forever",
+    publicFeatures: [
+      "1 Business Workspace",
+      "3 Milestones / month",
+      "Basic Health Snapshot",
+      "Valuation Preview",
+      "Up to 3 Documents (100 MB)",
+      "5 Active Leads",
+      "Save up to 5 listings",
+      "Compare up to 2 businesses",
+      "1 Public Listing (3 photos)",
+    ],
     upgradeOrder: 0,
     entitlements: FREE_ENTITLEMENTS,
     supportLevel: "general",
-    storageDescription: "No storage",
+    storageDescription: "100 MB",
     teamSeatDescription: "No team seats",
     dealRoomDescription: "Not included",
     valuationRefreshDescription: "Preview only",
@@ -673,14 +763,18 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     name: "Starter",
     monthlyPrice: 5,
     annualPrice: 50,
-    tagline: "New owners & explorers",
+    tagline: "Build operations and reach buyers",
     publicFeatures: [
-      "1 Business Profile",
-      "Timeline & 10 Milestones/mo",
+      "1 Business Workspace",
+      "10 Milestones / month",
       "Basic Health Checklist",
       "Basic Valuation Range",
-      "Up to 10 Documents",
-      "Up to 500 MB storage",
+      "Up to 10 Documents (500 MB)",
+      "25 Active Leads",
+      "Save up to 25 listings",
+      "Compare up to 3 businesses",
+      "1 Public or Confidential Listing (10 photos)",
+      "Bookkeeping",
       "1 Invited Collaborator",
       "Standard Support",
     ],
@@ -697,16 +791,20 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     name: "Builder",
     monthlyPrice: 10,
     annualPrice: 100,
-    tagline: "Active owners building operations",
+    tagline: "Scale with advanced analytics and collaboration",
     publicFeatures: [
       "Up to 2 Businesses",
       "Revenue & Expense Tracking",
-      "Tasks, Goals & 100 Active Leads",
+      "100 Milestones / month",
       "Advanced Health Report",
       "Detailed Valuation Estimate",
-      "Up to 100 Documents",
-      "Up to 5 GB storage",
-      "2 Invited Collaborators (owner excluded)",
+      "Up to 100 Documents (5 GB)",
+      "100 Active Leads",
+      "Save up to 100 listings",
+      "Compare up to 5 businesses",
+      "Up to 2 Listings (20 photos each)",
+      "Confidential Listings",
+      "2 Invited Collaborators",
       "Standard Support",
     ],
     upgradeOrder: 2,
@@ -730,9 +828,13 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
       "Customer Concentration Lab",
       "Seller Command Center & Pipeline",
       "Up to 3 Active Deal Rooms",
+      "1,000 Milestones / month",
       "1,000 Active Leads",
       "Up to 50 GB storage (Vault + Deal Rooms)",
-      "5 Invited Collaborators (owner excluded)",
+      "Save up to 1,000 listings",
+      "Compare up to 10 businesses",
+      "Up to 5 Listings (40 photos each)",
+      "5 Invited Collaborators",
       "Priority Support",
     ],
     upgradeOrder: 3,

@@ -35,11 +35,8 @@ async function getAuthenticatedUser() {
 export async function createLead(formData: FormData) {
   const { supabase, user } = await getAuthenticatedUser();
 
-  // Enforce Builder-or-higher for CRM writes
+  // Enforce active-lead quota (Explorer: 5, Starter: 25, Builder: 100, Pro: 1000)
   const billing = await getUserBillingState(supabase, user.id);
-  if (!billing.entitlements.leadLimit) {
-    redirect("/customers?error=UpgradeRequired");
-  }
 
   // Count active leads (server-side quota check, never trust client)
   const { count: activeLeadCount } = await supabase

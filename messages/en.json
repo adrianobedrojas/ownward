@@ -338,7 +338,7 @@
   },
   "Pricing": {
     "heroTitle": "Ownward Plans & Pricing",
-    "heroDescription": "Simple, scalable tools to build, manage, and increase your business value. Plans start at $5/month.",
+    "heroDescription": "Start free as an Explorer, then unlock capacity, advanced analysis, collaboration, privacy, and transaction tools as your needs grow.",
     "perMonth": "/ mo",
     "mostPopular": "Most Popular",
     "currentPlanBadge": "Current Plan",
@@ -355,7 +355,8 @@
     "buttons": {
       "starter": "Get Starter",
       "builder": "Start Builder Plan",
-      "pro": "Get Pro"
+      "pro": "Get Pro",
+      "free": "Start free"
     },
     "errors": {
       "billingPortal": "Unable to open billing portal.",
@@ -366,30 +367,38 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "New owners & explorers",
+        "tagline": "Build operations and reach buyers",
         "features": [
-          "1 Business Profile",
-          "Timeline & 10 Milestones/mo",
+          "1 Business Workspace",
+          "10 Milestones / month",
           "Basic Health Checklist",
           "Basic Valuation Range",
-          "Up to 10 Documents",
-          "Up to 500 MB storage",
+          "Up to 10 Documents (500 MB)",
+          "25 Active Leads",
+          "Save up to 25 listings",
+          "Compare up to 3 businesses",
+          "1 Public or Confidential Listing (10 photos)",
+          "Bookkeeping",
           "1 Invited Collaborator",
           "Standard Support"
         ]
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Active owners building operations",
+        "tagline": "Scale with advanced analytics and collaboration",
         "features": [
           "Up to 2 Businesses",
           "Revenue & Expense Tracking",
-          "Tasks, Goals & 100 Active Leads",
+          "100 Milestones / month",
           "Advanced Health Report",
           "Detailed Valuation Estimate",
-          "Up to 100 Documents",
-          "Up to 5 GB storage",
-          "2 Invited Collaborators (owner excluded)",
+          "Up to 100 Documents (5 GB)",
+          "100 Active Leads",
+          "Save up to 100 listings",
+          "Compare up to 5 businesses",
+          "Up to 2 Listings (20 photos each)",
+          "Confidential Listings",
+          "2 Invited Collaborators",
           "Standard Support"
         ]
       },
@@ -408,6 +417,21 @@
           "5 Invited Collaborators (owner excluded)",
           "Priority Support"
         ]
+      },
+      "free": {
+        "name": "Explorer",
+        "tagline": "Your first meaningful step — free forever",
+        "features": [
+          "1 Business Workspace",
+          "3 Milestones / month",
+          "Basic Health Snapshot",
+          "Valuation Preview",
+          "Up to 3 Documents (100 MB)",
+          "5 Active Leads",
+          "Save up to 5 listings",
+          "Compare up to 2 businesses",
+          "1 Public Listing (3 photos)"
+        ]
       }
     },
     "cardPayment": {
@@ -422,6 +446,79 @@
       "monthly": "Monthly",
       "annual": "Annual",
       "savingsBadge": "Save ~17% — 2 months free"
+    },
+    "explorerCtaSignedOut": "Start free",
+    "explorerCtaCurrentPlan": "Current plan",
+    "comparison": {
+      "title": "Plan comparison",
+      "subtitle": "Explorer gives you a real first step — paid plans add capacity, advanced analysis, collaboration, privacy, and transaction tools.",
+      "rowLabels": {
+        "workspaces": "Business Workspaces",
+        "listings": "Listings",
+        "milestones": "Milestones / month",
+        "leads": "Active Leads",
+        "docsStorage": "Documents & Storage",
+        "valuationLevel": "Valuation",
+        "bookkeeping": "Bookkeeping",
+        "collaborators": "Collaborators",
+        "confidentialListings": "Confidential Listings",
+        "dealRooms": "Deal Rooms",
+        "support": "Support"
+      },
+      "values": {
+        "free": {
+          "workspaces": "1",
+          "listings": "1 public",
+          "milestones": "3",
+          "leads": "5",
+          "docsStorage": "3 docs / 100 MB",
+          "valuationLevel": "Preview",
+          "bookkeeping": "—",
+          "collaborators": "—",
+          "confidentialListings": "—",
+          "dealRooms": "—",
+          "support": "Community"
+        },
+        "starter": {
+          "workspaces": "1",
+          "listings": "1",
+          "milestones": "10",
+          "leads": "25",
+          "docsStorage": "10 docs / 500 MB",
+          "valuationLevel": "Basic range",
+          "bookkeeping": "Yes",
+          "collaborators": "1",
+          "confidentialListings": "Yes",
+          "dealRooms": "—",
+          "support": "Standard"
+        },
+        "builder": {
+          "workspaces": "2",
+          "listings": "2",
+          "milestones": "100",
+          "leads": "100",
+          "docsStorage": "100 docs / 5 GB",
+          "valuationLevel": "Detailed",
+          "bookkeeping": "Yes",
+          "collaborators": "2",
+          "confidentialListings": "Yes",
+          "dealRooms": "—",
+          "support": "Standard"
+        },
+        "pro": {
+          "workspaces": "5",
+          "listings": "5",
+          "milestones": "1,000",
+          "leads": "1,000",
+          "docsStorage": "1,000 docs / 50 GB",
+          "valuationLevel": "Enhanced + weekly",
+          "bookkeeping": "Yes",
+          "collaborators": "5",
+          "confidentialListings": "Yes",
+          "dealRooms": "Up to 3",
+          "support": "Priority"
+        }
+      }
     }
   },
   "Buy": {

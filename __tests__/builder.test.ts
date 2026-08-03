@@ -12,18 +12,25 @@
 // ─── checkLeadLimit ────────────────────────────────────────────────────────────
 
 describe("checkLeadLimit", () => {
-  it("blocks lead creation on free plan", async () => {
+  it("allows lead creation on Explorer (free) plan within limit", async () => {
     const { checkLeadLimit, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    const err = checkLeadLimit(ent, 0);
-    expect(err).not.toBeNull();
-    expect(err?.code).toBe("PLAN_REQUIRED");
+    expect(checkLeadLimit(ent, 0)).toBeNull();
+    expect(checkLeadLimit(ent, 4)).toBeNull();
   });
 
-  it("blocks lead creation on starter plan (leadLimit=10, at 10)", async () => {
+  it("blocks 6th lead on Explorer (free) plan (leadLimit=5, at 5)", async () => {
+    const { checkLeadLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkLeadLimit(ent, 5);
+    expect(err).not.toBeNull();
+    expect(err?.code).toBe("FEATURE_GATED");
+  });
+
+  it("blocks lead creation on starter plan (leadLimit=25, at 25)", async () => {
     const { checkLeadLimit, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("starter");
-    const err = checkLeadLimit(ent, 10);
+    const err = checkLeadLimit(ent, 25);
     expect(err).not.toBeNull();
     expect(err?.code).toBe("FEATURE_GATED");
   });
@@ -31,7 +38,7 @@ describe("checkLeadLimit", () => {
   it("allows lead creation on starter within limit", async () => {
     const { checkLeadLimit, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("starter");
-    expect(checkLeadLimit(ent, 9)).toBeNull();
+    expect(checkLeadLimit(ent, 24)).toBeNull();
   });
 
   it("blocks the 101st lead on builder plan (leadLimit=100)", async () => {
