@@ -1,8 +1,10 @@
 import {
   GoogleAnalyticsController,
+  buildConsentInitScript,
   sanitizeGoogleAnalyticsPage,
   sanitizeGoogleAnalyticsReferrer,
 } from '@/lib/google-analytics';
+import { LEGACY_PRIVACY_CONSENT_STORAGE_KEY, PRIVACY_CONSENT_STORAGE_KEY } from '@/lib/privacy-consent';
 
 function createMockWindow(initialCookie = '_ga=abc; _ga_123=xyz; session=1') {
   const scriptElements: Array<{ src: string; async: boolean }> = [];
@@ -255,5 +257,175 @@ describe('GA URL sanitization', () => {
     const updatedPageViews = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'page_view');
     const externalPayload = updatedPageViews[1][2] as Record<string, string>;
     expect(externalPayload.page_referrer).toBe('https://example.com/');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helper: run the inline consent-init script in an isolated mock environment
+// so we can assert on the gtag calls it makes without touching real globals.
+// ---------------------------------------------------------------------------
+function runConsentInitScript(
+  script: string,
+  localStorageData: Record<string, string> = {},
+): Array<unknown[]> {
+  const dataLayer: IArguments[] = [];
+
+  // The IIFE uses `window.dataLayer`, `window.gtag`, and `localStorage`.
+  // We shadow those globals via a thin wrapper function.
+  const wrapped = `var window=_w;var localStorage=_ls;${script}`;
+  // eslint-disable-next-line no-new-func
+  const fn = new Function('_w', '_ls', wrapped);
+
+  const mockWindow = { dataLayer };
+  const mockLocalStorage = { getItem: (key: string) => localStorageData[key] ?? null };
+
+  fn(mockWindow, mockLocalStorage);
+
+  // Each dataLayer entry is an Arguments object pushed by the gtag stub.
+  return dataLayer.map((entry) => Array.from(entry));
+}
+
+describe('buildConsentInitScript', () => {
+  const script = buildConsentInitScript(PRIVACY_CONSENT_STORAGE_KEY, LEGACY_PRIVACY_CONSENT_STORAGE_KEY);
+
+  it('sets default consent with all privacy-sensitive fields denied', () => {
+    const calls = runConsentInitScript(script);
+
+    const defaultCall = calls.find((c) => c[0] === 'consent' && c[1] === 'default')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(defaultCall).toBeDefined();
+    expect(defaultCall?.analytics_storage).toBe('denied');
+    expect(defaultCall?.ad_storage).toBe('denied');
+    expect(defaultCall?.ad_user_data).toBe('denied');
+    expect(defaultCall?.ad_personalization).toBe('denied');
+  });
+
+  it('grants functionality_storage and security_storage in the default consent', () => {
+    const calls = runConsentInitScript(script);
+
+    const defaultCall = calls.find((c) => c[0] === 'consent' && c[1] === 'default')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(defaultCall?.functionality_storage).toBe('granted');
+    expect(defaultCall?.security_storage).toBe('granted');
+  });
+
+  it('does not fire a consent update when no saved consent exists', () => {
+    const calls = runConsentInitScript(script);
+
+    const updateCall = calls.find((c) => c[0] === 'consent' && c[1] === 'update');
+    expect(updateCall).toBeUndefined();
+  });
+
+  it('restores analytics consent from the v2 storage key', () => {
+    const saved = JSON.stringify({ analytics: true, functionality: true });
+    const calls = runConsentInitScript(script, { [PRIVACY_CONSENT_STORAGE_KEY]: saved });
+
+    const updateCall = calls.find((c) => c[0] === 'consent' && c[1] === 'update')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(updateCall).toBeDefined();
+    expect(updateCall?.analytics_storage).toBe('granted');
+  });
+
+  it('restores analytics consent from the legacy v1 storage key', () => {
+    const saved = JSON.stringify({ analytics: true, functionality: false });
+    const calls = runConsentInitScript(script, { [LEGACY_PRIVACY_CONSENT_STORAGE_KEY]: saved });
+
+    const updateCall = calls.find((c) => c[0] === 'consent' && c[1] === 'update')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(updateCall?.analytics_storage).toBe('granted');
+  });
+
+  it('keeps advertising consent denied in the restored update even when analytics is accepted', () => {
+    const saved = JSON.stringify({ analytics: true, functionality: true });
+    const calls = runConsentInitScript(script, { [PRIVACY_CONSENT_STORAGE_KEY]: saved });
+
+    const updateCall = calls.find((c) => c[0] === 'consent' && c[1] === 'update')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(updateCall?.ad_storage).toBe('denied');
+    expect(updateCall?.ad_user_data).toBe('denied');
+    expect(updateCall?.ad_personalization).toBe('denied');
+  });
+
+  it('restores denied analytics consent when saved preference is analytics=false', () => {
+    const saved = JSON.stringify({ analytics: false, functionality: true });
+    const calls = runConsentInitScript(script, { [PRIVACY_CONSENT_STORAGE_KEY]: saved });
+
+    const updateCall = calls.find((c) => c[0] === 'consent' && c[1] === 'update')?.[2] as
+      | Record<string, string>
+      | undefined;
+
+    expect(updateCall?.analytics_storage).toBe('denied');
+  });
+});
+
+describe('Google Consent Mode v2 update payload', () => {
+  it('accept all grants analytics_storage without granting advertising consent', () => {
+    const mock = createMockWindow();
+    const controller = new GoogleAnalyticsController('G-ABC12345', mock.win as never);
+
+    controller.setConsent({ analytics: true, functionality: true });
+
+    const updateCall = mock.gtagCalls.find(
+      (c) => c[0] === 'consent' && c[1] === 'update',
+    )?.[2] as Record<string, string> | undefined;
+
+    expect(updateCall?.analytics_storage).toBe('granted');
+    expect(updateCall?.ad_storage).toBe('denied');
+    expect(updateCall?.ad_user_data).toBe('denied');
+    expect(updateCall?.ad_personalization).toBe('denied');
+  });
+
+  it('reject nonessential denies analytics and all advertising consent', () => {
+    const mock = createMockWindow();
+    const controller = new GoogleAnalyticsController('G-ABC12345', mock.win as never);
+
+    controller.setConsent({ analytics: false, functionality: false });
+
+    const updateCall = mock.gtagCalls.find(
+      (c) => c[0] === 'consent' && c[1] === 'update',
+    )?.[2] as Record<string, string> | undefined;
+
+    expect(updateCall?.analytics_storage).toBe('denied');
+    expect(updateCall?.ad_storage).toBe('denied');
+    expect(updateCall?.ad_user_data).toBe('denied');
+    expect(updateCall?.ad_personalization).toBe('denied');
+  });
+
+  it('always grants functionality_storage and security_storage regardless of analytics', () => {
+    const mockOn = createMockWindow();
+    const controllerOn = new GoogleAnalyticsController('G-ABC12345', mockOn.win as never);
+    controllerOn.setConsent({ analytics: true, functionality: true });
+
+    const mockOff = createMockWindow();
+    const controllerOff = new GoogleAnalyticsController('G-ABC12345', mockOff.win as never);
+    controllerOff.setConsent({ analytics: false, functionality: false });
+
+    for (const mock of [mockOn, mockOff]) {
+      const update = mock.gtagCalls.find(
+        (c) => c[0] === 'consent' && c[1] === 'update',
+      )?.[2] as Record<string, string> | undefined;
+      expect(update?.functionality_storage).toBe('granted');
+      expect(update?.security_storage).toBe('granted');
+    }
+  });
+
+  it('does not fire a consent default call from setConsent (handled by inline script)', () => {
+    const mock = createMockWindow();
+    const controller = new GoogleAnalyticsController('G-ABC12345', mock.win as never);
+
+    controller.setConsent({ analytics: true, functionality: true });
+
+    const defaultCall = mock.gtagCalls.find((c) => c[0] === 'consent' && c[1] === 'default');
+    expect(defaultCall).toBeUndefined();
   });
 });
