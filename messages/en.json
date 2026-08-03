@@ -79,6 +79,10 @@
     "businessIdeaReadiness": {
       "title": "Business Idea Readiness Check | Ownward Hub",
       "description": "Take the free Business Idea Readiness Check. In a few minutes, identify what is clear, what is missing, and what you should do next."
+    },
+    "trust": {
+      "title": "Legal and Trust Center | Ownward",
+      "description": "Legal documents, privacy choices, contact information, and request guidance for Ownward Hub."
     }
   },
   "Common": {
@@ -133,7 +137,8 @@
     "guide": "Guide",
     "academy": "Academy",
     "instagramHandle": "@ownwardhub",
-    "instagramAriaLabel": "Visit Ownward Hub on Instagram"
+    "instagramAriaLabel": "Visit Ownward Hub on Instagram",
+    "trust": "Legal and Trust"
   },
   "Home": {
     "hero": {

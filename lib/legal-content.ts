@@ -19,7 +19,7 @@ export const TERMS_CONTENT: Record<LegalLocale, { badge: string; title: string; 
   en: {
     badge: 'Terms of Service',
     title: 'Ownward Hub Terms of Service',
-    note: 'Operational draft for attorney review. Effective for current product operations; not a claim of universal legal compliance.',
+    note: 'These terms explain the current rules for using Ownward Hub. Ownward may update them as the platform introduces new services, marketplace features, subscriptions, integrations, or transaction tools. When a material change affects users\' rights or responsibilities, Ownward will provide notice through the platform, by email, or through another appropriate method.',
     sections: [
       { id: 'acceptance', label: '1. Acceptance', title: '1. Acceptance of the Terms', body: ['By using Ownward Hub, you agree to these Terms. If you use Ownward for an organization, you confirm authority to bind that organization.'] },
       { id: 'operator', label: '2. Operator', title: '2. Service Operator and Contact', body: [`Ownward Hub is operated by ${LEGAL_OPERATOR.name}, a Texas limited liability company. Correspondence address (not a walk-in location): ${LEGAL_OPERATOR.address}. Contact: ${LEGAL_OPERATOR.email}.`] },
@@ -55,7 +55,7 @@ export const TERMS_CONTENT: Record<LegalLocale, { badge: string; title: string; 
   es: {
     badge: 'Términos del servicio',
     title: 'Términos del servicio de Ownward Hub',
-    note: 'Borrador operativo para revisión legal. Refleja la operación actual del producto y no garantiza cumplimiento universal.',
+    note: 'Estos términos explican las reglas actuales para usar Ownward Hub. Ownward puede actualizarlos a medida que la plataforma introduzca nuevos servicios, funciones del mercado, suscripciones, integraciones o herramientas de transacción. Cuando un cambio material afecte los derechos o responsabilidades de los usuarios, Ownward proporcionará aviso a través de la plataforma, por correo electrónico u otro método apropiado.',
     sections: [
       { id: 'acceptance', label: '1. Aceptación', title: '1. Aceptación de los Términos', body: ['Al usar Ownward Hub aceptas estos Términos. Si actúas por una organización, confirmas que tienes autoridad para obligarla.'] },
       { id: 'operator', label: '2. Operador', title: '2. Operador del servicio y contacto', body: [`Ownward Hub es operado por ${LEGAL_OPERATOR.name}, una LLC de Texas. Dirección de correspondencia (no atención presencial): ${LEGAL_OPERATOR.address}. Contacto: ${LEGAL_OPERATOR.email}.`] },

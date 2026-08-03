@@ -48,7 +48,7 @@ export default async function TermsPage() {
             <Link href="/pricing" className="font-semibold text-cyan-300 hover:text-cyan-200">{locale === 'es' ? 'Precios' : 'Pricing'}</Link>
             <Link href="/contact" className="font-semibold text-cyan-300 hover:text-cyan-200">{locale === 'es' ? 'Contacto' : 'Contact'}</Link>
           </div>
-          <p className="mt-3 text-slate-400">{locale === 'es' ? 'Contacto temporal:' : 'Temporary contact:'} <a href={`mailto:${LEGAL_OPERATOR.email}`} className="text-cyan-300 hover:text-cyan-200">{LEGAL_OPERATOR.email}</a></p>
+          <p className="mt-3 text-slate-400">{locale === 'es' ? 'Contacto legal y de privacidad:' : 'Legal and privacy contact:'} <a href={`mailto:${LEGAL_OPERATOR.email}`} aria-label={locale === 'es' ? `Enviar correo a ${LEGAL_OPERATOR.email}` : `Send email to ${LEGAL_OPERATOR.email}`} className="text-cyan-300 underline-offset-2 transition hover:text-cyan-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">{LEGAL_OPERATOR.email}</a></p>
         </section>
       </article>
     </main>
