@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 interface BuyerProfile {
   primary_goal?: string | null;
@@ -44,9 +43,7 @@ export default function BuyerPreferencesClient({ initialData }: Props) {
 
   function handleSave() {
     startTransition(async () => {
-      const supabase = createClient();
       const payload = {
-        buyer_id: undefined as unknown as string, // set server-side
         primary_goal: form.primary_goal || null,
         budget_min: form.budget_min ? parseFloat(form.budget_min) : null,
         budget_max: form.budget_max ? parseFloat(form.budget_max) : null,
@@ -58,10 +55,12 @@ export default function BuyerPreferencesClient({ initialData }: Props) {
         purchase_timeline: form.purchase_timeline || null,
         share_with_sellers: form.share_with_sellers,
       };
-      await supabase
-        .from('buyer_purchase_profiles')
-        .upsert({ ...payload }, { onConflict: 'buyer_id' });
-      setSaved(true);
+      const res = await fetch('/api/profile/buyer-preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) setSaved(true);
     });
   }
 

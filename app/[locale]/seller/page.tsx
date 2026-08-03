@@ -56,12 +56,34 @@ export default async function SellerPage() {
     .order('scored_at', { ascending: false })
     .limit(5);
 
+  // Buyer interest events for listings owned by this seller
+  const { data: interestEvents } = await supabase
+    .from('listing_interest_events')
+    .select('id, listing_id, event_type, conversation_id, created_at, business_listings(business_name)')
+    .eq('seller_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  // Flatten listing name
+  const flatEvents = (interestEvents ?? []).map((ev: Record<string, unknown>) => {
+    const listing = ev.business_listings as { business_name: string } | null;
+    return {
+      id: ev.id as string,
+      listing_id: ev.listing_id as string,
+      event_type: ev.event_type as string,
+      conversation_id: ev.conversation_id as string | null,
+      created_at: ev.created_at as string,
+      listing_name: listing?.business_name,
+    };
+  });
+
   return (
     <SellerClient
       businesses={businesses ?? []}
       opportunities={opportunities ?? []}
       pendingOffers={offers ?? []}
       recentAssessments={recentAssessments ?? []}
+      interestEvents={flatEvents}
     />
   );
 }
