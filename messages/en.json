@@ -107,7 +107,16 @@
     "learn": "Learn",
     "start": "Start",
     "learnMenuGuideDescription": "Practical articles, tools, and business guidance",
-    "learnMenuAcademyDescription": "Structured courses and learning paths"
+    "learnMenuAcademyDescription": "Structured courses and learning paths",
+    "tools": "Tools",
+    "toolsMenuValueMyBusinessLabel": "Value My Business",
+    "toolsMenuValueMyBusinessDescription": "Estimate and improve your business value",
+    "toolsMenuSaleReadinessLabel": "Sale Readiness",
+    "toolsMenuSaleReadinessDescription": "Check how ready your business is to sell",
+    "toolsMenuGrowthPlannerLabel": "Growth Planner",
+    "toolsMenuGrowthPlannerDescription": "Identify and plan your growth opportunities",
+    "toolsMenuCustomerConcentrationLabel": "Customer Concentration",
+    "toolsMenuCustomerConcentrationDescription": "Analyze your customer revenue risk"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. All rights reserved.",
@@ -221,9 +230,11 @@
       ]
     },
     "assessment": {
-      "title": "How prepared is your business for what comes next?",
-      "description": "Take our free interactive assessment to check your documentation, financial organization, and sale readiness.",
-      "cta": "Take the free sale-readiness check"
+      "badge": "Ownward Value Center",
+      "title": "What could your business be worth—and what may be holding its value back?",
+      "description": "Start with a private quick estimate. Then build an evidence-based report that explains your valuation range, confidence, risks, and possible improvements.",
+      "cta": "Get my quick estimate",
+      "secondaryCta": "Learn how business valuation works"
     },
     "articles": {
       "badge": "Learn with Ownward Hub",
@@ -1189,7 +1200,202 @@
     "title": "Invoices"
   },
   "Valuation": {
-    "title": "Valuation"
+    "title": "Ownward Value Center",
+    "metaTitle": "Business Valuation – Ownward Value Center",
+    "metaDescription": "Estimate your business value, build an evidence-based valuation report, and identify what may improve your valuation range.",
+    "reportMetaTitle": "Valuation Report",
+    "reportMetaDescription": "View your preliminary business valuation report.",
+    "disclaimer": {
+      "title": "Preliminary planning tool — educational use only",
+      "body": "This tool produces estimates for planning purposes. Results are not a certified appraisal, fairness opinion, investment recommendation, or guaranteed sale price. Consult a qualified advisor before making significant financial decisions."
+    },
+    "rangeNote": "Your estimate is a range, not a promise. Ownward shows what influenced the range and what could improve confidence.",
+    "modes": {
+      "quick": "Quick Value Snapshot",
+      "quickDescription": "Get an instant estimate in about 2 minutes. No account required.",
+      "detailed": "Detailed Valuation Report",
+      "detailedDescription": "Build an evidence-based report in 10–15 minutes.",
+      "reports": "My Reports",
+      "reportsDescription": "View your saved drafts and completed reports."
+    },
+    "beforeYouBegin": {
+      "title": "Before you begin",
+      "quickNeeds": "Quick snapshot requires",
+      "quickNeed1": "Recent owner earnings or net income",
+      "quickNeed2": "An approximate valuation multiple",
+      "detailedNeeds": "Detailed report may require",
+      "detailedNeed1": "Up to three years of financial information",
+      "detailedNeed2": "Owner involvement",
+      "detailedNeed3": "Customer concentration",
+      "detailedNeed4": "Recurring and contracted revenue",
+      "detailedNeed5": "Operational systems and procedures",
+      "detailedNeed6": "Assets, liabilities, and available supporting evidence"
+    },
+    "quickSnapshot": {
+      "heading": "Quick Value Snapshot",
+      "subheading": "Estimate your business value in about 2 minutes",
+      "guestNote": "This estimate is calculated in your browser and is not saved. No account required.",
+      "advancedAssumptions": "Advanced assumptions",
+      "normalizedEarningsExplain": "Normalized earnings adjust your reported income for owner compensation and one-time items to reflect the true economic earnings an acquirer would see.",
+      "rangeExplain": "The range reflects different buyer risk appetites. Defensive buyers pay less; strategic buyers may pay more based on growth opportunities.",
+      "resultCta": "Build a more detailed report",
+      "resultCtaDescription": "A detailed report includes multi-year analysis, risk map, owner dependence, and confidence scoring.",
+      "calculateButton": "Calculate estimate",
+      "calculating": "Calculating…",
+      "lowLabel": "Defensive estimate",
+      "expectedLabel": "Expected estimate",
+      "highLabel": "Strategic estimate",
+      "normalizedEarningsLabel": "Normalized earnings",
+      "disclaimer": "Educational planning scenario, not a certified appraisal. Actual value depends on many additional factors."
+    },
+    "detailedReport": {
+      "heading": "Detailed Valuation Report",
+      "subheading": "Build an evidence-based report in 10–15 minutes",
+      "stages": "This report covers 7 stages",
+      "stageList": [
+        "Business profile",
+        "Financial history (up to 3 years)",
+        "Owner earnings and add-backs",
+        "Revenue quality",
+        "Operations and systems",
+        "Assets and evidence",
+        "Review and calculate"
+      ],
+      "guestSignIn": "Sign in to build a detailed report",
+      "guestCreateAccount": "Create a free account",
+      "guestOr": "or",
+      "guestNote": "A free account lets you start the wizard and save a draft.",
+      "freeUserNote": "A paid plan is required to generate a full valuation report.",
+      "freeUserUpgrade": "Upgrade to Starter",
+      "startReport": "Start a new report",
+      "continueReport": "Continue report",
+      "newReport": "Start new report"
+    },
+    "myReports": {
+      "heading": "My Reports",
+      "emptyTitle": "No reports yet",
+      "emptyDescription": "Start a detailed valuation report to see it here.",
+      "emptyAction": "Start a report",
+      "business": "Business",
+      "status": "Status",
+      "expectedValue": "Expected value",
+      "confidence": "Confidence",
+      "updated": "Updated",
+      "statusDraft": "Draft",
+      "statusCompleted": "Completed",
+      "statusArchived": "Archived",
+      "actionContinue": "Continue",
+      "actionOpen": "Open",
+      "actionArchive": "Archive",
+      "untitledReport": "Untitled report",
+      "includeArchived": "Include archived",
+      "reportLevel": "Report level"
+    },
+    "report": {
+      "heading": "Valuation Report",
+      "backToReports": "Back to reports",
+      "archive": "Archive report",
+      "archiveConfirm": "Archive this report",
+      "archiveCancel": "Cancel",
+      "notFound": "Report not found",
+      "printButton": "Print report",
+      "valuationRange": "Valuation range",
+      "confidence": "Confidence",
+      "normalizedEarnings": "Normalized earnings",
+      "riskMap": "Risk map",
+      "valueDna": "Value DNA",
+      "buyerLens": "Buyer lens",
+      "valueBridge": "Value bridge",
+      "recommendedActions": "Recommended actions",
+      "upgradeBanner": "Upgrade to unlock all report sections",
+      "upgradeDescription": "Builder and Pro plans include deeper analysis, risk maps, and strategic improvement scenarios.",
+      "upgradeAction": "View plans"
+    },
+    "tiers": {
+      "free": "Free — Quick estimate preview only",
+      "starter": "Starter — Valuation range, confidence, and up to 3 actions",
+      "builder": "Builder — Multi-year analysis, risk map, owner dependence, and customer concentration",
+      "pro": "Pro — Full report including Value DNA, Buyer Lens, Value Bridge, and weekly refresh",
+      "upgradePrompt": "Upgrade to unlock full reports"
+    },
+    "calculator": {
+      "annualRevenue": "Annual revenue (optional)",
+      "baseEarnings": "Base earnings / net income",
+      "ownerCompensation": "Owner compensation add-back",
+      "interestAddback": "Interest add-back",
+      "depreciationAddback": "Depreciation add-back",
+      "amortizationAddback": "Amortization add-back",
+      "onetimeExpenses": "One-time expenses",
+      "nonoperatingIncome": "Non-operating income (deduct)",
+      "lowMultiple": "Low multiple",
+      "baseMultiple": "Base multiple",
+      "highMultiple": "High multiple",
+      "annualRevenuePlaceholder": "e.g. 500,000",
+      "baseEarningsPlaceholder": "e.g. 150,000",
+      "multiplesHint": "Industry multiples typically range from 1.5× to 6× normalized earnings"
+    },
+    "wizard": {
+      "step1": "Business profile",
+      "step2": "Financial history",
+      "step3": "Owner earnings",
+      "step4": "Revenue quality",
+      "step5": "Operations",
+      "step6": "Assets & evidence",
+      "step7": "Review & calculate",
+      "next": "Next",
+      "back": "Back",
+      "saveDraft": "Save draft",
+      "saving": "Saving…",
+      "calculate": "Generate report",
+      "calculating": "Calculating…",
+      "draftSaved": "Draft saved.",
+      "draftError": "Failed to save draft.",
+      "step": "Step",
+      "of": "of"
+    },
+    "actions": {
+      "saveDraftSuccess": "Draft saved.",
+      "saveDraftError": "Failed to save draft. Please try again.",
+      "calculateSuccess": "Report generated.",
+      "calculateError": "Failed to generate report.",
+      "archiveSuccess": "Report archived.",
+      "archiveError": "Failed to archive report.",
+      "authRequired": "You must be signed in.",
+      "upgradeRequired": "Upgrade to Starter to generate and save a valuation report. The free plan includes a basic estimate preview only.",
+      "reportNotFound": "Report not found.",
+      "validationError": "Please fix the highlighted fields.",
+      "saveEstimateAuthRequired": "You must be signed in to save estimates.",
+      "saveEstimateUpgradeRequired": "Upgrade to Starter to save estimates."
+    },
+    "industryLabels": {
+      "services": "Professional services",
+      "home-services": "Home services",
+      "food": "Food and beverage",
+      "retail": "Retail",
+      "construction": "Construction",
+      "marketing": "Marketing",
+      "technology": "Technology",
+      "other": "Other"
+    },
+    "vault": {
+      "heading": "Documents improve accuracy",
+      "description": "Store tax returns, financial statements, and contracts in your Ownward Vault to support your valuation evidence.",
+      "cta": "Open Ownward Vault"
+    },
+    "what": {
+      "heading": "What you’ll get",
+      "items": [
+        "Defensive, expected, and strategic value range",
+        "Confidence score based on evidence quality",
+        "Normalized earnings reconciliation",
+        "Customer concentration analysis",
+        "Owner dependence analysis",
+        "Value DNA scorecard (8 dimensions)",
+        "Buyer lens (3 buyer types)",
+        "Value bridge improvement scenarios",
+        "Risk map and recommended actions"
+      ]
+    }
   },
   "SaleReadiness": {
     "title": "Sale Readiness"

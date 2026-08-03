@@ -107,7 +107,16 @@
     "learn": "Aprender",
     "start": "Iniciar",
     "learnMenuGuideDescription": "Artículos, herramientas y orientación empresarial",
-    "learnMenuAcademyDescription": "Cursos estructurados y rutas de aprendizaje"
+    "learnMenuAcademyDescription": "Cursos estructurados y rutas de aprendizaje",
+    "tools": "Herramientas",
+    "toolsMenuValueMyBusinessLabel": "Valuar mi negocio",
+    "toolsMenuValueMyBusinessDescription": "Estima y mejora el valor de tu negocio",
+    "toolsMenuSaleReadinessLabel": "Preparación para vender",
+    "toolsMenuSaleReadinessDescription": "Verifica cuán listo está tu negocio para venderse",
+    "toolsMenuGrowthPlannerLabel": "Planificador de crecimiento",
+    "toolsMenuGrowthPlannerDescription": "Identifica y planifica tus oportunidades de crecimiento",
+    "toolsMenuCustomerConcentrationLabel": "Concentración de clientes",
+    "toolsMenuCustomerConcentrationDescription": "Analiza el riesgo de ingresos por cliente"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. Todos los derechos reservados.",
@@ -221,9 +230,11 @@
       ]
     },
     "assessment": {
-      "title": "¿Qué tan preparado está tu negocio para lo que viene?",
-      "description": "Haz nuestra evaluación interactiva gratuita para revisar tu documentación, organización financiera y preparación para venta.",
-      "cta": "Hacer la evaluación gratuita de preparación para venta"
+      "badge": "Centro de Valor Ownward",
+      "title": "¿Cuánto podría valer tu negocio y qué podría estar limitando su valor?",
+      "description": "Comienza con una estimación privada y rápida. Luego crea un informe respaldado por evidencia que explique tu rango de valor, nivel de confianza, riesgos y posibles mejoras.",
+      "cta": "Obtener mi estimación rápida",
+      "secondaryCta": "Aprender cómo funciona la valuación"
     },
     "articles": {
       "badge": "Aprende con Ownward Hub",
@@ -1189,7 +1200,202 @@
     "title": "Facturas"
   },
   "Valuation": {
-    "title": "Valuación"
+    "title": "Centro de Valor Ownward",
+    "metaTitle": "Valuación de negocio – Centro de Valor Ownward",
+    "metaDescription": "Estima el valor de tu negocio, crea un informe de valuación respaldado por evidencia e identifica qué puede mejorar tu rango de valor.",
+    "reportMetaTitle": "Informe de valuación",
+    "reportMetaDescription": "Consulta tu informe preliminar de valuación de negocio.",
+    "disclaimer": {
+      "title": "Herramienta de planificación preliminar — solo con fines educativos",
+      "body": "Esta herramienta produce estimaciones con fines de planificación. Los resultados no constituyen una tasación certificada, opinión de equidad, recomendación de inversión ni precio de venta garantizado. Consulta a un asesor calificado antes de tomar decisiones financieras importantes."
+    },
+    "rangeNote": "Tu estimación es un rango, no una promesa. Ownward muestra qué influyó en el rango y qué podría mejorar el nivel de confianza.",
+    "modes": {
+      "quick": "Estimación rápida de valor",
+      "quickDescription": "Obtén una estimación instantánea en unos 2 minutos. No requiere cuenta.",
+      "detailed": "Informe de valuación detallado",
+      "detailedDescription": "Crea un informe respaldado por evidencia en 10–15 minutos.",
+      "reports": "Mis informes",
+      "reportsDescription": "Consulta tus borradores guardados e informes completados."
+    },
+    "beforeYouBegin": {
+      "title": "Antes de comenzar",
+      "quickNeeds": "La estimación rápida requiere",
+      "quickNeed1": "Ganancias recientes del propietario o ingreso neto",
+      "quickNeed2": "Un múltiplo de valuación aproximado",
+      "detailedNeeds": "El informe detallado puede requerir",
+      "detailedNeed1": "Hasta tres años de información financiera",
+      "detailedNeed2": "Participación del propietario",
+      "detailedNeed3": "Concentración de clientes",
+      "detailedNeed4": "Ingresos recurrentes y bajo contrato",
+      "detailedNeed5": "Sistemas operativos y procedimientos",
+      "detailedNeed6": "Activos, pasivos y evidencia de respaldo disponible"
+    },
+    "quickSnapshot": {
+      "heading": "Estimación rápida de valor",
+      "subheading": "Estima el valor de tu negocio en unos 2 minutos",
+      "guestNote": "Esta estimación se calcula en tu navegador y no se guarda. No requiere cuenta.",
+      "advancedAssumptions": "Supuestos avanzados",
+      "normalizedEarningsExplain": "Las ganancias normalizadas ajustan tus ingresos reportados por compensación del propietario y elementos no recurrentes para reflejar las ganancias económicas reales que un comprador vería.",
+      "rangeExplain": "El rango refleja distintos apetitos de riesgo de los compradores. Los compradores defensivos pagan menos; los estratégicos pueden pagar más según las oportunidades de crecimiento.",
+      "resultCta": "Crear un informe más detallado",
+      "resultCtaDescription": "Un informe detallado incluye análisis multiaño, mapa de riesgos, dependencia del propietario y puntuación de confianza.",
+      "calculateButton": "Calcular estimación",
+      "calculating": "Calculando…",
+      "lowLabel": "Estimación defensiva",
+      "expectedLabel": "Estimación esperada",
+      "highLabel": "Estimación estratégica",
+      "normalizedEarningsLabel": "Ganancias normalizadas",
+      "disclaimer": "Escenario de planificación educativa, no una tasación certificada. El valor real depende de muchos factores adicionales."
+    },
+    "detailedReport": {
+      "heading": "Informe de valuación detallado",
+      "subheading": "Crea un informe respaldado por evidencia en 10–15 minutos",
+      "stages": "Este informe cubre 7 etapas",
+      "stageList": [
+        "Perfil del negocio",
+        "Historial financiero (hasta 3 años)",
+        "Ganancias del propietario y ajustes",
+        "Calidad de ingresos",
+        "Operaciones y sistemas",
+        "Activos y evidencia",
+        "Revisión y cálculo"
+      ],
+      "guestSignIn": "Inicia sesión para crear un informe detallado",
+      "guestCreateAccount": "Crear una cuenta gratuita",
+      "guestOr": "o",
+      "guestNote": "Una cuenta gratuita te permite iniciar el asistente y guardar un borrador.",
+      "freeUserNote": "Se requiere un plan de pago para generar un informe de valuación completo.",
+      "freeUserUpgrade": "Mejorar a Starter",
+      "startReport": "Iniciar un nuevo informe",
+      "continueReport": "Continuar informe",
+      "newReport": "Nuevo informe"
+    },
+    "myReports": {
+      "heading": "Mis informes",
+      "emptyTitle": "Aún no hay informes",
+      "emptyDescription": "Inicia un informe de valuación detallado para verlo aquí.",
+      "emptyAction": "Iniciar un informe",
+      "business": "Negocio",
+      "status": "Estado",
+      "expectedValue": "Valor esperado",
+      "confidence": "Confianza",
+      "updated": "Actualizado",
+      "statusDraft": "Borrador",
+      "statusCompleted": "Completado",
+      "statusArchived": "Archivado",
+      "actionContinue": "Continuar",
+      "actionOpen": "Abrir",
+      "actionArchive": "Archivar",
+      "untitledReport": "Informe sin título",
+      "includeArchived": "Incluir archivados",
+      "reportLevel": "Nivel del informe"
+    },
+    "report": {
+      "heading": "Informe de valuación",
+      "backToReports": "Volver a informes",
+      "archive": "Archivar informe",
+      "archiveConfirm": "Archivar este informe",
+      "archiveCancel": "Cancelar",
+      "notFound": "Informe no encontrado",
+      "printButton": "Imprimir informe",
+      "valuationRange": "Rango de valuación",
+      "confidence": "Confianza",
+      "normalizedEarnings": "Ganancias normalizadas",
+      "riskMap": "Mapa de riesgos",
+      "valueDna": "ADN de valor",
+      "buyerLens": "Perspectiva del comprador",
+      "valueBridge": "Puente de valor",
+      "recommendedActions": "Acciones recomendadas",
+      "upgradeBanner": "Mejora tu plan para desbloquear todas las secciones del informe",
+      "upgradeDescription": "Los planes Builder y Pro incluyen análisis más profundo, mapas de riesgos y escenarios de mejora estratégica.",
+      "upgradeAction": "Ver planes"
+    },
+    "tiers": {
+      "free": "Gratuito — Solo vista previa de estimación rápida",
+      "starter": "Starter — Rango de valuación, confianza y hasta 3 acciones",
+      "builder": "Builder — Análisis multiaño, mapa de riesgos, dependencia del propietario y concentración de clientes",
+      "pro": "Pro — Informe completo con ADN de valor, perspectiva del comprador, puente de valor y actualización semanal",
+      "upgradePrompt": "Mejora tu plan para desbloquear informes completos"
+    },
+    "calculator": {
+      "annualRevenue": "Ingresos anuales (opcional)",
+      "baseEarnings": "Ganancias base / ingreso neto",
+      "ownerCompensation": "Ajuste por compensación del propietario",
+      "interestAddback": "Ajuste por intereses",
+      "depreciationAddback": "Ajuste por depreciación",
+      "amortizationAddback": "Ajuste por amortización",
+      "onetimeExpenses": "Gastos no recurrentes",
+      "nonoperatingIncome": "Ingresos no operativos (deducir)",
+      "lowMultiple": "Múltiplo bajo",
+      "baseMultiple": "Múltiplo base",
+      "highMultiple": "Múltiplo alto",
+      "annualRevenuePlaceholder": "ej. 500,000",
+      "baseEarningsPlaceholder": "ej. 150,000",
+      "multiplesHint": "Los múltiplos de la industria suelen oscilar entre 1.5× y 6× las ganancias normalizadas"
+    },
+    "wizard": {
+      "step1": "Perfil del negocio",
+      "step2": "Historial financiero",
+      "step3": "Ganancias del propietario",
+      "step4": "Calidad de ingresos",
+      "step5": "Operaciones",
+      "step6": "Activos y evidencia",
+      "step7": "Revisión y cálculo",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "saveDraft": "Guardar borrador",
+      "saving": "Guardando…",
+      "calculate": "Generar informe",
+      "calculating": "Calculando…",
+      "draftSaved": "Borrador guardado.",
+      "draftError": "No se pudo guardar el borrador.",
+      "step": "Paso",
+      "of": "de"
+    },
+    "actions": {
+      "saveDraftSuccess": "Borrador guardado.",
+      "saveDraftError": "No se pudo guardar el borrador. Intenta de nuevo.",
+      "calculateSuccess": "Informe generado.",
+      "calculateError": "No se pudo generar el informe.",
+      "archiveSuccess": "Informe archivado.",
+      "archiveError": "No se pudo archivar el informe.",
+      "authRequired": "Debes iniciar sesión.",
+      "upgradeRequired": "Mejora a Starter para generar y guardar un informe de valuación. El plan gratuito incluye solo una vista previa básica.",
+      "reportNotFound": "Informe no encontrado.",
+      "validationError": "Por favor corrige los campos indicados.",
+      "saveEstimateAuthRequired": "Debes iniciar sesión para guardar estimaciones.",
+      "saveEstimateUpgradeRequired": "Mejora a Starter para guardar estimaciones."
+    },
+    "industryLabels": {
+      "services": "Servicios profesionales",
+      "home-services": "Servicios del hogar",
+      "food": "Alimentos y bebidas",
+      "retail": "Comercio minorista",
+      "construction": "Construcción",
+      "marketing": "Marketing",
+      "technology": "Tecnología",
+      "other": "Otro"
+    },
+    "vault": {
+      "heading": "Los documentos mejoran la precisión",
+      "description": "Guarda declaraciones de impuestos, estados financieros y contratos en tu Bóveda Ownward para respaldar tu evidencia de valuación.",
+      "cta": "Abrir Bóveda Ownward"
+    },
+    "what": {
+      "heading": "Lo que obtendrás",
+      "items": [
+        "Rango de valor defensivo, esperado y estratégico",
+        "Puntuación de confianza basada en la calidad de la evidencia",
+        "Reconciliación de ganancias normalizadas",
+        "Análisis de concentración de clientes",
+        "Análisis de dependencia del propietario",
+        "Tarjeta de puntuación ADN de valor (8 dimensiones)",
+        "Perspectiva del comprador (3 tipos)",
+        "Escenarios de mejora del puente de valor",
+        "Mapa de riesgos y acciones recomendadas"
+      ]
+    }
   },
   "SaleReadiness": {
     "title": "Preparación para venta"

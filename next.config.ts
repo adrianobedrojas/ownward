@@ -12,6 +12,20 @@ const nextConfig: NextConfig = {
       allowedOrigins,
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/value-my-business',
+        destination: '/valuation',
+        permanent: true,
+      },
+      {
+        source: '/es/value-my-business',
+        destination: '/es/valuation',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

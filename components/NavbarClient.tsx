@@ -14,6 +14,7 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
   const pathname = usePathname();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const learnMenuRef = useRef<HTMLDetailsElement>(null);
+  const toolsMenuRef = useRef<HTMLDetailsElement>(null);
   const t = useTranslations('Navigation');
   const navigation = [
     { name: t('start'), href: '/start' },
@@ -30,6 +31,11 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
   }
 
   const isLearnActive = isActive('/guide') || isActive('/academy');
+  const isToolsActive =
+    isActive('/valuation') ||
+    isActive('/sale-readiness') ||
+    isActive('/grow') ||
+    isActive('/customer-concentration');
 
   function closeMobileMenu() {
     if (detailsRef.current) {
@@ -40,6 +46,12 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
   function closeLearnMenu() {
     if (learnMenuRef.current) {
       learnMenuRef.current.open = false;
+    }
+  }
+
+  function closeToolsMenu() {
+    if (toolsMenuRef.current) {
+      toolsMenuRef.current.open = false;
     }
   }
 
@@ -122,6 +134,81 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
               </Link>
             </div>
           </details>
+
+          {/* Tools dropdown */}
+          <details ref={toolsMenuRef} className="relative" suppressHydrationWarning>
+            <summary
+              className={`cursor-pointer list-none rounded-lg px-3 py-2 text-sm font-medium transition select-none ${
+                isToolsActive
+                  ? 'bg-cyan-400/10 text-cyan-300'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+              aria-haspopup="menu"
+            >
+              {t('tools')} <span aria-hidden="true">▾</span>
+            </summary>
+            <div
+              role="menu"
+              className="absolute left-0 mt-2 w-64 rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl"
+            >
+              <Link
+                href="/valuation"
+                role="menuitem"
+                onClick={closeToolsMenu}
+                aria-current={isActive('/valuation') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/valuation')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('toolsMenuValueMyBusinessLabel')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('toolsMenuValueMyBusinessDescription')}</span>
+              </Link>
+              <Link
+                href="/sale-readiness"
+                role="menuitem"
+                onClick={closeToolsMenu}
+                aria-current={isActive('/sale-readiness') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/sale-readiness')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('toolsMenuSaleReadinessLabel')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('toolsMenuSaleReadinessDescription')}</span>
+              </Link>
+              <Link
+                href="/grow"
+                role="menuitem"
+                onClick={closeToolsMenu}
+                aria-current={isActive('/grow') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/grow')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('toolsMenuGrowthPlannerLabel')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('toolsMenuGrowthPlannerDescription')}</span>
+              </Link>
+              <Link
+                href="/customer-concentration"
+                role="menuitem"
+                onClick={closeToolsMenu}
+                aria-current={isActive('/customer-concentration') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm transition ${
+                  isActive('/customer-concentration')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-200 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="font-semibold">{t('toolsMenuCustomerConcentrationLabel')}</span>
+                <span className="mt-0.5 block text-xs text-slate-400">{t('toolsMenuCustomerConcentrationDescription')}</span>
+              </Link>
+            </div>
+          </details>
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -193,6 +280,58 @@ export default function NavbarClient({ signedIn }: NavbarClientProps) {
                 }`}
               >
                 {t('academy')}
+              </Link>
+            </div>
+            {/* Mobile Tools section */}
+            <div className="mt-3 border-t border-slate-800 pt-3">
+              <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">{t('tools')}</p>
+              <Link
+                href="/valuation"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/valuation') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/valuation')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('toolsMenuValueMyBusinessLabel')}
+              </Link>
+              <Link
+                href="/sale-readiness"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/sale-readiness') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/sale-readiness')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('toolsMenuSaleReadinessLabel')}
+              </Link>
+              <Link
+                href="/grow"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/grow') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/grow')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('toolsMenuGrowthPlannerLabel')}
+              </Link>
+              <Link
+                href="/customer-concentration"
+                onClick={closeMobileMenu}
+                aria-current={isActive('/customer-concentration') ? 'page' : undefined}
+                className={`block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive('/customer-concentration')
+                    ? 'bg-cyan-400/10 text-cyan-300'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {t('toolsMenuCustomerConcentrationLabel')}
               </Link>
             </div>
             <div className="mt-3 border-t border-slate-800 pt-3">

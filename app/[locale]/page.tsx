@@ -196,9 +196,13 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-slate-900 to-slate-950 p-8 text-center shadow-xl sm:p-12">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">{t('assessment.title')}</h2>
+          <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('assessment.badge')}</p>
+          <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">{t('assessment.title')}</h2>
           <p className="mx-auto mt-3 max-w-xl text-slate-300">{t('assessment.description')}</p>
-          <Link href="/valuation" className="mt-6 inline-block rounded-lg bg-cyan-400 px-6 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('assessment.cta')}</Link>
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <Link href="/valuation?mode=quick" className="rounded-lg bg-cyan-400 px-6 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('assessment.cta')}</Link>
+            <Link href="/guide/value/how-much-is-my-business-worth" className="rounded-lg border border-slate-600 px-6 py-3 font-semibold text-white transition hover:border-cyan-400 hover:bg-slate-800">{t('assessment.secondaryCta')}</Link>
+          </div>
         </div>
       </section>
 
