@@ -122,6 +122,7 @@ describe('Google Analytics consent mode', () => {
 
     controller.trackPageView('https://ownwardhub.com/en/dashboard?token=abc&utm_source=newsletter#private');
     controller.trackPageView('https://ownwardhub.com/en/dashboard?token=abc&utm_source=newsletter#private');
+    controller.trackPageView('https://ownwardhub.com/en/dashboard?token=def&utm_source=newsletter#changed');
     controller.trackPageView('https://ownwardhub.com/en/dashboard?utm_source=newsletter&utm_campaign=launch');
 
     const pageViews = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'page_view');
@@ -217,6 +218,42 @@ describe('GA URL sanitization', () => {
     ).toBe('https://ownwardhub.com/en/deals/invite/[token]');
     expect(
       sanitizeGoogleAnalyticsReferrer('https://example.com/en/dashboard?utm_source=x', 'https://ownwardhub.com'),
-    ).toBeUndefined();
+    ).toBe('https://example.com/');
+    expect(
+      sanitizeGoogleAnalyticsReferrer(
+        'https://example.com/en/dashboard?token=private&utm_source=x#fragment',
+        'https://ownwardhub.com',
+      ),
+    ).toBe('https://example.com/');
+    expect(sanitizeGoogleAnalyticsReferrer('', 'https://ownwardhub.com')).toBe('');
+    expect(sanitizeGoogleAnalyticsReferrer('https://', 'https://ownwardhub.com')).toBe('');
+  });
+
+  it('always sends explicit page_referrer and deduplicates by sanitized page location only', () => {
+    const mock = createMockWindow();
+    const controller = new GoogleAnalyticsController('G-ABC12345', mock.win as never);
+    controller.setConsent({ analytics: true, functionality: false });
+
+    controller.trackPageView('https://ownwardhub.com/en/dashboard?token=one&utm_source=x', '');
+    controller.trackPageView('https://ownwardhub.com/en/dashboard?token=two&utm_source=x', 'https://');
+    controller.trackPageView(
+      'https://ownwardhub.com/en/dashboard?token=three&utm_source=x',
+      'https://example.com/path?private=value#fragment',
+    );
+
+    const pageViews = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'page_view');
+    expect(pageViews).toHaveLength(1);
+
+    const firstPayload = pageViews[0][2] as Record<string, string>;
+    expect(firstPayload.page_referrer).toBe('');
+    expect(firstPayload.page_location).toBe('https://ownwardhub.com/en/dashboard?utm_source=x');
+
+    controller.trackPageView(
+      'https://ownwardhub.com/en/pricing?utm_source=x',
+      'https://example.com/path?private=value#fragment',
+    );
+    const updatedPageViews = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'page_view');
+    const externalPayload = updatedPageViews[1][2] as Record<string, string>;
+    expect(externalPayload.page_referrer).toBe('https://example.com/');
   });
 });
