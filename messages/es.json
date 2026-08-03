@@ -548,7 +548,9 @@
       }
     ],
     "importantTitle": "Información importante",
-    "importantDescription": "Ownward está siendo diseñado como una plataforma de software para organizar información empresarial y conectar usuarios. Las valuaciones, decisiones legales, impuestos, financiamiento, negociaciones y transferencias de propiedad pueden requerir ayuda de profesionales calificados."
+    "importantDescription": "Ownward está siendo diseñado como una plataforma de software para organizar información empresarial y conectar usuarios. Las valuaciones, decisiones legales, impuestos, financiamiento, negociaciones y transferencias de propiedad pueden requerir ayuda de profesionales calificados.",
+    "editListingCta": "Editar anuncio",
+    "continueCta": "Continuar editando"
   },
   "Guide": {
     "heroBadge": "Guía Ownward",
@@ -1113,7 +1115,10 @@
     "saved": "Guardado correctamente."
   },
   "Dashboard": {
-    "title": "Panel"
+    "title": "Panel",
+    "listingsTitle": "Tus anuncios",
+    "editListingCta": "Editar anuncio",
+    "newListingCta": "Nuevo anuncio"
   },
   "Books": {
     "title": "Libros"
@@ -1508,6 +1513,249 @@
     "appendMessages": {
       "option-preserving": "Has identificado una forma de preservar opciones. Usa ese paso antes de tomar la decisión más importante.",
       "identify-help": "El siguiente paso útil puede ser identificar quién tiene la autoridad, el conocimiento o la capacidad para ayudar."
+    }
+  },
+  "ListingStudio": {
+    "meta": {
+      "title": "Estudio de Publicación | Ownward",
+      "description": "Crea, edita y publica tu anuncio de negocio con fotos y contenido bilingüe."
+    },
+    "intro": {
+      "badge": "Vendedores Ownward",
+      "title": "Estudio de Publicación",
+      "description": "Crea un anuncio atractivo con contenido bilingüe, fotos y un resumen financiero completo. Tu borrador permanece privado hasta que elijas publicarlo.",
+      "startCta": "Crear nuevo anuncio",
+      "resumeCta": "Continuar editando",
+      "previewCta": "Vista previa",
+      "noPlan": "Se requiere un plan de pago para crear un anuncio.",
+      "upgradeCta": "Mejorar plan"
+    },
+    "steps": {
+      "identity": "Identidad y privacidad",
+      "story": "Historia del negocio",
+      "photos": "Fotos",
+      "financial": "Resumen financiero",
+      "operations": "Operaciones y traspaso",
+      "review": "Revisión y publicación"
+    },
+    "nav": {
+      "back": "Atrás",
+      "saveExit": "Guardar y salir",
+      "saveContinue": "Guardar y continuar",
+      "preview": "Vista previa",
+      "publish": "Publicar anuncio",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "saveFailed": "Error al guardar",
+      "unsavedChanges": "Tienes cambios sin guardar. ¿Seguro que quieres salir?"
+    },
+    "status": {
+      "draft": "Borrador — privado",
+      "published": "Publicado — público",
+      "unpublished": "No publicado"
+    },
+    "identity": {
+      "title": "Identidad y privacidad",
+      "description": "Cuéntanos sobre el negocio. Decide qué es visible públicamente.",
+      "businessNameLabel": "Nombre legal del negocio",
+      "businessNameHint": "Solo visible para ti. Nunca aparece en el anuncio público, la URL ni los metadatos de imágenes.",
+      "businessNamePlaceholder": "Ingresa el nombre legal del negocio",
+      "isConfidentialLabel": "Mantener este anuncio confidencial",
+      "isConfidentialHint": "Cuando está activado, el nombre legal nunca aparecerá públicamente. Debes proporcionar un título teaser seguro.",
+      "teaserTitleLabel": "Título teaser público",
+      "teaserTitleHint": "Visible públicamente. Describe el tipo de negocio sin revelar el nombre. Ejemplo: \"Empresa de limpieza residencial establecida\"",
+      "teaserTitlePlaceholder": "Empresa de limpieza residencial establecida",
+      "categoryLabel": "Categoría del negocio",
+      "categoryHint": "Visible públicamente",
+      "selectCategory": "Selecciona una categoría",
+      "locationLabel": "Ubicación general",
+      "locationHint": "Ciudad, estado o región — visible públicamente. No incluyas una dirección privada.",
+      "locationPlaceholder": "Ciudad, estado o remoto",
+      "yearEstablishedLabel": "Año de fundación",
+      "yearEstablishedHint": "Visible públicamente",
+      "visibilityPublic": "Visible públicamente",
+      "visibilityPrivate": "Solo visible para ti",
+      "visibilityDealRoom": "Compartido más adelante en un Deal Room"
+    },
+    "story": {
+      "title": "Historia del negocio",
+      "description": "Ayuda a los compradores a entender qué hace valioso y transferible a este negocio.",
+      "headlineEnLabel": "Titular (inglés)",
+      "headlineEnPlaceholder": "Una descripción concisa del negocio",
+      "headlineEsLabel": "Titular (español)",
+      "headlineEsPlaceholder": "Un resumen de una línea del negocio",
+      "summaryEnLabel": "Resumen (inglés)",
+      "summaryEnPlaceholder": "Describe qué hace el negocio, sus clientes y sus fortalezas.",
+      "summaryEsLabel": "Resumen (español)",
+      "summaryEsPlaceholder": "Describe qué hace el negocio, sus clientes y sus fortalezas.",
+      "highlightsEnLabel": "Aspectos destacados (inglés)",
+      "highlightsEnPlaceholder": "Fortalezas clave, sistemas, equipo, ingresos recurrentes, certificaciones…",
+      "highlightsEsLabel": "Aspectos destacados (español)",
+      "highlightsEsPlaceholder": "Fortalezas clave, sistemas, equipo, ingresos recurrentes…",
+      "growthEnLabel": "Oportunidades de crecimiento (inglés)",
+      "growthEnPlaceholder": "¿Qué podría hacer un nuevo dueño para hacer crecer este negocio?",
+      "growthEsLabel": "Oportunidades de crecimiento (español)",
+      "growthEsPlaceholder": "¿Qué podría hacer un nuevo dueño para hacer crecer este negocio?",
+      "reasonEnLabel": "Motivo de venta (inglés)",
+      "reasonEnPlaceholder": "Jubilación, reubicación, nuevo proyecto…",
+      "reasonEsLabel": "Motivo de venta (español)",
+      "reasonEsPlaceholder": "Jubilación, reubicación, nuevo proyecto…",
+      "bilingualNote": "La traducción es opcional. Cuando se proporcionan ambos idiomas, los compradores ven el contenido en su idioma preferido. No uses traducción automática.",
+      "coachTitle": "Guía de escritura",
+      "coachPrompts": [
+        "¿Qué hace el negocio día a día?",
+        "¿Quiénes son sus clientes principales?",
+        "¿Qué lo hace transferible a un nuevo dueño?",
+        "¿Qué podría crecer o mejorar un nuevo dueño?",
+        "¿Qué tan involucrado está el dueño actual semana a semana?"
+      ],
+      "checklist": [
+        "Explica claramente qué hace el negocio",
+        "Describe quiénes son los clientes",
+        "Destaca lo que lo hace valioso",
+        "Evita afirmaciones no verificadas o proyecciones",
+        "No contiene nombres de clientes ni datos privados"
+      ],
+      "charCount": "{count} / {max} caracteres",
+      "disclaimer": "No inventes afirmaciones sobre el negocio, cifras financieras, clientes ni ventajas competitivas."
+    },
+    "photos": {
+      "title": "Fotos",
+      "description": "Agrega fotos para ayudar a los compradores a visualizar el negocio. No subas documentos ni registros confidenciales aquí.",
+      "uploadCta": "Subir fotos",
+      "uploadDrop": "Arrastra y suelta o haz clic para subir",
+      "uploadHint": "JPEG, PNG o WebP. Máximo 10 MB por archivo.",
+      "uploading": "Subiendo…",
+      "uploadError": "Error al subir",
+      "setCover": "Establecer como portada",
+      "coverLabel": "Foto de portada",
+      "editCaption": "Editar descripción",
+      "captionEnLabel": "Descripción (inglés)",
+      "captionEsLabel": "Descripción (español)",
+      "altTextEnLabel": "Texto alternativo (inglés)",
+      "altTextEsLabel": "Texto alternativo (español)",
+      "deletePhoto": "Eliminar foto",
+      "deleteConfirm": "¿Seguro que deseas eliminar esta foto? Esta acción no se puede deshacer.",
+      "reorderHint": "Arrastra para reordenar las fotos",
+      "noPhotos": "Sin fotos aún",
+      "noPhotosHint": "Agregar fotos puede ayudar a los compradores a entender mejor el negocio.",
+      "limitReached": "Has alcanzado el límite de fotos de tu plan para este anuncio.",
+      "typeError": "Solo se permiten imágenes JPEG, PNG y WebP.",
+      "sizeError": "El archivo supera el límite de 10 MB.",
+      "exifNote": "Las fotos se procesan antes de subirse. Los metadatos GPS y EXIF se eliminan automáticamente.",
+      "limit": "Límite del plan: {limit} fotos",
+      "count": "{count} de {limit} fotos"
+    },
+    "financial": {
+      "title": "Resumen financiero",
+      "description": "Proporciona contexto financiero para los compradores. Indica la visibilidad de cada campo.",
+      "currencyLabel": "Moneda",
+      "askingPriceLabel": "Precio de venta",
+      "askingPriceHint": "Visible públicamente cuando eliges mostrarlo",
+      "annualRevenueLabel": "Ingresos anuales",
+      "annualRevenueHint": "Visible públicamente cuando eliges mostrarlo",
+      "cashFlowLabel": "Flujo de caja / SDE",
+      "cashFlowHint": "Ganancias discrecionales del vendedor. Visible públicamente cuando eliges mostrarlo.",
+      "financialYearLabel": "Año o período del reporte financiero",
+      "financialYearPlaceholder": "p. ej. 2024 o Ene 2023 – Dic 2023",
+      "sellerFinancingLabel": "Financiamiento del vendedor disponible",
+      "inventoryLabel": "Inventario incluido",
+      "realEstateLabel": "Bienes raíces incluidos",
+      "multiplesTitle": "Múltiplos de contexto",
+      "multiplesDisclaimer": "Estos son cálculos informativos únicamente — no son una valuación, tasación, recomendación ni garantía.",
+      "priceRevenueMultiple": "Precio / Ingresos: {multiple}×",
+      "priceCashFlowMultiple": "Precio / Flujo de caja: {multiple}×",
+      "unsureCta": "¿No estás seguro de tu valuación?",
+      "valuationToolCta": "Usar la herramienta de valuación de Ownward"
+    },
+    "operations": {
+      "title": "Operaciones y traspaso",
+      "description": "Ayuda a los compradores a entender cómo funciona el negocio y cómo sería una transición.",
+      "ownerHoursLabel": "Participación del dueño (horas por semana)",
+      "ownerHoursPlaceholder": "p. ej. 40",
+      "employeesLabel": "Número de empleados",
+      "employeesPlaceholder": "p. ej. 5",
+      "onlineLabel": "El negocio opera en línea",
+      "growthOpportunitiesNote": "Describe qué podría hacer un nuevo dueño para hacer crecer este negocio."
+    },
+    "review": {
+      "title": "Revisión y publicación",
+      "description": "Revisa tu anuncio antes de publicarlo. Los compradores verán todo lo que se muestra a continuación.",
+      "completenessTitle": "Integridad del anuncio",
+      "completenessNote": "Esta puntuación mide la integridad del perfil únicamente — no es una valuación ni una evaluación de preparación para la venta.",
+      "missingRequired": "Requerido antes de publicar:",
+      "recommended": "Mejoras recomendadas:",
+      "visibilityTitle": "Qué verán los compradores",
+      "visibilityItems": [
+        "Título teaser público o nombre del negocio",
+        "Categoría y ubicación general",
+        "Precio de venta (cuando se proporciona)",
+        "Ingresos anuales y flujo de caja (cuando se proporcionan)",
+        "Año de fundación",
+        "Resumen del negocio y aspectos destacados",
+        "Fotos"
+      ],
+      "notShared": "Lo que nunca se comparte públicamente:",
+      "notSharedItems": [
+        "Nombre legal del negocio (para anuncios confidenciales)",
+        "Dirección privada exacta",
+        "Tu ID de usuario o datos de cuenta",
+        "Documentos o registros confidenciales"
+      ],
+      "authorizationLabel": "Soy el propietario o estoy autorizado para publicar esta información y fotos.",
+      "noCustomerData": "No he incluido nombres de clientes, números de identificación fiscal, información bancaria, contraseñas ni registros confidenciales.",
+      "publishCta": "Publicar anuncio",
+      "publishConfirm": "¿Seguro que quieres publicar este anuncio? Será visible para todos los compradores en el marketplace.",
+      "publishSuccess": "Tu anuncio ya está publicado y visible en el marketplace.",
+      "publishError": "No se pudo publicar el anuncio. Verifica todos los campos requeridos.",
+      "missingFields": "Por favor completa todos los campos requeridos antes de publicar:",
+      "unpublishCta": "Despublicar anuncio",
+      "unpublishConfirm": "¿Seguro que quieres despublicar? Tu anuncio ya no será visible en el marketplace."
+    },
+    "preview": {
+      "title": "Vista previa del anuncio",
+      "ownerNote": "Esta es una vista previa privada del propietario. Esto es exactamente lo que verán los compradores cuando publiques tu anuncio.",
+      "editCta": "Volver al editor",
+      "notFound": "Anuncio no encontrado.",
+      "unauthorized": "No tienes permiso para ver este anuncio."
+    },
+    "completeness": {
+      "title": "Integridad",
+      "overallPercent": "{percent}% completo",
+      "sectionComplete": "Completo",
+      "sectionIncomplete": "Incompleto",
+      "missingEnglish": "Agregar contenido en inglés",
+      "missingSpanish": "Traducción al español faltante (opcional pero recomendada)"
+    },
+    "categories": {
+      "services": "Servicios",
+      "food": "Alimentos y bebidas",
+      "retail": "Comercio minorista",
+      "construction": "Construcción",
+      "marketing": "Marketing",
+      "technology": "Tecnología",
+      "healthcare": "Salud",
+      "education": "Educación",
+      "other": "Otro"
+    },
+    "errors": {
+      "notAuthenticated": "Debes iniciar sesión para gestionar anuncios.",
+      "notOwner": "No tienes permiso para editar este anuncio.",
+      "notFound": "Anuncio no encontrado.",
+      "saveFailed": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "publishFailed": "No se pudo publicar el anuncio.",
+      "imageTooLarge": "La imagen supera el límite de 10 MB.",
+      "imageTypeNotAllowed": "Solo se permiten imágenes JPEG, PNG y WebP.",
+      "imageLimitReached": "Has alcanzado el límite de imágenes de tu plan para este anuncio.",
+      "slugConflict": "No se pudo generar una URL única para el anuncio. Inténtalo de nuevo."
+    },
+    "accessibility": {
+      "stepNavLabel": "Pasos del editor de anuncios",
+      "photoGridLabel": "Fotos del anuncio",
+      "dragHandleLabel": "Arrastra para reordenar",
+      "setCoverLabel": "Establecer como foto de portada",
+      "deletePhotoLabel": "Eliminar foto",
+      "previewLabel": "Vista previa del comprador"
     }
   }
 }

@@ -420,7 +420,15 @@ export default async function DashboardPage({
 
       {/* Listings Section */}
       <section className="mt-12">
-        <h2 className="text-xl font-bold text-white mb-6">Saved Listing Drafts</h2>
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <h2 className="text-xl font-bold text-white">Saved Listing Drafts</h2>
+          <Link
+            href="/sell/new"
+            className="rounded-lg border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/10"
+          >
+            + New listing
+          </Link>
+        </div>
 
         {error && (
           <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-300">
@@ -548,6 +556,14 @@ export default async function DashboardPage({
                     </span>
 
                     <div className="flex items-center gap-4">
+                      {/* Edit listing in studio */}
+                      <Link
+                        href={`/sell/${listing.id}/edit`}
+                        className="text-xs font-semibold text-slate-300 transition hover:text-white"
+                      >
+                        Edit listing
+                      </Link>
+
                       {listing.is_public && listing.slug && (
                         <Link
                           href={`/b/${listing.slug}`}
