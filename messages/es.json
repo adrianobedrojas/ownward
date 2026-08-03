@@ -1802,7 +1802,19 @@
     "openProduct": "Abrir tu espacio de trabajo",
     "processing": "Redirigiendo al pago…",
     "errorPrefix": "Error:",
+    "unknownError": "Algo salió mal. Inténtalo de nuevo.",
+    "networkError": "Error de red. Inténtalo de nuevo.",
     "disclaimerTitle": "Importante — Por favor lee esto",
     "disclaimerBody": "Value Action Sprint es una herramienta de planificación y ejecución empresarial. No es una tasación certificada, servicio legal, servicio fiscal, servicio de asesoría financiera ni garantía de valor comercial o de resultados. Todas las decisiones de priorización y planificación son de tu exclusiva responsabilidad."
+  },
+  "AccountProductWorkspace": {
+    "pageTitle": "Espacio de trabajo Value Action Sprint | Ownward",
+    "pageDescription": "Accede a tu espacio de trabajo de Value Action Sprint.",
+    "backToProducts": "← Volver a Mis Productos",
+    "heading": "Espacio de trabajo Value Action Sprint",
+    "body": "Tu espacio de trabajo está activo. Usa esta compra como tu área dedicada de planificación y ejecución.",
+    "statusLabel": "Estado del espacio de trabajo:",
+    "pendingTitle": "Tu espacio de trabajo aún se está preparando",
+    "pendingBody": "Tu pago está registrado y la entrega sigue en proceso. Vuelve a cargar esta página en unos momentos."
   }
 }

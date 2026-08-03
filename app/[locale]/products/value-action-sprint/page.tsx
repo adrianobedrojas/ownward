@@ -53,6 +53,8 @@ export default async function ValueActionSprintPage({
     openProduct: t("openProduct"),
     processing: t("processing"),
     errorPrefix: t("errorPrefix"),
+    unknownError: t("unknownError"),
+    networkError: t("networkError"),
   };
 
   return (
@@ -96,6 +98,7 @@ export default async function ValueActionSprintPage({
           </div>
           <PurchaseCard
             productKey="value_action_sprint"
+            locale={locale}
             isAuthenticated={Boolean(user)}
             alreadyPurchased={alreadyPurchased}
             loginHref={loginHref}

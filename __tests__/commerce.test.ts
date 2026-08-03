@@ -116,6 +116,14 @@ describe("Product Registry — product definitions", () => {
     const p = getProduct("value_action_sprint")!;
     expect(p.fulfillmentBehavior).toBe("create_workspace");
   });
+
+  it("the first active product uses STRIPE_PRICE_VALUE_ACTION_SPRINT", async () => {
+    const { PRODUCT_KEYS, getProduct } = await import("@/lib/commerce/products");
+    const firstActiveKey = PRODUCT_KEYS.find((key) => getProduct(key)?.active);
+    expect(firstActiveKey).toBe("value_action_sprint");
+    const firstActive = getProduct(firstActiveKey!)!;
+    expect(firstActive.stripePriceEnvVar).toBe("STRIPE_PRICE_VALUE_ACTION_SPRINT");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -363,6 +371,47 @@ describe("Webhook idempotency — duplicate event protection", () => {
     expect(createWorkspace("p1")).toBe("exists"); // replay
     expect(createWorkspace("p2")).toBe("created"); // different purchase
   });
+
+  it("a replay can finish partial fulfillment without creating duplicates", () => {
+    type FulfillmentState = {
+      purchaseStatus: "pending" | "fulfilled";
+      items: Set<string>;
+      grants: Set<string>;
+      workspaces: Set<string>;
+    };
+
+    function fulfillOnce(
+      state: FulfillmentState,
+      opts: { failBeforeWorkspace?: boolean } = {}
+    ): void {
+      state.items.add("purchase-1:value_action_sprint");
+      state.grants.add("purchase-1:value_action_sprint");
+      if (opts.failBeforeWorkspace) {
+        throw new Error("workspace write failed");
+      }
+      state.workspaces.add("purchase-1");
+      state.purchaseStatus = "fulfilled";
+    }
+
+    const state: FulfillmentState = {
+      purchaseStatus: "pending",
+      items: new Set(),
+      grants: new Set(),
+      workspaces: new Set(),
+    };
+
+    expect(() => fulfillOnce(state, { failBeforeWorkspace: true })).toThrow();
+    expect(state.purchaseStatus).toBe("pending");
+    expect(state.items.size).toBe(1);
+    expect(state.grants.size).toBe(1);
+    expect(state.workspaces.size).toBe(0);
+
+    fulfillOnce(state);
+    expect(state.purchaseStatus).toBe("fulfilled");
+    expect(state.items.size).toBe(1);
+    expect(state.grants.size).toBe(1);
+    expect(state.workspaces.size).toBe(1);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -424,6 +473,8 @@ describe("Bilingual labels — ValueActionSprint namespace", () => {
     expect(ns.disclaimerBody).toBeTruthy();
     expect(ns.purchaseCta).toBeTruthy();
     expect(ns.whatYouGetItems).toBeDefined();
+    expect(ns.unknownError).toBeTruthy();
+    expect(ns.networkError).toBeTruthy();
   });
 
   it("Spanish ValueActionSprint namespace has required keys", () => {
@@ -432,6 +483,8 @@ describe("Bilingual labels — ValueActionSprint namespace", () => {
     expect(ns.heading).toBeTruthy();
     expect(ns.disclaimerBody).toBeTruthy();
     expect(ns.purchaseCta).toBeTruthy();
+    expect(ns.unknownError).toBeTruthy();
+    expect(ns.networkError).toBeTruthy();
   });
 
   it("English disclaimer differs from Spanish disclaimer", () => {
@@ -447,6 +500,15 @@ describe("Bilingual labels — ValueActionSprint namespace", () => {
     expect(body.toLowerCase()).toContain("appraisal");
     expect(body.toLowerCase()).toContain("legal");
     expect(body.toLowerCase()).toContain("tax");
+  });
+
+  it("workspace namespace exists in both English and Spanish", () => {
+    const enNs = (enMessages as Record<string, Record<string, unknown>>).AccountProductWorkspace;
+    const esNs = (esMessages as Record<string, Record<string, unknown>>).AccountProductWorkspace;
+    expect(enNs).toBeDefined();
+    expect(esNs).toBeDefined();
+    expect(enNs.heading).toBeTruthy();
+    expect(esNs.heading).toBeTruthy();
   });
 });
 
@@ -541,5 +603,47 @@ describe("Ownership and RLS contract", () => {
     const workspace = buildWorkspaceInsert("user-123", "purchase-456");
     expect(workspace.user_id).toBe("user-123");
     expect(workspace.status).toBe("not_started");
+  });
+
+  it("cross-user rows are filtered out by ownership predicates", () => {
+    type PurchaseRow = { id: string; user_id: string };
+    const rows: PurchaseRow[] = [
+      { id: "p1", user_id: "user-1" },
+      { id: "p2", user_id: "user-2" },
+    ];
+    const visibleToUser1 = rows.filter((row) => row.user_id === "user-1");
+    expect(visibleToUser1).toEqual([{ id: "p1", user_id: "user-1" }]);
+  });
+});
+
+describe("Commerce migration safety contract", () => {
+  it("keeps subscription tables untouched", async () => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const root = path.resolve(process.cwd());
+    const sql = fs.readFileSync(
+      path.join(root, "supabase/migrations/20260803070000_commerce_foundation.sql"),
+      "utf8"
+    ) as string;
+
+    expect(sql).not.toMatch(/ALTER TABLE\s+public\.subscriptions/i);
+    expect(sql).not.toMatch(/DROP TABLE\s+public\.subscriptions/i);
+  });
+
+  it("documents SELECT-only authenticated access and service-role writes", async () => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const root = path.resolve(process.cwd());
+    const sql = fs.readFileSync(
+      path.join(root, "supabase/migrations/20260803070000_commerce_foundation.sql"),
+      "utf8"
+    ) as string;
+
+    expect(sql).toContain("GRANT SELECT ON public.purchases                        TO authenticated;");
+    expect(sql).toContain("GRANT SELECT, INSERT, UPDATE, DELETE ON public.purchases                        TO service_role;");
+    expect(sql).not.toMatch(/GRANT\s+INSERT\s+ON\s+public\.purchases\s+TO\s+authenticated/i);
+    expect(sql).not.toMatch(/CREATE POLICY[\s\S]*FOR INSERT[\s\S]*TO authenticated/i);
+    expect(sql).not.toMatch(/CREATE POLICY[\s\S]*FOR UPDATE[\s\S]*TO authenticated/i);
+    expect(sql).not.toMatch(/CREATE POLICY[\s\S]*FOR DELETE[\s\S]*TO authenticated/i);
   });
 });

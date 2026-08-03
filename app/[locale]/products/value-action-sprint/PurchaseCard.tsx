@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 interface PurchaseCardProps {
   productKey: string;
+  locale: string;
   isAuthenticated: boolean;
   alreadyPurchased: boolean;
   loginHref: string;
@@ -16,11 +17,14 @@ interface PurchaseCardProps {
     openProduct: string;
     processing: string;
     errorPrefix: string;
+    unknownError: string;
+    networkError: string;
   };
 }
 
 export default function PurchaseCard({
   productKey,
+  locale,
   isAuthenticated,
   alreadyPurchased,
   loginHref,
@@ -60,7 +64,7 @@ export default function PurchaseCard({
       const res = await fetch("/api/commerce/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productKey }),
+        body: JSON.stringify({ productKey, locale }),
       });
 
       const data = (await res.json()) as { url?: string; error?: string; redirectTo?: string };
@@ -70,7 +74,7 @@ export default function PurchaseCard({
           router.push(data.redirectTo);
           return;
         }
-        setErrorMessage(data.error ?? "Unknown error");
+        setErrorMessage(data.error ?? labels.unknownError);
         return;
       }
 
@@ -78,7 +82,7 @@ export default function PurchaseCard({
         window.location.href = data.url;
       }
     } catch {
-      setErrorMessage("Network error. Please try again.");
+      setErrorMessage(labels.networkError);
     } finally {
       setLoading(false);
     }

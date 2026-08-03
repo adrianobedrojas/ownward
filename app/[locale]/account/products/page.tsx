@@ -39,10 +39,24 @@ export default async function AccountProductsPage({
   const { data: purchases } = await supabase
     .from("purchases")
     .select("id, product_key, payment_status, fulfillment_status, amount_total, currency, created_at")
-    .eq("payment_status", "paid")
     .order("created_at", { ascending: false });
 
   const items: Purchase[] = purchases ?? [];
+  const purchaseIds = items.map((purchase) => purchase.id);
+
+  let entitlementPurchaseIds = new Set<string>();
+  if (purchaseIds.length > 0) {
+    const { data: entitlementGrants } = await supabase
+      .from("entitlement_grants")
+      .select("purchase_id")
+      .eq("status", "active")
+      .eq("product_key", "value_action_sprint")
+      .in("purchase_id", purchaseIds);
+
+    entitlementPurchaseIds = new Set(
+      (entitlementGrants ?? []).map((grant) => String(grant.purchase_id))
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -86,7 +100,8 @@ export default async function AccountProductsPage({
             );
 
             const workspaceHref =
-              purchase.product_key === "value_action_sprint"
+              purchase.product_key === "value_action_sprint" &&
+              entitlementPurchaseIds.has(purchase.id)
                 ? `/${locale === "es" ? "es/" : ""}account/products/${purchase.id}/workspace`
                 : null;
 
@@ -130,7 +145,9 @@ export default async function AccountProductsPage({
                   </div>
                 </div>
 
-                {workspaceHref && purchase.fulfillment_status === "fulfilled" && (
+                {workspaceHref &&
+                  purchase.payment_status === "paid" &&
+                  purchase.fulfillment_status === "fulfilled" && (
                   <div className="mt-4">
                     <Link
                       href={workspaceHref}

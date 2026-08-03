@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveProduct, getStripePriceId } from "@/lib/commerce/products";
 import { getSiteUrl } from "@/lib/config";
 import { isObsoleteStripeCustomer } from "@/lib/billing";
+import { routing } from "@/i18n/routing";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -41,6 +42,16 @@ export async function POST(req: Request) {
       body && typeof body === "object" && "productKey" in body
         ? String((body as Record<string, unknown>).productKey ?? "").trim()
         : "";
+    const requestedLocale =
+      body && typeof body === "object" && "locale" in body
+        ? String((body as Record<string, unknown>).locale ?? "")
+            .trim()
+            .toLowerCase()
+        : "";
+    const locale = routing.locales.includes(requestedLocale as "en" | "es")
+      ? requestedLocale
+      : routing.defaultLocale;
+    const localePrefix = locale === routing.defaultLocale ? "" : `/${locale}`;
 
     if (!productKey) {
       return NextResponse.json({ error: "productKey is required" }, { status: 400 });
@@ -165,8 +176,8 @@ export async function POST(req: Request) {
       mode: "payment",
       customer: stripeCustomerId,
       client_reference_id: user.id,
-      success_url: `${siteUrl}/account/products?success=purchased`,
-      cancel_url: `${siteUrl}/products/value-action-sprint`,
+      success_url: `${siteUrl}${localePrefix}/account/products?success=purchased`,
+      cancel_url: `${siteUrl}${localePrefix}/products/value-action-sprint`,
       metadata: {
         purchaseType: "one_time_product",
         userId: user.id,

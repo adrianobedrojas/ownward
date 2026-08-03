@@ -422,9 +422,9 @@ async function handleOneTimeProductCheckout(
 
   // Validate the product key exists in the registry
   const product = getProduct(productKey);
-  if (!product) {
+  if (!product || product.purchaseType !== "one_time") {
     throw new Error(
-      `[one_time_product] Unknown product key "${productKey}" on session ${session.id}`
+      `[one_time_product] Unsupported product key "${productKey}" on session ${session.id}`
     );
   }
 
@@ -491,7 +491,7 @@ async function handleOneTimeProductCheckout(
         currency: session.currency,
         updated_at: now,
       },
-      { onConflict: "purchase_id" }
+      { onConflict: "purchase_id,product_key" }
     );
 
   if (itemError) {

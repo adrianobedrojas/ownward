@@ -69,7 +69,9 @@ CREATE TABLE IF NOT EXISTS public.purchase_items (
   unit_amount   integer,
   currency      text,
   created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now()
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT purchase_items_purchase_product_key
+    UNIQUE (purchase_id, product_key)
 );
 
 CREATE INDEX IF NOT EXISTS purchase_items_purchase_id_idx

@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Server-only product registry for one-time purchasable products.
  *
@@ -154,10 +156,15 @@ export function getActiveProduct(key: string): ProductDefinition | null {
  * The Price ID is never sourced from client input — only from `process.env`.
  */
 export function getStripePriceId(product: ProductDefinition): string {
-  const priceId = process.env[product.stripePriceEnvVar];
+  const priceId = process.env[product.stripePriceEnvVar]?.trim();
   if (!priceId) {
     throw new Error(
       `${product.stripePriceEnvVar} is not configured on the server.`
+    );
+  }
+  if (!/^price_[A-Za-z0-9_]+$/.test(priceId)) {
+    throw new Error(
+      `${product.stripePriceEnvVar} is malformed on the server.`
     );
   }
   return priceId;

@@ -1803,7 +1803,19 @@
     "openProduct": "Open your workspace",
     "processing": "Redirecting to checkout…",
     "errorPrefix": "Error:",
+    "unknownError": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please try again.",
     "disclaimerTitle": "Important — Please Read",
     "disclaimerBody": "Value Action Sprint is a business planning and execution tool. It is not a certified appraisal, legal service, tax service, financial advisory service, or guarantee of business value or results. All prioritization and planning decisions remain your responsibility."
+  },
+  "AccountProductWorkspace": {
+    "pageTitle": "Value Action Sprint Workspace | Ownward",
+    "pageDescription": "Access your Value Action Sprint workspace.",
+    "backToProducts": "← Back to My Products",
+    "heading": "Value Action Sprint Workspace",
+    "body": "Your workspace is active. Use this purchase as your dedicated planning and execution area.",
+    "statusLabel": "Workspace status:",
+    "pendingTitle": "Workspace is still being prepared",
+    "pendingBody": "Your payment is recorded, and fulfillment is still processing. Refresh this page in a moment."
   }
 }
