@@ -934,16 +934,14 @@
     "panelBadge": "Opciones de privacidad",
     "panelTitle": "Controla el almacenamiento opcional en Ownward",
     "close": "Cerrar",
-    "panelDescription": "Ownward siempre usa almacenamiento necesario para que las funciones principales del sitio funcionen. Funcionalidad, analítica y marketing permanecen desactivados hasta que los permitas. Tus elecciones se guardan solo en este navegador.",
+    "panelDescription": "Ownward siempre usa almacenamiento necesario para que las funciones principales del sitio funcionen. Funcionalidad y analítica permanecen desactivadas hasta que las permitas. Tus elecciones se guardan solo en este navegador.",
     "necessary": "Necesario",
     "necessaryDescription": "Mantiene el funcionamiento esencial del sitio.",
     "alwaysOn": "Siempre activo",
     "functionality": "Funcionalidad",
     "functionalityDescription": "Permite funciones locales opcionales como el token de respuesta anónima de la comunidad.",
     "analytics": "Analítica",
-    "analyticsDescription": "Permite funciones de medición opcionales si se agregan más adelante.",
-    "marketing": "Marketing",
-    "marketingDescription": "Permite almacenamiento opcional relacionado con marketing si se usa más adelante.",
+    "analyticsDescription": "Activa Vercel Web Analytics y Google Analytics 4 solo con consentimiento, con sanitización de URLs privadas y publicidad/personalización desactivadas.",
     "reject": "Rechazar lo no esencial",
     "customize": "Personalizar",
     "accept": "Aceptar todo",
@@ -981,7 +979,7 @@
           "Autenticar usuarios, mantener la seguridad de la cuenta y prevenir fraude o abuso.",
           "Procesar solicitudes, consultas de soporte y otras comunicaciones.",
           "Cumplir obligaciones legales y hacer cumplir nuestros términos.",
-          "Operar funciones opcionales, analítica o tecnologías de marketing solo cuando esté permitido."
+          "Operar funciones opcionales y analítica solo cuando esté permitido."
         ]
       },
       {
@@ -1010,7 +1008,7 @@
         "label": "6. Cookies y almacenamiento local",
         "title": "6. Cookies y almacenamiento local",
         "body": [
-          "El almacenamiento necesario respalda la autenticación, la seguridad, los flujos solicitados y tu registro de elecciones de privacidad. Las categorías opcionales (funcionalidad, analítica y marketing) permanecen desactivadas a menos que las permitas."
+          "El almacenamiento necesario respalda la autenticación, la seguridad, los flujos solicitados y tu registro de elecciones de privacidad. Las categorías opcionales (funcionalidad y analítica) permanecen desactivadas a menos que las permitas."
         ]
       },
       {
@@ -1080,8 +1078,8 @@
     "choicesPageNecessaryDescription": "Requerido para el funcionamiento esencial del sitio y siempre habilitado.",
     "choicesPageFunctionalityTitle": "Funcionalidad",
     "choicesPageFunctionalityDescription": "Habilita funciones locales opcionales como el token anónimo de respuesta de la comunidad.",
-    "choicesPageAnalyticsTitle": "Analítica y marketing",
-    "choicesPageAnalyticsDescription": "Reservado para almacenamiento opcional de medición o promoción si esas funciones se usan.",
+    "choicesPageAnalyticsTitle": "Analítica",
+    "choicesPageAnalyticsDescription": "Activa Vercel Web Analytics y Google Analytics 4 solo con consentimiento, con sanitización de URLs y almacenamiento publicitario/personalización denegado.",
     "choicesPageOpenPanel": "Abrir panel de privacidad",
     "choicesPageFooter": "Puedes volver a estas opciones en cualquier momento desde el botón persistente de Opciones de privacidad después de guardar una selección.",
     "saveChoices": "Guardar preferencias"

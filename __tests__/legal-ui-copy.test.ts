@@ -45,6 +45,17 @@ describe('legal/disclosure UI copy', () => {
     expect(analyticsComponent).toContain('<Analytics beforeSend={beforeSend} />');
   });
 
+  it('mentions Google Analytics 4 in English and Spanish privacy disclosures', () => {
+    const privacyConsentComponent = read('components/PrivacyConsent.tsx');
+    const privacyChoicesPage = read('app/[locale]/privacy-choices/page.tsx');
+    const legalContent = read('lib/legal-content.ts');
+
+    expect(privacyConsentComponent).toContain('Google Analytics 4');
+    expect(privacyChoicesPage).toContain('Google Analytics 4');
+    expect(legalContent).toContain('Google Analytics 4');
+    expect(legalContent).toContain('policies.google.com/technologies/partner-sites');
+  });
+
   it('gates planner persistence by functionality consent and exposes privacy choices control', () => {
     const planner = read('app/[locale]/start/StartBusinessPlanner.tsx');
     expect(planner).toContain('hasFunctionalityConsent');

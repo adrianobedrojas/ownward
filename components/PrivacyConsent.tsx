@@ -121,8 +121,8 @@ export function PrivacyConsentProvider({ children }: { children: ReactNode }) {
       key: 'analytics',
       title: t('analytics'),
       description: isSpanish
-        ? 'Permite Vercel Web Analytics con redacción de query/hash e identificadores dinámicos conocidos.'
-        : 'Enables Vercel Web Analytics with query/hash and known dynamic-ID redaction.',
+        ? 'Permite Vercel Web Analytics y Google Analytics 4 solo después de consentimiento. Ownward sanitiza URLs/IDs privados y mantiene desactivadas señales publicitarias y personalización.'
+        : 'Enables Vercel Web Analytics and Google Analytics 4 only after consent. Ownward sanitizes URLs/private IDs and keeps advertising and personalization signals disabled.',
     },
   ] as const;
 
