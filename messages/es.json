@@ -341,6 +341,7 @@
     "heroDescription": "Comienza gratis como Explorer, luego desbloquea capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción a medida que crecen tus necesidades.",
     "perMonth": "/ mes",
     "mostPopular": "Más popular",
+    "recommendedBadge": "Recomendado",
     "currentPlanBadge": "Plan actual",
     "currentPlanSummary": "Estás en el plan {plan}{suffix}.",
     "renewsOn": " — renueva el {date}",
@@ -367,7 +368,7 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "Construye operaciones y llega a compradores",
+        "tagline": "Lanza lo esencial para un negocio",
         "features": [
           "1 Espacio de trabajo",
           "10 Hitos / mes",
@@ -385,7 +386,7 @@
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Escala con análisis avanzado y colaboración",
+        "tagline": "Crece con mejores sistemas y colaboración",
         "features": [
           "Hasta 2 negocios",
           "Seguimiento de ingresos y gastos",
@@ -404,7 +405,7 @@
       },
       "pro": {
         "name": "Pro",
-        "tagline": "Dueños serios preparándose para crecer o vender",
+        "tagline": "Prepárate para acuerdos, diligencia y venta",
         "features": [
           "Hasta 5 negocios",
           "Puntaje de preparación para venta (10 categorías)",
@@ -420,7 +421,7 @@
       },
       "free": {
         "name": "Explorer",
-        "tagline": "Tu primer paso real — gratis para siempre",
+        "tagline": "Explora la compra o creación de un negocio a tu ritmo",
         "features": [
           "1 Espacio de trabajo",
           "3 Hitos / mes",
@@ -449,6 +450,72 @@
     },
     "explorerCtaSignedOut": "Comenzar gratis",
     "explorerCtaCurrentPlan": "Plan actual",
+    "includedInEveryPlan": {
+      "title": "Incluido en cada plan",
+      "description": "Las integraciones estándar compatibles están incluidas en todos los planes, así que las recomendaciones de esta página nunca cambian tus permisos reales."
+    },
+    "planFinder": {
+      "title": "Encuentra el plan correcto",
+      "description": "Elige la meta que más te importa y Ownward te recomendará la mejor opción.",
+      "recommendationLabel": "Plan recomendado: {plan}",
+      "genericRecommendation": "Úsalo como punto de partida y luego compara la capacidad y las herramientas incluidas abajo.",
+      "goals": {
+        "first-workspace": {
+          "title": "Crear mi primer espacio de trabajo",
+          "description": "Empieza a gestionar un negocio sin pagar primero.",
+          "recommendation": "Explorer te da un espacio de trabajo gratis y lo básico para empezar."
+        },
+        "bookkeeping": {
+          "title": "Organizar la contabilidad",
+          "description": "Registra ingresos, gastos, recibos y cierres mensuales.",
+          "recommendation": "Starter es el primer plan con contabilidad habilitada, así que es el siguiente paso correcto para las finanzas operativas."
+        },
+        "team-growth": {
+          "title": "Crecer con un equipo",
+          "description": "Agrega más colaboración, capacidad y espacio para escalar.",
+          "recommendation": "Builder agrega más capacidad, más prospectos, más documentos y más colaboración para una operación en crecimiento."
+        },
+        "sale-readiness": {
+          "title": "Prepararme para vender",
+          "description": "Activa flujos listos para diligencia y herramientas avanzadas de transacción.",
+          "recommendation": "Pro desbloquea preparación para venta, concentración de clientes, deal rooms y el centro de comando del vendedor."
+        }
+      }
+    },
+    "featureTemplates": {
+      "workspaces": "{count, plural, one {# espacio de trabajo} other {# espacios de trabajo}}",
+      "milestones": "{count} hitos / mes",
+      "documentsStorage": "Hasta {documents} documentos ({storage})",
+      "leads": "{count} prospectos activos",
+      "savedListings": "Guarda hasta {count} listados",
+      "comparison": "Compara hasta {count} negocios",
+      "publicListingSingle": "1 listado público ({photos} fotos)",
+      "flexibleListingSingle": "1 listado público o confidencial ({photos} fotos)",
+      "listingsMultiple": "Hasta {count} listados ({photos} fotos cada uno)",
+      "bookkeeping": "Contabilidad",
+      "collaborators": "{count, plural, one {# colaborador invitado} other {# colaboradores invitados}}",
+      "dealRooms": "Hasta {count} deal rooms activos",
+      "saleReadiness": "Puntaje de preparación para venta",
+      "customerConcentration": "Laboratorio de concentración de clientes",
+      "sellerCommandCenter": "Centro de comando del vendedor y pipeline",
+      "integrations": "Integraciones estándar incluidas",
+      "health": {
+        "snapshot": "Resumen básico de salud",
+        "checklist": "Lista básica de salud",
+        "advanced": "Informe avanzado de salud"
+      },
+      "valuation": {
+        "preview": "Vista previa de valoración",
+        "basic": "Rango básico de valoración",
+        "detailed": "Estimación detallada de valoración",
+        "enhanced": "Reporte completo de valuación + actualización semanal"
+      },
+      "support": {
+        "community": "Soporte comunitario",
+        "standard": "Soporte estándar",
+        "priority": "Soporte prioritario"
+      }
+    },
     "comparison": {
       "title": "Comparación de planes",
       "subtitle": "Explorer te da un primer paso real — los planes de pago añaden capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción.",
@@ -460,64 +527,27 @@
         "docsStorage": "Documentos y almacenamiento",
         "valuationLevel": "Valoración",
         "bookkeeping": "Contabilidad",
+        "integrations": "Integraciones",
         "collaborators": "Colaboradores",
         "confidentialListings": "Listados confidenciales",
         "dealRooms": "Salas de transacción",
         "support": "Soporte"
       },
-      "values": {
-        "free": {
-          "workspaces": "1",
-          "listings": "1 público",
-          "milestones": "3",
-          "leads": "5",
-          "docsStorage": "3 docs / 100 MB",
-          "valuationLevel": "Vista previa",
-          "bookkeeping": "—",
-          "collaborators": "—",
-          "confidentialListings": "—",
-          "dealRooms": "—",
-          "support": "Comunidad"
-        },
-        "starter": {
-          "workspaces": "1",
-          "listings": "1",
-          "milestones": "10",
-          "leads": "25",
-          "docsStorage": "10 docs / 500 MB",
-          "valuationLevel": "Rango básico",
-          "bookkeeping": "Sí",
-          "collaborators": "1",
-          "confidentialListings": "Sí",
-          "dealRooms": "—",
-          "support": "Estándar"
-        },
-        "builder": {
-          "workspaces": "2",
-          "listings": "2",
-          "milestones": "100",
-          "leads": "100",
-          "docsStorage": "100 docs / 5 GB",
-          "valuationLevel": "Detallado",
-          "bookkeeping": "Sí",
-          "collaborators": "2",
-          "confidentialListings": "Sí",
-          "dealRooms": "—",
-          "support": "Estándar"
-        },
-        "pro": {
-          "workspaces": "5",
-          "listings": "5",
-          "milestones": "1,000",
-          "leads": "1,000",
-          "docsStorage": "1,000 docs / 50 GB",
-          "valuationLevel": "Mejorado + semanal",
-          "bookkeeping": "Sí",
-          "collaborators": "5",
-          "confidentialListings": "Sí",
-          "dealRooms": "Hasta 3",
-          "support": "Prioritario"
-        }
+      "included": "Incluido",
+      "notIncluded": "—",
+      "publicOnly": "1 público",
+      "docsStorageValue": "{documents} docs / {storage}",
+      "dealRoomsValue": "Hasta {count}",
+      "valuation": {
+        "preview": "Vista previa",
+        "basic": "Rango básico",
+        "detailed": "Detallado",
+        "enhanced": "Mejorado + semanal"
+      },
+      "support": {
+        "community": "Comunidad",
+        "standard": "Estándar",
+        "priority": "Prioritario"
       }
     }
   },

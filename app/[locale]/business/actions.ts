@@ -57,7 +57,7 @@ export async function createBusiness(
   }
   const { supabase, user } = auth;
 
-  // Entitlement check: must have a paid plan and be within businessLimit
+  // Entitlement check: user must remain within the workspace limit for their plan
   const billing = await getUserBillingState(supabase, user.id);
   const { count: currentCount } = await supabase
     .from("businesses")

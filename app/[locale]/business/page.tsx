@@ -34,6 +34,7 @@ export default async function BusinessPage({
     .maybeSingle();
 
   const activeBusinessId = profile?.active_business_id;
+  const businessCount = businesses?.length ?? 0;
   const canCreate = businessLimit > 0 && (businesses?.length ?? 0) < businessLimit;
 
   return (
@@ -46,9 +47,9 @@ export default async function BusinessPage({
           </p>
           <h1 className="mt-2 text-3xl font-bold text-white">Your Business Workspaces</h1>
           <p className="mt-2 text-slate-300">
-            {billing.plan === "free"
-              ? "Upgrade to a Starter plan to create a business workspace."
-              : `${businesses?.length ?? 0} of ${businessLimit} workspace${businessLimit === 1 ? "" : "s"} used`}
+            {canCreate
+              ? `${businessCount} of ${businessLimit} workspace${businessLimit === 1 ? "" : "s"} used`
+              : `You have used all ${businessLimit} workspace${businessLimit === 1 ? "" : "s"} on your current plan.`}
           </p>
         </div>
         {canCreate && (
@@ -64,7 +65,7 @@ export default async function BusinessPage({
             href="/pricing"
             className="inline-flex items-center rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300 transition"
           >
-            Upgrade to Get Started
+            See Upgrade Options
           </Link>
         )}
       </div>
@@ -85,19 +86,19 @@ export default async function BusinessPage({
       {!businesses || businesses.length === 0 ? (
         <div className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-10 text-center">
           <p className="text-slate-400">No business workspaces yet.</p>
-          {billing.plan === "free" ? (
-            <Link
-              href="/pricing"
-              className="mt-4 inline-block rounded-lg border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-400/10 transition"
-            >
-              Upgrade to Starter
-            </Link>
-          ) : (
+          {canCreate ? (
             <Link
               href="/business/new"
               className="mt-4 inline-block rounded-lg border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-400/10 transition"
             >
               Create Your First Business
+            </Link>
+          ) : (
+            <Link
+              href="/pricing"
+              className="mt-4 inline-block rounded-lg border border-cyan-400 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-400/10 transition"
+            >
+              Upgrade for More Workspaces
             </Link>
           )}
         </div>

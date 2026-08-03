@@ -5,37 +5,35 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
 import { PLAN_CATALOG } from '@/lib/billing';
+import {
+  ALL_PLAN_KEYS,
+  COMPARISON_ROW_KEYS,
+  getComparisonValue,
+  getPlanCardFeatures,
+  type PlanRecommendationGoal,
+} from '@/lib/pricing';
+import PlanFinder from './PlanFinder';
 
 interface PricingCardsProps {
   billingState: BillingState | null;
+  recommendedPlan: BillingPlan | null;
+  selectedGoal: PlanRecommendationGoal | null;
 }
 
-/** All four plan keys including Explorer. */
-const ALL_PLAN_KEYS = ['free', 'starter', 'builder', 'pro'] as const;
-
-// Annual equivalent monthly rates (annualPrice / 12, rounded to 2 decimal places)
 const ANNUAL_EQUIVALENT_MONTHLY: Record<string, string> = {
   starter: '4.17',
   builder: '8.33',
   pro: '16.67',
 };
 
-// Comparison table row order
-const COMPARISON_ROW_KEYS = [
-  'workspaces',
-  'listings',
-  'milestones',
-  'leads',
-  'docsStorage',
-  'valuationLevel',
-  'bookkeeping',
-  'collaborators',
-  'confidentialListings',
-  'dealRooms',
-  'support',
-] as const;
+const GB = 1024 * 1024 * 1024;
+const MB = 1024 * 1024;
 
-export default function PricingCards({ billingState }: PricingCardsProps) {
+export default function PricingCards({
+  billingState,
+  recommendedPlan,
+  selectedGoal,
+}: PricingCardsProps) {
   const locale = useLocale();
   const isSpanish = locale === 'es';
   const t = useTranslations('Pricing');
@@ -59,7 +57,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
       featured: key === 'builder',
       name: t(`plans.${key}.name`),
       tagline: t(`plans.${key}.tagline`),
-      features: t.raw(`plans.${key}.features`) as string[],
+      features: getPlanCardFeatures(key),
     };
   });
 
@@ -99,6 +97,97 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
       month: 'short',
       day: 'numeric',
     }).format(new Date(value));
+
+  const formatNumber = (value: number) => new Intl.NumberFormat(locale).format(value);
+
+  const formatStorage = (storageBytes: number) => {
+    if (storageBytes >= GB) {
+      return `${formatNumber(storageBytes / GB)} GB`;
+    }
+
+    return `${formatNumber(storageBytes / MB)} MB`;
+  };
+
+  const formatPlanFeature = (feature: ReturnType<typeof getPlanCardFeatures>[number]) => {
+    switch (feature.key) {
+      case 'workspaces':
+        return t('featureTemplates.workspaces', { count: feature.count });
+      case 'milestones':
+        return t('featureTemplates.milestones', { count: formatNumber(feature.count) });
+      case 'health':
+        return t(`featureTemplates.health.${feature.level}`);
+      case 'valuation':
+        return t(`featureTemplates.valuation.${feature.level}`);
+      case 'documentsStorage':
+        return t('featureTemplates.documentsStorage', {
+          documents: formatNumber(feature.documents),
+          storage: formatStorage(feature.storageBytes),
+        });
+      case 'leads':
+        return t('featureTemplates.leads', { count: formatNumber(feature.count) });
+      case 'savedListings':
+        return t('featureTemplates.savedListings', { count: formatNumber(feature.count) });
+      case 'comparison':
+        return t('featureTemplates.comparison', { count: formatNumber(feature.count) });
+      case 'listings':
+        if (feature.count === 1) {
+          return feature.confidential
+            ? t('featureTemplates.flexibleListingSingle', { photos: formatNumber(feature.photos) })
+            : t('featureTemplates.publicListingSingle', { photos: formatNumber(feature.photos) });
+        }
+
+        return t('featureTemplates.listingsMultiple', {
+          count: formatNumber(feature.count),
+          photos: formatNumber(feature.photos),
+        });
+      case 'bookkeeping':
+        return t('featureTemplates.bookkeeping');
+      case 'collaborators':
+        return t('featureTemplates.collaborators', { count: formatNumber(feature.count) });
+      case 'support':
+        return t(`featureTemplates.support.${feature.level}`);
+      case 'dealRooms':
+        return t('featureTemplates.dealRooms', { count: formatNumber(feature.count) });
+      case 'saleReadiness':
+        return t('featureTemplates.saleReadiness');
+      case 'customerConcentration':
+        return t('featureTemplates.customerConcentration');
+      case 'sellerCommandCenter':
+        return t('featureTemplates.sellerCommandCenter');
+      case 'integrations':
+        return t('featureTemplates.integrations');
+    }
+  };
+
+  const formatComparisonValue = (plan: BillingPlan, row: (typeof COMPARISON_ROW_KEYS)[number]) => {
+    const value = getComparisonValue(plan, row);
+
+    switch (value.type) {
+      case 'count':
+        return value.count > 0 ? formatNumber(value.count) : t('comparison.notIncluded');
+      case 'listings':
+        if (value.count === 1 && value.publicOnly) {
+          return t('comparison.publicOnly');
+        }
+
+        return formatNumber(value.count);
+      case 'docsStorage':
+        return t('comparison.docsStorageValue', {
+          documents: formatNumber(value.documents),
+          storage: formatStorage(value.storageBytes),
+        });
+      case 'valuation':
+        return t(`comparison.valuation.${value.level}`);
+      case 'boolean':
+        return value.included ? t('comparison.included') : t('comparison.notIncluded');
+      case 'dealRooms':
+        return value.count > 0
+          ? t('comparison.dealRoomsValue', { count: formatNumber(value.count) })
+          : t('comparison.notIncluded');
+      case 'support':
+        return t(`comparison.support.${value.level}`);
+    }
+  };
 
   const handleSubscribe = async (planKey: string) => {
     if (!isSignedIn) {
@@ -180,6 +269,8 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
   return (
     <>
+      <PlanFinder recommendedPlan={recommendedPlan} selectedGoal={selectedGoal} />
+
       {statusMessage ? (
         <div
           role="alert"
@@ -194,7 +285,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         </div>
       ) : null}
 
-      {/* Billing interval toggle — shown for paid plans only */}
       <div className="mt-8 flex items-center justify-center gap-3" role="group" aria-label={t('billingToggle.label')}>
         <button
           type="button"
@@ -229,7 +319,12 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
       {isSignedIn && currentPlan && currentPlan !== 'free' ? (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
-          <span>{t('currentPlanSummary', { plan: currentPlan, suffix: currentPlanSuffix })}</span>
+          <span>
+            {t('currentPlanSummary', {
+              plan: t(`plans.${currentPlan}.name`),
+              suffix: currentPlanSuffix,
+            })}
+          </span>
           <button
             type="button"
             onClick={handleManageSubscription}
@@ -241,17 +336,21 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         </div>
       ) : null}
 
-      {/* Plan cards: 1 col → 2 col (md) → 4 col (xl) */}
-      <div className="mt-12 grid grid-cols-1 gap-6 items-stretch pb-24 md:grid-cols-2 xl:grid-cols-4 md:pb-16">
+      <div className="mt-12 grid grid-cols-1 gap-6 items-stretch pb-12 md:grid-cols-2 xl:grid-cols-4">
         {plans.map((plan) => {
           const isCurrent = isCurrentPlan(plan.key as BillingPlan);
+          const isRecommended = recommendedPlan === plan.key;
+
           return (
             <div
+              id={`plan-${plan.key}`}
               key={plan.key}
               className={`relative rounded-2xl p-6 flex flex-col justify-between ${
                 plan.featured
                   ? 'border-2 border-cyan-400 bg-slate-900 shadow-lg shadow-cyan-950/40'
-                  : 'border border-slate-800 bg-slate-900/60'
+                  : isRecommended
+                    ? 'border border-emerald-400 bg-slate-900/80 shadow-lg shadow-emerald-950/30'
+                    : 'border border-slate-800 bg-slate-900/60'
               }`}
             >
               {plan.featured ? (
@@ -264,44 +363,44 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
                   {t('currentPlanBadge')}
                 </div>
               ) : null}
+              {!isCurrent && isRecommended ? (
+                <div className="absolute -top-3.5 right-6 rounded-full bg-emerald-300 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-950">
+                  {t('recommendedBadge')}
+                </div>
+              ) : null}
               <div>
                 <h2 className={`text-xl font-semibold ${plan.featured ? 'text-cyan-400' : ''}`}>{plan.name}</h2>
                 <p className="text-xs text-slate-400 mt-1">{plan.tagline}</p>
 
-                {/* Price display */}
                 {plan.isFree ? (
                   <p className="mt-4 text-3xl font-bold">
-                    $0{' '}
-                    <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
+                    $0 <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
                 ) : isAnnual && plan.annualEquivalentMonthly ? (
                   <>
                     <p className="mt-4 text-3xl font-bold">
-                      {plan.annualPrice}{' '}
-                      <span className="text-sm font-normal text-slate-400">{t('perYear')}</span>
+                      {plan.annualPrice} <span className="text-sm font-normal text-slate-400">{t('perYear')}</span>
                     </p>
                     <p className="mt-1 text-sm text-emerald-300">
-                      ${plan.annualEquivalentMonthly}{t('annualEquivalentSuffix')}
+                      ${plan.annualEquivalentMonthly}
+                      {t('annualEquivalentSuffix')}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500">{t('annualBilledOnce')}</p>
                   </>
                 ) : (
                   <p className="mt-4 text-3xl font-bold">
-                    {plan.monthlyPrice}{' '}
-                    <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
+                    {plan.monthlyPrice} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
                 )}
 
                 <ul className="mt-6 space-y-2.5 text-sm text-slate-300">
-                  {plan.features.map((feature) => (
-                    <li key={feature}>✓ {feature}</li>
+                  {plan.features.map((feature, index) => (
+                    <li key={`${plan.key}-${feature.key}-${index}`}>✓ {formatPlanFeature(feature)}</li>
                   ))}
                 </ul>
               </div>
 
-              {/* CTA button */}
               {plan.isFree ? (
-                /* Explorer CTA — never triggers Stripe checkout */
                 isCurrent && isSignedIn ? (
                   <div className="mt-6 w-full rounded-lg py-3 text-center text-sm font-semibold bg-slate-800 text-slate-400 cursor-default select-none">
                     {t('explorerCtaCurrentPlan')}
@@ -359,7 +458,6 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
                 </button>
               )}
 
-              {/* Billing disclosure — only for paid plans */}
               {!plan.isFree ? (
                 <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-xs leading-5 text-slate-400">
                   <p>{disclosure.recurring}</p>
@@ -382,12 +480,13 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
         })}
       </div>
 
-      {/* Compact comparison section */}
+      <section className="mb-12 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+        <h2 className="text-xl font-semibold text-white">{t('includedInEveryPlan.title')}</h2>
+        <p className="mt-2 text-sm text-slate-400">{t('includedInEveryPlan.description')}</p>
+      </section>
+
       <section aria-labelledby="plan-comparison-heading" className="mt-4 mb-16 overflow-x-auto">
-        <h2
-          id="plan-comparison-heading"
-          className="mb-2 text-xl font-semibold text-white"
-        >
+        <h2 id="plan-comparison-heading" className="mb-2 text-xl font-semibold text-white">
           {t('comparison.title')}
         </h2>
         <p className="mb-6 text-sm text-slate-400">{t('comparison.subtitle')}</p>
@@ -408,7 +507,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
                 <td className="py-2 pr-4 text-slate-400 font-medium">{t(`comparison.rowLabels.${row}`)}</td>
                 {ALL_PLAN_KEYS.map((key) => (
                   <td key={key} className="py-2 px-3 text-center text-slate-300">
-                    {t(`comparison.values.${key}.${row}`)}
+                    {formatComparisonValue(key, row)}
                   </td>
                 ))}
               </tr>

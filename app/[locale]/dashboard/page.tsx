@@ -381,7 +381,7 @@ export default async function DashboardPage({
             Unlock the full Ownward toolkit
           </p>
           <p className="mt-1 text-sm text-slate-400">
-            Upgrade to Starter to get your Business Passport, Milestone Trail, Health Check, Valuation, and more.
+            Upgrade for more workspace capacity, bookkeeping, confidential listings, deeper valuation, and stronger collaboration tools.
           </p>
           <Link
             href="/pricing"

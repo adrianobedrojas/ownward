@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from '@/lib/billing';
+import { getPricingRecommendationFromSearchParams } from '@/lib/pricing';
 import PricingCards from './PricingCards';
 
 export async function generateMetadata({
@@ -18,14 +19,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ goal?: string; recommend?: string; upgrade?: string }>;
+}) {
   const t = await getTranslations('Pricing');
+  const query = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const billingState = user ? await getUserBillingState(supabase, user.id) : null;
+  const recommendation = getPricingRecommendationFromSearchParams(query);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-16 text-slate-100">
@@ -37,7 +44,11 @@ export default async function PricingPage() {
           <p className="mt-1 text-slate-400">{t('cardPayment.description')}</p>
         </div>
       </div>
-      <PricingCards billingState={billingState} />
+      <PricingCards
+        billingState={billingState}
+        recommendedPlan={recommendation?.plan ?? null}
+        selectedGoal={recommendation?.goal ?? null}
+      />
     </div>
   );
 }
