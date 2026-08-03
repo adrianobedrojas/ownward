@@ -576,8 +576,7 @@ export type BookkeepingAccessResult =
  * Checks whether a user's current billing state permits bookkeeping write
  * operations (create/edit transactions, close months, reconcile, etc.).
  *
- * - Builder and Pro plans: write access allowed.
- * - Starter: write access allowed (bookkeeping: true entitlement).
+ * - Starter, Builder, and Pro plans: write access allowed.
  * - Free / downgraded: read/export/delete only, no writes.
  *
  * Returns a structured result — never throws.
@@ -590,7 +589,7 @@ export function checkBookkeepingAccess(
       allowed: false,
       code: "PLAN_REQUIRED",
       message:
-        "Revenue and expense tracking requires a Builder or higher plan. " +
+        "Revenue and expense tracking requires a Starter or higher plan. " +
         "You can still view, export, or delete your existing records.",
       featureEnabled: false,
     };

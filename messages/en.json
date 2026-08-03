@@ -341,6 +341,7 @@
     "heroDescription": "Start free as an Explorer, then unlock capacity, advanced analysis, collaboration, privacy, and transaction tools as your needs grow.",
     "perMonth": "/ mo",
     "mostPopular": "Most Popular",
+    "recommendedBadge": "Recommended",
     "currentPlanBadge": "Current Plan",
     "currentPlanSummary": "You are on the {plan} plan{suffix}.",
     "renewsOn": " — renews {date}",
@@ -367,7 +368,7 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "Build operations and reach buyers",
+        "tagline": "Launch the essentials for one business",
         "features": [
           "1 Business Workspace",
           "10 Milestones / month",
@@ -385,7 +386,7 @@
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Scale with advanced analytics and collaboration",
+        "tagline": "Grow with stronger systems and collaboration",
         "features": [
           "Up to 2 Businesses",
           "Revenue & Expense Tracking",
@@ -404,7 +405,7 @@
       },
       "pro": {
         "name": "Pro",
-        "tagline": "Serious owners preparing to grow or sell",
+        "tagline": "Prepare for deals, diligence, and sale readiness",
         "features": [
           "Up to 5 Businesses",
           "Sale-Readiness Score (10 categories)",
@@ -420,7 +421,7 @@
       },
       "free": {
         "name": "Explorer",
-        "tagline": "Your first meaningful step — free forever",
+        "tagline": "Explore business ownership at your own pace",
         "features": [
           "1 Business Workspace",
           "3 Milestones / month",
@@ -449,6 +450,72 @@
     },
     "explorerCtaSignedOut": "Start free",
     "explorerCtaCurrentPlan": "Current plan",
+    "includedInEveryPlan": {
+      "title": "Included in every plan",
+      "description": "Supported standard integrations are included in every plan, so recommendations on this page never change your real account entitlements."
+    },
+    "planFinder": {
+      "title": "Find the right plan",
+      "description": "Choose the goal that matters most and Ownward will recommend the best fit.",
+      "recommendationLabel": "Recommended plan: {plan}",
+      "genericRecommendation": "Use this as a starting point, then compare the included capacity and tools below.",
+      "goals": {
+        "first-workspace": {
+          "title": "Create my first workspace",
+          "description": "Start managing one business without paying first.",
+          "recommendation": "Explorer gives you one free workspace plus the core basics to get started."
+        },
+        "bookkeeping": {
+          "title": "Organize bookkeeping",
+          "description": "Track income, expenses, receipts, and monthly records.",
+          "recommendation": "Starter is the first plan with bookkeeping enabled, so it is the right next step for operational finance."
+        },
+        "team-growth": {
+          "title": "Grow with a team",
+          "description": "Add more collaboration, capacity, and room to scale.",
+          "recommendation": "Builder adds more workspace capacity, more leads, more documents, and more collaboration for a growing operation."
+        },
+        "sale-readiness": {
+          "title": "Prepare to sell",
+          "description": "Run diligence-ready workflows and advanced transaction tools.",
+          "recommendation": "Pro unlocks sale-readiness, customer concentration, deal rooms, and seller command center workflows."
+        }
+      }
+    },
+    "featureTemplates": {
+      "workspaces": "{count, plural, one {# business workspace} other {# business workspaces}}",
+      "milestones": "{count} milestones / month",
+      "documentsStorage": "Up to {documents} documents ({storage})",
+      "leads": "{count} active leads",
+      "savedListings": "Save up to {count} listings",
+      "comparison": "Compare up to {count} businesses",
+      "publicListingSingle": "1 public listing ({photos} photos)",
+      "flexibleListingSingle": "1 public or confidential listing ({photos} photos)",
+      "listingsMultiple": "Up to {count} listings ({photos} photos each)",
+      "bookkeeping": "Bookkeeping",
+      "collaborators": "{count, plural, one {# invited collaborator} other {# invited collaborators}}",
+      "dealRooms": "Up to {count} active Deal Rooms",
+      "saleReadiness": "Sale-readiness score",
+      "customerConcentration": "Customer concentration lab",
+      "sellerCommandCenter": "Seller command center and pipeline",
+      "integrations": "Standard integrations included",
+      "health": {
+        "snapshot": "Basic health snapshot",
+        "checklist": "Basic health checklist",
+        "advanced": "Advanced health report"
+      },
+      "valuation": {
+        "preview": "Valuation preview",
+        "basic": "Basic valuation range",
+        "detailed": "Detailed valuation estimate",
+        "enhanced": "Full valuation report + weekly refresh"
+      },
+      "support": {
+        "community": "Community support",
+        "standard": "Standard support",
+        "priority": "Priority support"
+      }
+    },
     "comparison": {
       "title": "Plan comparison",
       "subtitle": "Explorer gives you a real first step — paid plans add capacity, advanced analysis, collaboration, privacy, and transaction tools.",
@@ -460,64 +527,27 @@
         "docsStorage": "Documents & Storage",
         "valuationLevel": "Valuation",
         "bookkeeping": "Bookkeeping",
+        "integrations": "Integrations",
         "collaborators": "Collaborators",
         "confidentialListings": "Confidential Listings",
         "dealRooms": "Deal Rooms",
         "support": "Support"
       },
-      "values": {
-        "free": {
-          "workspaces": "1",
-          "listings": "1 public",
-          "milestones": "3",
-          "leads": "5",
-          "docsStorage": "3 docs / 100 MB",
-          "valuationLevel": "Preview",
-          "bookkeeping": "—",
-          "collaborators": "—",
-          "confidentialListings": "—",
-          "dealRooms": "—",
-          "support": "Community"
-        },
-        "starter": {
-          "workspaces": "1",
-          "listings": "1",
-          "milestones": "10",
-          "leads": "25",
-          "docsStorage": "10 docs / 500 MB",
-          "valuationLevel": "Basic range",
-          "bookkeeping": "Yes",
-          "collaborators": "1",
-          "confidentialListings": "Yes",
-          "dealRooms": "—",
-          "support": "Standard"
-        },
-        "builder": {
-          "workspaces": "2",
-          "listings": "2",
-          "milestones": "100",
-          "leads": "100",
-          "docsStorage": "100 docs / 5 GB",
-          "valuationLevel": "Detailed",
-          "bookkeeping": "Yes",
-          "collaborators": "2",
-          "confidentialListings": "Yes",
-          "dealRooms": "—",
-          "support": "Standard"
-        },
-        "pro": {
-          "workspaces": "5",
-          "listings": "5",
-          "milestones": "1,000",
-          "leads": "1,000",
-          "docsStorage": "1,000 docs / 50 GB",
-          "valuationLevel": "Enhanced + weekly",
-          "bookkeeping": "Yes",
-          "collaborators": "5",
-          "confidentialListings": "Yes",
-          "dealRooms": "Up to 3",
-          "support": "Priority"
-        }
+      "included": "Included",
+      "notIncluded": "—",
+      "publicOnly": "1 public",
+      "docsStorageValue": "{documents} docs / {storage}",
+      "dealRoomsValue": "Up to {count}",
+      "valuation": {
+        "preview": "Preview",
+        "basic": "Basic range",
+        "detailed": "Detailed",
+        "enhanced": "Enhanced + weekly"
+      },
+      "support": {
+        "community": "Community",
+        "standard": "Standard",
+        "priority": "Priority"
       }
     }
   },
