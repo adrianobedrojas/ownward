@@ -1757,5 +1757,52 @@
       "deletePhotoLabel": "Eliminar foto",
       "previewLabel": "Vista previa del comprador"
     }
+  },
+  "AccountProducts": {
+    "pageTitle": "Mis Productos | Ownward",
+    "pageDescription": "Consulta los productos que has comprado en Ownward y accede a tus espacios de trabajo.",
+    "heading": "Mis Productos",
+    "subheading": "Los productos que hayas comprado aparecen aquí. Haz clic en Abrir Producto para acceder a tu espacio de trabajo.",
+    "emptyState": "Aún no has comprado ningún producto.",
+    "exploreCta": "Explorar Value Action Sprint",
+    "openProduct": "Abrir Producto",
+    "paymentStatus": {
+      "paid": "Pagado",
+      "pending": "Pendiente",
+      "refunded": "Reembolsado",
+      "failed": "Fallido"
+    },
+    "fulfillmentStatus": {
+      "fulfilled": "Listo",
+      "pending": "Procesando",
+      "failed": "Error en entrega",
+      "refunded": "Reembolsado"
+    }
+  },
+  "ValueActionSprint": {
+    "pageTitle": "Value Action Sprint | Ownward",
+    "pageDescription": "Un sprint estructurado de 30 días de planificación y ejecución para identificar y actuar sobre las prioridades de mayor valor de tu negocio.",
+    "badge": "Compra única",
+    "heading": "Value Action Sprint",
+    "tagline": "Identifica y actúa sobre las prioridades de mayor valor de tu negocio en 30 días enfocados.",
+    "whatItIsTitle": "¿Qué es el Value Action Sprint?",
+    "whatItIsBody": "El Value Action Sprint es un espacio de trabajo estructurado de 30 días de planificación y ejecución que te guía para identificar tus prioridades empresariales más impactantes y tomar acciones concretas sobre ellas. Combina marcos de priorización con seguimiento de responsabilidad para ayudarte a pasar de ideas a resultados.",
+    "whatYouGetTitle": "Qué incluye",
+    "whatYouGetItems": [
+      "Un espacio de trabajo dedicado para 30 días de sprint",
+      "Lista de acciones priorizadas según el impacto en el negocio",
+      "Seguimiento de progreso y actualizaciones de estado",
+      "Acceso a tu espacio de trabajo en cualquier momento después de la compra"
+    ],
+    "price": "Compra única",
+    "priceNote": "Pago seguro a través de Stripe",
+    "purchaseCta": "Comenzar",
+    "loginCta": "Inicia sesión para comprar",
+    "alreadyPurchased": "Ya tienes este producto",
+    "openProduct": "Abrir tu espacio de trabajo",
+    "processing": "Redirigiendo al pago…",
+    "errorPrefix": "Error:",
+    "disclaimerTitle": "Importante — Por favor lee esto",
+    "disclaimerBody": "Value Action Sprint es una herramienta de planificación y ejecución empresarial. No es una tasación certificada, servicio legal, servicio fiscal, servicio de asesoría financiera ni garantía de valor comercial o de resultados. Todas las decisiones de priorización y planificación son de tu exclusiva responsabilidad."
   }
 }

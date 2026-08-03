@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { getFeaturedListingConfig } from "@/lib/billing";
+import { getProduct } from "@/lib/commerce/products";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -77,6 +78,12 @@ export async function POST(req: Request) {
         // ── Featured-listing one-time payment ──────────────────────────────
         if (session.metadata?.purchaseType === "featured_listing") {
           await handleFeaturedListingCheckout(session, supabaseAdmin);
+          break;
+        }
+
+        // ── One-time product purchase ───────────────────────────────────────
+        if (session.metadata?.purchaseType === "one_time_product") {
+          await handleOneTimeProductCheckout(session, supabaseAdmin);
           break;
         }
 
@@ -384,4 +391,170 @@ async function handleFeaturedListingRefund(
       updated_at: new Date().toISOString(),
     })
     .eq("id", promotion.listing_id);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: fulfill a one-time product purchase
+// Idempotent — repeated delivery of the same event is safe.
+// Uniqueness is enforced by:
+//   purchases            UNIQUE (stripe_checkout_session_id)
+//   entitlement_grants   UNIQUE (purchase_id, product_key)
+//   workspaces           UNIQUE (purchase_id)
+// ─────────────────────────────────────────────────────────────────────────────
+async function handleOneTimeProductCheckout(
+  session: Stripe.Checkout.Session,
+  supabaseAdmin: SupabaseClient
+): Promise<void> {
+  if (session.mode !== "payment" || session.payment_status !== "paid") {
+    throw new Error(
+      `[one_time_product] Session ${session.id} is not a completed payment checkout.`
+    );
+  }
+
+  const userId = session.metadata?.userId || session.client_reference_id;
+  const productKey = session.metadata?.productKey;
+
+  if (!userId || !productKey) {
+    throw new Error(
+      `[one_time_product] Missing metadata on session ${session.id}`
+    );
+  }
+
+  // Validate the product key exists in the registry
+  const product = getProduct(productKey);
+  if (!product) {
+    throw new Error(
+      `[one_time_product] Unknown product key "${productKey}" on session ${session.id}`
+    );
+  }
+
+  // Idempotency check: if a paid purchase already exists for this session, skip
+  const { data: existing } = await supabaseAdmin
+    .from("purchases")
+    .select("id, payment_status, fulfillment_status")
+    .eq("stripe_checkout_session_id", session.id)
+    .maybeSingle();
+
+  if (existing?.payment_status === "paid" && existing?.fulfillment_status === "fulfilled") {
+    return;
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  const stripeCustomerId =
+    typeof session.customer === "string"
+      ? session.customer
+      : session.customer?.id ?? null;
+
+  const now = new Date().toISOString();
+
+  // Upsert purchase record (UNIQUE on stripe_checkout_session_id)
+  const { data: purchase, error: purchaseError } = await supabaseAdmin
+    .from("purchases")
+    .upsert(
+      {
+        user_id: userId,
+        product_key: productKey,
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id: paymentIntentId,
+        stripe_customer_id: stripeCustomerId,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        payment_status: "paid",
+        fulfillment_status: "pending",
+        updated_at: now,
+      },
+      { onConflict: "stripe_checkout_session_id" }
+    )
+    .select("id")
+    .single();
+
+  if (purchaseError || !purchase) {
+    throw new Error(
+      `[one_time_product] Failed to upsert purchase for session ${session.id}: ${purchaseError?.message}`
+    );
+  }
+
+  // Upsert purchase item (one item per checkout in Phase 1)
+  const { error: itemError } = await supabaseAdmin
+    .from("purchase_items")
+    .upsert(
+      {
+        purchase_id: purchase.id,
+        product_key: productKey,
+        stripe_price_id: null,
+        quantity: 1,
+        unit_amount: session.amount_total,
+        currency: session.currency,
+        updated_at: now,
+      },
+      { onConflict: "purchase_id" }
+    );
+
+  if (itemError) {
+    throw new Error(
+      `[one_time_product] Failed to upsert purchase item for purchase ${purchase.id}: ${itemError.message}`
+    );
+  }
+
+  // Upsert entitlement grant (UNIQUE on purchase_id, product_key)
+  const { error: grantError } = await supabaseAdmin
+    .from("entitlement_grants")
+    .upsert(
+      {
+        purchase_id: purchase.id,
+        user_id: userId,
+        product_key: productKey,
+        entitlement_type: product.entitlementType,
+        status: "active",
+        granted_at: now,
+        updated_at: now,
+      },
+      { onConflict: "purchase_id,product_key" }
+    );
+
+  if (grantError) {
+    throw new Error(
+      `[one_time_product] Failed to upsert entitlement grant for purchase ${purchase.id}: ${grantError.message}`
+    );
+  }
+
+  // Fulfill based on the product's fulfillment behavior
+  if (product.fulfillmentBehavior === "create_workspace") {
+    if (productKey === "value_action_sprint") {
+      // Upsert workspace (UNIQUE on purchase_id)
+      const { error: workspaceError } = await supabaseAdmin
+        .from("value_action_sprint_workspaces")
+        .upsert(
+          {
+            user_id: userId,
+            purchase_id: purchase.id,
+            status: "not_started",
+            updated_at: now,
+          },
+          { onConflict: "purchase_id" }
+        );
+
+      if (workspaceError) {
+        throw new Error(
+          `[one_time_product] Failed to upsert workspace for purchase ${purchase.id}: ${workspaceError.message}`
+        );
+      }
+    }
+  }
+
+  // Mark purchase as fulfilled
+  const { error: fulfillError } = await supabaseAdmin
+    .from("purchases")
+    .update({ fulfillment_status: "fulfilled", updated_at: now })
+    .eq("id", purchase.id);
+
+  if (fulfillError) {
+    throw new Error(
+      `[one_time_product] Failed to mark purchase ${purchase.id} as fulfilled: ${fulfillError.message}`
+    );
+  }
 }
