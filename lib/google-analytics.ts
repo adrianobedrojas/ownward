@@ -1,5 +1,24 @@
 export const GA_RELOAD_SESSION_KEY = 'ownward_ga_withdrawal_reload_v1';
 
+/**
+ * Builds the inline JavaScript snippet that must be placed in <head> before
+ * any gtag/GTM script loads.  It:
+ *  1. Initialises window.dataLayer and window.gtag.
+ *  2. Calls gtag('consent', 'default', …) with every privacy-sensitive field
+ *     set to 'denied' so Google Tag Assistant records proper consent
+ *     initialisation.
+ *  3. Reads the saved Ownward consent choice from localStorage and, if found,
+ *     immediately fires gtag('consent', 'update', …) so returning visitors
+ *     don't have to re-consent.
+ *
+ * Call this once on the server and inject the result via dangerouslySetInnerHTML
+ * in the <head> of the root layout.
+ */
+export function buildConsentInitScript(storageKey: string, legacyStorageKey: string): string {
+  // Keys are compile-time constants – no user input, no XSS risk.
+  return `(function(){window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}if(!window.gtag){window.gtag=gtag;}gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',personalization_storage:'denied',functionality_storage:'granted',security_storage:'granted'});try{var r=localStorage.getItem('${storageKey}')||localStorage.getItem('${legacyStorageKey}');if(r){var c=JSON.parse(r);if(c&&typeof c==='object'){gtag('consent','update',{analytics_storage:c.analytics?'granted':'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',personalization_storage:'denied',functionality_storage:'granted',security_storage:'granted'});}}}catch(e){}})();`;
+}
+
 const GA_ALLOWED_QUERY_PARAMETERS = new Set([
   'utm_source',
   'utm_medium',
@@ -106,7 +125,10 @@ function createConsentPayload(consent: GoogleAnalyticsConsentState) {
     ad_user_data: 'denied',
     ad_personalization: 'denied',
     personalization_storage: 'denied',
-    functionality_storage: consent.functionality ? 'granted' : 'denied',
+    // functionality_storage and security_storage are always granted because
+    // Ownward requires them for authentication, session handling, and core
+    // site functionality regardless of the user's analytics preference.
+    functionality_storage: 'granted',
     security_storage: 'granted',
   };
 }
@@ -276,7 +298,8 @@ export class GoogleAnalyticsController {
     const previousConsent = this.currentConsent;
     this.currentConsent = nextConsent;
 
-    this.gtag('consent', 'default', createConsentPayload({ analytics: false, functionality: nextConsent.functionality }));
+    // 'consent default' is handled by the inline <head> script (buildConsentInitScript)
+    // which runs before any gtag JS loads.  Only send an update here.
     this.gtag('consent', 'update', createConsentPayload(nextConsent));
 
     if (nextConsent.analytics) {
