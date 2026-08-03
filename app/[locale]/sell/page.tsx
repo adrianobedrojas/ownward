@@ -13,7 +13,7 @@ export default async function SellBusinessPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  await params; // locale not needed here; i18n Link handles prefixing
   const t = await getTranslations('Sell');
   const tStudio = await getTranslations('ListingStudio');
   const steps = t.raw('prepSteps') as Array<Record<string, string>>;
@@ -38,13 +38,13 @@ export default async function SellBusinessPage({
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              href={`/${locale}/sell/new`}
+              href="/sell/new"
               className="flex-1 rounded-lg bg-cyan-400 px-5 py-3 text-center font-semibold text-slate-950 transition hover:bg-cyan-300"
             >
               {tStudio('intro.startCta')}
             </Link>
             <Link
-              href={`/${locale}/dashboard`}
+              href="/dashboard"
               className="flex-1 rounded-lg border border-slate-700 px-5 py-3 text-center font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300"
             >
               {t('resumeCta')}

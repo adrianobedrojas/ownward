@@ -602,6 +602,7 @@
     "protectTitle": "Protege la información confidencial",
     "protectDescription": "No incluyas números de identificación fiscal, información bancaria, contraseñas, direcciones personales ni información confidencial de clientes en una publicación pública.",
     "saveDraft": "Guardar borrador",
+    "resumeCta": "Continuar una publicación",
     "prepBadge": "Preparación para la venta",
     "prepTitle": "Tu hoja de ruta de preparación",
     "prepSteps": [
@@ -1580,7 +1581,8 @@
     "coursePath": "Ruta del curso",
     "coursePathDescription": "Cada lección sigue vinculada a su artículo de la Guía para que puedas leer a fondo sin duplicar el contenido dentro de la Academia.",
     "upcomingModules": "Próximos módulos en desarrollo",
-    "upcomingModulesDescription": "Estos módulos planificados siguen en la hoja de ruta del curso y aparecerán cuando se publiquen artículos completos en la Guía."
+    "upcomingModulesDescription": "Estos módulos planificados siguen en la hoja de ruta del curso y aparecerán cuando se publiquen artículos completos en la Guía.",
+    "start": "Comenzar"
   },
   "UrgencyTriage": {
     "heading": "¿Es realmente urgente esto?",

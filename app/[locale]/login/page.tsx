@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { getSafeRedirect } from '@/lib/auth/safe-redirect';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -8,9 +9,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t('login.title'), description: t('login.description') };
 }
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const t = await getTranslations('Authentication.login');
   const forms = await getTranslations('Forms');
+  const { next } = await searchParams;
+  // Validate the next param server-side; the hidden input only carries safe values
+  const safeNext = getSafeRedirect(next ?? null);
 
   return (
     <div className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-2">
@@ -30,6 +34,8 @@ export default async function LoginPage() {
           <p className="mt-2 text-sm text-slate-400">{t('formDescription')}</p>
         </div>
         <form action="/api/login" method="post" className="mt-8 space-y-6">
+          {/* Pass the validated redirect destination through the form */}
+          <input type="hidden" name="next" value={safeNext} />
           <div>
             <label htmlFor="email" className="block text-sm font-semibold text-slate-300">{forms('emailAddress')}</label>
             <input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400" />
@@ -41,7 +47,6 @@ export default async function LoginPage() {
             </div>
             <input id="password" name="password" type="password" autoComplete="current-password" placeholder="••••••••" required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400" />
           </div>
-          <label className="flex items-center gap-3 text-sm text-slate-300"><input name="remember" type="checkbox" className="h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400" />{t('rememberMe')}</label>
           <button type="submit" className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('submit')}</button>
           <p className="text-center text-xs text-slate-500">{t('secureNote')}</p>
         </form>

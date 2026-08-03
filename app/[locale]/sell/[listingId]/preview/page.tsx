@@ -38,7 +38,7 @@ export default async function ListingPreviewPage({ params }: Props) {
   }
 
   if (listing.user_id !== user.id) {
-    redirect(`/${locale}/dashboard`);
+    redirect("/dashboard");
   }
 
   // Fetch media with signed URLs (owner can see their own images for preview)
@@ -130,7 +130,7 @@ export default async function ListingPreviewPage({ params }: Props) {
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <p className="text-sm text-slate-400">{t("preview.ownerNote")}</p>
           <Link
-            href={`/${locale}/sell/${listingId}/edit`}
+            href={`/sell/${listingId}/edit`}
             className="shrink-0 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300"
           >
             {t("preview.editCta")}

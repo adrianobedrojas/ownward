@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
+import { isValidAccountType } from "@/lib/auth/account-types";
 
 function redirectTo(path: string) {
   return new Response(null, {
@@ -38,6 +39,14 @@ export async function POST(request: Request) {
     !agreementAccepted
   ) {
     return redirectTo("/error");
+  }
+
+  // Reject unsupported account types with a controlled 400
+  if (!isValidAccountType(accountType)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid account type" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   if (
