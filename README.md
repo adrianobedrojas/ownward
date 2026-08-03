@@ -59,3 +59,4 @@ supabase db reset
 supabase db lint
 supabase gen types typescript --linked > types/database.generated.ts
 ```
+

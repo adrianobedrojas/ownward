@@ -130,6 +130,8 @@ export type PlanEntitlements = {
   weeklyValuationRefresh: boolean;
   /** Seller Command Center with pipeline, offers, and NBA widgets. */
   sellerCommandCenter: boolean;
+  /** Maximum listing photos per listing (0 = none). */
+  listingImageLimit: number;
 };
 
 /** 500 MB expressed in bytes. */
@@ -154,6 +156,7 @@ const FREE_ENTITLEMENTS: PlanEntitlements = {
   customerConcentration: false,
   weeklyValuationRefresh: false,
   sellerCommandCenter: false,
+  listingImageLimit: 0,
 };
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
@@ -175,6 +178,7 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: false,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
+    listingImageLimit: 5,
   },
   builder: {
     businessLimit: 2,
@@ -194,6 +198,7 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: false,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
+    listingImageLimit: 10,
   },
   pro: {
     businessLimit: 5,
@@ -213,6 +218,7 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     customerConcentration: true,
     weeklyValuationRefresh: true,
     sellerCommandCenter: true,
+    listingImageLimit: 20,
   },
 };
 
@@ -354,6 +360,7 @@ export async function getUserBillingState(
 export type UpgradeErrorCode =
   | "BUSINESS_LIMIT"
   | "LISTING_LIMIT"
+  | "IMAGE_LIMIT"
   | "MILESTONE_MONTHLY_LIMIT"
   | "DOCUMENT_LIMIT"
   | "STORAGE_LIMIT"
@@ -425,6 +432,26 @@ export function checkMilestoneMonthlyLimit(
     return new EntitlementError(
       "MILESTONE_MONTHLY_LIMIT",
       `You have used all ${entitlements.milestoneMonthlyLimit} milestone${entitlements.milestoneMonthlyLimit === 1 ? "" : "s"} for this month. Upgrade your plan or wait until next month.`
+    );
+  }
+  return null;
+}
+
+/** Returns an EntitlementError if the listing has reached its image limit. */
+export function checkListingImageLimit(
+  entitlements: PlanEntitlements,
+  currentImageCount: number
+): EntitlementError | null {
+  if (entitlements.listingImageLimit === 0) {
+    return new EntitlementError(
+      "PLAN_REQUIRED",
+      "A paid plan is required to upload listing images."
+    );
+  }
+  if (currentImageCount >= entitlements.listingImageLimit) {
+    return new EntitlementError(
+      "IMAGE_LIMIT",
+      `Your plan allows up to ${entitlements.listingImageLimit} image${entitlements.listingImageLimit === 1 ? "" : "s"} per listing. Upgrade to add more.`
     );
   }
   return null;

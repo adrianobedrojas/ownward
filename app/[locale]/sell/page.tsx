@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { saveListingDraft } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -9,8 +8,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t('sell.title'), description: t('sell.description') };
 }
 
-export default async function SellBusinessPage() {
+export default async function SellBusinessPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const t = await getTranslations('Sell');
+  const tStudio = await getTranslations('ListingStudio');
   const steps = t.raw('prepSteps') as Array<Record<string, string>>;
   const areas = t.raw('reviewAreas') as Array<Record<string, string>>;
 
@@ -23,67 +28,33 @@ export default async function SellBusinessPage() {
       </div>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+        {/* Studio CTA */}
+        <section className="rounded-xl border border-cyan-400/30 bg-slate-900 p-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('draftBadge')}</p>
-            <h2 className="mt-2 text-2xl font-bold text-white">{t('draftTitle')}</h2>
-            <p className="mt-2 text-sm text-slate-400">{t('draftDescription')}</p>
+            <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{tStudio('intro.badge')}</p>
+            <h2 className="mt-2 text-2xl font-bold text-white">{tStudio('intro.title')}</h2>
+            <p className="mt-2 text-sm text-slate-400">{tStudio('intro.description')}</p>
           </div>
 
-          <form action={saveListingDraft} className="mt-8 space-y-6">
-            <div>
-              <label htmlFor="business-name" className="block text-sm font-semibold text-slate-300">{t('businessName')}</label>
-              <input id="business-name" name="businessName" type="text" required placeholder={t('businessNamePlaceholder')} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-              <p className="mt-2 text-xs text-slate-500">{t('businessNameHint')}</p>
-            </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href={`/${locale}/sell/new`}
+              className="flex-1 rounded-lg bg-cyan-400 px-5 py-3 text-center font-semibold text-slate-950 transition hover:bg-cyan-300"
+            >
+              {tStudio('intro.startCta')}
+            </Link>
+            <Link
+              href={`/${locale}/dashboard`}
+              className="flex-1 rounded-lg border border-slate-700 px-5 py-3 text-center font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300"
+            >
+              {t('resumeCta')}
+            </Link>
+          </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="category" className="block text-sm font-semibold text-slate-300">{t('businessCategory')}</label>
-                <select id="category" name="category" defaultValue="" required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300">
-                  <option value="" disabled>{t('selectCategory')}</option>
-                  <option value="services">Services</option>
-                  <option value="food">Food and beverage</option>
-                  <option value="retail">Retail</option>
-                  <option value="construction">Construction</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="technology">Technology</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="location" className="block text-sm font-semibold text-slate-300">{t('location')}</label>
-                <input id="location" name="location" type="text" placeholder={t('locationPlaceholder')} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-              </div>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-3">
-              <div>
-                <label htmlFor="year-established" className="block text-sm font-semibold text-slate-300">{t('yearEstablished')}</label>
-                <input id="year-established" name="yearEstablished" type="number" min="1800" placeholder="2020" className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-              </div>
-              <div>
-                <label htmlFor="annual-revenue" className="block text-sm font-semibold text-slate-300">{t('annualRevenue')}</label>
-                <input id="annual-revenue" name="annualRevenue" type="number" min="0" placeholder="$0" className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-              </div>
-              <div>
-                <label htmlFor="asking-price" className="block text-sm font-semibold text-slate-300">{t('askingPrice')}</label>
-                <input id="asking-price" name="askingPrice" type="number" min="0" placeholder="$0" className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="summary" className="block text-sm font-semibold text-slate-300">{t('businessSummary')}</label>
-              <textarea id="summary" name="summary" rows={6} placeholder={t('summaryPlaceholder')} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-600" />
-            </div>
-
-            <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4">
-              <p className="font-semibold text-amber-300">{t('protectTitle')}</p>
-              <p className="mt-1 text-sm text-slate-300">{t('protectDescription')}</p>
-            </div>
-
-            <button type="submit" className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('saveDraft')}</button>
-          </form>
+          <div className="mt-6 rounded-lg border border-amber-400/30 bg-amber-400/10 p-4">
+            <p className="font-semibold text-amber-300">{t('protectTitle')}</p>
+            <p className="mt-1 text-sm text-slate-300">{t('protectDescription')}</p>
+          </div>
         </section>
 
         <aside className="space-y-6">
