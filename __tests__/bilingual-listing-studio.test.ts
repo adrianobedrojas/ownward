@@ -394,41 +394,47 @@ describe("validateListingImage", () => {
 // ─── Image count limits ────────────────────────────────────────────────────
 
 describe("Image limit entitlements", () => {
-  it("free plan has 0 listing images", () => {
+  it("Explorer (free) plan has 3 listing images", () => {
     const ent = getEntitlementsByPlan("free");
-    expect(ent.listingImageLimit).toBe(0);
+    expect(ent.listingImageLimit).toBe(3);
   });
 
-  it("starter plan has 5 listing images", () => {
+  it("starter plan has 10 listing images", () => {
     const ent = getEntitlementsByPlan("starter");
-    expect(ent.listingImageLimit).toBe(5);
-  });
-
-  it("builder plan has 10 listing images", () => {
-    const ent = getEntitlementsByPlan("builder");
     expect(ent.listingImageLimit).toBe(10);
   });
 
-  it("pro plan has 20 listing images", () => {
-    const ent = getEntitlementsByPlan("pro");
+  it("builder plan has 20 listing images", () => {
+    const ent = getEntitlementsByPlan("builder");
     expect(ent.listingImageLimit).toBe(20);
   });
 
-  it("checkListingImageLimit returns error for free plan", () => {
-    const ent = getEntitlementsByPlan("free");
-    const err = checkListingImageLimit(ent, 0);
-    expect(err).not.toBeNull();
-    expect(err!.code).toBe("PLAN_REQUIRED");
+  it("pro plan has 40 listing images", () => {
+    const ent = getEntitlementsByPlan("pro");
+    expect(ent.listingImageLimit).toBe(40);
   });
 
-  it("checkListingImageLimit returns error when at limit", () => {
-    const ent = getEntitlementsByPlan("starter");
-    const err = checkListingImageLimit(ent, 5);
+  it("checkListingImageLimit allows first upload on Explorer (free) plan", () => {
+    const ent = getEntitlementsByPlan("free");
+    const err = checkListingImageLimit(ent, 0);
+    expect(err).toBeNull();
+  });
+
+  it("checkListingImageLimit blocks when at Explorer limit (3)", () => {
+    const ent = getEntitlementsByPlan("free");
+    const err = checkListingImageLimit(ent, 3);
     expect(err).not.toBeNull();
     expect(err!.code).toBe("IMAGE_LIMIT");
   });
 
-  it("checkListingImageLimit returns null when under limit", () => {
+  it("checkListingImageLimit returns error when at starter limit (10)", () => {
+    const ent = getEntitlementsByPlan("starter");
+    const err = checkListingImageLimit(ent, 10);
+    expect(err).not.toBeNull();
+    expect(err!.code).toBe("IMAGE_LIMIT");
+  });
+
+  it("checkListingImageLimit returns null when under starter limit", () => {
     const ent = getEntitlementsByPlan("starter");
     const err = checkListingImageLimit(ent, 4);
     expect(err).toBeNull();

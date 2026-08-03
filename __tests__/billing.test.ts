@@ -8,19 +8,24 @@
 // ─── Entitlement model ────────────────────────────────────────────────────────
 
 describe("getEntitlementsByPlan", () => {
-  it("returns zero/false for free plan", async () => {
+  it("returns Explorer entitlements for free plan", async () => {
     const { getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    expect(ent.businessLimit).toBe(0);
-    expect(ent.listingLimit).toBe(0);
-    expect(ent.documentLimit).toBe(0);
-    expect(ent.storageBytes).toBe(0);
-    expect(ent.milestoneMonthlyLimit).toBe(0);
+    expect(ent.businessLimit).toBe(1);
+    expect(ent.listingLimit).toBe(1);
+    expect(ent.documentLimit).toBe(3);
+    expect(ent.storageBytes).toBe(100 * 1024 * 1024); // 100 MB
+    expect(ent.milestoneMonthlyLimit).toBe(3);
+    expect(ent.leadLimit).toBe(5);
     expect(ent.bookkeeping).toBe(false);
     expect(ent.dealRooms).toBe(false);
-    expect(ent.healthLevel).toBe("none");
+    expect(ent.healthLevel).toBe("basic");
     expect(ent.valuationLevel).toBe("preview");
     expect(ent.supportLevel).toBe("general");
+    expect(ent.listingImageLimit).toBe(3);
+    expect(ent.savedListingLimit).toBe(5);
+    expect(ent.listingComparisonLimit).toBe(2);
+    expect(ent.confidentialListings).toBe(false);
   });
 
   it("returns correct values for starter plan", async () => {
@@ -31,11 +36,16 @@ describe("getEntitlementsByPlan", () => {
     expect(ent.documentLimit).toBe(10);
     expect(ent.storageBytes).toBe(500 * 1024 * 1024); // 500 MB
     expect(ent.milestoneMonthlyLimit).toBe(10);
+    expect(ent.leadLimit).toBe(25);
     expect(ent.bookkeeping).toBe(true);
     expect(ent.dealRooms).toBe(false);
     expect(ent.healthLevel).toBe("basic");
     expect(ent.valuationLevel).toBe("basic");
     expect(ent.supportLevel).toBe("standard");
+    expect(ent.listingImageLimit).toBe(10);
+    expect(ent.savedListingLimit).toBe(25);
+    expect(ent.listingComparisonLimit).toBe(3);
+    expect(ent.confidentialListings).toBe(true);
   });
 
   it("returns correct values for builder plan", async () => {
@@ -102,7 +112,7 @@ describe("getUserBillingState", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const state = await getUserBillingState(makeSupabase(null) as any, "user-1");
     expect(state.plan).toBe("free");
-    expect(state.entitlements.businessLimit).toBe(0);
+    expect(state.entitlements.businessLimit).toBe(1); // Explorer has 1 workspace
   });
 
   it("returns free plan when subscription is canceled (not active/trialing)", async () => {
@@ -123,7 +133,7 @@ describe("getUserBillingState", () => {
       "user-1"
     );
     expect(state.plan).toBe("free");
-    expect(state.entitlements.businessLimit).toBe(0);
+    expect(state.entitlements.businessLimit).toBe(1); // Explorer has 1 workspace
   });
 
   it("returns starter plan for active starter subscription", async () => {
@@ -160,12 +170,19 @@ describe("getUserBillingState", () => {
 // ─── Limit helpers ────────────────────────────────────────────────────────────
 
 describe("checkBusinessLimit", () => {
-  it("returns error for free plan", async () => {
+  it("allows creating first business on Explorer (free) plan", async () => {
     const { checkBusinessLimit, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
     const err = checkBusinessLimit(ent, 0);
+    expect(err).toBeNull();
+  });
+
+  it("blocks second business on Explorer (free) plan (limit 1)", async () => {
+    const { checkBusinessLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkBusinessLimit(ent, 1);
     expect(err).not.toBeNull();
-    expect(err?.code).toBe("PLAN_REQUIRED");
+    expect(err?.code).toBe("BUSINESS_LIMIT");
   });
 
   it("allows creating first business on starter", async () => {
@@ -192,10 +209,20 @@ describe("checkBusinessLimit", () => {
 });
 
 describe("checkMilestoneMonthlyLimit", () => {
-  it("blocks milestones on free plan", async () => {
+  it("allows up to 3 milestones per month on Explorer (free) plan", async () => {
     const { checkMilestoneMonthlyLimit, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    expect(checkMilestoneMonthlyLimit(ent, 0)?.code).toBe("PLAN_REQUIRED");
+    expect(checkMilestoneMonthlyLimit(ent, 0)).toBeNull();
+    expect(checkMilestoneMonthlyLimit(ent, 1)).toBeNull();
+    expect(checkMilestoneMonthlyLimit(ent, 2)).toBeNull();
+  });
+
+  it("blocks the 4th milestone on Explorer (free) plan (limit 3)", async () => {
+    const { checkMilestoneMonthlyLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkMilestoneMonthlyLimit(ent, 3);
+    expect(err).not.toBeNull();
+    expect(err?.code).toBe("MILESTONE_MONTHLY_LIMIT");
   });
 
   it("allows up to 10 milestones per month on starter", async () => {
@@ -320,11 +347,27 @@ describe("annual billing — PLAN_CATALOG annualPrice", () => {
 describe("checkDocumentLimits", () => {
   const MB = 1024 * 1024;
 
-  it("blocks uploads on free plan", async () => {
+  it("allows first upload on Explorer (free) plan within limits", async () => {
     const { checkDocumentLimits, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
+    // Explorer: 3 docs / 100 MB — first upload should be allowed
     const err = checkDocumentLimits(ent, 0, 0, 1024);
-    expect(err?.code).toBe("PLAN_REQUIRED");
+    expect(err).toBeNull();
+  });
+
+  it("blocks the 4th document on Explorer (free) plan (limit 3)", async () => {
+    const { checkDocumentLimits, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkDocumentLimits(ent, 3, 10 * MB, 1024);
+    expect(err?.code).toBe("DOCUMENT_LIMIT");
+  });
+
+  it("blocks upload exceeding 100 MB storage cap on Explorer (free) plan", async () => {
+    const { checkDocumentLimits, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    // 95 MB used + 10 MB file = 105 MB > 100 MB
+    const err = checkDocumentLimits(ent, 1, 95 * MB, 10 * MB);
+    expect(err?.code).toBe("STORAGE_LIMIT");
   });
 
   it("allows upload within starter limits", async () => {
@@ -346,5 +389,120 @@ describe("checkDocumentLimits", () => {
     // 490 MB used + 20 MB file = 510 MB > 500 MB
     const err = checkDocumentLimits(ent, 5, 490 * MB, 20 * MB);
     expect(err?.code).toBe("STORAGE_LIMIT");
+  });
+});
+
+// ─── Saved listing limits ──────────────────────────────────────────────────────
+
+describe("checkSavedListingLimit", () => {
+  it("allows first save on Explorer (free) plan", async () => {
+    const { checkSavedListingLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    expect(checkSavedListingLimit(ent, 0)).toBeNull();
+  });
+
+  it("allows fifth save on Explorer (free) plan (limit 5)", async () => {
+    const { checkSavedListingLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    expect(checkSavedListingLimit(ent, 4)).toBeNull();
+  });
+
+  it("blocks sixth save on Explorer (free) plan (limit 5)", async () => {
+    const { checkSavedListingLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkSavedListingLimit(ent, 5);
+    expect(err).not.toBeNull();
+    expect(err?.code).toBe("SAVED_LISTING_LIMIT");
+  });
+
+  it("allows up to 25 saves on starter", async () => {
+    const { checkSavedListingLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("starter");
+    expect(checkSavedListingLimit(ent, 24)).toBeNull();
+    const err = checkSavedListingLimit(ent, 25);
+    expect(err?.code).toBe("SAVED_LISTING_LIMIT");
+  });
+});
+
+// ─── Comparison limits ──────────────────────────────────────────────────────────
+
+describe("checkListingComparisonLimit", () => {
+  it("allows comparing 2 businesses on Explorer (free) plan", async () => {
+    const { checkListingComparisonLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    expect(checkListingComparisonLimit(ent, 2)).toBeNull();
+  });
+
+  it("blocks comparing 3 businesses on Explorer (free) plan (limit 2)", async () => {
+    const { checkListingComparisonLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkListingComparisonLimit(ent, 3);
+    expect(err).not.toBeNull();
+    expect(err?.code).toBe("COMPARISON_LIMIT");
+  });
+
+  it("allows comparing 10 businesses on Pro plan", async () => {
+    const { checkListingComparisonLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("pro");
+    expect(checkListingComparisonLimit(ent, 10)).toBeNull();
+  });
+
+  it("blocks comparing 11 businesses on Pro plan (limit 10)", async () => {
+    const { checkListingComparisonLimit, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("pro");
+    const err = checkListingComparisonLimit(ent, 11);
+    expect(err?.code).toBe("COMPARISON_LIMIT");
+  });
+});
+
+// ─── Confidential listing access ──────────────────────────────────────────────
+
+describe("checkConfidentialListingAccess", () => {
+  it("blocks confidential listings on Explorer (free) plan", async () => {
+    const { checkConfidentialListingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("free");
+    const err = checkConfidentialListingAccess(ent);
+    expect(err).not.toBeNull();
+    expect(err?.code).toBe("CONFIDENTIAL_LISTING_GATED");
+  });
+
+  it("allows confidential listings on starter plan", async () => {
+    const { checkConfidentialListingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("starter");
+    expect(checkConfidentialListingAccess(ent)).toBeNull();
+  });
+
+  it("allows confidential listings on builder plan", async () => {
+    const { checkConfidentialListingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("builder");
+    expect(checkConfidentialListingAccess(ent)).toBeNull();
+  });
+
+  it("allows confidential listings on pro plan", async () => {
+    const { checkConfidentialListingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("pro");
+    expect(checkConfidentialListingAccess(ent)).toBeNull();
+  });
+});
+
+// ─── Explorer plan catalog entry ──────────────────────────────────────────────
+
+describe("Explorer plan catalog", () => {
+  it("PLAN_CATALOG free entry has name Explorer", async () => {
+    const { PLAN_CATALOG } = await import("@/lib/billing");
+    const freeEntry = PLAN_CATALOG.find((p) => p.key === "free");
+    expect(freeEntry?.name).toBe("Explorer");
+    expect(freeEntry?.monthlyPrice).toBe(0);
+    expect(freeEntry?.annualPrice).toBe(0);
+  });
+
+  it("Explorer entitlements include Explorer-level capabilities", async () => {
+    const { PLAN_CATALOG } = await import("@/lib/billing");
+    const freeEntry = PLAN_CATALOG.find((p) => p.key === "free")!;
+    expect(freeEntry.entitlements.businessLimit).toBe(1);
+    expect(freeEntry.entitlements.listingLimit).toBe(1);
+    expect(freeEntry.entitlements.savedListingLimit).toBe(5);
+    expect(freeEntry.entitlements.listingComparisonLimit).toBe(2);
+    expect(freeEntry.entitlements.confidentialListings).toBe(false);
   });
 });

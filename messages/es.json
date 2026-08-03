@@ -338,7 +338,7 @@
   },
   "Pricing": {
     "heroTitle": "Planes y precios de Ownward",
-    "heroDescription": "Herramientas simples y escalables para construir, gestionar y aumentar el valor de tu negocio. Los planes comienzan en $5/mes.",
+    "heroDescription": "Comienza gratis como Explorer, luego desbloquea capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción a medida que crecen tus necesidades.",
     "perMonth": "/ mes",
     "mostPopular": "Más popular",
     "currentPlanBadge": "Plan actual",
@@ -354,8 +354,9 @@
     "signInToGet": "Inicia sesión para obtener {plan}",
     "buttons": {
       "starter": "Obtener Starter",
-      "builder": "Iniciar plan Builder",
-      "pro": "Obtener Pro"
+      "builder": "Empezar Plan Builder",
+      "pro": "Obtener Pro",
+      "free": "Comenzar gratis"
     },
     "errors": {
       "billingPortal": "No se pudo abrir el portal de facturación.",
@@ -366,30 +367,38 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "Nuevos dueños y exploradores",
+        "tagline": "Construye operaciones y llega a compradores",
         "features": [
-          "1 perfil de negocio",
-          "Cronograma y 10 hitos/mes",
-          "Lista básica de salud",
-          "Rango básico de valuación",
-          "Hasta 10 documentos",
-          "Hasta 500 MB de almacenamiento",
-          "1 colaborador invitado",
+          "1 Espacio de trabajo",
+          "10 Hitos / mes",
+          "Lista de verificación de salud básica",
+          "Rango básico de valoración",
+          "Hasta 10 documentos (500 MB)",
+          "25 Prospectos activos",
+          "Guardar hasta 25 listados",
+          "Comparar hasta 3 negocios",
+          "1 Listado público o confidencial (10 fotos)",
+          "Contabilidad",
+          "1 Colaborador invitado",
           "Soporte estándar"
         ]
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Dueños activos construyendo operaciones",
+        "tagline": "Escala con análisis avanzado y colaboración",
         "features": [
           "Hasta 2 negocios",
           "Seguimiento de ingresos y gastos",
-          "Tareas, metas y 100 leads activos",
-          "Reporte avanzado de salud",
-          "Estimación detallada de valuación",
-          "Hasta 100 documentos",
-          "Hasta 5 GB de almacenamiento",
-          "2 colaboradores invitados (sin contar al dueño)",
+          "100 Hitos / mes",
+          "Informe avanzado de salud",
+          "Estimación detallada de valoración",
+          "Hasta 100 documentos (5 GB)",
+          "100 Prospectos activos",
+          "Guardar hasta 100 listados",
+          "Comparar hasta 5 negocios",
+          "Hasta 2 listados (20 fotos cada uno)",
+          "Listados confidenciales",
+          "2 Colaboradores invitados",
           "Soporte estándar"
         ]
       },
@@ -408,6 +417,21 @@
           "5 colaboradores invitados (sin contar al dueño)",
           "Soporte prioritario"
         ]
+      },
+      "free": {
+        "name": "Explorer",
+        "tagline": "Tu primer paso real — gratis para siempre",
+        "features": [
+          "1 Espacio de trabajo",
+          "3 Hitos / mes",
+          "Resumen básico de salud",
+          "Vista previa de valoración",
+          "Hasta 3 documentos (100 MB)",
+          "5 Prospectos activos",
+          "Guardar hasta 5 listados",
+          "Comparar hasta 2 negocios",
+          "1 Listado público (3 fotos)"
+        ]
       }
     },
     "cardPayment": {
@@ -422,6 +446,79 @@
       "monthly": "Mensual",
       "annual": "Anual",
       "savingsBadge": "Ahorra ~17% — 2 meses gratis"
+    },
+    "explorerCtaSignedOut": "Comenzar gratis",
+    "explorerCtaCurrentPlan": "Plan actual",
+    "comparison": {
+      "title": "Comparación de planes",
+      "subtitle": "Explorer te da un primer paso real — los planes de pago añaden capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción.",
+      "rowLabels": {
+        "workspaces": "Espacios de trabajo",
+        "listings": "Listados",
+        "milestones": "Hitos / mes",
+        "leads": "Prospectos activos",
+        "docsStorage": "Documentos y almacenamiento",
+        "valuationLevel": "Valoración",
+        "bookkeeping": "Contabilidad",
+        "collaborators": "Colaboradores",
+        "confidentialListings": "Listados confidenciales",
+        "dealRooms": "Salas de transacción",
+        "support": "Soporte"
+      },
+      "values": {
+        "free": {
+          "workspaces": "1",
+          "listings": "1 público",
+          "milestones": "3",
+          "leads": "5",
+          "docsStorage": "3 docs / 100 MB",
+          "valuationLevel": "Vista previa",
+          "bookkeeping": "—",
+          "collaborators": "—",
+          "confidentialListings": "—",
+          "dealRooms": "—",
+          "support": "Comunidad"
+        },
+        "starter": {
+          "workspaces": "1",
+          "listings": "1",
+          "milestones": "10",
+          "leads": "25",
+          "docsStorage": "10 docs / 500 MB",
+          "valuationLevel": "Rango básico",
+          "bookkeeping": "Sí",
+          "collaborators": "1",
+          "confidentialListings": "Sí",
+          "dealRooms": "—",
+          "support": "Estándar"
+        },
+        "builder": {
+          "workspaces": "2",
+          "listings": "2",
+          "milestones": "100",
+          "leads": "100",
+          "docsStorage": "100 docs / 5 GB",
+          "valuationLevel": "Detallado",
+          "bookkeeping": "Sí",
+          "collaborators": "2",
+          "confidentialListings": "Sí",
+          "dealRooms": "—",
+          "support": "Estándar"
+        },
+        "pro": {
+          "workspaces": "5",
+          "listings": "5",
+          "milestones": "1,000",
+          "leads": "1,000",
+          "docsStorage": "1,000 docs / 50 GB",
+          "valuationLevel": "Mejorado + semanal",
+          "bookkeeping": "Sí",
+          "collaborators": "5",
+          "confidentialListings": "Sí",
+          "dealRooms": "Hasta 3",
+          "support": "Prioritario"
+        }
+      }
     }
   },
   "Buy": {
