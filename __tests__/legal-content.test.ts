@@ -20,7 +20,9 @@ describe('legal content', () => {
     expect(allPrivacy).toContain('Supabase');
     expect(allPrivacy).toContain('Stripe');
     expect(allPrivacy).toContain('Vercel');
-    expect(allPrivacy).toContain('strips query/hash');
+    expect(allPrivacy).toContain('Google Analytics 4');
+    expect(allPrivacy).toContain('strips fragments');
+    expect(allPrivacy).toContain('https://policies.google.com/technologies/partner-sites');
     expect(allPrivacy).toContain('does not currently sell personal data');
   });
 });

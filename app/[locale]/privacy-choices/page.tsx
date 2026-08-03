@@ -27,9 +27,10 @@ export default async function PrivacyChoicesPage() {
           'Si está activado, Ownward puede guardar progreso local en ownward_academy_progress_v1, ownward_start_business_plan_v1 y ownward_visitor_token. Estos datos quedan en localStorage hasta que los borres, cambies consentimiento o limpies el navegador.',
         analyticsTitle: 'Analítica (opcional)',
         analyticsBody:
-          'Activa Vercel Web Analytics. Si está desactivado, el componente de analítica no se monta. Cuando está activo, Ownward elimina query/hash y reemplaza IDs/tokens conocidos antes de enviar rutas.',
+          'Activa Vercel Web Analytics y Google Analytics 4 solo después de consentimiento. Ownward elimina fragmentos, conserva solo parámetros UTM/campaña permitidos, redacciona IDs/tokens privados conocidos y mantiene desactivado el almacenamiento/publicidad personalizada.',
         footer:
           'Las cookies y localStorage no son iguales: las cookies pueden caducar automáticamente, mientras que localStorage normalmente permanece hasta borrado o revocación de consentimiento.',
+        googlePolicy: 'Cómo Google usa información de sitios o apps que usan sus servicios',
         privacy: 'Política de privacidad',
         terms: 'Términos del servicio',
         pricing: 'Precios',
@@ -46,9 +47,10 @@ export default async function PrivacyChoicesPage() {
           'If enabled, Ownward may save local progress in ownward_academy_progress_v1, ownward_start_business_plan_v1, and ownward_visitor_token. This localStorage data remains until cleared, consent changes, or browser storage is removed.',
         analyticsTitle: 'Analytics (optional)',
         analyticsBody:
-          'Enables Vercel Web Analytics. If disabled, analytics is not mounted. When enabled, Ownward removes query/hash values and redacts known IDs/tokens before route events are sent.',
+          'Enables Vercel Web Analytics and Google Analytics 4 only after consent. Ownward removes fragments, keeps only allowed campaign/UTM parameters, redacts known private IDs/tokens, and keeps advertising/personalization storage disabled.',
         footer:
           'Cookies and localStorage behave differently: cookies may expire automatically, while localStorage usually remains until cleared or consent is revoked.',
+        googlePolicy: 'How Google uses information from sites or apps that use its services',
         privacy: 'Privacy Policy',
         terms: 'Terms of Service',
         pricing: 'Pricing',
@@ -70,6 +72,7 @@ export default async function PrivacyChoicesPage() {
           <Link href="/privacy" className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200">{copy.privacy}</Link>
           <Link href="/terms" className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200">{copy.terms}</Link>
           <Link href="/pricing" className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200">{copy.pricing}</Link>
+          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer noopener" className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200">{copy.googlePolicy}</a>
           <Link href="mailto:ownwardhub@gmail.com" className="rounded-lg border border-slate-700 px-5 py-3 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200">ownwardhub@gmail.com</Link>
         </div>
         <p className="mt-6 text-sm leading-6 text-slate-400">{copy.footer}</p>

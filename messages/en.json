@@ -934,16 +934,14 @@
     "panelBadge": "Privacy choices",
     "panelTitle": "Control optional storage on Ownward",
     "close": "Close",
-    "panelDescription": "Ownward always uses necessary storage so core site features work. Functionality, analytics, and marketing stay off until you allow them. Your choices are stored only in this browser.",
+    "panelDescription": "Ownward always uses necessary storage so core site features work. Functionality and analytics stay off until you allow them. Your choices are stored only in this browser.",
     "necessary": "Necessary",
     "necessaryDescription": "Keeps essential site behavior working.",
     "alwaysOn": "Always on",
     "functionality": "Functionality",
     "functionalityDescription": "Allows optional local features such as the anonymous community response token.",
     "analytics": "Analytics",
-    "analyticsDescription": "Allows optional measurement features if they are added later.",
-    "marketing": "Marketing",
-    "marketingDescription": "Allows optional marketing-related storage if used later.",
+    "analyticsDescription": "Enables Vercel Web Analytics and Google Analytics 4 only after consent, with private-URL sanitization and advertising/personalization disabled.",
     "reject": "Reject nonessential",
     "customize": "Customize",
     "accept": "Accept all",
@@ -981,7 +979,7 @@
           "Authenticate users, maintain account security, and prevent fraud or abuse.",
           "Process requests, support inquiries, and other communications.",
           "Comply with legal obligations and enforce our terms.",
-          "Operate optional functionality, analytics, or marketing technologies only where permitted."
+          "Operate optional functionality and analytics technologies only where permitted."
         ]
       },
       {
@@ -1010,7 +1008,7 @@
         "label": "6. Cookies and Local Storage",
         "title": "6. Cookies and Local Storage",
         "body": [
-          "Necessary storage supports authentication, security, requested workflows, and your privacy-choice record. Optional categories (functionality, analytics, and marketing) remain disabled unless you permit them."
+          "Necessary storage supports authentication, security, requested workflows, and your privacy-choice record. Optional categories (functionality and analytics) remain disabled unless you permit them."
         ]
       },
       {
@@ -1080,8 +1078,8 @@
     "choicesPageNecessaryDescription": "Required for essential site behavior and always enabled.",
     "choicesPageFunctionalityTitle": "Functionality",
     "choicesPageFunctionalityDescription": "Enables optional local features such as the anonymous community response token.",
-    "choicesPageAnalyticsTitle": "Analytics & marketing",
-    "choicesPageAnalyticsDescription": "Reserved for optional measurement or promotional storage if those features are used.",
+    "choicesPageAnalyticsTitle": "Analytics",
+    "choicesPageAnalyticsDescription": "Enables Vercel Web Analytics and Google Analytics 4 only after consent, with URL sanitization and advertising/personalization storage denied.",
     "choicesPageOpenPanel": "Open privacy panel",
     "choicesPageFooter": "You can revisit these choices at any time from the persistent Privacy choices button after saving a selection.",
     "saveChoices": "Save choices"
