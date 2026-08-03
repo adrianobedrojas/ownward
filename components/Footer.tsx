@@ -13,6 +13,7 @@ export default async function Footer() {
           <nav aria-label="Footer" className="flex flex-wrap items-center gap-4 text-sm">
             <Link href="/guide" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('guide')}</Link>
             <Link href="/academy" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('academy')}</Link>
+            <Link href="/trust" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('trust')}</Link>
             <Link href="/privacy" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('privacyPolicy')}</Link>
             <Link href="/privacy-choices" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('privacyChoices')}</Link>
             <Link href="/terms" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('terms')}</Link>

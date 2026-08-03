@@ -79,6 +79,10 @@
     "businessIdeaReadiness": {
       "title": "Evaluación de preparación de idea de negocio | Ownward Hub",
       "description": "Haz la evaluación gratuita de preparación de tu idea de negocio. En pocos minutos, identifica qué está claro, qué falta y qué deberías hacer a continuación."
+    },
+    "trust": {
+      "title": "Centro legal y de confianza | Ownward",
+      "description": "Documentos legales, opciones de privacidad, información de contacto y orientación para solicitudes en Ownward Hub."
     }
   },
   "Common": {
@@ -133,7 +137,8 @@
     "guide": "Guía",
     "academy": "Academia",
     "instagramHandle": "@ownwardhub",
-    "instagramAriaLabel": "Visita Ownward Hub en Instagram"
+    "instagramAriaLabel": "Visita Ownward Hub en Instagram",
+    "trust": "Legal y confianza"
   },
   "Home": {
     "hero": {

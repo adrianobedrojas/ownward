@@ -63,4 +63,40 @@ describe('legal/disclosure UI copy', () => {
     expect(planner).toContain('OpenPrivacyChoicesButton');
     expect(planner).toContain('localStorage.removeItem(START_BUSINESS_STORAGE_KEY)');
   });
+
+  it('does not use "Temporary contact" or "Contacto temporal" language on the terms page', () => {
+    const termsPage = read('app/[locale]/terms/page.tsx');
+    expect(termsPage).not.toContain('Temporary contact');
+    expect(termsPage).not.toContain('Contacto temporal');
+  });
+
+  it('uses "Legal and privacy contact" language on the terms page', () => {
+    const termsPage = read('app/[locale]/terms/page.tsx');
+    expect(termsPage).toContain('Legal and privacy contact');
+    expect(termsPage).toContain('Contacto legal y de privacidad');
+  });
+
+  it('terms page contact link uses correct email and mailto href', () => {
+    const termsPage = read('app/[locale]/terms/page.tsx');
+    expect(termsPage).toContain('mailto:');
+    expect(termsPage).toContain('LEGAL_OPERATOR.email');
+    expect(termsPage).not.toContain('ownward@gmail.com');
+    expect(termsPage).not.toContain('ownward@gmail.con');
+  });
+
+  it('trust page exists with correct structure and contact email', () => {
+    const trustPage = read('app/[locale]/trust/page.tsx');
+    expect(trustPage).toContain('LEGAL_OPERATOR.email');
+    expect(trustPage).toContain('Legal and privacy contact');
+    expect(trustPage).toContain('Contacto legal y de privacidad');
+    expect(trustPage).toContain('What do you need help with?');
+    expect(trustPage).toContain('¿Con qué necesitas ayuda?');
+    expect(trustPage).not.toContain('ownward@gmail.com');
+    expect(trustPage).not.toContain('ownward@gmail.con');
+  });
+
+  it('footer includes a trust link', () => {
+    const footer = read('components/Footer.tsx');
+    expect(footer).toContain('/trust');
+  });
 });

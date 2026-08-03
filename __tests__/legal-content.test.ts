@@ -25,4 +25,17 @@ describe('legal content', () => {
     expect(allPrivacy).toContain('https://policies.google.com/technologies/partner-sites');
     expect(allPrivacy).toContain('does not currently sell personal data');
   });
+
+  it('does not contain draft or attorney-review language in terms notes', () => {
+    expect(TERMS_CONTENT.en.note).not.toContain('Operational draft');
+    expect(TERMS_CONTENT.en.note).not.toContain('attorney review');
+    expect(TERMS_CONTENT.es.note).not.toContain('Borrador operativo');
+    expect(TERMS_CONTENT.es.note).not.toContain('revisión legal');
+  });
+
+  it('uses the correct official contact email', () => {
+    expect(LEGAL_OPERATOR.email).toBe('ownwardhub@gmail.com');
+    expect(LEGAL_OPERATOR.email).not.toBe('ownward@gmail.com');
+    expect(LEGAL_OPERATOR.email).not.toBe('ownward@gmail.con');
+  });
 });
