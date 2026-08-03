@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
+import { isValidAccountType } from "@/lib/auth/account-types";
 
 export async function signup(formData: FormData) {
   const accountType = String(formData.get("accountType") ?? "");
@@ -24,6 +25,10 @@ export async function signup(formData: FormData) {
     !confirmPassword ||
     !agreementAccepted
   ) {
+    redirect("/error");
+  }
+
+  if (!isValidAccountType(accountType)) {
     redirect("/error");
   }
 

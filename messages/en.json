@@ -602,6 +602,7 @@
     "protectTitle": "Protect confidential information",
     "protectDescription": "Do not include tax identification numbers, bank-account information, passwords, personal addresses, or confidential customer information in a public listing.",
     "saveDraft": "Save draft listing",
+    "resumeCta": "Resume a listing",
     "prepBadge": "Sale preparation",
     "prepTitle": "Your preparation roadmap",
     "prepSteps": [

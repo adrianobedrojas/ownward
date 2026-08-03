@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import PublicListingPresentation from "@/components/listing-studio/PublicListingPresentation";
 
 interface Props {
@@ -11,14 +12,13 @@ export default async function PublicBusinessPage({ params }: Props) {
 
   const supabase = await createClient();
 
+  // Query the safe public-detail view (never exposes user_id or raw confidential names)
   const { data: listing, error } = await supabase
-    .from("business_listings")
+    .from("business_listing_public_detail")
     .select(
-      "id, slug, user_id, business_name, is_confidential, teaser_title, category, location, headline_en, headline_es, summary, summary_en, summary_es, highlights_en, highlights_es, growth_opportunities_en, growth_opportunities_es, reason_for_selling_en, reason_for_selling_es, asking_price, annual_revenue, cash_flow, year_established, currency, seller_financing, inventory_included, real_estate_included, owner_involvement_hours, number_of_employees, featured_until, published_at"
+      "id, slug, business_name, is_confidential, teaser_title, category, location, headline_en, headline_es, summary, summary_en, summary_es, highlights_en, highlights_es, growth_opportunities_en, growth_opportunities_es, reason_for_selling_en, reason_for_selling_es, asking_price, annual_revenue, cash_flow, year_established, currency, seller_financing, inventory_included, real_estate_included, owner_involvement_hours, number_of_employees, featured_until, published_at"
     )
     .eq("slug", slug)
-    .eq("is_public", true)
-    .eq("status", "published")
     .maybeSingle();
 
   if (error || !listing) {
@@ -42,37 +42,56 @@ export default async function PublicBusinessPage({ params }: Props) {
     initialSaved = !!saved;
   }
 
-  const isOwner = user?.id === listing.user_id;
+  // isOwner: cannot be determined from the public view (user_id is not exposed).
+  // Ownership editing is handled in the seller dashboard; mark false for public pages.
+  const isOwner = false;
 
-  // Fetch published media — signed URLs for owner, public bucket for published listings
+  // Fetch media records — only those belonging to this listing (prevents cross-listing path injection)
   const { data: rawMedia } = await supabase
     .from("listing_media")
     .select("id, storage_path, alt_text_en, alt_text_es, caption_en, caption_es, sort_order, is_cover")
     .eq("listing_id", listing.id)
     .order("sort_order", { ascending: true });
 
-  // For published listings, generate signed URLs (listing-images is a private bucket)
+  // Generate short-lived signed URLs using the server-only admin client.
+  // The listing is already verified as published/public by the view query above.
+  // Each media row is fetched from the DB so storage paths cannot be browser-supplied.
+  const adminClient = createAdminClient();
   const media = await Promise.all(
     (rawMedia ?? []).map(async (m) => {
-      const { data: signed } = await supabase.storage
-        .from("listing-images")
-        .createSignedUrl(m.storage_path, 3600);
-      return {
-        id: m.id,
-        signedUrl: signed?.signedUrl ?? null,
-        altTextEn: m.alt_text_en ?? undefined,
-        altTextEs: m.alt_text_es ?? undefined,
-        captionEn: m.caption_en ?? undefined,
-        captionEs: m.caption_es ?? undefined,
-        isCover: m.is_cover,
-        sortOrder: m.sort_order,
-      };
+      try {
+        const { data: signed } = await adminClient.storage
+          .from("listing-images")
+          .createSignedUrl(m.storage_path, 3600);
+        return {
+          id: m.id,
+          signedUrl: signed?.signedUrl ?? null,
+          altTextEn: m.alt_text_en ?? undefined,
+          altTextEs: m.alt_text_es ?? undefined,
+          captionEn: m.caption_en ?? undefined,
+          captionEs: m.caption_es ?? undefined,
+          isCover: m.is_cover,
+          sortOrder: m.sort_order,
+        };
+      } catch {
+        // Gracefully handle inaccessible images – render without a URL
+        return {
+          id: m.id,
+          signedUrl: null,
+          altTextEn: m.alt_text_en ?? undefined,
+          altTextEs: m.alt_text_es ?? undefined,
+          captionEn: m.caption_en ?? undefined,
+          captionEs: m.caption_es ?? undefined,
+          isCover: m.is_cover,
+          sortOrder: m.sort_order,
+        };
+      }
     })
   );
 
-  // Public title: teaser for confidential, business_name otherwise
+  // Public title: teaser for confidential listings (business_name is already masked in the view)
   const publicTitle = listing.is_confidential
-    ? (listing.teaser_title ?? "")
+    ? (listing.teaser_title ?? listing.business_name ?? "")
     : listing.business_name;
 
   // Locale-aware content fallback

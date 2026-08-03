@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
 import { getUserBillingState, checkListingLimit } from "@/lib/billing";
 import { createListingDraft } from "../actions";
@@ -24,7 +23,7 @@ export default async function NewListingPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
+  await params; // locale not needed here; i18n Link handles prefixing
   const { supabase, user } = await requireUser();
   const t = await getTranslations("ListingStudio");
   const tSell = await getTranslations("Sell");
@@ -42,7 +41,7 @@ export default async function NewListingPage({
   return (
     <section className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <nav className="mb-6 text-sm text-slate-400">
-        <Link href={`/${locale}/sell`} className="hover:text-cyan-400 transition">
+        <Link href="/sell" className="hover:text-cyan-400 transition">
           {tSell("heroBadge")}
         </Link>
         <span className="mx-2">/</span>
@@ -61,7 +60,7 @@ export default async function NewListingPage({
         <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-6 text-center">
           <p className="font-semibold text-amber-300">{t("intro.noPlan")}</p>
           <Link
-            href={`/${locale}/pricing`}
+            href="/pricing"
             className="mt-4 inline-block rounded-lg bg-cyan-400 px-5 py-2.5 font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
             {t("intro.upgradeCta")}

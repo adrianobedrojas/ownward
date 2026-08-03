@@ -37,7 +37,8 @@ export function UpgradePrompt({
   message,
   suggestedPlan,
   currentPlan,
-  locale,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  locale: _locale,
 }: UpgradePromptProps) {
   const isExplorer = currentPlan === 'free';
   const nextPlanLabel = suggestedPlan ? PLAN_NAMES[suggestedPlan] : 'a paid plan';
@@ -56,7 +57,7 @@ export function UpgradePrompt({
       )}
       <div className="mt-3 flex items-center gap-3">
         <Link
-          href={`/${locale}/pricing`}
+          href="/pricing"
           className="rounded-lg bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 hover:bg-cyan-300 transition-colors"
         >
           View plans

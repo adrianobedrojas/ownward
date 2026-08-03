@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-const ALLOWED_VISIBILITY = ['private', 'public', 'contacts_only'];
+const ALLOWED_VISIBILITY = ['private', 'public', 'connections'];
 const ALLOWED_ROLES = ['buyer', 'seller', 'both', ''];
 const ALLOWED_LOCALES = ['en', 'es'];
 
@@ -80,12 +80,13 @@ export async function POST(req: Request) {
       .eq('id', user.id);
 
     if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+      console.error('Profile update error:', updateError.message);
+      return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('Profile update unexpected error:', err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

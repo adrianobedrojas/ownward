@@ -16,7 +16,8 @@ interface SearchParams {
   location?: string;
 }
 
-export default async function MarketplacePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+export default async function MarketplacePage({ params: pageParams, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<SearchParams> }) {
+  const { locale } = await pageParams;
   const t = await getTranslations('Buy');
   const params = await searchParams;
   const searchQuery = params.search?.trim() || '';
@@ -27,7 +28,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
   const now = new Date().toISOString();
   let query = supabase
     .from('marketplace_public_listings')
-    .select('id,slug,business_name,category,location,summary,asking_price,annual_revenue,year_established,featured_until,published_at');
+    .select('id,slug,business_name,category,location,summary_en,summary_es,asking_price,annual_revenue,year_established,featured_until,published_at');
 
   if (searchQuery) query = query.ilike('business_name', `%${searchQuery}%`);
   if (categoryQuery) query = query.eq('category', categoryQuery);
@@ -145,13 +146,17 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
       business_name: string | null;
       category: string | null;
       location: string | null;
-      summary: string | null;
+      summary_en: string | null;
+      summary_es: string | null;
       asking_price: number | null;
       annual_revenue: number | null;
       year_established: number | null;
     },
     featured: boolean,
   ) {
+    const summary = locale === 'es'
+      ? (business.summary_es ?? business.summary_en)
+      : (business.summary_en ?? business.summary_es);
     return (
       <article key={business.id} className={`flex flex-col rounded-xl p-6 transition ${featured ? 'border border-amber-500/40 bg-slate-900 ring-1 ring-amber-500/10 hover:border-amber-400' : 'border border-slate-800 bg-slate-900 hover:border-cyan-400'}`}>
         <div className="flex items-center justify-between gap-3">
@@ -160,7 +165,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         </div>
         <h3 className="mt-5 text-xl font-semibold text-white">{business.business_name}</h3>
         <p className="mt-1 text-sm text-slate-400">{business.location}</p>
-        <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">{business.summary || t('noSummary')}</p>
+        <p className="mt-4 flex-1 text-sm leading-6 text-slate-300">{summary || t('noSummary')}</p>
         <div className="mt-6 grid grid-cols-3 gap-3 border-y border-slate-800 py-4">
           <div>
             <p className="text-xs text-slate-500">{t('askingPrice')}</p>

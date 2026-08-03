@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSafeRedirect } from "@/lib/auth/safe-redirect";
 
 function redirectTo(path: string) {
   return new Response(null, {
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     .toLowerCase();
 
   const password = String(formData.get("password") ?? "");
+  const next = String(formData.get("next") ?? "").trim();
 
   if (!email || !password) {
     return redirectTo("/error");
@@ -34,5 +36,5 @@ export async function POST(request: Request) {
     return redirectTo("/error");
   }
 
-  return redirectTo("/dashboard");
+  return redirectTo(getSafeRedirect(next));
 }

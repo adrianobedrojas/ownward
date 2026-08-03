@@ -102,7 +102,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
 
   const handleSubscribe = async (planKey: string) => {
     if (!isSignedIn) {
-      window.location.assign(`/${locale}/login?next=${encodeURIComponent(`/${locale}/pricing`)}`);
+      window.location.assign(`/login?next=${encodeURIComponent('/pricing')}`);
       return;
     }
 
@@ -118,7 +118,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
       const data = await res.json();
 
       if (res.status === 401) {
-        window.location.assign(`/${locale}/login?next=${encodeURIComponent(`/${locale}/pricing`)}`);
+        window.location.assign(`/login?next=${encodeURIComponent('/pricing')}`);
         return;
       }
 
@@ -308,7 +308,7 @@ export default function PricingCards({ billingState }: PricingCardsProps) {
                   </div>
                 ) : (
                   <Link
-                    href={isSignedIn ? `/${locale}/dashboard` : `/${locale}/signup`}
+                    href={isSignedIn ? '/dashboard' : '/signup'}
                     className="mt-6 block w-full rounded-lg py-3 text-center text-sm font-semibold bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors"
                   >
                     {t('explorerCtaSignedOut')}
