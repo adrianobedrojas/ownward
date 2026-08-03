@@ -75,6 +75,10 @@
     "confirmEmail": {
       "title": "Confirm Your Email",
       "description": "Click the button below to confirm your Ownward account email address."
+    },
+    "businessIdeaReadiness": {
+      "title": "Business Idea Readiness Check | Ownward Hub",
+      "description": "Take the free Business Idea Readiness Check. In a few minutes, identify what is clear, what is missing, and what you should do next."
     }
   },
   "Common": {
@@ -1817,5 +1821,372 @@
     "statusLabel": "Workspace status:",
     "pendingTitle": "Workspace is still being prepared",
     "pendingBody": "Your payment is recorded, and fulfillment is still processing. Refresh this page in a moment."
+  },
+  "BusinessIdeaReadiness": {
+    "intro": {
+      "title": "Business Idea Readiness Check",
+      "description": "Take the free Business Idea Readiness Check. In a few minutes, identify what is clear, what is missing, and what you should do next.",
+      "timeEstimate": "3–5 minutes",
+      "noExperienceRequired": "No prior business experience required.",
+      "startButton": "Start the Assessment",
+      "privacyStatement": "Your answers are never made public and no personal information is requested. With functionality consent enabled, your progress is saved across page refreshes. Without consent, everything stays in memory only.",
+      "privacyChoicesLink": "Manage Privacy Choices"
+    },
+    "progress": {
+      "questionLabel": "Question {current} of {total}",
+      "srLabel": "Assessment progress: question {current} of {total}",
+      "dimensionLabel": "Topic: {dimension}"
+    },
+    "controls": {
+      "back": "Back",
+      "continue": "Continue",
+      "submit": "See My Results",
+      "restart": "Start Over",
+      "restartConfirm": "Are you sure you want to restart? Your current answers will be cleared.",
+      "print": "Print Results",
+      "copy": "Copy Results",
+      "copied": "Copied!",
+      "copyFailed": "Could not copy"
+    },
+    "validation": {
+      "selectAnswer": "Please select an answer to continue."
+    },
+    "dimensions": {
+      "problem_clarity": "Problem Clarity",
+      "customer_clarity": "Customer Clarity",
+      "offer_value": "Offer & Value",
+      "business_model": "Business Model",
+      "execution_readiness": "Execution Readiness"
+    },
+    "questions": {
+      "q1": {
+        "text": "How clearly can you describe the specific problem your idea solves?",
+        "options": {
+          "not_yet": "I have not defined a problem yet",
+          "general_idea": "I have a general idea of the problem",
+          "clear": "I can describe the problem clearly",
+          "validated": "I have confirmed the problem with real people"
+        }
+      },
+      "q2": {
+        "text": "How well do you understand why this problem matters to the people who experience it?",
+        "options": {
+          "not_yet": "I have not explored this yet",
+          "general_idea": "I have some guesses about why it matters",
+          "clear": "I understand the impact clearly",
+          "validated": "People have told me directly how much it affects them"
+        }
+      },
+      "q3": {
+        "text": "How clearly have you defined who your target customer is?",
+        "options": {
+          "not_yet": "Not defined yet",
+          "general_idea": "I have a broad category in mind",
+          "clear": "I have a specific profile with key traits",
+          "validated": "I have spoken with real people who match the profile"
+        }
+      },
+      "q4": {
+        "text": "How well do you understand how your target customer currently deals with this problem?",
+        "options": {
+          "not_yet": "I have not looked into this",
+          "general_idea": "I have general assumptions",
+          "clear": "I understand their current workarounds or alternatives",
+          "validated": "I have direct evidence from conversations or research"
+        }
+      },
+      "q5": {
+        "text": "How clearly defined is your product or service offering?",
+        "options": {
+          "not_yet": "Still just an idea",
+          "general_idea": "I have a rough concept",
+          "clear": "I can describe what I would deliver",
+          "validated": "I have a specific offer I have tested or described to potential customers"
+        }
+      },
+      "q6": {
+        "text": "How clear is your understanding of why a customer would choose your offer over alternatives?",
+        "options": {
+          "not_yet": "I have not thought about this yet",
+          "general_idea": "I have a rough sense of the advantage",
+          "clear": "I can articulate a clear differentiation",
+          "validated": "Potential customers have confirmed this advantage matters to them"
+        }
+      },
+      "q7": {
+        "text": "How clear is your plan for how you will charge for your product or service?",
+        "options": {
+          "not_yet": "No plan yet",
+          "general_idea": "I have a rough pricing idea",
+          "clear": "I have a specific pricing model in mind",
+          "validated": "I have tested or discussed pricing with potential customers"
+        }
+      },
+      "q8": {
+        "text": "How well do you understand the economics required for your idea to be financially sustainable?",
+        "options": {
+          "not_yet": "I have not explored this",
+          "general_idea": "I have rough assumptions",
+          "clear": "I have estimated basic costs and required revenue",
+          "validated": "I have modeled the numbers and they appear viable"
+        }
+      },
+      "q9": {
+        "text": "How clear is your immediate next step to move this idea forward?",
+        "options": {
+          "not_yet": "I am not sure what to do next",
+          "general_idea": "I have a general sense of the next step",
+          "clear": "I know my next concrete action",
+          "validated": "I have a specific plan with a timeline"
+        }
+      },
+      "q10": {
+        "text": "How ready are you to commit regular time to this idea over the next 30 days?",
+        "options": {
+          "not_yet": "Not able to commit time right now",
+          "general_idea": "I might find occasional time",
+          "clear": "I have a realistic block of time I can protect",
+          "validated": "I have already blocked consistent time and started"
+        }
+      },
+      "q11": {
+        "text": "What is your biggest obstacle right now?",
+        "options": {
+          "not_sure_where_to_start": "I am not sure where to start",
+          "customer_research": "Finding and talking to potential customers",
+          "define_offer": "Defining exactly what I will sell",
+          "funding": "Funding or startup costs",
+          "technical_help": "Technical skills or tools I need",
+          "confidence_accountability": "Confidence or accountability",
+          "organize_idea": "Organizing my idea and priorities",
+          "other": "Something else"
+        }
+      },
+      "q12": {
+        "text": "How many hours per week can you realistically dedicate to this idea right now?",
+        "options": {
+          "less_than_2h": "Less than 2 hours",
+          "2_to_5h": "2 to 5 hours",
+          "5_to_10h": "5 to 10 hours",
+          "more_than_10h": "More than 10 hours"
+        }
+      }
+    },
+    "results": {
+      "heading": "Your Readiness Results",
+      "overallLabel": "Overall Readiness",
+      "scoreAria": "{score} out of 100",
+      "levelLabel": "Readiness Level",
+      "levels": {
+        "idea_discovery": "Idea Discovery",
+        "early_validation": "Early Validation",
+        "test_ready": "Test-Ready",
+        "execution_ready": "Execution-Ready"
+      },
+      "levelDescriptions": {
+        "idea_discovery": "Your idea is at an early stage. The most valuable next steps are to sharpen your understanding of the problem and identify who it affects most.",
+        "early_validation": "You have a foundation in place. Focusing on customer clarity and a defined offer will help you validate whether this idea has real traction.",
+        "test_ready": "You have solid groundwork. The next step is to run a small, low-cost test to see how real customers respond.",
+        "execution_ready": "You are well-prepared to move forward. The focus now is on consistent execution and tracking early results."
+      },
+      "summary": {
+        "idea_discovery": "Your answers show this idea is still taking shape. That is a normal starting point. The clearest path forward is to narrow down the problem and the person it affects before anything else.",
+        "early_validation": "You have a clearer picture than you might think, but there are key gaps to address before committing resources. Your next focus should be direct conversations with potential customers.",
+        "test_ready": "The groundwork is solid. You have defined the problem, identified the customer, and outlined an offer. The missing piece is real-world validation through a structured small test.",
+        "execution_ready": "You have done the foundational work well. The challenge now is maintaining momentum and adapting based on early feedback."
+      },
+      "dimensionsHeading": "Dimension Breakdown",
+      "strongest": "Strongest Area",
+      "weakest": "Needs the Most Work",
+      "whatIsClear": "What Is Clear",
+      "whatIsMissing": "What Is Missing",
+      "whatIsClearItems": {
+        "problem_clarity": "You have a clear understanding of the problem your idea addresses.",
+        "customer_clarity": "You have a clear picture of who your target customer is.",
+        "offer_value": "You have defined your offer and understand its value.",
+        "business_model": "You understand how your business will generate revenue.",
+        "execution_readiness": "You are ready to take action and move forward."
+      },
+      "whatIsMissingItems": {
+        "problem_clarity": "The problem your idea solves is not yet clearly defined or validated.",
+        "customer_clarity": "The profile of your target customer still needs more definition.",
+        "offer_value": "Your offer and its differentiation need more clarity or validation.",
+        "business_model": "The revenue model and financial sustainability need more work.",
+        "execution_readiness": "A clear next step and committed time plan are still missing."
+      },
+      "whatToDoNext": "What to Do Next",
+      "actionsHeading": "Prioritized Actions",
+      "immediateActionHeading": "Your Immediate Next Step",
+      "sevenDayPlanHeading": "Your 7-Day Action Plan",
+      "disclaimer": "This score reflects your self-reported preparation based on the answers you provided. It is not a professional evaluation, prediction of business success, or guarantee of any outcome.",
+      "restartLabel": "Retake Assessment"
+    },
+    "recommendations": {
+      "action_clarify_problem": "Write a one-sentence description of the specific problem you are solving and share it with three people who might experience it. Ask them whether it resonates.",
+      "action_define_customer": "Build a one-page customer profile: who they are, what triggers the problem, and how they currently deal with it.",
+      "action_validate_offer": "Describe your offer in plain language and share it with potential customers. Ask if they would use it and what would make them hesitate.",
+      "action_map_revenue": "Sketch a simple business model: what you charge, what it costs to deliver, and how many customers you need to break even.",
+      "action_build_momentum": "Block a recurring time slot this week to work on one specific next action. Start small and protect the time.",
+      "action_start_framework": "Write down your idea in three parts: the problem, who has it, and your proposed solution. Use this as your working foundation.",
+      "action_customer_research": "Identify five people who could be your customer and reach out to schedule a 20-minute conversation this week.",
+      "action_explore_funding": "List the minimum resources you need to test your idea. Separate what you can start with today from what requires funding.",
+      "action_technical_first_step": "Identify the single most important technical capability your idea requires. Find one free resource, course, or person who can help you with it.",
+      "action_accountability_system": "Tell one person about your idea and commit to a specific update in 7 days. Accountability is one of the highest-leverage early tools.",
+      "action_organize_idea": "Spend one hour writing down everything you know about your idea, then group it into: what you know, what you assume, and what you need to find out.",
+      "action_next_concrete_step": "Choose one specific action you can complete this week that moves your idea forward. Write it down and schedule it."
+    },
+    "immediateActions": {
+      "immediate_problem_clarity": "Write a one-sentence problem statement today and share it with one person who might experience the problem.",
+      "immediate_customer_clarity": "List three specific people you know who could represent your target customer. Send one of them a message today.",
+      "immediate_offer_value": "Write down your offer in one sentence: who it is for, what it delivers, and what makes it different from alternatives.",
+      "immediate_business_model": "Estimate the price you would charge, the main cost to deliver it, and how many customers you would need in month one.",
+      "immediate_execution_readiness": "Block 30 minutes today to define your one most important next action and schedule it."
+    },
+    "sevenDayPlan": {
+      "problem_clarity": {
+        "day1": "Write a rough draft of the problem you are trying to solve in one or two sentences.",
+        "day2": "List five specific people who might experience this problem.",
+        "day3": "Reach out to two people from your list and ask for a 15-minute conversation.",
+        "day4": "Conduct your first conversation. Focus on listening, not pitching.",
+        "day5": "Conduct your second conversation and compare what you heard.",
+        "day6": "Rewrite your problem statement based on what you learned.",
+        "day7": "Share your updated problem statement with one more person and ask if it resonates."
+      },
+      "customer_clarity": {
+        "day1": "Write a rough customer profile: who they are, their age or role, and what triggers the problem.",
+        "day2": "List five specific people or communities where your customer type congregates.",
+        "day3": "Reach out to two people who match the profile and ask for a brief conversation.",
+        "day4": "Hold your first conversation. Ask about their experience with the problem, not your solution.",
+        "day5": "Hold your second conversation. Focus on what surprised you.",
+        "day6": "Refine your customer profile based on what you heard.",
+        "day7": "Write a one-paragraph description of your target customer and share it with someone for feedback."
+      },
+      "offer_value": {
+        "day1": "Write a simple description of what you will sell, who it is for, and what outcome it delivers.",
+        "day2": "List three to five alternatives a customer could use instead of your offer.",
+        "day3": "Write one sentence explaining why your offer is different or better.",
+        "day4": "Share your offer description with two potential customers and ask for honest feedback.",
+        "day5": "Revise your offer based on what you heard.",
+        "day6": "Write down the top objection a customer might have and how you would respond.",
+        "day7": "Finalize a one-paragraph offer summary you could share with anyone."
+      },
+      "business_model": {
+        "day1": "Write down your proposed price and the top reason a customer would pay it.",
+        "day2": "List the three main costs involved in delivering your offer.",
+        "day3": "Calculate how many customers you would need per month to cover basic costs.",
+        "day4": "Identify one revenue assumption you are least confident about and test it.",
+        "day5": "Ask one potential customer whether your price feels reasonable for the outcome delivered.",
+        "day6": "Revise your numbers based on what you learned.",
+        "day7": "Write a one-page financial summary: price, key costs, break-even estimate, and confidence level."
+      },
+      "execution_readiness": {
+        "day1": "Write down the one action that would move your idea forward the most right now.",
+        "day2": "Block recurring time this week dedicated to this idea — at minimum 30 minutes per session.",
+        "day3": "Complete the first concrete task you identified on Day 1.",
+        "day4": "Identify one person who could give you useful feedback or accountability on your progress.",
+        "day5": "Share your current progress with that person and ask for their input.",
+        "day6": "Identify the next three actions after today and write them down in order.",
+        "day7": "Review what you accomplished this week and set a specific goal for the week ahead."
+      },
+      "problem_clarity_limited": {
+        "day1": "In 15 minutes, write one sentence describing the problem you are solving.",
+        "day2": "List three people you know who might experience this problem.",
+        "day3": "Send a brief message to one person asking about their experience with the problem.",
+        "day4": "Read their reply or have a short conversation. Write down one thing you learned.",
+        "day5": "Revise your problem statement based on what you heard.",
+        "day6": "Share the updated statement with one more person and ask if it resonates.",
+        "day7": "Write down your clearest version of the problem. You will build on this next week."
+      },
+      "customer_clarity_limited": {
+        "day1": "In 15 minutes, write a rough description of one type of person who has the problem.",
+        "day2": "Identify one real person you know who might fit that description.",
+        "day3": "Send them a message asking about their experience — not your idea.",
+        "day4": "Read or hear their response and note what surprised you.",
+        "day5": "Update your customer description based on what you learned.",
+        "day6": "Identify one more person who might fit the profile.",
+        "day7": "Write a one-paragraph customer description you can share next week."
+      },
+      "offer_value_limited": {
+        "day1": "In 15 minutes, write one sentence describing what you will offer and who it is for.",
+        "day2": "List two alternatives a customer might use instead.",
+        "day3": "Write one sentence explaining why your offer is better or different.",
+        "day4": "Share this with one person and ask for feedback.",
+        "day5": "Note what they said and revise your offer sentence.",
+        "day6": "Think about one objection they might raise and write a response.",
+        "day7": "Finalize your offer description. Keep it to two or three sentences."
+      },
+      "business_model_limited": {
+        "day1": "Write down your proposed price.",
+        "day2": "List the top two costs of delivering your offer.",
+        "day3": "Estimate how many sales per month you would need to cover those costs.",
+        "day4": "Ask one person if your price feels reasonable.",
+        "day5": "Adjust your numbers based on what you heard.",
+        "day6": "Write down the one assumption you are least sure about.",
+        "day7": "Identify one way to test that assumption with minimal effort next week."
+      },
+      "execution_readiness_limited": {
+        "day1": "Write down the one next action that matters most.",
+        "day2": "Block one 30-minute slot this week to work on it.",
+        "day3": "Complete that action.",
+        "day4": "Write down the result — what happened and what you learned.",
+        "day5": "Choose the next action based on what you learned.",
+        "day6": "Tell one person about your progress.",
+        "day7": "Set one specific goal for next week."
+      },
+      "problem_clarity_not_sure_where_to_start": {
+        "day1": "Write everything you know about your idea without filtering. Spend 20 minutes.",
+        "day2": "Underline every statement that describes a problem someone has.",
+        "day3": "Pick the most compelling problem and write it as a single sentence.",
+        "day4": "Share that sentence with one person and ask if it sounds like a real problem.",
+        "day5": "Refine based on their response.",
+        "day6": "List the three people most likely to experience this problem.",
+        "day7": "Reach out to one of them and ask to learn more about their experience."
+      },
+      "customer_clarity_customer_research": {
+        "day1": "Write down three assumptions you have about your target customer.",
+        "day2": "Turn each assumption into a question you could ask a real person.",
+        "day3": "Identify three people to reach out to and send each a short message.",
+        "day4": "Hold your first conversation. Listen more than you speak.",
+        "day5": "Write down the most important thing you learned.",
+        "day6": "Hold a second conversation or review what you heard from the first.",
+        "day7": "Update your customer profile based on real input."
+      },
+      "execution_readiness_confidence_accountability": {
+        "day1": "Write down exactly what is holding you back in two sentences.",
+        "day2": "Identify one very small action you can complete in under 30 minutes.",
+        "day3": "Complete that action and write down that you did it.",
+        "day4": "Tell one trusted person what you are working on and ask them to check in with you in 3 days.",
+        "day5": "Complete one more small action before the check-in.",
+        "day6": "Have the check-in conversation. Share your progress.",
+        "day7": "Set a specific commitment for next week that you will share with your accountability contact."
+      },
+      "problem_clarity_not_sure_where_to_start_limited": {
+        "day1": "In 10 minutes, write one sentence about a problem you see that bothers you or others.",
+        "day2": "Ask yourself: do I personally experience this problem? Does someone I know?",
+        "day3": "Send a message to one person who might experience it and ask one open question.",
+        "day4": "Read their reply. Note one thing that surprised you.",
+        "day5": "Rewrite your problem sentence using what you learned.",
+        "day6": "Read it out loud. Does it still feel true?",
+        "day7": "Write your clearest version and save it as your starting point."
+      },
+      "customer_clarity_customer_research_limited": {
+        "day1": "Write one sentence describing who has the problem you want to solve.",
+        "day2": "Name one real person you know who fits that description.",
+        "day3": "Send them a short message asking about their experience.",
+        "day4": "Read their reply and note the most important thing.",
+        "day5": "Update your customer description with one new insight.",
+        "day6": "Identify one more person to speak with next week.",
+        "day7": "Write a two-sentence customer description you can use as a guide going forward."
+      },
+      "execution_readiness_confidence_accountability_limited": {
+        "day1": "Write down the one thing you are most hesitant about.",
+        "day2": "Choose the smallest possible first step. Something you can do in 15 minutes.",
+        "day3": "Complete that step today.",
+        "day4": "Tell one person what you did.",
+        "day5": "Ask them to check in with you in two days.",
+        "day6": "Complete one more small step before the check-in.",
+        "day7": "Have the check-in. Decide on your next step for next week."
+      }
+    }
   }
 }
