@@ -9,6 +9,7 @@ import {
   sendMessage,
   submitListingInterest,
 } from "@/app/actions/messaging";
+import { recordExplicitInterest } from "@/app/actions/listing-interest";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -58,6 +59,12 @@ export default function ListingInterestPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Yes / Maybe / No interest prompt state
+  type InterestChoice = "yes" | "maybe" | "no" | null;
+  const [interestChoice, setInterestChoice] = useState<InterestChoice>(null);
+  const [interestDone, setInterestDone] = useState(false);
+  const [maybeQuestion, setMaybeQuestion] = useState("");
+
   // Ask-a-question form state
   const [question, setQuestion] = useState("");
 
@@ -91,6 +98,75 @@ export default function ListingInterestPanel({
     setModal("none");
     setError(null);
     setSuccess(null);
+  }
+
+  // ── Yes / Maybe / No handlers ─────────────────────────────────────────────
+
+  function handleInterestChoiceSelect(choice: InterestChoice) {
+    if (!requireAuth()) return;
+    setInterestChoice(choice);
+    setError(null);
+  }
+
+  function handleYesSubmit() {
+    startTransition(async () => {
+      // 1. Create interested event + conversation via server
+      const convResult = await startConversation(listingId);
+      if (convResult.error || !convResult.conversationId) {
+        setError(convResult.error || "Could not start conversation.");
+        return;
+      }
+
+      // 2. Record explicit interest event (links to conversation)
+      await recordExplicitInterest(listingId, "interested", convResult.conversationId);
+
+      // 3. Send structured interest summary message
+      const fd = new FormData();
+      fd.append("conversationId", convResult.conversationId);
+      fd.append("body", `I am interested in ${listingName}. Please let me know how to proceed.`);
+      await sendMessage(fd);
+
+      setInterestDone(true);
+      setTimeout(() => {
+        router.push(`/messages/${convResult.conversationId}`);
+      }, 1200);
+    });
+  }
+
+  function handleMaybeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!maybeQuestion.trim()) {
+      setError("Please enter what information you need.");
+      return;
+    }
+    startTransition(async () => {
+      // 1. Create conversation
+      const convResult = await startConversation(listingId);
+      if (convResult.error || !convResult.conversationId) {
+        setError(convResult.error || "Could not start conversation.");
+        return;
+      }
+
+      // 2. Record maybe_interested event
+      await recordExplicitInterest(listingId, "maybe_interested", convResult.conversationId);
+
+      // 3. Send buyer question
+      const fd = new FormData();
+      fd.append("conversationId", convResult.conversationId);
+      fd.append("body", maybeQuestion.trim());
+      await sendMessage(fd);
+
+      setInterestDone(true);
+      setTimeout(() => {
+        router.push(`/messages/${convResult.conversationId}`);
+      }, 1200);
+    });
+  }
+
+  function handleNoSubmit() {
+    // No conversation, no seller notification, private dismissal only
+    setInterestChoice("no");
+    setInterestDone(true);
   }
 
   // ── Save / Unsave ──────────────────────────────────────────────────────────
@@ -231,6 +307,125 @@ export default function ListingInterestPanel({
 
   return (
     <>
+      {/* ── Yes / Maybe / No Prompt ─────────────────────────────────────────── */}
+      <section
+        aria-label="Is this the right business?"
+        className="rounded-2xl border border-slate-700 bg-slate-900 p-6 space-y-4"
+      >
+        <h2 className="font-semibold text-white">
+          Could this be the right business for you?
+        </h2>
+
+        {error && !interestChoice && (
+          <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
+            {error}
+          </p>
+        )}
+
+        {/* Done state */}
+        {interestDone ? (
+          <div className="rounded-xl border border-cyan-500/30 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-300">
+            {interestChoice === "yes" && "Your interest has been shared with the seller. Opening conversation…"}
+            {interestChoice === "maybe" && "Your question was sent. Opening conversation…"}
+            {interestChoice === "no" && "Noted — this listing will not affect your recommendations."}
+          </div>
+        ) : (
+          <>
+            {/* Choice buttons */}
+            {!interestChoice && (
+              <div className="grid gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleInterestChoiceSelect("yes")}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-3 rounded-xl border border-cyan-500/40 bg-cyan-400/10 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 disabled:opacity-60"
+                >
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Yes, I&apos;m interested
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInterestChoiceSelect("maybe")}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 disabled:opacity-60"
+                >
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Maybe — I need more information
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNoSubmit}
+                  disabled={isPending}
+                  className="flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400 disabled:opacity-60"
+                >
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  No, it&apos;s not a fit
+                </button>
+              </div>
+            )}
+
+            {/* Yes: confirm */}
+            {interestChoice === "yes" && (
+              <div className="space-y-3">
+                <p className="text-sm text-slate-400">
+                  Expressing interest will start a conversation with the seller and notify them of your interest.
+                </p>
+                {error && (
+                  <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
+                    {error}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleYesSubmit}
+                    disabled={isPending}
+                    className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+                  >
+                    {isPending ? "…" : "Confirm interest"}
+                  </button>
+                  <button type="button" onClick={() => setInterestChoice(null)} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:text-slate-200">Back</button>
+                </div>
+              </div>
+            )}
+
+            {/* Maybe: ask what info is needed */}
+            {interestChoice === "maybe" && (
+              <form onSubmit={handleMaybeSubmit} className="space-y-3">
+                <label htmlFor="maybeQuestion" className="block text-sm font-medium text-slate-300">
+                  What information would help you decide?
+                </label>
+                <textarea
+                  id="maybeQuestion"
+                  value={maybeQuestion}
+                  onChange={(e) => setMaybeQuestion(e.target.value)}
+                  rows={3}
+                  maxLength={1000}
+                  required
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                  placeholder="e.g. What are the main growth opportunities? How involved are current owners?"
+                />
+                {error && (
+                  <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
+                    {error}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+                  >
+                    {isPending ? "…" : "Send question"}
+                  </button>
+                  <button type="button" onClick={() => setInterestChoice(null)} className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:text-slate-200">Back</button>
+                </div>
+              </form>
+            )}
+          </>
+        )}
+      </section>
+
       {/* Action Panel */}
       <section
         aria-label="Buyer actions"
@@ -258,7 +453,7 @@ export default function ListingInterestPanel({
               : "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
           }`}
         >
-          <span aria-hidden="true">{saved ? "★" : "☆"}</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           {saved ? "Saved privately" : "Save privately"}
         </button>
 
@@ -268,7 +463,7 @@ export default function ListingInterestPanel({
           onClick={() => openModal("ask")}
           className="flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-700"
         >
-          <span aria-hidden="true">💬</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Ask the seller a question
         </button>
 
@@ -278,7 +473,7 @@ export default function ListingInterestPanel({
           onClick={() => openModal("interest")}
           className="flex w-full items-center gap-3 rounded-xl border border-cyan-500/40 bg-cyan-400/10 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/20"
         >
-          <span aria-hidden="true">🤝</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Share my interest
         </button>
 
@@ -288,7 +483,7 @@ export default function ListingInterestPanel({
           onClick={() => openModal("request")}
           className="flex w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-700"
         >
-          <span aria-hidden="true">📋</span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Request more details
         </button>
 
