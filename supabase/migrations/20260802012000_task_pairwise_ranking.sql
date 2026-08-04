@@ -115,8 +115,8 @@ CREATE POLICY "Users can insert own task pairwise comparisons"
   );
 
 CREATE OR REPLACE FUNCTION public.record_task_pairwise_choice(
-  winner_task_id uuid,
-  loser_task_id uuid
+  p_winner_task_id uuid,
+  p_loser_task_id uuid
 )
 RETURNS TABLE (
   user_id uuid,
@@ -152,7 +152,7 @@ BEGIN
       USING ERRCODE = '42501';
   END IF;
 
-  IF winner_task_id IS NULL OR loser_task_id IS NULL OR winner_task_id = loser_task_id THEN
+  IF p_winner_task_id IS NULL OR p_loser_task_id IS NULL OR p_winner_task_id = p_loser_task_id THEN
     RAISE EXCEPTION 'Choose two different tasks to compare.'
       USING ERRCODE = '22023';
   END IF;
@@ -160,7 +160,7 @@ BEGIN
   WITH locked_tasks AS (
     SELECT id, pairwise_rating, pairwise_comparison_count, pairwise_win_count
     FROM public.tasks
-    WHERE id IN (winner_task_id, loser_task_id)
+    WHERE id IN (p_winner_task_id, p_loser_task_id)
       AND user_id = v_user_id
       AND status = 'todo'
     ORDER BY id
@@ -168,11 +168,11 @@ BEGIN
   )
   SELECT
     count(*)::integer,
-    max(CASE WHEN id = winner_task_id THEN pairwise_rating END),
-    max(CASE WHEN id = loser_task_id THEN pairwise_rating END),
-    max(CASE WHEN id = winner_task_id THEN pairwise_comparison_count END),
-    max(CASE WHEN id = loser_task_id THEN pairwise_comparison_count END),
-    max(CASE WHEN id = winner_task_id THEN pairwise_win_count END)
+    max(CASE WHEN id = p_winner_task_id THEN pairwise_rating END),
+    max(CASE WHEN id = p_loser_task_id THEN pairwise_rating END),
+    max(CASE WHEN id = p_winner_task_id THEN pairwise_comparison_count END),
+    max(CASE WHEN id = p_loser_task_id THEN pairwise_comparison_count END),
+    max(CASE WHEN id = p_winner_task_id THEN pairwise_win_count END)
   INTO
     v_locked_task_count,
     v_winner_rating_before,
@@ -199,7 +199,7 @@ BEGIN
     pairwise_comparison_count = pairwise_comparison_count + 1,
     pairwise_win_count = pairwise_win_count + 1,
     updated_at = now()
-  WHERE id = winner_task_id
+  WHERE id = p_winner_task_id
     AND user_id = v_user_id;
 
   UPDATE public.tasks
@@ -207,7 +207,7 @@ BEGIN
     pairwise_rating = v_loser_rating_after,
     pairwise_comparison_count = pairwise_comparison_count + 1,
     updated_at = now()
-  WHERE id = loser_task_id
+  WHERE id = p_loser_task_id
     AND user_id = v_user_id;
 
   INSERT INTO public.task_pairwise_comparisons (
@@ -221,8 +221,8 @@ BEGIN
   )
   VALUES (
     v_user_id,
-    winner_task_id,
-    loser_task_id,
+    p_winner_task_id,
+    p_loser_task_id,
     v_winner_rating_before,
     v_loser_rating_before,
     v_winner_rating_after,
@@ -232,8 +232,8 @@ BEGIN
   RETURN QUERY
   SELECT
     v_user_id,
-    winner_task_id,
-    loser_task_id,
+    p_winner_task_id,
+    p_loser_task_id,
     v_winner_rating_before,
     v_loser_rating_before,
     v_winner_rating_after,
