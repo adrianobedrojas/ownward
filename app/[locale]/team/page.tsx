@@ -68,11 +68,10 @@ export default async function TeamPage() {
         .is('deleted_at', null)
     : { data: [] };
 
-  // Count used seats
-  const activeMembers = (members ?? []).filter((m) => m.status === 'active');
-  const uniqueActiveUserIds = new Set(activeMembers.map((m) => m.user_id));
-  const pendingCount = (invitations ?? []).length;
-  const usedSeats = uniqueActiveUserIds.size + pendingCount;
+  const { data: seatUsageCount } = await supabase.rpc('count_owner_collaborator_usage', {
+    p_owner_user_id: user.id,
+  });
+  const usedSeats = typeof seatUsageCount === 'number' ? seatUsageCount : 0;
 
   return (
     <TeamClient

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import crypto from 'crypto';
 import InviteClient from './InviteClient';
 import type { Metadata } from 'next';
@@ -17,7 +17,6 @@ export default async function InvitePage({ params }: Props) {
   const { token } = await params;
   const supabase = await createClient();
   const locale = await getLocale();
-  const t = await getTranslations('Team');
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -39,7 +38,7 @@ export default async function InvitePage({ params }: Props) {
 
   if (!inv) {
     errorKey = 'inviteInvalid';
-  } else if (inv.status === 'cancelled') {
+  } else if (inv.status === 'revoked') {
     errorKey = 'inviteCancelled';
   } else if (inv.status === 'accepted' || inv.status === 'declined') {
     errorKey = 'inviteAlreadyUsed';

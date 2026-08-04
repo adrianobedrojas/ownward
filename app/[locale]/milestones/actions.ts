@@ -6,6 +6,7 @@ import {
   getUserBillingState,
   checkMilestoneMonthlyLimit,
 } from "@/lib/billing";
+import { canWriteOperations } from "@/lib/business-access";
 
 export type MilestoneResult =
   | { success: true; milestoneId: string }
@@ -63,16 +64,8 @@ export async function createMilestone(
     return { success: false, message: "Business and title are required." };
   }
 
-  // Verify ownership of the business
-  const { data: biz } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("id", businessId)
-    .eq("owner_id", user.id)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!biz) {
+  const canWrite = await canWriteOperations(user.id, businessId);
+  if (!canWrite) {
     return { success: false, message: "Business not found or access denied." };
   }
 
@@ -114,13 +107,16 @@ export async function updateMilestone(
 
   const { data: existing } = await supabase
     .from("business_milestones")
-    .select("id")
+    .select("id, business_id")
     .eq("id", milestoneId)
-    .eq("user_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
 
   if (!existing)
+    return { success: false, message: "Milestone not found or access denied." };
+
+  const canWrite = await canWriteOperations(user.id, existing.business_id);
+  if (!canWrite)
     return { success: false, message: "Milestone not found or access denied." };
 
   const title = String(formData.get("title") ?? "").trim();
@@ -146,8 +142,7 @@ export async function updateMilestone(
       milestone_date: milestoneDate,
       completed_at: completedAt,
     })
-    .eq("id", milestoneId)
-    .eq("user_id", user.id);
+    .eq("id", milestoneId);
 
   if (error) return { success: false, message: "Failed to update milestone." };
 
@@ -165,11 +160,24 @@ export async function completeMilestone(
     return { success: false, message: "You must be signed in." };
   const { supabase, user } = auth;
 
+  const { data: existing } = await supabase
+    .from("business_milestones")
+    .select("id, business_id")
+    .eq("id", milestoneId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!existing)
+    return { success: false, message: "Milestone not found or access denied." };
+
+  const canWrite = await canWriteOperations(user.id, existing.business_id);
+  if (!canWrite)
+    return { success: false, message: "Milestone not found or access denied." };
+
   const { error } = await supabase
     .from("business_milestones")
     .update({ status: "completed", completed_at: new Date().toISOString() })
     .eq("id", milestoneId)
-    .eq("user_id", user.id)
     .is("deleted_at", null);
 
   if (error) return { success: false, message: "Failed to complete milestone." };
@@ -187,11 +195,24 @@ export async function reopenMilestone(
     return { success: false, message: "You must be signed in." };
   const { supabase, user } = auth;
 
+  const { data: existing } = await supabase
+    .from("business_milestones")
+    .select("id, business_id")
+    .eq("id", milestoneId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!existing)
+    return { success: false, message: "Milestone not found or access denied." };
+
+  const canWrite = await canWriteOperations(user.id, existing.business_id);
+  if (!canWrite)
+    return { success: false, message: "Milestone not found or access denied." };
+
   const { error } = await supabase
     .from("business_milestones")
     .update({ status: "in_progress", completed_at: null })
     .eq("id", milestoneId)
-    .eq("user_id", user.id)
     .is("deleted_at", null);
 
   if (error) return { success: false, message: "Failed to reopen milestone." };
@@ -209,11 +230,24 @@ export async function deleteMilestone(
     return { success: false, message: "You must be signed in." };
   const { supabase, user } = auth;
 
+  const { data: existing } = await supabase
+    .from("business_milestones")
+    .select("id, business_id")
+    .eq("id", milestoneId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!existing)
+    return { success: false, message: "Milestone not found or access denied." };
+
+  const canWrite = await canWriteOperations(user.id, existing.business_id);
+  if (!canWrite)
+    return { success: false, message: "Milestone not found or access denied." };
+
   const { error } = await supabase
     .from("business_milestones")
     .update({ deleted_at: new Date().toISOString() })
-    .eq("id", milestoneId)
-    .eq("user_id", user.id);
+    .eq("id", milestoneId);
 
   if (error) return { success: false, message: "Failed to delete milestone." };
   revalidatePath("/milestones");

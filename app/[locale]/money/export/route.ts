@@ -9,6 +9,7 @@ import {
   getCategoryLabel,
   isValidCategory,
 } from "@/lib/bookkeeping";
+import { canReadFinance } from "@/lib/business-access";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -38,15 +39,9 @@ export async function GET(req: NextRequest) {
     .lte("transaction_date", monthEndIso(validMonth))
     .order("transaction_date", { ascending: false });
 
-  // Validate business ownership before filtering
+  // Validate business read access before filtering
   if (businessParam) {
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("id", businessParam)
-      .eq("owner_id", user.id)
-      .maybeSingle();
-    if (biz) {
+    if (await canReadFinance(user.id, businessParam)) {
       query = query.eq("business_id", businessParam);
     }
   }

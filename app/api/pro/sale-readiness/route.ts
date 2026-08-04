@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState, checkProFeature } from '@/lib/billing';
+import { canWriteFinance } from '@/lib/business-access';
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -31,15 +32,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'businessId is required.' }, { status: 400 });
   }
 
-  // Verify business ownership
-  const { data: business, error: bizError } = await supabase
-    .from('businesses')
-    .select('id')
-    .eq('id', businessId)
-    .eq('owner_id', user.id)
-    .maybeSingle();
-
-  if (bizError || !business) {
+  const canWrite = await canWriteFinance(user.id, businessId);
+  if (!canWrite) {
     return NextResponse.json({ error: 'Business not found.' }, { status: 404 });
   }
 

@@ -3,6 +3,7 @@ import { updateBusinessAction } from "../actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { canEditBusiness, canViewBusiness } from "@/lib/business-access";
 
 export const metadata: Metadata = {
   title: "Business Profile | Ownward",
@@ -19,11 +20,17 @@ export default async function BusinessDetailPage({
   const qp = await searchParams;
   const { supabase, user } = await requireUser();
 
+  const [canView, canEdit] = await Promise.all([
+    canViewBusiness(user.id, businessId),
+    canEditBusiness(user.id, businessId),
+  ]);
+
+  if (!canView) notFound();
+
   const { data: biz } = await supabase
     .from("businesses")
     .select("*")
     .eq("id", businessId)
-    .eq("owner_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -70,6 +77,12 @@ export default async function BusinessDetailPage({
         </div>
       )}
 
+      {!canEdit && (
+        <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-300 text-sm">
+          You have read-only access to this workspace.
+        </div>
+      )}
+
       <form action={updateBusinessAction} className="space-y-5">
         <input type="hidden" name="business_id" value={biz.id} />
 
@@ -83,6 +96,7 @@ export default async function BusinessDetailPage({
             type="text"
             required
             defaultValue={biz.name}
+            disabled={!canEdit}
             className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400"
           />
         </div>
@@ -96,6 +110,7 @@ export default async function BusinessDetailPage({
             name="description"
             rows={3}
             defaultValue={biz.description ?? ""}
+            disabled={!canEdit}
             className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
           />
         </div>
@@ -108,6 +123,7 @@ export default async function BusinessDetailPage({
               name="industry"
               type="text"
               defaultValue={biz.industry ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -118,6 +134,7 @@ export default async function BusinessDetailPage({
               name="location"
               type="text"
               defaultValue={biz.location ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -132,6 +149,7 @@ export default async function BusinessDetailPage({
               type="url"
               defaultValue={biz.website ?? ""}
               placeholder="https://"
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -142,6 +160,7 @@ export default async function BusinessDetailPage({
               name="year_established"
               type="number"
               defaultValue={biz.year_established ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -153,6 +172,7 @@ export default async function BusinessDetailPage({
             id="business_stage"
             name="business_stage"
             defaultValue={biz.business_stage ?? ""}
+            disabled={!canEdit}
             className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
           >
             <option value="">Select stage...</option>
@@ -171,6 +191,7 @@ export default async function BusinessDetailPage({
               type="number"
               min="0"
               defaultValue={biz.employee_count ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -182,6 +203,7 @@ export default async function BusinessDetailPage({
               type="number"
               min="0"
               defaultValue={biz.annual_revenue ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -195,6 +217,7 @@ export default async function BusinessDetailPage({
               name="owner_role"
               type="text"
               defaultValue={biz.owner_role ?? ""}
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -206,6 +229,7 @@ export default async function BusinessDetailPage({
               type="text"
               defaultValue={biz.primary_customer ?? ""}
               placeholder="e.g., SMBs, consumers..."
+              disabled={!canEdit}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-white focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -214,6 +238,7 @@ export default async function BusinessDetailPage({
         <div className="flex items-center gap-4 pt-2">
           <button
             type="submit"
+            disabled={!canEdit}
             className="rounded-lg bg-cyan-400 px-6 py-3 font-semibold text-slate-950 hover:bg-cyan-300 transition"
           >
             Save Changes

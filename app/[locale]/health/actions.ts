@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState } from "@/lib/billing";
 import { calculateHealthScores, HEALTH_QUESTIONS } from "@/lib/health/scoring";
+import { canEditBusiness } from "@/lib/business-access";
 
 export type HealthCheckResult =
   | { success: true; assessmentId: string; overallScore: number }
@@ -34,16 +35,8 @@ export async function saveHealthAssessment(
   if (!businessId)
     return { success: false, message: "Missing business ID." };
 
-  // Ownership check
-  const { data: biz } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("id", businessId)
-    .eq("owner_id", user.id)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!biz) return { success: false, message: "Business not found." };
+  const canEdit = await canEditBusiness(user.id, businessId);
+  if (!canEdit) return { success: false, message: "Business not found." };
 
   // Build answers map from form data
   const answers: Record<string, string> = {};

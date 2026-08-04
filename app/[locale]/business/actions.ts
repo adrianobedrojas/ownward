@@ -7,6 +7,7 @@ import {
   getUserBillingState,
   checkBusinessLimit,
 } from "@/lib/billing";
+import { canEditBusiness, canViewBusiness } from "@/lib/business-access";
 
 export type BusinessActionResult =
   | { success: true; businessId: string }
@@ -189,15 +190,8 @@ export async function updateBusiness(
     return { success: false, message: "Missing business ID." };
   }
 
-  // Ownership validation — never trust client-supplied user_id
-  const { data: existing } = await supabase
-    .from("businesses")
-    .select("id, owner_id")
-    .eq("id", businessId)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!existing || existing.owner_id !== user.id) {
+  const canEdit = await canEditBusiness(user.id, businessId);
+  if (!canEdit) {
     return { success: false, message: "Business not found or access denied." };
   }
 
@@ -257,7 +251,7 @@ export async function updateBusiness(
     .from("businesses")
     .update(updates)
     .eq("id", businessId)
-    .eq("owner_id", user.id);
+    .is("deleted_at", null);
 
   if (error) {
     return { success: false, message: "Failed to update business." };
@@ -279,16 +273,8 @@ export async function setActiveBusiness(
   }
   const { supabase, user } = auth;
 
-  // Validate ownership
-  const { data: biz } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("id", businessId)
-    .eq("owner_id", user.id)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!biz) {
+  const canView = await canViewBusiness(user.id, businessId);
+  if (!canView) {
     return { success: false, message: "Business not found or access denied." };
   }
 
