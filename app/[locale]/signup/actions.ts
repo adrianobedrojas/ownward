@@ -1,10 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
 import { isValidAccountType } from "@/lib/auth/account-types";
+import { randomUUID } from "node:crypto";
 
 export async function signup(formData: FormData) {
   const accountType = String(formData.get("accountType") ?? "");
@@ -56,5 +58,15 @@ export async function signup(formData: FormData) {
     redirect("/error");
   }
 
-  redirect("/check-email");
+  const signupNonce = randomUUID();
+  const cookieStore = await cookies();
+  cookieStore.set("ownward_signup_success_nonce", signupNonce, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 900,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  redirect(`/check-email?signup=success&nonce=${encodeURIComponent(signupNonce)}`);
 }

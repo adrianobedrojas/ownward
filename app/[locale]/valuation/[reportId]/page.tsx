@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { requireUser } from "@/lib/require-user";
 import { getUserBillingState } from "@/lib/billing";
 import { ValuationRange } from "@/components/valuation/ValuationRange";
@@ -10,6 +11,7 @@ import { ValueDnaScorecard } from "@/components/valuation/ValueDnaScorecard";
 import { BuyerLens } from "@/components/valuation/BuyerLens";
 import { ValueBridge } from "@/components/valuation/ValueBridge";
 import { RiskMap } from "@/components/valuation/RiskMap";
+import ValuationCompleteTracker from "@/components/valuation/ValuationCompleteTracker";
 import type { ValuationResult } from "@/lib/valuation/types";
 import type { ValuationLevel } from "@/lib/billing";
 import { archiveReportFormAction } from "../actions";
@@ -28,6 +30,7 @@ function isUuid(value: string) {
 
 interface PageProps {
   params: Promise<{ reportId: string }>;
+  searchParams: Promise<{ valuation?: string; nonce?: string }>;
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -52,8 +55,9 @@ function PriorityBadge({ priority }: { priority: "immediate" | "short-term" | "l
   );
 }
 
-export default async function ValuationReportPage({ params }: PageProps) {
+export default async function ValuationReportPage({ params, searchParams }: PageProps) {
   const { reportId } = await params;
+  const resolvedSearchParams = await searchParams;
 
   if (!isUuid(reportId)) {
     notFound();
@@ -100,9 +104,19 @@ export default async function ValuationReportPage({ params }: PageProps) {
 
   const showDetailed = levelRank[effectiveLevel] >= levelRank["detailed"];
   const showEnhanced = levelRank[effectiveLevel] >= levelRank["enhanced"];
+  const valuationNonceFromQuery = resolvedSearchParams.nonce ?? "";
+  const cookieStore = await cookies();
+  const valuationNonceFromCookie = cookieStore.get("ownward_valuation_complete_nonce")?.value ?? "";
+  const verifiedValuationNonce =
+    resolvedSearchParams.valuation === "complete" &&
+    valuationNonceFromQuery &&
+    valuationNonceFromCookie === valuationNonceFromQuery
+      ? valuationNonceFromQuery
+      : null;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <ValuationCompleteTracker reportLevel={effectiveLevel} verifiedNonce={verifiedValuationNonce} />
       {/* Header */}
       <div className="mb-2">
         <Link

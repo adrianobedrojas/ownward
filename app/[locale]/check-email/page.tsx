@@ -1,20 +1,42 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { cookies } from 'next/headers';
 import { Link } from '@/i18n/navigation';
 import { ResendConfirmationForm } from '@/components/ResendConfirmationForm';
+import SignupSuccessTracker from '@/components/analytics/SignupSuccessTracker';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('checkEmail.title'), description: t('checkEmail.description') };
+  return {
+    title: t('checkEmail.title'),
+    description: t('checkEmail.description'),
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
 }
 
-export default async function CheckEmailPage() {
+interface CheckEmailPageProps {
+  searchParams: Promise<{ signup?: string; nonce?: string }>;
+}
+
+export default async function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
   const t = await getTranslations('Authentication.checkEmail');
   const helpPoints = t.raw('helpPoints') as string[];
+  const resolvedSearchParams = await searchParams;
+  const cookieStore = await cookies();
+  const cookieNonce = cookieStore.get('ownward_signup_success_nonce')?.value ?? '';
+  const signupNonce = resolvedSearchParams.nonce ?? '';
+  const verifiedSignupNonce =
+    resolvedSearchParams.signup === 'success' && signupNonce && cookieNonce === signupNonce
+      ? signupNonce
+      : null;
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-73px)] max-w-7xl items-center justify-center px-4 py-12 sm:px-6">
+      <SignupSuccessTracker verifiedNonce={verifiedSignupNonce} />
       <section className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center shadow-2xl shadow-slate-950">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-400/10 text-3xl">✉️</div>
         <p className="mt-6 text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('badge')}</p>

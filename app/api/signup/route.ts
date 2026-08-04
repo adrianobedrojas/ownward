@@ -2,14 +2,37 @@ import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
 import { isValidAccountType } from "@/lib/auth/account-types";
+import { randomUUID } from "node:crypto";
 
-function redirectTo(path: string) {
+function redirectTo(path: string, setCookie?: string) {
+  const headers: Record<string, string> = {
+    Location: path,
+  };
+
+  if (setCookie) {
+    headers["Set-Cookie"] = setCookie;
+  }
+
   return new Response(null, {
     status: 303,
-    headers: {
-      Location: path,
-    },
+    headers,
   });
+}
+
+function buildSignupSuccessCookie(nonce: string): string {
+  const parts = [
+    `ownward_signup_success_nonce=${encodeURIComponent(nonce)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=900",
+  ];
+
+  if (process.env.NODE_ENV === "production") {
+    parts.push("Secure");
+  }
+
+  return parts.join("; ");
 }
 
 export async function POST(request: Request) {
@@ -81,5 +104,11 @@ export async function POST(request: Request) {
     return redirectTo("/error");
   }
 
-  return redirectTo("/check-email");
+  const signupNonce = randomUUID();
+  const signupCookie = buildSignupSuccessCookie(signupNonce);
+
+  return redirectTo(
+    `/check-email?signup=success&nonce=${encodeURIComponent(signupNonce)}`,
+    signupCookie,
+  );
 }
