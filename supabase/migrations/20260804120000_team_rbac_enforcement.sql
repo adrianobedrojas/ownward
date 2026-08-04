@@ -651,7 +651,7 @@ CREATE POLICY "business_inv_invited_select"
   ON public.business_member_invitations FOR SELECT TO authenticated
   USING (
     public.normalize_email(email) = public.normalize_email(
-      coalesce((SELECT p.email FROM public.profiles p WHERE p.id = auth.uid() LIMIT 1), '')
+      coalesce(auth.jwt() ->> 'email', '')
     )
   );
 
@@ -670,12 +670,12 @@ CREATE POLICY "business_inv_invited_update"
     status = 'pending'
     AND expires_at > now()
     AND public.normalize_email(email) = public.normalize_email(
-      coalesce((SELECT p.email FROM public.profiles p WHERE p.id = auth.uid() LIMIT 1), '')
+      coalesce(auth.jwt() ->> 'email', '')
     )
   )
   WITH CHECK (
     public.normalize_email(email) = public.normalize_email(
-      coalesce((SELECT p.email FROM public.profiles p WHERE p.id = auth.uid() LIMIT 1), '')
+      coalesce(auth.jwt() ->> 'email', '')
     )
   );
 
