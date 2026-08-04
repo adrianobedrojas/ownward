@@ -1050,36 +1050,64 @@ END;
 $$;
 
 DO $$
+DECLARE
+  v_has_user_id boolean;
+  v_has_is_public boolean;
+  v_has_status boolean;
 BEGIN
-  IF EXISTS (
+  SELECT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'user_id'
-  ) THEN
-    ALTER TABLE public.business_listings ENABLE ROW LEVEL SECURITY;
+  ) INTO v_has_user_id;
 
-    DROP POLICY IF EXISTS "Users can manage their own listings" ON public.business_listings;
-    DROP POLICY IF EXISTS "Collaborator read listings" ON public.business_listings;
-    DROP POLICY IF EXISTS "listing_owner_select" ON public.business_listings;
-    DROP POLICY IF EXISTS "listing_owner_insert" ON public.business_listings;
-    DROP POLICY IF EXISTS "listing_owner_update" ON public.business_listings;
-    DROP POLICY IF EXISTS "listing_owner_delete" ON public.business_listings;
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'is_public'
+  ) INTO v_has_is_public;
 
-    CREATE POLICY "listing_owner_select"
-      ON public.business_listings FOR SELECT TO authenticated
-      USING (user_id = auth.uid());
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'status'
+  ) INTO v_has_status;
 
-    CREATE POLICY "listing_owner_insert"
-      ON public.business_listings FOR INSERT TO authenticated
-      WITH CHECK (user_id = auth.uid());
+  IF v_has_user_id AND v_has_is_public AND v_has_status THEN
+    EXECUTE 'ALTER TABLE public.business_listings ENABLE ROW LEVEL SECURITY';
 
-    CREATE POLICY "listing_owner_update"
-      ON public.business_listings FOR UPDATE TO authenticated
-      USING (user_id = auth.uid())
-      WITH CHECK (user_id = auth.uid());
+    EXECUTE 'DROP POLICY IF EXISTS "Users can manage their own listings" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "Collaborator read listings" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "Owner and public read listings" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "listing_owner_select" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "listing_owner_insert" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "listing_owner_update" ON public.business_listings';
+    EXECUTE 'DROP POLICY IF EXISTS "listing_owner_delete" ON public.business_listings';
 
-    CREATE POLICY "listing_owner_delete"
-      ON public.business_listings FOR DELETE TO authenticated
-      USING (user_id = auth.uid());
+    EXECUTE $sql$
+      CREATE POLICY "listing_owner_select"
+        ON public.business_listings FOR SELECT TO authenticated
+        USING (
+          user_id = auth.uid()
+          OR (is_public = true AND status = 'published')
+        )
+    $sql$;
+
+    EXECUTE $sql$
+      CREATE POLICY "listing_owner_insert"
+        ON public.business_listings FOR INSERT TO authenticated
+        WITH CHECK (user_id = auth.uid())
+    $sql$;
+
+    EXECUTE $sql$
+      CREATE POLICY "listing_owner_update"
+        ON public.business_listings FOR UPDATE TO authenticated
+        USING (user_id = auth.uid())
+        WITH CHECK (user_id = auth.uid())
+    $sql$;
+
+    EXECUTE $sql$
+      CREATE POLICY "listing_owner_delete"
+        ON public.business_listings FOR DELETE TO authenticated
+        USING (user_id = auth.uid())
+    $sql$;
   END IF;
 END;
 $$;
