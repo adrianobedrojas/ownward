@@ -100,6 +100,7 @@
     "sell": "Sell",
     "features": "Features",
     "pricing": "Pricing",
+    "solutions": "Solutions",
     "guide": "Guide",
     "dashboard": "Dashboard",
     "books": "Books",
@@ -136,6 +137,7 @@
     "contact": "Contact",
     "guide": "Guide",
     "academy": "Academy",
+    "solutions": "Solutions",
     "instagramHandle": "@ownwardhub",
     "instagramAriaLabel": "Visit Ownward Hub on Instagram",
     "trust": "Legal and Trust"
@@ -148,7 +150,8 @@
       "primaryCta": "Explore businesses",
       "secondaryCta": "Sell a business",
       "tertiaryCta": "Run your business",
-      "guideCta": "Learn how Ownward Hub works →"
+      "guideCta": "Learn how Ownward Hub works →",
+      "solutionsCta": "Browse Ownward Solutions →"
     },
     "preview": {
       "browserLabel": "ownwardhub.com/preview",
@@ -1899,13 +1902,30 @@
     }
   },
   "AccountProducts": {
-    "pageTitle": "My Products | Ownward",
-    "pageDescription": "View your purchased Ownward products and access your workspaces.",
-    "heading": "My Products",
-    "subheading": "Products you have purchased appear here. Click Open Product to access your workspace.",
+    "pageTitle": "My Purchases | Ownward",
+    "pageDescription": "View your purchased Ownward solutions and access each fulfillment destination.",
+    "heading": "My Purchases",
+    "subheading": "Your completed and in-progress purchases appear here.",
     "emptyState": "You have not purchased any products yet.",
-    "exploreCta": "Explore Value Action Sprint",
-    "openProduct": "Open Product",
+    "exploreCta": "Explore Ownward Solutions",
+    "openProduct": "Open purchase",
+    "actions": {
+      "refunded": "Refunded",
+      "processing": "Processing",
+      "openWorkspace": "Open workspace",
+      "viewReport": "View report",
+      "managePromotion": "Manage promotion",
+      "viewEntitlement": "View purchase",
+      "noWorkspace": "No linked workspace"
+    },
+    "detail": {
+      "pageTitle": "Purchase detail | Ownward",
+      "pageDescription": "Review payment and fulfillment status for your purchase.",
+      "backToPurchases": "← Back to My Purchases",
+      "paymentStatusLabel": "Payment status",
+      "fulfillmentStatusLabel": "Fulfillment status",
+      "entitlementNote": "If your purchase includes access or promotion, it will appear automatically after fulfillment completes."
+    },
     "paymentStatus": {
       "paid": "Paid",
       "pending": "Pending",
@@ -1950,7 +1970,7 @@
   "AccountProductWorkspace": {
     "pageTitle": "Value Action Sprint Workspace | Ownward",
     "pageDescription": "Access your Value Action Sprint workspace.",
-    "backToProducts": "← Back to My Products",
+    "backToProducts": "← Back to My Purchases",
     "heading": "Value Action Sprint Workspace",
     "body": "Your workspace is active. Use this purchase as your dedicated planning and execution area.",
     "statusLabel": "Workspace status:",

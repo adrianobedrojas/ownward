@@ -32,8 +32,8 @@ describe("Product Registry — getProduct", () => {
 
   it("returns the product regardless of active status", async () => {
     const { getProduct } = await import("@/lib/commerce/products");
-    // value_dna_snapshot is inactive but getProduct still returns it
-    const product = getProduct("value_dna_snapshot");
+    // quick_boost is inactive but getProduct still returns it
+    const product = getProduct("quick_boost");
     expect(product).not.toBeNull();
     expect(product?.active).toBe(false);
   });
@@ -54,8 +54,8 @@ describe("Product Registry — getActiveProduct", () => {
 
   it("returns null for an inactive product", async () => {
     const { getActiveProduct } = await import("@/lib/commerce/products");
-    expect(getActiveProduct("value_dna_snapshot")).toBeNull();
-    expect(getActiveProduct("sale_readiness_blueprint")).toBeNull();
+    expect(getActiveProduct("quick_boost")).toBeNull();
+    expect(getActiveProduct("market_spotlight")).toBeNull();
     expect(getActiveProduct("transaction_workspace")).toBeNull();
   });
 });
@@ -111,18 +111,18 @@ describe("Product Registry — product definitions", () => {
     expect(p.purchaseType).toBe("one_time");
   });
 
-  it("value_action_sprint has fulfillmentBehavior create_workspace", async () => {
+  it("value_action_sprint has fulfillmentBehavior create_value_action_sprint_workspace", async () => {
     const { getProduct } = await import("@/lib/commerce/products");
     const p = getProduct("value_action_sprint")!;
-    expect(p.fulfillmentBehavior).toBe("create_workspace");
+    expect(p.fulfillmentBehavior).toBe("create_value_action_sprint_workspace");
   });
 
-  it("the first active product uses STRIPE_PRICE_VALUE_ACTION_SPRINT", async () => {
+  it("featured_listing is the first active product and has a dedicated Stripe env var", async () => {
     const { PRODUCT_KEYS, getProduct } = await import("@/lib/commerce/products");
     const firstActiveKey = PRODUCT_KEYS.find((key) => getProduct(key)?.active);
-    expect(firstActiveKey).toBe("value_action_sprint");
+    expect(firstActiveKey).toBe("featured_listing");
     const firstActive = getProduct(firstActiveKey!)!;
-    expect(firstActive.stripePriceEnvVar).toBe("STRIPE_PRICE_VALUE_ACTION_SPRINT");
+    expect(firstActive.stripePriceEnvVar).toBe("STRIPE_PRICE_FEATURED_LISTING");
   });
 });
 
@@ -179,7 +179,7 @@ describe("Commerce Checkout — product key enforcement", () => {
   it("rejects inactive products via getActiveProduct", async () => {
     const { getActiveProduct } = await import("@/lib/commerce/products");
     // Future products are inactive and must be rejected
-    expect(getActiveProduct("value_dna_snapshot")).toBeNull();
+    expect(getActiveProduct("quick_boost")).toBeNull();
     expect(getActiveProduct("launch_intelligence_pack")).toBeNull();
   });
 
@@ -538,15 +538,14 @@ describe("Existing subscription helpers — unaffected", () => {
     expect(isActiveSubscription(undefined)).toBe(false);
   });
 
-  it("getPriceIdForPlan still resolves subscription plans", async () => {
+  it("getPriceIdForPlan still resolves monthly subscription plans", async () => {
     process.env.STRIPE_PRICE_STARTER = "price_starter_monthly";
     process.env.STRIPE_PRICE_BUILDER = "price_builder_monthly";
     process.env.STRIPE_PRICE_PRO = "price_pro_monthly";
-    process.env.STRIPE_PRICE_STARTER_ANNUAL = "price_starter_annual";
     const { getPriceIdForPlan } = await import("@/lib/billing");
     expect(getPriceIdForPlan("starter", "monthly")).toBe("price_starter_monthly");
     expect(getPriceIdForPlan("pro", "monthly")).toBe("price_pro_monthly");
-    expect(getPriceIdForPlan("starter", "annual")).toBe("price_starter_annual");
+    expect(getPriceIdForPlan("starter", "annual")).toBeNull();
     expect(getPriceIdForPlan("unknown_plan")).toBeNull();
   });
 

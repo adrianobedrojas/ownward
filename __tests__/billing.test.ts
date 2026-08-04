@@ -242,9 +242,9 @@ describe("checkMilestoneMonthlyLimit", () => {
   });
 });
 
-// ─── Annual billing ───────────────────────────────────────────────────────────
+// ─── Monthly-only public billing ─────────────────────────────────────────────
 
-describe("annual billing — getPlanPriceMapAnnual", () => {
+describe("monthly-only billing", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -254,9 +254,6 @@ describe("annual billing — getPlanPriceMapAnnual", () => {
       STRIPE_PRICE_STARTER: "price_starter",
       STRIPE_PRICE_BUILDER: "price_builder",
       STRIPE_PRICE_PRO: "price_pro",
-      STRIPE_PRICE_STARTER_ANNUAL: "price_starter_annual",
-      STRIPE_PRICE_BUILDER_ANNUAL: "price_builder_annual",
-      STRIPE_PRICE_PRO_ANNUAL: "price_pro_annual",
     };
   });
 
@@ -264,16 +261,13 @@ describe("annual billing — getPlanPriceMapAnnual", () => {
     process.env = originalEnv;
   });
 
-  it("getAllowedPriceIds includes all six price IDs", async () => {
+  it("getAllowedPriceIds includes only monthly subscription price IDs", async () => {
     const { getAllowedPriceIds } = await import("@/lib/billing");
     const ids = getAllowedPriceIds();
     expect(ids.has("price_starter")).toBe(true);
     expect(ids.has("price_builder")).toBe(true);
     expect(ids.has("price_pro")).toBe(true);
-    expect(ids.has("price_starter_annual")).toBe(true);
-    expect(ids.has("price_builder_annual")).toBe(true);
-    expect(ids.has("price_pro_annual")).toBe(true);
-    expect(ids.size).toBe(6);
+    expect(ids.size).toBe(3);
   });
 
   it("getPriceIdForPlan defaults to monthly when no interval supplied", async () => {
@@ -290,25 +284,18 @@ describe("annual billing — getPlanPriceMapAnnual", () => {
     expect(getPriceIdForPlan("pro", "monthly")).toBe("price_pro");
   });
 
-  it("getPriceIdForPlan returns annual price IDs for annual interval", async () => {
+  it("getPriceIdForPlan returns null for annual interval", async () => {
     const { getPriceIdForPlan } = await import("@/lib/billing");
-    expect(getPriceIdForPlan("starter", "annual")).toBe("price_starter_annual");
-    expect(getPriceIdForPlan("builder", "annual")).toBe("price_builder_annual");
-    expect(getPriceIdForPlan("pro", "annual")).toBe("price_pro_annual");
+    expect(getPriceIdForPlan("starter", "annual")).toBeNull();
+    expect(getPriceIdForPlan("builder", "annual")).toBeNull();
+    expect(getPriceIdForPlan("pro", "annual")).toBeNull();
   });
 
-  it("getPlanByPriceId maps annual price IDs to the same plan entitlements", async () => {
-    const { getPlanByPriceId, getEntitlementsByPlan } = await import("@/lib/billing");
-    const starterAnnualPlan = getPlanByPriceId("price_starter_annual");
-    const builderAnnualPlan = getPlanByPriceId("price_builder_annual");
-    const proAnnualPlan = getPlanByPriceId("price_pro_annual");
-    expect(starterAnnualPlan).toBe("starter");
-    expect(builderAnnualPlan).toBe("builder");
-    expect(proAnnualPlan).toBe("pro");
-    // Same entitlements as monthly counterparts
-    expect(getEntitlementsByPlan("starter")).toEqual(getEntitlementsByPlan(starterAnnualPlan!));
-    expect(getEntitlementsByPlan("builder")).toEqual(getEntitlementsByPlan(builderAnnualPlan!));
-    expect(getEntitlementsByPlan("pro")).toEqual(getEntitlementsByPlan(proAnnualPlan!));
+  it("getPlanByPriceId returns null for annual price IDs", async () => {
+    const { getPlanByPriceId } = await import("@/lib/billing");
+    expect(getPlanByPriceId("price_starter_annual")).toBeNull();
+    expect(getPlanByPriceId("price_builder_annual")).toBeNull();
+    expect(getPlanByPriceId("price_pro_annual")).toBeNull();
   });
 
   it("getPlanByPriceId still maps monthly price IDs correctly", async () => {
@@ -324,14 +311,14 @@ describe("annual billing — getPlanPriceMapAnnual", () => {
   });
 });
 
-describe("annual billing — PLAN_CATALOG annualPrice", () => {
-  it("PLAN_CATALOG has correct annual prices for all plans", async () => {
+describe("PLAN_CATALOG annualPrice retirement", () => {
+  it("PLAN_CATALOG annual prices are retired for paid plans", async () => {
     const { PLAN_CATALOG } = await import("@/lib/billing");
     const byKey = Object.fromEntries(PLAN_CATALOG.map((p) => [p.key, p]));
     expect(byKey["free"].annualPrice).toBe(0);
-    expect(byKey["starter"].annualPrice).toBe(50);
-    expect(byKey["builder"].annualPrice).toBe(100);
-    expect(byKey["pro"].annualPrice).toBe(200);
+    expect(byKey["starter"].annualPrice).toBe(0);
+    expect(byKey["builder"].annualPrice).toBe(0);
+    expect(byKey["pro"].annualPrice).toBe(0);
   });
 
   it("PLAN_CATALOG monthly prices remain correct", async () => {

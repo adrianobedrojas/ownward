@@ -82,8 +82,8 @@ describe('FeaturedListingButton card payment clarification', () => {
   });
 });
 
-describe('Annual billing interval translations', () => {
-  it('has English billing toggle and annual wording', () => {
+describe('Annual billing copy still exists for historical context', () => {
+  it('has English annual wording in translations', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const en = require('../messages/en.json') as Record<string, Record<string, unknown>>;
     const pricing = en['Pricing'] as Record<string, unknown>;
@@ -98,7 +98,7 @@ describe('Annual billing interval translations', () => {
     expect(pricing['annualEquivalentSuffix']).toContain('mo');
   });
 
-  it('has Spanish billing toggle and annual wording', () => {
+  it('has Spanish annual wording in translations', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const es = require('../messages/es.json') as Record<string, Record<string, unknown>>;
     const pricing = es['Pricing'] as Record<string, unknown>;
@@ -114,21 +114,20 @@ describe('Annual billing interval translations', () => {
 });
 
 describe('PricingCards sends billing interval to checkout', () => {
-  it('includes billingInterval state and passes interval in JSON body', () => {
+  it('passes monthly interval in JSON body', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).toContain('billingInterval');
-    expect(pricingCards).toContain("interval: billingInterval");
+    expect(pricingCards).toContain("interval: 'monthly'");
     expect(pricingCards).toContain("'monthly'");
-    expect(pricingCards).toContain("'annual'");
+    expect(pricingCards).not.toContain("interval: 'annual'");
   });
 
-  it('defaults billing interval to monthly', () => {
+  it('does not keep billing interval toggle state', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).toContain("useState<'monthly' | 'annual'>('monthly')");
+    expect(pricingCards).not.toContain('billingInterval');
   });
 
-  it('uses aria-pressed for accessible billing toggle buttons', () => {
+  it('does not render annual toggle aria controls', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).toContain('aria-pressed');
+    expect(pricingCards).not.toContain('aria-pressed');
   });
 });

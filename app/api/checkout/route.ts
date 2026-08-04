@@ -43,7 +43,13 @@ export async function POST(req: Request) {
     if (rawInterval !== undefined && rawInterval !== "monthly" && rawInterval !== "annual") {
       return NextResponse.json({ error: "Invalid billing interval" }, { status: 400 });
     }
-    const billingInterval: BillingInterval = rawInterval ?? "monthly";
+    if (rawInterval === "annual") {
+      return NextResponse.json(
+        { error: "Annual billing is not available" },
+        { status: 400 }
+      );
+    }
+    const billingInterval: BillingInterval = "monthly";
 
     const resolvedPriceId =
       (requestedPlan ? getPriceIdForPlan(requestedPlan, billingInterval) : null) ??

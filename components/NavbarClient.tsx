@@ -24,6 +24,7 @@ export default function NavbarClient({ signedIn, controlCenterData }: NavbarClie
     { name: t('sell'), href: '/sell' },
     { name: t('features'), href: '/#features' },
     { name: t('pricing'), href: '/pricing' },
+    { name: t('solutions'), href: '/solutions' },
   ];
 
   function isActive(href: string) {
