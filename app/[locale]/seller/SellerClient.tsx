@@ -135,7 +135,7 @@ export default function SellerClient({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-slate-200">Sale Pipeline</h2>
-          <Link href="/seller/new" className="text-xs bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-2 rounded-lg font-semibold">
+          <Link href="/sell/new" className="text-xs bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-2 rounded-lg font-semibold">
             + New Opportunity
           </Link>
         </div>
@@ -143,7 +143,7 @@ export default function SellerClient({
         {businessOpps.length === 0 ? (
           <div className="rounded-xl border border-slate-700 bg-slate-900 p-8 text-center text-slate-400">
             No pipeline opportunities yet.{' '}
-            <Link href="/seller/new" className="text-cyan-400 hover:underline">Create your first one.</Link>
+            <Link href="/sell/new" className="text-cyan-400 hover:underline">Create your first one.</Link>
           </div>
         ) : (
           <div className="space-y-3">
