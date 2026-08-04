@@ -35,10 +35,11 @@ describe("team RBAC pending migrations schema safety", () => {
 
     const listingBlockB = section(
       migrationB,
-      "IF EXISTS (\n    SELECT 1 FROM information_schema.columns\n    WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'user_id'",
+      "DO $$\nDECLARE\n  v_has_user_id boolean;",
       "END;\n$$;"
     );
 
+    expect(listingBlockB).not.toBe("");
     expect(listingBlockA).not.toContain("business_id IS NOT NULL");
     expect(listingBlockA).not.toContain("public.has_business_access(auth.uid(), business_id)");
     expect(listingBlockB).not.toContain("business_id IS NOT NULL");
