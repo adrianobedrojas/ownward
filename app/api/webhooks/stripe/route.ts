@@ -944,7 +944,7 @@ async function fulfillProductResource(params: {
         throw new Error(`[one_time_product] Invalid conversation target for purchase ${purchaseId}`);
       }
 
-      if (!["active", "qualified", "nda_requested"].includes(conversation.status)) {
+      if (!["active", "qualified", "nda_requested", "deal_room"].includes(conversation.status)) {
         throw new Error(`[one_time_product] Conversation is not eligible for deal room creation`);
       }
 
