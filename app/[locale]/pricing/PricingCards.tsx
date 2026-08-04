@@ -20,12 +20,6 @@ interface PricingCardsProps {
   selectedGoal: PlanRecommendationGoal | null;
 }
 
-const ANNUAL_EQUIVALENT_MONTHLY: Record<string, string> = {
-  starter: '4.17',
-  builder: '8.33',
-  pro: '16.67',
-};
-
 const GB = 1024 * 1024 * 1024;
 const MB = 1024 * 1024;
 
@@ -42,9 +36,6 @@ export default function PricingCards({
     type: 'error' | 'info';
     text: string;
   } | null>(null);
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
-
-  const isAnnual = billingInterval === 'annual';
 
   const plans = ALL_PLAN_KEYS.map((key) => {
     const plan = PLAN_CATALOG.find((entry) => entry.key === key)!;
@@ -52,8 +43,6 @@ export default function PricingCards({
       key,
       isFree: key === 'free',
       monthlyPrice: `$${plan.monthlyPrice}`,
-      annualPrice: `$${plan.annualPrice}`,
-      annualEquivalentMonthly: ANNUAL_EQUIVALENT_MONTHLY[key] ?? null,
       featured: key === 'builder',
       name: t(`plans.${key}.name`),
       tagline: t(`plans.${key}.tagline`),
@@ -71,9 +60,8 @@ export default function PricingCards({
 
   const disclosure = isSpanish
     ? {
-        recurring: isAnnual
-          ? 'Cobro anual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.'
-          : 'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+        recurring:
+          'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
         cancel: 'Gestiona o cancela en Stripe Customer Portal. La cancelación normalmente aplica al final del período pagado.',
         legalLead: 'Al continuar aceptas los',
         terms: 'Términos',
@@ -81,9 +69,8 @@ export default function PricingCards({
         privacy: 'Política de privacidad',
       }
     : {
-        recurring: isAnnual
-          ? 'Billed annually unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.'
-          : 'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+        recurring:
+          'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',
@@ -202,7 +189,7 @@ export default function PricingCards({
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planKey, interval: billingInterval }),
+        body: JSON.stringify({ plan: planKey, interval: 'monthly' }),
       });
       const data = await res.json();
 
@@ -285,36 +272,8 @@ export default function PricingCards({
         </div>
       ) : null}
 
-      <div className="mt-8 flex items-center justify-center gap-3" role="group" aria-label={t('billingToggle.label')}>
-        <button
-          type="button"
-          aria-pressed={billingInterval === 'monthly'}
-          onClick={() => setBillingInterval('monthly')}
-          className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
-            billingInterval === 'monthly'
-              ? 'bg-cyan-400 text-slate-950'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-          }`}
-        >
-          {t('billingToggle.monthly')}
-        </button>
-        <button
-          type="button"
-          aria-pressed={billingInterval === 'annual'}
-          onClick={() => setBillingInterval('annual')}
-          className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
-            billingInterval === 'annual'
-              ? 'bg-cyan-400 text-slate-950'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-          }`}
-        >
-          {t('billingToggle.annual')}
-        </button>
-        {isAnnual ? (
-          <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
-            {t('billingToggle.savingsBadge')}
-          </span>
-        ) : null}
+      <div className="mt-8 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-3 text-center text-sm text-slate-300">
+        {isSpanish ? 'Facturación mensual activa para todos los planes de pago.' : 'Monthly billing is active for all paid plans.'}
       </div>
 
       {isSignedIn && currentPlan && currentPlan !== 'free' ? (
@@ -376,17 +335,6 @@ export default function PricingCards({
                   <p className="mt-4 text-3xl font-bold">
                     $0 <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
-                ) : isAnnual && plan.annualEquivalentMonthly ? (
-                  <>
-                    <p className="mt-4 text-3xl font-bold">
-                      {plan.annualPrice} <span className="text-sm font-normal text-slate-400">{t('perYear')}</span>
-                    </p>
-                    <p className="mt-1 text-sm text-emerald-300">
-                      ${plan.annualEquivalentMonthly}
-                      {t('annualEquivalentSuffix')}
-                    </p>
-                    <p className="mt-0.5 text-xs text-slate-500">{t('annualBilledOnce')}</p>
-                  </>
                 ) : (
                   <p className="mt-4 text-3xl font-bold">
                     {plan.monthlyPrice} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>

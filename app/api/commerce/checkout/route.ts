@@ -1,12 +1,87 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveProduct, getStripePriceId } from "@/lib/commerce/products";
+import {
+  getPurchasableProduct,
+  getStripePriceId,
+  isProductConfigured,
+  type ProductDefinition,
+} from "@/lib/commerce/products";
 import { getSiteUrl } from "@/lib/config";
 import { isObsoleteStripeCustomer } from "@/lib/billing";
 import Stripe from "stripe";
 
 const SUPPORTED_LOCALES = ["en", "es"] as const;
 const DEFAULT_LOCALE = "en";
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function getLocalePrefix(locale: string): string {
+  return locale === DEFAULT_LOCALE ? "" : `/${locale}`;
+}
+
+async function validateTargetEligibility(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  product: ProductDefinition,
+  targetId: string | null
+): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  if (product.requiredTargetType === "none") {
+    return { ok: true };
+  }
+
+  if (!targetId || !UUID_REGEX.test(targetId)) {
+    return {
+      ok: false,
+      status: 400,
+      error: "A valid targetId is required for this product",
+    };
+  }
+
+  if (product.requiredTargetType === "listing") {
+    const { data: listing } = await supabase
+      .from("business_listings")
+      .select("id, user_id, status, is_public")
+      .eq("id", targetId)
+      .maybeSingle();
+
+    if (!listing) {
+      return { ok: false, status: 404, error: "Target listing not found" };
+    }
+    if (listing.user_id !== userId) {
+      return { ok: false, status: 403, error: "You do not own this listing" };
+    }
+    if (listing.status !== "published" || !listing.is_public) {
+      return {
+        ok: false,
+        status: 422,
+        error: "Listing must be public and published for this product",
+      };
+    }
+    return { ok: true };
+  }
+
+  if (product.requiredTargetType === "business") {
+    const { data: business } = await supabase
+      .from("businesses")
+      .select("id, owner_id, deleted_at")
+      .eq("id", targetId)
+      .maybeSingle();
+
+    if (!business || business.deleted_at !== null) {
+      return { ok: false, status: 404, error: "Target business not found" };
+    }
+    if (business.owner_id !== userId) {
+      return { ok: false, status: 403, error: "You do not own this business" };
+    }
+    return { ok: true };
+  }
+
+  return {
+    ok: false,
+    status: 422,
+    error: "Target validation is not available for this product",
+  };
+}
 
 export async function POST(req: Request) {
   try {
@@ -53,16 +128,34 @@ export async function POST(req: Request) {
     const locale = SUPPORTED_LOCALES.includes(requestedLocale as "en" | "es")
       ? requestedLocale
       : DEFAULT_LOCALE;
-    const localePrefix = locale === DEFAULT_LOCALE ? "" : `/${locale}`;
+    const localePrefix = getLocalePrefix(locale);
+    const targetId =
+      body && typeof body === "object" && "targetId" in body
+        ? String((body as Record<string, unknown>).targetId ?? "").trim()
+        : "";
 
     if (!productKey) {
       return NextResponse.json({ error: "productKey is required" }, { status: 400 });
     }
 
-    // 3. Resolve product — rejects unknown or inactive keys
-    const product = getActiveProduct(productKey);
+    // 3. Resolve product — rejects unknown, planned, and unavailable keys
+    const product = getPurchasableProduct(productKey);
     if (!product) {
       return NextResponse.json({ error: "Invalid or unavailable product" }, { status: 400 });
+    }
+
+    if (!isProductConfigured(product)) {
+      return NextResponse.json({ error: "Product is not configured" }, { status: 500 });
+    }
+
+    const targetCheck = await validateTargetEligibility(
+      supabase,
+      user.id,
+      product,
+      targetId || null
+    );
+    if (!targetCheck.ok) {
+      return NextResponse.json({ error: targetCheck.error }, { status: targetCheck.status });
     }
 
     // 4. Resolve Stripe Price ID server-side from environment variables only
@@ -179,11 +272,12 @@ export async function POST(req: Request) {
       customer: stripeCustomerId,
       client_reference_id: user.id,
       success_url: `${siteUrl}${localePrefix}/account/products?success=purchased`,
-      cancel_url: `${siteUrl}${localePrefix}/products/value-action-sprint`,
+      cancel_url: `${siteUrl}${localePrefix}${product.cancelPath}`,
       metadata: {
         purchaseType: "one_time_product",
         userId: user.id,
         productKey: product.key,
+        targetId: targetId || "",
       },
     });
 

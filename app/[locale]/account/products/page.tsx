@@ -45,17 +45,27 @@ export default async function AccountProductsPage({
   const purchaseIds = items.map((purchase) => purchase.id);
 
   let entitlementPurchaseIds = new Set<string>();
+  const workspaceByPurchaseId = new Map<string, { id: string }>();
+
   if (purchaseIds.length > 0) {
     const { data: entitlementGrants } = await supabase
       .from("entitlement_grants")
       .select("purchase_id")
       .eq("status", "active")
-      .eq("product_key", "value_action_sprint")
       .in("purchase_id", purchaseIds);
 
     entitlementPurchaseIds = new Set(
       (entitlementGrants ?? []).map((grant) => String(grant.purchase_id))
     );
+
+    const { data: workspaces } = await supabase
+      .from("value_action_sprint_workspaces")
+      .select("id, purchase_id")
+      .in("purchase_id", purchaseIds);
+
+    for (const workspace of workspaces ?? []) {
+      workspaceByPurchaseId.set(String(workspace.purchase_id), { id: String(workspace.id) });
+    }
   }
 
   return (
@@ -69,7 +79,7 @@ export default async function AccountProductsPage({
         <div className="rounded-xl border border-slate-700 bg-slate-900/60 px-6 py-12 text-center">
           <p className="text-slate-400 text-lg">{t("emptyState")}</p>
           <Link
-            href={`/${locale === "es" ? "es/" : ""}products/value-action-sprint`}
+            href={`/${locale === "es" ? "es/" : ""}solutions`}
             className="mt-6 inline-block rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
           >
             {t("exploreCta")}
@@ -99,11 +109,48 @@ export default async function AccountProductsPage({
               { year: "numeric", month: "long", day: "numeric" }
             );
 
-            const workspaceHref =
-              purchase.product_key === "value_action_sprint" &&
-              entitlementPurchaseIds.has(purchase.id)
-                ? `/${locale === "es" ? "es/" : ""}account/products/${purchase.id}/workspace`
-                : null;
+            const localePrefix = locale === "es" ? "/es" : "";
+            const hasEntitlement = entitlementPurchaseIds.has(purchase.id);
+            const workspaceHref = `${localePrefix}/account/products/${purchase.id}/workspace`;
+
+            let actionLabel: string | null = null;
+            let actionHref: string | null = null;
+
+            const isRefunded =
+              purchase.payment_status === "refunded" ||
+              purchase.fulfillment_status === "refunded";
+
+            if (isRefunded) {
+              actionLabel = t("actions.refunded");
+            } else if (
+              purchase.payment_status !== "paid" ||
+              purchase.fulfillment_status !== "fulfilled"
+            ) {
+              actionLabel = t("actions.processing");
+            } else if (!product) {
+              actionLabel = t("actions.noWorkspace");
+            } else if (
+              product.fulfillmentBehavior === "create_value_action_sprint_workspace" &&
+              hasEntitlement &&
+              workspaceByPurchaseId.has(purchase.id)
+            ) {
+              actionLabel = t("actions.openWorkspace");
+              actionHref = workspaceHref;
+            } else if (
+              product.fulfillmentBehavior === "grant_report_access" &&
+              hasEntitlement
+            ) {
+              actionLabel = t("actions.viewReport");
+              actionHref = `${localePrefix}/valuation`;
+            } else if (product.fulfillmentBehavior === "apply_listing_promotion") {
+              actionLabel = t("actions.managePromotion");
+              actionHref = `${localePrefix}/dashboard?featured=active`;
+            } else if (hasEntitlement) {
+              actionLabel = t("actions.viewEntitlement");
+              actionHref = `${localePrefix}/account/products/${purchase.id}`;
+            } else {
+              actionLabel = t("actions.noWorkspace");
+            }
 
             return (
               <li
@@ -145,18 +192,20 @@ export default async function AccountProductsPage({
                   </div>
                 </div>
 
-                {workspaceHref &&
-                  purchase.payment_status === "paid" &&
-                  purchase.fulfillment_status === "fulfilled" && (
-                  <div className="mt-4">
+                <div className="mt-4">
+                  {actionHref ? (
                     <Link
-                      href={workspaceHref}
+                      href={actionHref}
                       className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
                     >
-                      {t("openProduct")}
+                      {actionLabel}
                     </Link>
-                  </div>
-                )}
+                  ) : (
+                    <span className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300">
+                      {actionLabel}
+                    </span>
+                  )}
+                </div>
               </li>
             );
           })}

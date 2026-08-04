@@ -100,6 +100,7 @@
     "sell": "Vender",
     "features": "Funciones",
     "pricing": "Precios",
+    "solutions": "Soluciones",
     "guide": "Guía",
     "dashboard": "Panel",
     "books": "Libros",
@@ -136,6 +137,7 @@
     "contact": "Contacto",
     "guide": "Guía",
     "academy": "Academia",
+    "solutions": "Soluciones",
     "instagramHandle": "@ownwardhub",
     "instagramAriaLabel": "Visita Ownward Hub en Instagram",
     "trust": "Legal y confianza"
@@ -148,7 +150,8 @@
       "primaryCta": "Explorar negocios",
       "secondaryCta": "Vender un negocio",
       "tertiaryCta": "Operar tu negocio",
-      "guideCta": "Aprende cómo funciona Ownward Hub →"
+      "guideCta": "Aprende cómo funciona Ownward Hub →",
+      "solutionsCta": "Explorar Soluciones Ownward →"
     },
     "preview": {
       "browserLabel": "ownwardhub.com/preview",
@@ -1899,13 +1902,30 @@
     }
   },
   "AccountProducts": {
-    "pageTitle": "Mis Productos | Ownward",
-    "pageDescription": "Consulta los productos que has comprado en Ownward y accede a tus espacios de trabajo.",
-    "heading": "Mis Productos",
-    "subheading": "Los productos que hayas comprado aparecen aquí. Haz clic en Abrir Producto para acceder a tu espacio de trabajo.",
+    "pageTitle": "Mis Compras | Ownward",
+    "pageDescription": "Consulta tus soluciones compradas y accede a cada destino de entrega.",
+    "heading": "Mis Compras",
+    "subheading": "Aquí aparecen tus compras completadas y en proceso.",
     "emptyState": "Aún no has comprado ningún producto.",
-    "exploreCta": "Explorar Value Action Sprint",
-    "openProduct": "Abrir Producto",
+    "exploreCta": "Explorar Soluciones Ownward",
+    "openProduct": "Abrir compra",
+    "actions": {
+      "refunded": "Reembolsado",
+      "processing": "Procesando",
+      "openWorkspace": "Abrir espacio de trabajo",
+      "viewReport": "Ver informe",
+      "managePromotion": "Gestionar promoción",
+      "viewEntitlement": "Ver compra",
+      "noWorkspace": "Sin espacio vinculado"
+    },
+    "detail": {
+      "pageTitle": "Detalle de compra | Ownward",
+      "pageDescription": "Revisa el estado de pago y entrega de tu compra.",
+      "backToPurchases": "← Volver a Mis Compras",
+      "paymentStatusLabel": "Estado del pago",
+      "fulfillmentStatusLabel": "Estado de entrega",
+      "entitlementNote": "Si tu compra incluye acceso o promoción, aparecerá automáticamente cuando termine la entrega."
+    },
     "paymentStatus": {
       "paid": "Pagado",
       "pending": "Pendiente",
@@ -1950,7 +1970,7 @@
   "AccountProductWorkspace": {
     "pageTitle": "Espacio de trabajo Value Action Sprint | Ownward",
     "pageDescription": "Accede a tu espacio de trabajo de Value Action Sprint.",
-    "backToProducts": "← Volver a Mis Productos",
+    "backToProducts": "← Volver a Mis Compras",
     "heading": "Espacio de trabajo Value Action Sprint",
     "body": "Tu espacio de trabajo está activo. Usa esta compra como tu área dedicada de planificación y ejecución.",
     "statusLabel": "Estado del espacio de trabajo:",

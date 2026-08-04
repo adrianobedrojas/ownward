@@ -240,6 +240,21 @@ async function handleFeaturedListingCheckout(
     );
   }
 
+  await activateFeaturedListingPromotion(
+    session,
+    supabaseAdmin,
+    userId,
+    listingId
+  );
+}
+
+async function activateFeaturedListingPromotion(
+  session: Stripe.Checkout.Session,
+  supabaseAdmin: SupabaseClient,
+  userId: string,
+  listingId: string
+): Promise<void> {
+
   // Idempotency: if a promotion for this checkout session already exists and
   // is active, skip re-processing.
   const { data: existing } = await supabaseAdmin
@@ -522,10 +537,10 @@ async function handleOneTimeProductCheckout(
     );
   }
 
-  // Fulfill based on the product's fulfillment behavior
-  if (product.fulfillmentBehavior === "create_workspace") {
-    if (productKey === "value_action_sprint") {
-      // Upsert workspace (UNIQUE on purchase_id)
+  // Fulfill based on explicit behavior map. Unknown or unfinished behaviors
+  // fail closed to avoid silent mis-fulfillment.
+  switch (product.fulfillmentBehavior) {
+    case "create_value_action_sprint_workspace": {
       const { error: workspaceError } = await supabaseAdmin
         .from("value_action_sprint_workspaces")
         .upsert(
@@ -543,6 +558,44 @@ async function handleOneTimeProductCheckout(
           `[one_time_product] Failed to upsert workspace for purchase ${purchase.id}: ${workspaceError.message}`
         );
       }
+      break;
+    }
+
+    case "grant_report_access": {
+      break;
+    }
+
+    case "apply_listing_promotion": {
+      const listingId = session.metadata?.targetId;
+      if (!listingId) {
+        throw new Error(
+          `[one_time_product] Missing listing target for product ${product.key} on session ${session.id}`
+        );
+      }
+
+      await activateFeaturedListingPromotion(
+        session,
+        supabaseAdmin,
+        userId,
+        listingId
+      );
+      break;
+    }
+
+    case "grant_timed_deal_room":
+    case "grant_credit_balance":
+    case "manual_service":
+    case "not_implemented": {
+      throw new Error(
+        `[one_time_product] Fulfillment behavior not available for ${product.key}: ${product.fulfillmentBehavior}`
+      );
+    }
+
+    default: {
+      const _exhaustive: never = product.fulfillmentBehavior;
+      throw new Error(
+        `[one_time_product] Unknown fulfillment behavior for ${product.key}: ${String(_exhaustive)}`
+      );
     }
   }
 

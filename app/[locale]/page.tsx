@@ -73,6 +73,8 @@ export default async function HomePage() {
             </div>
             <div className="mt-5">
               <Link href="/guide" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-400 hover:underline">{t('hero.guideCta')}</Link>
+              <span className="mx-2 text-slate-600">•</span>
+              <Link href="/solutions" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-400 hover:underline">{t('hero.solutionsCta')}</Link>
             </div>
           </div>
 
