@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { requireUser } from "@/lib/require-user";
 
 export const metadata: Metadata = {
@@ -47,7 +48,12 @@ function formatDate(iso: string | null): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
-export default async function DealsPage() {
+export default async function DealsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const { supabase, user } = await requireUser();
 
   // ── Fetch deal rooms where the user is an active member ──────────────────
@@ -192,6 +198,12 @@ export default async function DealsPage() {
             <p className="mt-2 text-3xl font-bold text-cyan-300">{totalDocs}</p>
           </article>
         </div>
+
+        <ContextualSolutionModule
+          placement="deal_rooms"
+          locale={locale === "es" ? "es" : "en"}
+          userId={user.id}
+        />
 
         {/* Deal rooms list */}
         <section className="mt-10 rounded-xl border border-slate-800 bg-slate-900 p-6">

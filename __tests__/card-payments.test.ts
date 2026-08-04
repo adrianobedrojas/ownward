@@ -114,20 +114,20 @@ describe('Annual billing copy still exists for historical context', () => {
 });
 
 describe('PricingCards sends billing interval to checkout', () => {
-  it('passes monthly interval in JSON body', () => {
+  it('passes selected billing interval in JSON body', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).toContain("interval: 'monthly'");
+    expect(pricingCards).toContain('interval: billingInterval');
     expect(pricingCards).toContain("'monthly'");
-    expect(pricingCards).not.toContain("interval: 'annual'");
+    expect(pricingCards).toContain("'annual'");
   });
 
-  it('does not keep billing interval toggle state', () => {
+  it('keeps billing interval toggle state', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).not.toContain('billingInterval');
+    expect(pricingCards).toContain('billingInterval');
   });
 
-  it('does not render annual toggle aria controls', () => {
+  it('renders billing interval aria controls', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).not.toContain('aria-pressed');
+    expect(pricingCards).toContain('aria-pressed');
   });
 });

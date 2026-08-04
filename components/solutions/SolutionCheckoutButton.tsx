@@ -8,6 +8,9 @@ type Props = {
   ctaBehavior: "checkout" | "coming_soon" | "included" | "contact" | "manage";
   status: "active" | "planned" | "coming_soon" | "included" | "contact";
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
+  targetId?: string;
+  targetOptions?: Array<{ id: string; label: string; description?: string }>;
+  onStartCheckout?: () => void;
 };
 
 export default function SolutionCheckoutButton({
@@ -16,9 +19,12 @@ export default function SolutionCheckoutButton({
   ctaBehavior,
   status,
   requiredTargetType,
+  targetId,
+  targetOptions = [],
+  onStartCheckout,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [targetId, setTargetId] = useState("");
+  const [selectedTarget, setSelectedTarget] = useState<string>(targetId ?? targetOptions[0]?.id ?? "");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const labels = useMemo(() => {
@@ -26,8 +32,9 @@ export default function SolutionCheckoutButton({
       return {
         buy: "Comprar",
         processing: "Redirigiendo…",
-        targetLabel: "ID del objetivo",
-        targetHint: "Requerido para esta solución",
+        targetLabel: "Selecciona objetivo",
+        targetHint: "Debes elegir un objetivo elegible",
+        missingTarget: "Selecciona un objetivo elegible para continuar.",
         comingSoon: "Próximamente",
         included: "Incluido",
         contact: "Contáctanos",
@@ -39,8 +46,9 @@ export default function SolutionCheckoutButton({
     return {
       buy: "Buy now",
       processing: "Redirecting…",
-      targetLabel: "Target ID",
-      targetHint: "Required for this solution",
+      targetLabel: "Select target",
+      targetHint: "You must choose an eligible target",
+      missingTarget: "Select an eligible target to continue.",
       comingSoon: "Coming soon",
       included: "Included",
       contact: "Contact us",
@@ -67,6 +75,13 @@ export default function SolutionCheckoutButton({
   }
 
   async function handleCheckout() {
+    const effectiveTargetId = targetId ?? selectedTarget;
+    if (requiredTargetType !== "none" && !effectiveTargetId) {
+      setErrorMessage(labels.missingTarget);
+      return;
+    }
+
+    onStartCheckout?.();
     setLoading(true);
     setErrorMessage(null);
 
@@ -77,7 +92,7 @@ export default function SolutionCheckoutButton({
         body: JSON.stringify({
           productKey,
           locale,
-          targetId: targetId.trim() || undefined,
+          targetId: effectiveTargetId || undefined,
         }),
       });
 
@@ -104,16 +119,29 @@ export default function SolutionCheckoutButton({
 
   return (
     <div className="space-y-2">
-      {requiredTargetType !== "none" ? (
+      {requiredTargetType !== "none" && !targetId && targetOptions.length > 0 ? (
         <label className="block text-xs text-slate-400">
           {labels.targetLabel}
-          <input
-            value={targetId}
-            onChange={(event) => setTargetId(event.target.value)}
-            placeholder={labels.targetHint}
+          <select
+            value={selectedTarget}
+            onChange={(event) => setSelectedTarget(event.target.value)}
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
-          />
+          >
+            <option value="">{labels.targetHint}</option>
+            {targetOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {targetOptions.find((option) => option.id === selectedTarget)?.description ? (
+            <span className="mt-1 block text-[11px] text-slate-500">
+              {targetOptions.find((option) => option.id === selectedTarget)?.description}
+            </span>
+          ) : null}
         </label>
+      ) : requiredTargetType !== "none" && !targetId ? (
+        <p className="text-xs text-slate-500">{labels.missingTarget}</p>
       ) : null}
 
       <button

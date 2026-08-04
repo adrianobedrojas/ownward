@@ -10,6 +10,7 @@ import { ValueDnaScorecard } from "@/components/valuation/ValueDnaScorecard";
 import { BuyerLens } from "@/components/valuation/BuyerLens";
 import { ValueBridge } from "@/components/valuation/ValueBridge";
 import { RiskMap } from "@/components/valuation/RiskMap";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import type { ValuationResult } from "@/lib/valuation/types";
 import type { ValuationLevel } from "@/lib/billing";
 import { archiveReportFormAction } from "../actions";
@@ -27,7 +28,7 @@ function isUuid(value: string) {
 }
 
 interface PageProps {
-  params: Promise<{ reportId: string }>;
+  params: Promise<{ locale: string; reportId: string }>;
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -53,7 +54,7 @@ function PriorityBadge({ priority }: { priority: "immediate" | "short-term" | "l
 }
 
 export default async function ValuationReportPage({ params }: PageProps) {
-  const { reportId } = await params;
+  const { locale, reportId } = await params;
 
   if (!isUuid(reportId)) {
     notFound();
@@ -171,6 +172,12 @@ export default async function ValuationReportPage({ params }: PageProps) {
       )}
 
       <div className="mt-8 space-y-8">
+        <ContextualSolutionModule
+          placement="valuation_result"
+          locale={locale === "es" ? "es" : "en"}
+          userId={user.id}
+        />
+
         {/* Core valuation range */}
         <ValuationRange
           defensiveValue={result.defensiveValue}

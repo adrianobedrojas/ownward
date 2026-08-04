@@ -3,6 +3,7 @@ import Link from "next/link";
 import { deleteListingDraft, publishListing, unpublishListing } from "./actions";
 import { requireUser } from "@/lib/require-user";
 import FeaturedListingButton from "@/components/FeaturedListingButton";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { getUserBillingState } from "@/lib/billing";
 import { getNextBestAction } from "@/lib/launchpad/next-best-action";
 
@@ -17,11 +18,15 @@ interface SearchParams {
 }
 
 export default async function DashboardPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<SearchParams>;
 }) {
-  const params = await searchParams;
+  const { locale } = await params;
+  const recommendationLocale = locale === "es" ? "es" : "en";
+  const queryParams = await searchParams;
   const { supabase, user } = await requireUser();
 
   // ── Billing & Launchpad data ─────────────────────────────────────────────
@@ -180,7 +185,7 @@ export default async function DashboardPage({
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       {/* Success / featured banners */}
-      {params.success === "draft-saved" && (
+      {queryParams.success === "draft-saved" && (
         <div className="mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
           <p className="font-semibold">Draft saved successfully!</p>
           <p className="text-sm text-emerald-400/80 mt-1">
@@ -188,7 +193,7 @@ export default async function DashboardPage({
           </p>
         </div>
       )}
-      {params.success === "onboarding-complete" && (
+      {queryParams.success === "onboarding-complete" && (
         <div className="mb-8 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-cyan-200">
           <p className="font-semibold">Onboarding complete!</p>
           <p className="text-sm text-cyan-300/80 mt-1">
@@ -196,7 +201,7 @@ export default async function DashboardPage({
           </p>
         </div>
       )}
-      {params.success === "password-updated" && (
+      {queryParams.success === "password-updated" && (
         <div className="mb-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
           <p className="font-semibold">Password updated!</p>
           <p className="text-sm text-emerald-400/80 mt-1">
@@ -205,7 +210,7 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {params.featured === "processing" && (
+      {queryParams.featured === "processing" && (
         <div className="mb-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200">
           <p className="font-semibold">Payment received — promotion pending</p>
           <p className="text-sm text-amber-300/80 mt-1">
@@ -214,7 +219,7 @@ export default async function DashboardPage({
           </p>
         </div>
       )}
-      {params.featured === "canceled" && (
+      {queryParams.featured === "canceled" && (
         <div className="mb-8 rounded-xl border border-slate-700 bg-slate-800 p-4 text-slate-300">
           <p className="font-semibold">Checkout canceled</p>
           <p className="text-sm text-slate-400 mt-1">
@@ -246,6 +251,14 @@ export default async function DashboardPage({
           </Link>
         </div>
       </div>
+
+      <ContextualSolutionModule
+        placement="dashboard"
+        locale={recommendationLocale}
+        userId={user.id}
+        currentPlan={billing.plan}
+        businessId={activeBizId ?? null}
+      />
 
       {/* ── Plan-named Launchpad ───────────────────────────────────────────── */}
       {billing.plan !== "free" && (

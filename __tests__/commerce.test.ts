@@ -542,10 +542,13 @@ describe("Existing subscription helpers — unaffected", () => {
     process.env.STRIPE_PRICE_STARTER = "price_starter_monthly";
     process.env.STRIPE_PRICE_BUILDER = "price_builder_monthly";
     process.env.STRIPE_PRICE_PRO = "price_pro_monthly";
+    process.env.STRIPE_PRICE_STARTER_ANNUAL = "price_starter_annual";
+    process.env.STRIPE_PRICE_BUILDER_ANNUAL = "price_builder_annual";
+    process.env.STRIPE_PRICE_PRO_ANNUAL = "price_pro_annual";
     const { getPriceIdForPlan } = await import("@/lib/billing");
     expect(getPriceIdForPlan("starter", "monthly")).toBe("price_starter_monthly");
     expect(getPriceIdForPlan("pro", "monthly")).toBe("price_pro_monthly");
-    expect(getPriceIdForPlan("starter", "annual")).toBeNull();
+    expect(getPriceIdForPlan("starter", "annual")).toBe("price_starter_annual");
     expect(getPriceIdForPlan("unknown_plan")).toBeNull();
   });
 

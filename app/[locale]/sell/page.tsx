@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -13,7 +14,7 @@ export default async function SellBusinessPage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  await params; // locale not needed here; i18n Link handles prefixing
+  const { locale } = await params;
   const t = await getTranslations('Sell');
   const tStudio = await getTranslations('ListingStudio');
   const steps = t.raw('prepSteps') as Array<Record<string, string>>;
@@ -26,6 +27,11 @@ export default async function SellBusinessPage({
         <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{t('heroTitle')}</h1>
         <p className="mt-4 text-lg leading-8 text-slate-300">{t('heroDescription')}</p>
       </div>
+
+      <ContextualSolutionModule
+        placement="sell_landing"
+        locale={locale === 'es' ? 'es' : 'en'}
+      />
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* Studio CTA */}

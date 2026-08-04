@@ -3,6 +3,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState } from "@/lib/billing";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { ValuationWizard } from "./ValuationWizard";
 import ValuationCalculator from "./ValuationCalculator";
 
@@ -36,6 +37,7 @@ function parseMode(value: string | undefined): Mode {
 }
 
 interface PageProps {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
@@ -48,7 +50,8 @@ function fmt(value: number | null) {
   }).format(value);
 }
 
-export default async function ValuationPage({ searchParams }: PageProps) {
+export default async function ValuationPage({ params, searchParams }: PageProps) {
+  const { locale: routeLocale } = await params;
   const { mode: rawMode } = await searchParams;
   const mode = parseMode(rawMode);
   const locale = await getLocale();
@@ -154,6 +157,13 @@ export default async function ValuationPage({ searchParams }: PageProps) {
 
         {/* ─── RANGE NOTE ─── */}
         <p className="mt-4 text-sm text-slate-400 italic">{t("rangeNote")}</p>
+
+        <ContextualSolutionModule
+          placement="valuation"
+          locale={routeLocale === "es" ? "es" : "en"}
+          userId={user?.id ?? null}
+          currentPlan={billing?.plan ?? null}
+        />
 
         {/* ─── MODE CONTENT ─── */}
 

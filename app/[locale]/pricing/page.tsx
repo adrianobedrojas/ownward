@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from '@/lib/billing';
 import { getPricingRecommendationFromSearchParams } from '@/lib/pricing';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import PricingCards from './PricingCards';
 
 export async function generateMetadata({
@@ -20,10 +21,14 @@ export async function generateMetadata({
 }
 
 export default async function PricingPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ goal?: string; recommend?: string; upgrade?: string }>;
 }) {
+  const { locale } = await params;
+  const recommendationLocale = locale === 'es' ? 'es' : 'en';
   const t = await getTranslations('Pricing');
   const query = await searchParams;
   const supabase = await createClient();
@@ -48,6 +53,12 @@ export default async function PricingPage({
         billingState={billingState}
         recommendedPlan={recommendation?.plan ?? null}
         selectedGoal={recommendation?.goal ?? null}
+      />
+      <ContextualSolutionModule
+        placement="pricing"
+        locale={recommendationLocale}
+        userId={user?.id ?? null}
+        currentPlan={billingState?.plan ?? null}
       />
     </div>
   );
