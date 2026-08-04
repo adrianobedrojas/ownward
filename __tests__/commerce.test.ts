@@ -97,31 +97,31 @@ describe("Product Registry — getStripePriceId", () => {
 });
 
 describe("Product Registry — product definitions", () => {
-  it("enhanced_valuation_report maps to the new Stripe env var and remains unavailable", async () => {
+  it("enhanced_valuation_report maps to the new Stripe env var and is purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("enhanced_valuation_report")!;
     expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_ENHANCED_VALUATION_REPORT");
     expect(p.requiredTargetType).toBe("business");
     expect(p.fulfillmentBehavior).toBe("grant_enhanced_valuation_report");
-    expect(getPurchasableProduct("enhanced_valuation_report")).toBeNull();
+    expect(getPurchasableProduct("enhanced_valuation_report")?.key).toBe("enhanced_valuation_report");
   });
 
-  it("deal_room_90 keeps transaction target type and remains unavailable", async () => {
+  it("deal_room_90 keeps transaction target type and is purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("deal_room_90")!;
     expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_DEAL_ROOM_90");
     expect(p.requiredTargetType).toBe("transaction");
     expect(p.fulfillmentBehavior).toBe("create_timed_deal_room");
-    expect(getPurchasableProduct("deal_room_90")).toBeNull();
+    expect(getPurchasableProduct("deal_room_90")?.key).toBe("deal_room_90");
   });
 
-  it("confidential_sale_launch maps to the new Stripe env var and remains unavailable", async () => {
+  it("confidential_sale_launch maps to the new Stripe env var and is purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("confidential_sale_launch")!;
     expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH");
     expect(p.requiredTargetType).toBe("listing");
     expect(p.fulfillmentBehavior).toBe("launch_confidential_sale_listing");
-    expect(getPurchasableProduct("confidential_sale_launch")).toBeNull();
+    expect(getPurchasableProduct("confidential_sale_launch")?.key).toBe("confidential_sale_launch");
   });
 
   it("resolves historical aliases for legacy purchase keys", async () => {

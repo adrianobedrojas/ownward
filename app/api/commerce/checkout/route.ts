@@ -7,7 +7,7 @@ import {
   type ProductDefinition,
 } from "@/lib/commerce/products";
 import { getSiteUrl } from "@/lib/config";
-import { isObsoleteStripeCustomer } from "@/lib/billing";
+import { getUserBillingState, isObsoleteStripeCustomer } from "@/lib/billing";
 import Stripe from "stripe";
 
 const SUPPORTED_LOCALES = ["en", "es"] as const;
@@ -19,14 +19,45 @@ function getLocalePrefix(locale: string): string {
   return locale === DEFAULT_LOCALE ? "" : `/${locale}`;
 }
 
+type TargetValidationResult =
+  | {
+      ok: true;
+      targetType: string;
+      targetId: string | null;
+      targetSnapshot: Record<string, unknown>;
+    }
+  | {
+      ok: false;
+      status: number;
+      error: string;
+      route?: string;
+    };
+
+type DuplicateGuardResult =
+  | { ok: true }
+  | {
+      ok: false;
+      status: number;
+      error: string;
+      route?: string;
+    };
+
 async function validateTargetEligibility(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   product: ProductDefinition,
   targetId: string | null
-): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+): Promise<TargetValidationResult> {
   if (product.requiredTargetType === "none") {
-    return { ok: true };
+    return {
+      ok: true,
+      targetType: "none",
+      targetId: null,
+      targetSnapshot: {
+        productKey: product.key,
+        targetType: "none",
+      },
+    };
   }
 
   if (!targetId || !UUID_REGEX.test(targetId)) {
@@ -40,7 +71,7 @@ async function validateTargetEligibility(
   if (product.requiredTargetType === "listing") {
     const { data: listing } = await supabase
       .from("business_listings")
-      .select("id, user_id, status, is_public")
+      .select("id, user_id, status, is_public, is_confidential, teaser_title, business_name")
       .eq("id", targetId)
       .maybeSingle();
 
@@ -50,6 +81,14 @@ async function validateTargetEligibility(
     if (listing.user_id !== userId) {
       return { ok: false, status: 403, error: "You do not own this listing" };
     }
+    if (product.key === "confidential_sale_launch" && listing.is_confidential) {
+      return {
+        ok: false,
+        status: 409,
+        error: "This listing already has confidential launch state.",
+        route: `/sell/${listing.id}/edit`,
+      };
+    }
     if (listing.status !== "published" || !listing.is_public) {
       return {
         ok: false,
@@ -57,13 +96,40 @@ async function validateTargetEligibility(
         error: "Listing must be public and published for this product",
       };
     }
-    return { ok: true };
+    if (product.key === "confidential_sale_launch") {
+      const teaser = String(listing.teaser_title ?? "").trim();
+      if (!teaser) {
+        return {
+          ok: false,
+          status: 422,
+          error: "Complete this listing with a public teaser title before checkout",
+          route: `/sell/${listing.id}/edit`,
+        };
+      }
+    }
+
+    return {
+      ok: true,
+      targetType: "listing",
+      targetId: listing.id,
+      targetSnapshot: {
+        productKey: product.key,
+        targetType: "listing",
+        listingId: listing.id,
+        displayName:
+          listing.is_confidential && listing.teaser_title
+            ? listing.teaser_title
+            : listing.business_name,
+        listingStatus: listing.status,
+        validatedOwner: true,
+      },
+    };
   }
 
   if (product.requiredTargetType === "business") {
     const { data: business } = await supabase
       .from("businesses")
-      .select("id, owner_id, deleted_at")
+      .select("id, owner_id, deleted_at, name")
       .eq("id", targetId)
       .maybeSingle();
 
@@ -73,7 +139,75 @@ async function validateTargetEligibility(
     if (business.owner_id !== userId) {
       return { ok: false, status: 403, error: "You do not own this business" };
     }
-    return { ok: true };
+    return {
+      ok: true,
+      targetType: "business",
+      targetId: business.id,
+      targetSnapshot: {
+        productKey: product.key,
+        targetType: "business",
+        businessId: business.id,
+        displayName: business.name,
+        validatedOwner: true,
+      },
+    };
+  }
+
+  if (product.requiredTargetType === "transaction" && product.key === "deal_room_90") {
+    const { data: conversation } = await supabase
+      .from("conversations")
+      .select("id, listing_id, buyer_id, seller_id, status")
+      .eq("id", targetId)
+      .maybeSingle();
+
+    if (!conversation) {
+      return { ok: false, status: 404, error: "Target conversation not found" };
+    }
+
+    if (conversation.seller_id !== userId) {
+      return {
+        ok: false,
+        status: 403,
+        error: "Only the seller can purchase Deal Room 90 for this conversation",
+      };
+    }
+
+    if (!["active", "qualified", "nda_requested"].includes(conversation.status)) {
+      return {
+        ok: false,
+        status: 422,
+        error: "Conversation is not eligible for Deal Room creation",
+      };
+    }
+
+    const { data: existingDealRoom } = await supabase
+      .from("deal_rooms")
+      .select("id")
+      .eq("conversation_id", conversation.id)
+      .maybeSingle();
+
+    if (existingDealRoom) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A Deal Room already exists for this conversation",
+        route: `/deals/${existingDealRoom.id}`,
+      };
+    }
+
+    return {
+      ok: true,
+      targetType: "transaction",
+      targetId: conversation.id,
+      targetSnapshot: {
+        productKey: product.key,
+        targetType: "transaction",
+        conversationId: conversation.id,
+        listingId: conversation.listing_id,
+        validatedSeller: true,
+        conversationStatus: conversation.status,
+      },
+    };
   }
 
   return {
@@ -81,6 +215,124 @@ async function validateTargetEligibility(
     status: 422,
     error: "Target validation is not available for this product",
   };
+}
+
+async function guardAgainstDuplicatePurchase(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  product: ProductDefinition,
+  targetType: string,
+  targetId: string | null
+): Promise<DuplicateGuardResult> {
+  if (!targetId || targetType === "none") {
+    return { ok: true };
+  }
+
+  const { data: openPurchase } = await supabase
+    .from("purchases")
+    .select("id, payment_status, fulfillment_status, fulfilled_resource_type, fulfilled_resource_id")
+    .eq("user_id", userId)
+    .eq("product_key", product.key)
+    .eq("target_type", targetType)
+    .eq("target_id", targetId)
+    .in("payment_status", ["pending", "paid"])
+    .in("fulfillment_status", ["pending", "fulfilled"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (openPurchase) {
+    const existingRoute =
+      openPurchase.fulfilled_resource_type === "deal_room" && openPurchase.fulfilled_resource_id
+        ? `/deals/${openPurchase.fulfilled_resource_id}`
+        : openPurchase.fulfilled_resource_type === "valuation_report"
+          ? `/account/products/${openPurchase.id}/report`
+          : openPurchase.fulfilled_resource_type === "listing"
+            ? `/sell/${openPurchase.fulfilled_resource_id}/edit`
+            : `/account/products`;
+    return {
+      ok: false,
+      status: 409,
+      error: "A purchase for this target is already pending or active",
+      route: existingRoute,
+    };
+  }
+
+  const { data: activeGrant } = await supabase
+    .from("entitlement_grants")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("product_key", product.key)
+    .eq("status", "active")
+    .eq("target_type", targetType)
+    .eq("target_id", targetId)
+    .maybeSingle();
+
+  if (activeGrant) {
+    return {
+      ok: false,
+      status: 409,
+      error: "You already have active access for this target",
+      route: `/account/products`,
+    };
+  }
+
+  if (product.key === "deal_room_90") {
+    const { data: existingRoom } = await supabase
+      .from("deal_rooms")
+      .select("id")
+      .eq("conversation_id", targetId)
+      .maybeSingle();
+
+    if (existingRoom) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A Deal Room already exists for this conversation",
+        route: `/deals/${existingRoom.id}`,
+      };
+    }
+  }
+
+  if (product.key === "enhanced_valuation_report") {
+    const { data: existingDelivery } = await supabase
+      .from("paid_valuation_report_deliveries")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("business_id", targetId)
+      .in("status", ["pending", "processing", "input_required", "ready"])
+      .maybeSingle();
+
+    if (existingDelivery) {
+      return {
+        ok: false,
+        status: 409,
+        error: "You already have a valuation delivery in progress for this business",
+        route: `/account/products`,
+      };
+    }
+  }
+
+  if (product.key === "confidential_sale_launch") {
+    const { data: launch } = await supabase
+      .from("confidential_sale_launches")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("listing_id", targetId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (launch) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A confidential launch is already active for this listing",
+        route: `/sell/${targetId}/edit`,
+      };
+    }
+  }
+
+  return { ok: true };
 }
 
 export async function POST(req: Request) {
@@ -156,7 +408,68 @@ export async function POST(req: Request) {
       targetId || null
     );
     if (!targetCheck.ok) {
-      return NextResponse.json({ error: targetCheck.error }, { status: targetCheck.status });
+      return NextResponse.json(
+        { error: targetCheck.error, route: targetCheck.route },
+        { status: targetCheck.status }
+      );
+    }
+
+    const billing = await getUserBillingState(supabase, user.id);
+
+    if (
+      product.key === "enhanced_valuation_report" &&
+      billing.entitlements.valuationLevel === "enhanced"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Included in your Pro plan. Use the valuation workflow directly.",
+          route: `${localePrefix}/valuation?mode=detailed`,
+        },
+        { status: 409 }
+      );
+    }
+
+    if (product.key === "deal_room_90" && billing.entitlements.dealRooms) {
+      const { count: activeRoomCount } = await supabase
+        .from("deal_rooms")
+        .select("id", { count: "exact", head: true })
+        .eq("seller_id", user.id)
+        .eq("status", "active");
+
+      if ((activeRoomCount ?? 0) < billing.entitlements.activeDealRoomLimit) {
+        return NextResponse.json(
+          {
+            error: "Included in your Pro plan. Use your included Deal Room capacity.",
+            route: `${localePrefix}/deals`,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    if (product.key === "confidential_sale_launch" && billing.entitlements.confidentialListings) {
+      return NextResponse.json(
+        {
+          error: "Confidential listing capability is already included in your current plan.",
+          route: `${localePrefix}/sell/${targetCheck.targetId}/edit`,
+        },
+        { status: 409 }
+      );
+    }
+
+    const duplicateGuard = await guardAgainstDuplicatePurchase(
+      supabase,
+      user.id,
+      product,
+      targetCheck.targetType,
+      targetCheck.targetId
+    );
+
+    if (!duplicateGuard.ok) {
+      return NextResponse.json(
+        { error: duplicateGuard.error, route: duplicateGuard.route },
+        { status: duplicateGuard.status }
+      );
     }
 
     // 4. Resolve Stripe Price ID server-side from environment variables only
@@ -265,6 +578,8 @@ export async function POST(req: Request) {
       }
     }
 
+    const serializedTargetSnapshot = JSON.stringify(targetCheck.targetSnapshot).slice(0, 490);
+
     // 7. Create Stripe Checkout Session (mode: payment — one-time purchase)
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -278,7 +593,9 @@ export async function POST(req: Request) {
         purchaseType: "one_time_product",
         userId: user.id,
         productKey: product.key,
-        targetId: targetId || "",
+        targetType: targetCheck.targetType,
+        targetId: targetCheck.targetId || "",
+        targetSnapshot: serializedTargetSnapshot,
       },
     });
 
