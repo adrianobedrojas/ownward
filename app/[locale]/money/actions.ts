@@ -12,6 +12,7 @@ import {
   monthEndIso,
 } from "@/lib/bookkeeping";
 import { getUserBillingState, checkBookkeepingAccess } from "@/lib/billing";
+import { canReadFinance, canWriteFinance } from "@/lib/business-access";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -30,20 +31,14 @@ async function getAuthenticatedUser() {
   return { supabase, user };
 }
 
-/** Verify a business belongs to the authenticated user. Returns true if valid or no business. */
-async function verifyBusinessOwnership(
+/** Verify bookkeeping write permission for a business if provided. */
+async function verifyBusinessWriteAccess(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   businessId: string | null
 ): Promise<boolean> {
   if (!businessId) return true;
-  const { data } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("id", businessId)
-    .eq("owner_id", userId)
-    .maybeSingle();
-  return Boolean(data);
+  return canWriteFinance(userId, businessId);
 }
 
 /** Verify a document belongs to the authenticated user. */
@@ -66,15 +61,28 @@ async function verifyDocumentOwnership(
 async function verifyTransactionAccess(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  transactionId: string
-): Promise<{ ok: boolean; transaction?: { transaction_date: string } }> {
+  transactionId: string,
+  mode: "read" | "write"
+): Promise<{ ok: boolean; transaction?: { transaction_date: string; business_id: string | null } }> {
   const { data } = await supabase
     .from("transactions")
-    .select("id, transaction_date")
+    .select("id, user_id, transaction_date, business_id")
     .eq("id", transactionId)
-    .eq("user_id", userId)
     .maybeSingle();
   if (!data) return { ok: false };
+
+  if (!data.business_id) {
+    return {
+      ok: data.user_id === userId,
+      transaction: data as { transaction_date: string; business_id: string | null },
+    };
+  }
+
+  const allowed = mode === "read"
+    ? await canReadFinance(userId, data.business_id)
+    : await canWriteFinance(userId, data.business_id);
+
+  if (!allowed) return { ok: false };
   return { ok: true, transaction: data };
 }
 
@@ -140,7 +148,7 @@ export async function addTransaction(formData: FormData) {
   if (paymentMethod && !isValidPaymentMethod(paymentMethod))
     backToMoney({ error: "InvalidPaymentMethod" });
 
-  if (businessId && !(await verifyBusinessOwnership(supabase, user.id, businessId)))
+  if (businessId && !(await verifyBusinessWriteAccess(supabase, user.id, businessId)))
     backToMoney({ error: "InvalidBusiness" });
 
   if (documentId && !(await verifyDocumentOwnership(supabase, user.id, documentId)))
@@ -205,7 +213,7 @@ export async function updateTransaction(formData: FormData) {
   if (!transactionId) redirect("/money?error=MissingId");
 
   // Verify ownership
-  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId, "write");
   if (!txAccess.ok) redirect("/money?error=NotFound");
 
   // Validate inputs
@@ -226,7 +234,7 @@ export async function updateTransaction(formData: FormData) {
   if (paymentMethod && !isValidPaymentMethod(paymentMethod))
     redirect(`/money/${transactionId}/edit?error=InvalidPaymentMethod`);
 
-  if (businessId && !(await verifyBusinessOwnership(supabase, user.id, businessId)))
+  if (businessId && !(await verifyBusinessWriteAccess(supabase, user.id, businessId)))
     redirect(`/money/${transactionId}/edit?error=InvalidBusiness`);
 
   if (documentId && !(await verifyDocumentOwnership(supabase, user.id, documentId)))
@@ -256,8 +264,7 @@ export async function updateTransaction(formData: FormData) {
       receipt_document_id: documentId,
       is_tax_deductible: isTaxDed,
     })
-    .eq("id", transactionId)
-    .eq("user_id", user.id);
+    .eq("id", transactionId);
 
   if (dbError) {
     console.error("updateTransaction db error:", dbError.message);
@@ -280,7 +287,7 @@ export async function deleteTransaction(formData: FormData) {
 
   if (!transactionId) backToMoney({ error: "MissingId" });
 
-  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId, "write");
   if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
   if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
@@ -289,8 +296,7 @@ export async function deleteTransaction(formData: FormData) {
   const { error: dbError } = await supabase
     .from("transactions")
     .delete()
-    .eq("id", transactionId)
-    .eq("user_id", user.id);
+    .eq("id", transactionId);
 
   if (dbError) {
     console.error("deleteTransaction db error:", dbError.message);
@@ -318,7 +324,7 @@ export async function markTransactionReviewed(formData: FormData) {
   if (!transactionId || !isValidReviewStatus(reviewStatus))
     backToMoney({ error: "InvalidInput" });
 
-  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId, "write");
   if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
   if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
@@ -327,8 +333,7 @@ export async function markTransactionReviewed(formData: FormData) {
   await supabase
     .from("transactions")
     .update({ review_status: reviewStatus })
-    .eq("id", transactionId)
-    .eq("user_id", user.id);
+    .eq("id", transactionId);
 
   revalidatePath("/money");
   const params: Record<string, string> = {};
@@ -350,7 +355,7 @@ export async function toggleTransactionReconciled(formData: FormData) {
 
   if (!transactionId) backToMoney({ error: "MissingId" });
 
-  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId);
+  const txAccess = await verifyTransactionAccess(supabase, user.id, transactionId, "write");
   if (!txAccess.ok) backToMoney({ error: "NotFound" });
 
   if (txAccess.transaction && await isPeriodClosed(supabase, user.id, txAccess.transaction.transaction_date))
@@ -359,8 +364,7 @@ export async function toggleTransactionReconciled(formData: FormData) {
   await supabase
     .from("transactions")
     .update({ reconciled_at: reconcile ? new Date().toISOString() : null })
-    .eq("id", transactionId)
-    .eq("user_id", user.id);
+    .eq("id", transactionId);
 
   revalidatePath("/money");
   const params: Record<string, string> = {};
@@ -382,7 +386,7 @@ export async function closeMonth(formData: FormData) {
   if (!monthParam || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam))
     backToMoney({ error: "InvalidMonth" });
 
-  if (businessId && !(await verifyBusinessOwnership(supabase, user.id, businessId)))
+  if (businessId && !(await verifyBusinessWriteAccess(supabase, user.id, businessId)))
     backToMoney({ error: "InvalidBusiness" });
 
   const monthStart = monthStartIso(monthParam);
@@ -438,7 +442,7 @@ export async function reopenMonth(formData: FormData) {
   if (!monthParam || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam))
     backToMoney({ error: "InvalidMonth" });
 
-  if (businessId && !(await verifyBusinessOwnership(supabase, user.id, businessId)))
+  if (businessId && !(await verifyBusinessWriteAccess(supabase, user.id, businessId)))
     backToMoney({ error: "InvalidBusiness" });
 
   const monthStart = monthStartIso(monthParam);

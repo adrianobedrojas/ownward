@@ -40,6 +40,7 @@ const OPS_ID = 'user-ops';
 const VIEWER_ID = 'user-viewer';
 const UNRELATED_ID = 'user-unrelated';
 const SUSPENDED_ID = 'user-suspended';
+const REMOVED_ID = 'user-removed';
 
 function setupMocks(
   userId: string,
@@ -108,6 +109,13 @@ describe('getBusinessAccess', () => {
     const access = await getBusinessAccess(UNRELATED_ID, BIZ_ID);
     expect(access).toBeNull();
   });
+
+  it('returns removed status for removed member', async () => {
+    setupMocks(REMOVED_ID, OWNER_ID, { role: 'viewer', status: 'removed' });
+    const { getBusinessAccess } = await import('@/lib/business-access');
+    const access = await getBusinessAccess(REMOVED_ID, BIZ_ID);
+    expect(access?.status).toBe('removed');
+  });
 });
 
 // ─── canViewBusiness ──────────────────────────────────────────────────────────
@@ -137,6 +145,12 @@ describe('canViewBusiness', () => {
     setupMocks(UNRELATED_ID, OWNER_ID, null);
     const { canViewBusiness } = await import('@/lib/business-access');
     expect(await canViewBusiness(UNRELATED_ID, BIZ_ID)).toBe(false);
+  });
+
+  it('removed member cannot view business', async () => {
+    setupMocks(REMOVED_ID, OWNER_ID, { role: 'viewer', status: 'removed' });
+    const { canViewBusiness } = await import('@/lib/business-access');
+    expect(await canViewBusiness(REMOVED_ID, BIZ_ID)).toBe(false);
   });
 });
 
@@ -218,6 +232,24 @@ describe('canManageBilling', () => {
   });
 });
 
+// ─── canDeleteBusiness ───────────────────────────────────────────────────────
+
+describe('canDeleteBusiness', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('owner can delete business', async () => {
+    setupMocks(OWNER_ID, OWNER_ID, null);
+    const { canDeleteBusiness } = await import('@/lib/business-access');
+    expect(await canDeleteBusiness(OWNER_ID, BIZ_ID)).toBe(true);
+  });
+
+  it('manager cannot delete business', async () => {
+    setupMocks(MANAGER_ID, OWNER_ID, { role: 'manager', status: 'active' });
+    const { canDeleteBusiness } = await import('@/lib/business-access');
+    expect(await canDeleteBusiness(MANAGER_ID, BIZ_ID)).toBe(false);
+  });
+});
+
 // ─── canAccessFinance ─────────────────────────────────────────────────────────
 
 describe('canAccessFinance', () => {
@@ -276,6 +308,12 @@ describe('canAccessCRM', () => {
     const { canAccessCRM } = await import('@/lib/business-access');
     expect(await canAccessCRM(VIEWER_ID, BIZ_ID, 'read')).toBe(true);
   });
+
+  it('removed member cannot write CRM', async () => {
+    setupMocks(REMOVED_ID, OWNER_ID, { role: 'operations', status: 'removed' });
+    const { canAccessCRM } = await import('@/lib/business-access');
+    expect(await canAccessCRM(REMOVED_ID, BIZ_ID, 'write')).toBe(false);
+  });
 });
 
 // ─── canManageListings ────────────────────────────────────────────────────────
@@ -299,5 +337,11 @@ describe('canManageListings', () => {
     setupMocks(VIEWER_ID, OWNER_ID, { role: 'viewer', status: 'active' });
     const { canManageListings } = await import('@/lib/business-access');
     expect(await canManageListings(VIEWER_ID, BIZ_ID, 'read')).toBe(true);
+  });
+
+  it('operations can write listings (limited operational editing)', async () => {
+    setupMocks(OPS_ID, OWNER_ID, { role: 'operations', status: 'active' });
+    const { canManageListings } = await import('@/lib/business-access');
+    expect(await canManageListings(OPS_ID, BIZ_ID, 'write')).toBe(true);
   });
 });

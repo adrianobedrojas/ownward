@@ -33,6 +33,21 @@ export default async function BusinessPage({
     .eq("id", user.id)
     .maybeSingle();
 
+  const { data: myMemberships } = await supabase
+    .from("business_members")
+    .select("business_id, role, status")
+    .eq("user_id", user.id)
+    .neq("role", "owner");
+
+  const sharedIds = Array.from(new Set((myMemberships ?? []).map((m) => m.business_id)));
+  const { data: sharedBusinesses } = sharedIds.length
+    ? await supabase
+        .from("businesses")
+        .select("id, name, profile_completion")
+        .in("id", sharedIds)
+        .is("deleted_at", null)
+    : { data: [] };
+
   const activeBusinessId = profile?.active_business_id;
   const businessCount = businesses?.length ?? 0;
   const canCreate = businessLimit > 0 && (businesses?.length ?? 0) < businessLimit;
@@ -194,6 +209,42 @@ export default async function BusinessPage({
           to add more.
         </div>
       )}
+
+      <section className="mt-10">
+        <h2 className="text-xl font-bold text-white">Shared with me</h2>
+        {!sharedBusinesses || sharedBusinesses.length === 0 ? (
+          <p className="mt-3 text-slate-400">No shared workspaces yet.</p>
+        ) : (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {sharedBusinesses.map((biz) => {
+              const membership = (myMemberships ?? []).find((m) => m.business_id === biz.id);
+              const isActive = membership?.status === "active";
+              return (
+                <div key={biz.id} className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-lg font-semibold text-white">{biz.name}</h3>
+                    <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300">
+                      {membership?.role ?? "viewer"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Status: {membership?.status ?? "unknown"}
+                  </p>
+                  <div className="mt-3">
+                    {isActive ? (
+                      <Link href={`/business/${biz.id}`} className="text-sm font-semibold text-cyan-300 hover:text-cyan-200">
+                        Enter workspace →
+                      </Link>
+                    ) : (
+                      <span className="text-sm text-amber-300">Restricted access</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

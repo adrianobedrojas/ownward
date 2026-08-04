@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState, checkLeadLimit } from "@/lib/billing";
+import { canReadCRM, canWriteCRM } from "@/lib/business-access";
 
 const CRM_STAGES = [
   "new",
@@ -28,6 +29,20 @@ async function getAuthenticatedUser() {
   } = await supabase.auth.getUser();
   if (error || !user) redirect("/login");
   return { supabase, user };
+}
+
+async function resolveBusinessId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  explicitBusinessId: string | null
+): Promise<string | null> {
+  if (explicitBusinessId) return explicitBusinessId;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("active_business_id")
+    .eq("id", userId)
+    .maybeSingle();
+  return profile?.active_business_id ?? null;
 }
 
 // ─── Create lead ─────────────────────────────────────────────────────────────
@@ -60,7 +75,7 @@ export async function createLead(formData: FormData) {
   const phone       = String(formData.get("phone") ?? "").trim() || null;
   const source      = String(formData.get("source") ?? "").trim() || null;
   const stage       = String(formData.get("stage") ?? "new");
-  const businessId  = String(formData.get("business_id") ?? "").trim() || null;
+  const requestedBusinessId = String(formData.get("business_id") ?? "").trim() || null;
   const estimatedValueStr = String(formData.get("estimated_value") ?? "").trim();
   const notes       = String(formData.get("notes") ?? "").trim() || null;
 
@@ -73,15 +88,12 @@ export async function createLead(formData: FormData) {
     redirect("/customers?error=InvalidValue");
   }
 
-  // Validate business ownership if provided
-  if (businessId) {
-    const { data: biz } = await supabase
-      .from("businesses")
-      .select("id")
-      .eq("id", businessId)
-      .eq("owner_id", user.id)
-      .maybeSingle();
-    if (!biz) redirect("/customers?error=InvalidBusiness");
+  const businessId = await resolveBusinessId(supabase, user.id, requestedBusinessId);
+  if (!businessId) redirect("/customers?error=InvalidBusiness");
+
+  const canWrite = await canWriteCRM(user.id, businessId);
+  if (!canWrite) {
+    redirect("/customers?error=Forbidden");
   }
 
   const { error: dbError } = await supabase.from("crm_contacts").insert({
@@ -124,13 +136,17 @@ export async function updateContact(formData: FormData) {
   // Verify ownership
   const { data: contact } = await supabase
     .from("crm_contacts")
-    .select("id, record_type")
+    .select("id, record_type, business_id")
     .eq("id", contactId)
-    .eq("owner_user_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
 
   if (!contact) redirect("/customers?error=NotFound");
+
+  if (!contact.business_id) redirect("/customers?error=InvalidBusiness");
+
+  const canWrite = await canWriteCRM(user.id, contact.business_id);
+  if (!canWrite) redirect("/customers?error=Forbidden");
 
   const name        = String(formData.get("name") ?? "").trim();
   const company     = String(formData.get("company") ?? "").trim() || null;
@@ -164,8 +180,7 @@ export async function updateContact(formData: FormData) {
       notes,
       next_follow_up_at: followUpStr,
     })
-    .eq("id", contactId)
-    .eq("owner_user_id", user.id);
+    .eq("id", contactId);
 
   if (dbError) {
     console.error("updateContact error:", dbError.message);
@@ -186,9 +201,8 @@ export async function convertLeadToCustomer(formData: FormData) {
 
   const { data: contact } = await supabase
     .from("crm_contacts")
-    .select("id, record_type")
+    .select("id, record_type, business_id")
     .eq("id", contactId)
-    .eq("owner_user_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
 
@@ -196,11 +210,14 @@ export async function convertLeadToCustomer(formData: FormData) {
     redirect("/customers?error=NotFound");
   }
 
+  if (!contact.business_id) redirect("/customers?error=InvalidBusiness");
+  const canWrite = await canWriteCRM(user.id, contact.business_id);
+  if (!canWrite) redirect("/customers?error=Forbidden");
+
   const { error: updateError } = await supabase
     .from("crm_contacts")
     .update({ record_type: "customer", stage: "won" })
-    .eq("id", contactId)
-    .eq("owner_user_id", user.id);
+    .eq("id", contactId);
 
   if (updateError) {
     console.error("convertLeadToCustomer error:", updateError.message);
@@ -227,11 +244,21 @@ export async function archiveContact(formData: FormData) {
   const contactId = String(formData.get("contact_id") ?? "").trim();
   if (!contactId) redirect("/customers?error=MissingId");
 
+  const { data: contact } = await supabase
+    .from("crm_contacts")
+    .select("id, business_id")
+    .eq("id", contactId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!contact || !contact.business_id) redirect("/customers?error=NotFound");
+  const canWrite = await canWriteCRM(user.id, contact.business_id);
+  if (!canWrite) redirect("/customers?error=Forbidden");
+
   const { error: dbError } = await supabase
     .from("crm_contacts")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", contactId)
-    .eq("owner_user_id", user.id)
     .is("deleted_at", null);
 
   if (dbError) {
@@ -251,11 +278,20 @@ export async function restoreContact(formData: FormData) {
   const contactId = String(formData.get("contact_id") ?? "").trim();
   if (!contactId) redirect("/customers?error=MissingId");
 
+  const { data: contact } = await supabase
+    .from("crm_contacts")
+    .select("id, business_id")
+    .eq("id", contactId)
+    .maybeSingle();
+
+  if (!contact || !contact.business_id) redirect("/customers?error=NotFound");
+  const canRead = await canReadCRM(user.id, contact.business_id);
+  if (!canRead) redirect("/customers?error=Forbidden");
+
   const { error: dbError } = await supabase
     .from("crm_contacts")
     .update({ deleted_at: null })
-    .eq("id", contactId)
-    .eq("owner_user_id", user.id);
+    .eq("id", contactId);
 
   if (dbError) {
     console.error("restoreContact error:", dbError.message);

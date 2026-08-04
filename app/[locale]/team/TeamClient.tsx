@@ -158,9 +158,9 @@ export default function TeamClient({
                               defaultValue={m.role}
                               disabled={isPending}
                               onChange={(e) =>
-                                startTransition(() =>
-                                  changeMemberRole(m.id, biz.id, e.target.value)
-                                )
+                                startTransition(() => {
+                                  void changeMemberRole(m.id, biz.id, e.target.value);
+                                })
                               }
                               className="text-xs bg-slate-800 border border-slate-600 rounded px-1 py-0.5"
                             >
@@ -170,7 +170,9 @@ export default function TeamClient({
                             </select>
                             {m.status === 'active' ? (
                               <button
-                                onClick={() => startTransition(() => suspendMember(m.id, biz.id))}
+                                onClick={() => startTransition(() => {
+                                  void suspendMember(m.id, biz.id);
+                                })}
                                 disabled={isPending}
                                 className="text-xs text-amber-400 hover:underline"
                               >
@@ -178,7 +180,9 @@ export default function TeamClient({
                               </button>
                             ) : (
                               <button
-                                onClick={() => startTransition(() => reactivateMember(m.id, biz.id))}
+                                onClick={() => startTransition(() => {
+                                  void reactivateMember(m.id, biz.id);
+                                })}
                                 disabled={isPending}
                                 className="text-xs text-green-400 hover:underline"
                               >
@@ -188,7 +192,9 @@ export default function TeamClient({
                             <button
                               onClick={() => {
                                 if (confirm(t('confirmRemove')))
-                                  startTransition(() => removeMember(m.id, biz.id));
+                                  startTransition(() => {
+                                    void removeMember(m.id, biz.id);
+                                  });
                               }}
                               disabled={isPending}
                               className="text-xs text-red-400 hover:underline"
@@ -215,7 +221,9 @@ export default function TeamClient({
                             {inv.email} · {roleLabel(t, inv.role)} · {t('expiresAt')} {new Date(inv.expires_at).toLocaleDateString()}
                           </span>
                           <button
-                            onClick={() => startTransition(() => cancelInvitation(inv.id, biz.id))}
+                            onClick={() => startTransition(() => {
+                              void cancelInvitation(inv.id, biz.id);
+                            })}
                             disabled={isPending}
                             className="text-xs text-red-400 hover:underline ml-2"
                           >
