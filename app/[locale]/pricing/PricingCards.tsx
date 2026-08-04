@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
 import { PLAN_CATALOG } from '@/lib/billing';
+import { trackGoogleAnalyticsConversion } from '@/lib/google-analytics';
 import {
   ALL_PLAN_KEYS,
   COMPARISON_ROW_KEYS,
@@ -214,6 +215,15 @@ export default function PricingCards({
       }
 
       if (data.url) {
+        trackGoogleAnalyticsConversion(
+          'begin_checkout',
+          {
+            checkout_type: 'subscription',
+            plan: planKey,
+            interval: 'monthly',
+          },
+          { dedupeKey: `begin_checkout:subscription:${planKey}:${data.url}` },
+        );
         window.location.assign(data.url);
       } else {
         setStatusMessage({ type: 'error', text: data.error ?? t('errors.checkout') });

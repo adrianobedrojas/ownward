@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import InstagramLink from '@/components/InstagramLink';
+import { trackGoogleAnalyticsConversion } from '@/lib/google-analytics';
 
 
 export default function ContactPage() {
@@ -36,6 +37,10 @@ export default function ContactPage() {
       setName('');
       setEmail('');
       setMessage('');
+      trackGoogleAnalyticsConversion('generate_lead', {
+        lead_type: 'contact_form',
+        source: 'contact_page',
+      });
     } catch (error: unknown) {
       setStatus('error');
       setErrorMessage(error instanceof Error ? error.message : t('error'));

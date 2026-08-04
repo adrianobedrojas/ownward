@@ -1,6 +1,7 @@
 import {
   GoogleAnalyticsController,
   buildConsentInitScript,
+  sanitizeGoogleAnalyticsEventParams,
   sanitizeGoogleAnalyticsPage,
   sanitizeGoogleAnalyticsReferrer,
 } from '@/lib/google-analytics';
@@ -154,6 +155,20 @@ describe('Google Analytics consent mode', () => {
     expect(mock.cookieWrites.some((entry) => entry.startsWith('_ga_123='))).toBe(true);
     expect(mock.win.location.reload).toHaveBeenCalledTimes(1);
   });
+
+  it('tracks conversion events only with analytics consent and dedupes by key', () => {
+    const mock = createMockWindow();
+    const controller = new GoogleAnalyticsController('G-ABC12345', mock.win as never);
+
+    controller.trackEvent('begin_checkout', { checkout_type: 'subscription' }, { dedupeKey: 'checkout-1' });
+    controller.setConsent({ analytics: true, functionality: true });
+    controller.trackEvent('begin_checkout', { checkout_type: 'subscription' }, { dedupeKey: 'checkout-1' });
+    controller.trackEvent('begin_checkout', { checkout_type: 'subscription' }, { dedupeKey: 'checkout-1' });
+    controller.trackEvent('begin_checkout', { checkout_type: 'subscription' }, { dedupeKey: 'checkout-2' });
+
+    const conversions = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'begin_checkout');
+    expect(conversions).toHaveLength(2);
+  });
 });
 
 describe('GA URL sanitization', () => {
@@ -257,6 +272,29 @@ describe('GA URL sanitization', () => {
     const updatedPageViews = mock.gtagCalls.filter((call) => call[0] === 'event' && call[1] === 'page_view');
     const externalPayload = updatedPageViews[1][2] as Record<string, string>;
     expect(externalPayload.page_referrer).toBe('https://example.com/');
+  });
+});
+
+describe('GA event param sanitization', () => {
+  it('keeps safe event params and strips sensitive keys and values', () => {
+    const sanitized = sanitizeGoogleAnalyticsEventParams({
+      checkout_type: 'subscription',
+      plan: 'builder',
+      amount: 99,
+      has_discount: false,
+      email: 'user@example.com',
+      user_name: 'Jane',
+      notes: 'contact me at jane@example.com',
+      phone: '+15551234567',
+      empty: '   ',
+    });
+
+    expect(sanitized).toEqual({
+      checkout_type: 'subscription',
+      plan: 'builder',
+      amount: 99,
+      has_discount: false,
+    });
   });
 });
 

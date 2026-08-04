@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { QUESTIONS } from '@/lib/business-idea-readiness/questions';
 import { computeScore } from '@/lib/business-idea-readiness/scoring';
 import { buildRecommendations, buildSevenDayPlanKey } from '@/lib/business-idea-readiness/recommendations';
+import { trackGoogleAnalyticsConversion } from '@/lib/google-analytics';
 import {
   loadOrDefault,
   saveBusinessIdeaReadinessState,
@@ -104,6 +105,7 @@ export default function BusinessIdeaReadinessAssessment() {
   const t = useTranslations('BusinessIdeaReadiness');
   const [state, dispatch] = useReducer(reducer, undefined, makeDefault);
   const questionRef = useRef<HTMLDivElement>(null);
+  const completionTrackedRef = useRef(false);
 
   const { status, currentQuestionIndex, answers, hydrated, validationError } = state;
 
@@ -134,6 +136,7 @@ export default function BusinessIdeaReadinessAssessment() {
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
 
   const handleStart = useCallback(() => {
+    completionTrackedRef.current = false;
     dispatch({ type: 'start' });
   }, []);
 
@@ -147,6 +150,20 @@ export default function BusinessIdeaReadinessAssessment() {
       dispatch({ type: 'set_validation_error', message: t('validation.selectAnswer') });
       return;
     }
+
+    if (isLastQuestion && !completionTrackedRef.current) {
+      completionTrackedRef.current = true;
+      const completionNonce = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      trackGoogleAnalyticsConversion(
+        'readiness_check_complete',
+        {
+          assessment_version: 1,
+          total_questions: QUESTIONS.length,
+        },
+        { dedupeKey: `readiness_check_complete:${completionNonce}` },
+      );
+    }
+
     dispatch({ type: 'continue', isLast: isLastQuestion });
     requestAnimationFrame(() => {
       questionRef.current?.focus();
@@ -162,6 +179,7 @@ export default function BusinessIdeaReadinessAssessment() {
 
   const handleRestart = useCallback(() => {
     if (!window.confirm(t('controls.restartConfirm'))) return;
+    completionTrackedRef.current = false;
     clearBusinessIdeaReadinessState();
     dispatch({ type: 'restart' });
   }, [t]);

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
 
 interface FeaturedListingButtonProps {
   listingId: string;
@@ -34,6 +35,14 @@ export default function FeaturedListingButton({
         setError(data.error ?? "Could not start checkout. Please try again.");
         return;
       }
+
+      trackGoogleAnalyticsConversion(
+        "begin_checkout",
+        {
+          checkout_type: "featured_listing",
+        },
+        { dedupeKey: `begin_checkout:featured_listing:${listingId}:${data.url}` },
+      );
 
       window.location.href = data.url;
     } catch {

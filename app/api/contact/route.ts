@@ -6,6 +6,8 @@ const MAX_NAME    = 200;
 const MAX_EMAIL   = 254;
 const MAX_SUBJECT = 300;
 const MAX_MESSAGE = 5000;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_ATTEMPTS = 5;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -53,6 +55,24 @@ export async function POST(req: Request) {
 
   try {
     const supabase = await createClient();
+    const normalizedEmail = email.toLowerCase().slice(0, MAX_EMAIL);
+    const rateLimitWindowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+    const { count: recentMessageCount, error: rateLimitError } = await supabase
+      .from('contact_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('email', normalizedEmail)
+      .gte('created_at', rateLimitWindowStart);
+
+    if (rateLimitError) {
+      console.warn('Contact form rate-limit check failed:', rateLimitError.message);
+    } else if ((recentMessageCount ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a few minutes and try again.' },
+        { status: 429 },
+      );
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -61,7 +81,7 @@ export async function POST(req: Request) {
       .from('contact_messages')
       .insert([{
         name:    name.slice(0, MAX_NAME),
-        email:   email.toLowerCase().slice(0, MAX_EMAIL),
+        email:   normalizedEmail,
         subject: subject.slice(0, MAX_SUBJECT) || null,
         message: message.slice(0, MAX_MESSAGE),
         user_id: user?.id ?? null,

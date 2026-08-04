@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
 
 type Props = {
   productKey: string;
@@ -93,6 +94,15 @@ export default function SolutionCheckoutButton({
       }
 
       if (data.url) {
+        trackGoogleAnalyticsConversion(
+          "begin_checkout",
+          {
+            checkout_type: "one_time_product",
+            product_key: productKey,
+            target_type: requiredTargetType,
+          },
+          { dedupeKey: `begin_checkout:product:${productKey}:${data.url}` },
+        );
         window.location.assign(data.url);
       }
     } catch {

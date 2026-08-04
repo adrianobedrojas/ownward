@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
 
 interface PurchaseCardProps {
   productKey: string;
@@ -79,6 +80,14 @@ export default function PurchaseCard({
       }
 
       if (data.url) {
+        trackGoogleAnalyticsConversion(
+          "begin_checkout",
+          {
+            checkout_type: "one_time_product",
+            product_key: productKey,
+          },
+          { dedupeKey: `begin_checkout:value_action_sprint:${data.url}` },
+        );
         window.location.href = data.url;
       }
     } catch {
