@@ -126,7 +126,7 @@ describe("Commerce checkout route", () => {
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
-  it("ignores client-controlled user, amount, currency, entitlement, and price inputs", async () => {
+  it("ignores client-controlled user, amount, currency, entitlement, price, and redirect inputs", async () => {
     const { response, stripeMock } = await runCheckout({
       productKey: "value_action_sprint",
       locale: "en",
@@ -136,6 +136,8 @@ describe("Commerce checkout route", () => {
       entitlementType: "admin",
       fulfillmentBehavior: "skip",
       priceId: "price_evil",
+      success_url: "https://evil.example/success",
+      cancel_url: "https://evil.example/cancel",
     });
 
     expect(response.status).toBe(200);
@@ -143,12 +145,18 @@ describe("Commerce checkout route", () => {
       | {
           client_reference_id?: string;
           line_items?: Array<{ price: string; quantity: number }>;
+          success_url?: string;
+          cancel_url?: string;
           metadata?: Record<string, string>;
         }
       | undefined;
     expect(payload).toBeDefined();
     expect(payload?.client_reference_id).toBe("user-1");
     expect(payload?.line_items).toEqual([{ price: "price_vas_123", quantity: 1 }]);
+    expect(payload?.success_url).toBe(
+      "https://ownward.example/account/products?success=purchased"
+    );
+    expect(payload?.cancel_url).toBe("https://ownward.example/products/value-action-sprint");
     expect(payload?.metadata?.userId).toBe("user-1");
     expect(payload?.metadata?.productKey).toBe("value_action_sprint");
     expect(payload?.metadata?.purchaseType).toBe("one_time_product");

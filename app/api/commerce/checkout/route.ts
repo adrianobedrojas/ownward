@@ -106,8 +106,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized", redirectTo: "/login" }, { status: 401 });
     }
 
-    // 2. Parse body — only productKey is accepted from the client.
-    //    Amount, currency, and price ID are never sourced from the request.
+    // 2. Parse body. The client may provide productKey, locale, and targetId only.
+    //    All sensitive billing and fulfillment inputs stay server-controlled
+    //    (price ID, amount, currency, user ID, fulfillment behavior, and redirect URLs).
     let body: unknown;
     try {
       body = await req.json();

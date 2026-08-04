@@ -97,6 +97,40 @@ describe("Product Registry — getStripePriceId", () => {
 });
 
 describe("Product Registry — product definitions", () => {
+  it("enhanced_valuation_report maps to the new Stripe env var and remains unavailable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("enhanced_valuation_report")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_ENHANCED_VALUATION_REPORT");
+    expect(p.requiredTargetType).toBe("business");
+    expect(p.fulfillmentBehavior).toBe("grant_enhanced_valuation_report");
+    expect(getPurchasableProduct("enhanced_valuation_report")).toBeNull();
+  });
+
+  it("deal_room_90 keeps transaction target type and remains unavailable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("deal_room_90")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_DEAL_ROOM_90");
+    expect(p.requiredTargetType).toBe("transaction");
+    expect(p.fulfillmentBehavior).toBe("create_timed_deal_room");
+    expect(getPurchasableProduct("deal_room_90")).toBeNull();
+  });
+
+  it("confidential_sale_launch maps to the new Stripe env var and remains unavailable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("confidential_sale_launch")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH");
+    expect(p.requiredTargetType).toBe("listing");
+    expect(p.fulfillmentBehavior).toBe("launch_confidential_sale_listing");
+    expect(getPurchasableProduct("confidential_sale_launch")).toBeNull();
+  });
+
+  it("resolves historical aliases for legacy purchase keys", async () => {
+    const { getProduct } = await import("@/lib/commerce/products");
+    expect(getProduct("full_deal_room")?.key).toBe("deal_room_90");
+    expect(getProduct("confidential_sale_listing")?.key).toBe("confidential_sale_launch");
+    expect(getProduct("confidential_sale_launch_pack")?.key).toBe("confidential_sale_launch");
+  });
+
   it("value_action_sprint has English and Spanish names", async () => {
     const { getProduct } = await import("@/lib/commerce/products");
     const p = getProduct("value_action_sprint")!;

@@ -50,8 +50,11 @@ export type EntitlementType =
 export type FulfillmentBehavior =
   | "create_value_action_sprint_workspace"
   | "grant_report_access"
+  | "grant_enhanced_valuation_report"
   | "grant_timed_deal_room"
+  | "create_timed_deal_room"
   | "apply_listing_promotion"
+  | "launch_confidential_sale_listing"
   | "grant_credit_balance"
   | "manual_service"
   | "not_implemented";
@@ -137,6 +140,7 @@ export const PRODUCT_KEYS = [
   "customer_risk_scan",
   "owner_dependence_scan",
   "value_dna_snapshot",
+  "enhanced_valuation_report",
   "sale_readiness_blueprint",
   "value_improvement_roadmap",
   "value_action_sprint",
@@ -144,7 +148,7 @@ export const PRODUCT_KEYS = [
   "deal_room_extension",
   "closing_archive",
   "deal_room_90",
-  "confidential_sale_launch_pack",
+  "confidential_sale_launch",
   "transaction_workspace",
   "business_comparison_pack",
   "acquisition_readiness_profile",
@@ -459,6 +463,43 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     active: true,
     isPublic: true,
   },
+  enhanced_valuation_report: {
+    key: "enhanced_valuation_report",
+    slug: "enhanced-valuation-report",
+    nameEn: "Enhanced Valuation Report",
+    nameEs: "Informe de Valuacion Mejorado",
+    descriptionEn: "Comprehensive valuation report for transfer planning.",
+    descriptionEs: "Informe integral de valuacion para planificar la transferencia.",
+    outcomeEn: "Get deeper valuation context before major decisions.",
+    outcomeEs: "Obtiene un contexto de valuacion mas profundo antes de decisiones importantes.",
+    category: "business_intelligence",
+    audience: ["owner", "seller"],
+    goals: ["improve_valuation", "improve_sale_readiness"],
+    billingModel: "one_time",
+    displayPrice: 20,
+    status: "planned",
+    billingContextEn: "one-time",
+    billingContextEs: "pago unico",
+    deliverablesEn: ["Enhanced valuation report"],
+    deliverablesEs: ["Informe de valuacion mejorado"],
+    detailRoute: "/solutions/enhanced-valuation-report",
+    ctaBehavior: "coming_soon",
+    requiresAuth: true,
+    requiredTargetType: "business",
+    stripePriceEnvVar: "STRIPE_PRICE_ENHANCED_VALUATION_REPORT",
+    purchaseType: "one_time",
+    entitlementType: "report_access",
+    fulfillmentBehavior: "grant_enhanced_valuation_report",
+    cancelPath: "/solutions/enhanced-valuation-report",
+    disclaimersEn: [
+      "Unavailable until report generation and access delivery are implemented.",
+    ],
+    disclaimersEs: [
+      "No disponible hasta implementar la generacion del informe y la entrega de acceso.",
+    ],
+    active: false,
+    isPublic: true,
+  },
   sale_readiness_blueprint: {
     key: "sale_readiness_blueprint",
     slug: "sale-readiness-blueprint",
@@ -685,22 +726,26 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     detailRoute: "/solutions/deal-room-90",
     ctaBehavior: "coming_soon",
     requiresAuth: true,
-    requiredTargetType: "deal_room",
+    requiredTargetType: "transaction",
     stripePriceEnvVar: "STRIPE_PRICE_DEAL_ROOM_90",
     purchaseType: "one_time",
     entitlementType: "deal_room_access",
-    fulfillmentBehavior: "not_implemented",
+    fulfillmentBehavior: "create_timed_deal_room",
     cancelPath: "/deals",
-    disclaimersEn: ["Rollout planned."],
-    disclaimersEs: ["Lanzamiento planificado."],
+    disclaimersEn: [
+      "Unavailable until transaction ownership, post-payment room creation, 90-day expiration, and refund revocation are implemented.",
+    ],
+    disclaimersEs: [
+      "No disponible hasta implementar propiedad de transaccion, creacion de sala tras pago, vencimiento de 90 dias y revocacion por reembolsos.",
+    ],
     active: false,
     isPublic: true,
   },
-  confidential_sale_launch_pack: {
-    key: "confidential_sale_launch_pack",
-    slug: "confidential-sale-launch-pack",
-    nameEn: "Confidential Sale Launch Pack",
-    nameEs: "Paquete de Lanzamiento de Venta Confidencial",
+  confidential_sale_launch: {
+    key: "confidential_sale_launch",
+    slug: "confidential-sale-launch",
+    nameEn: "Confidential Sale Launch",
+    nameEs: "Lanzamiento de Venta Confidencial",
     descriptionEn: "Launch support for confidential sale workflows.",
     descriptionEs: "Soporte de lanzamiento para flujos de venta confidencial.",
     outcomeEn: "Prepare a controlled confidential process.",
@@ -715,17 +760,21 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     billingContextEs: "pago único",
     deliverablesEn: ["Launch checklist"],
     deliverablesEs: ["Checklist de lanzamiento"],
-    detailRoute: "/solutions/confidential-sale-launch-pack",
+    detailRoute: "/solutions/confidential-sale-launch",
     ctaBehavior: "coming_soon",
     requiresAuth: true,
-    requiredTargetType: "business",
-    stripePriceEnvVar: "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH_PACK",
+    requiredTargetType: "listing",
+    stripePriceEnvVar: "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH",
     purchaseType: "one_time",
-    entitlementType: "service_access",
-    fulfillmentBehavior: "manual_service",
+    entitlementType: "listing_promotion",
+    fulfillmentBehavior: "launch_confidential_sale_listing",
     cancelPath: "/sell",
-    disclaimersEn: ["Manual service scheduling required."],
-    disclaimersEs: ["Requiere programación de servicio manual."],
+    disclaimersEn: [
+      "Unavailable until listing ownership validation, confidential listing workflow, entitlement grant, and refund reversal are implemented.",
+    ],
+    disclaimersEs: [
+      "No disponible hasta implementar validacion de propiedad del listado, flujo confidencial, concesion de derecho y reversa por reembolso.",
+    ],
     active: false,
     isPublic: true,
   },
@@ -1180,9 +1229,49 @@ function assertRegistryInvariants(): void {
 
 assertRegistryInvariants();
 
+const HISTORICAL_PRODUCT_KEY_ALIASES: Partial<Record<string, ProductKey>> = {
+  full_deal_room: "deal_room_90",
+  confidential_sale_listing: "confidential_sale_launch",
+  confidential_sale_launch_pack: "confidential_sale_launch",
+};
+
+const STRIPE_ENV_FALLBACK_BY_PRODUCT_KEY: Partial<Record<ProductKey, readonly string[]>> = {
+  deal_room_90: ["STRIPE_PRICE_FULL_DEAL_ROOM"],
+  confidential_sale_launch: [
+    "STRIPE_PRICE_CONFIDENTIAL_SALE_LISTING",
+    "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH_PACK",
+  ],
+};
+
+function resolveCanonicalProductKey(key: string): ProductKey | null {
+  const normalized = key.trim();
+  if (!normalized) return null;
+  if (PRODUCT_KEYS.includes(normalized as ProductKey)) {
+    return normalized as ProductKey;
+  }
+  return HISTORICAL_PRODUCT_KEY_ALIASES[normalized] ?? null;
+}
+
+function resolveStripePriceFromEnv(product: ProductDefinition): string | null {
+  const envVarCandidates = [
+    product.stripePriceEnvVar,
+    ...(STRIPE_ENV_FALLBACK_BY_PRODUCT_KEY[product.key] ?? []),
+  ].filter((value): value is string => Boolean(value));
+
+  for (const envVarName of envVarCandidates) {
+    const candidate = process.env[envVarName]?.trim();
+    if (candidate && /^price_[A-Za-z0-9_]+$/.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 export function getProduct(key: string): ProductDefinition | null {
-  if (!PRODUCT_KEYS.includes(key as ProductKey)) return null;
-  return PRODUCT_REGISTRY[key as ProductKey] ?? null;
+  const canonicalKey = resolveCanonicalProductKey(key);
+  if (!canonicalKey) return null;
+  return PRODUCT_REGISTRY[canonicalKey] ?? null;
 }
 
 export function getActiveProduct(key: string): ProductDefinition | null {
@@ -1202,8 +1291,7 @@ export function getPurchasableProduct(key: string): ProductDefinition | null {
 
 export function isProductConfigured(product: ProductDefinition): boolean {
   if (!product.stripePriceEnvVar) return product.ctaBehavior !== "checkout";
-  const value = process.env[product.stripePriceEnvVar]?.trim();
-  return Boolean(value && /^price_[A-Za-z0-9_]+$/.test(value));
+  return Boolean(resolveStripePriceFromEnv(product));
 }
 
 export function getStripePriceId(product: ProductDefinition): string {
@@ -1211,12 +1299,9 @@ export function getStripePriceId(product: ProductDefinition): string {
     throw new Error(`Product ${product.key} has no stripePriceEnvVar.`);
   }
 
-  const priceId = process.env[product.stripePriceEnvVar]?.trim();
+  const priceId = resolveStripePriceFromEnv(product);
   if (!priceId) {
     throw new Error(`${product.stripePriceEnvVar} is not configured on the server.`);
-  }
-  if (!/^price_[A-Za-z0-9_]+$/.test(priceId)) {
-    throw new Error(`${product.stripePriceEnvVar} is malformed on the server.`);
   }
   return priceId;
 }

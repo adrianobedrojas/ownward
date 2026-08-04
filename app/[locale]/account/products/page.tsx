@@ -137,7 +137,8 @@ export default async function AccountProductsPage({
               actionLabel = t("actions.openWorkspace");
               actionHref = workspaceHref;
             } else if (
-              product.fulfillmentBehavior === "grant_report_access" &&
+              (product.fulfillmentBehavior === "grant_report_access" ||
+                product.fulfillmentBehavior === "grant_enhanced_valuation_report") &&
               hasEntitlement
             ) {
               actionLabel = t("actions.viewReport");

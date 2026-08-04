@@ -565,6 +565,10 @@ async function handleOneTimeProductCheckout(
       break;
     }
 
+    case "grant_enhanced_valuation_report": {
+      break;
+    }
+
     case "apply_listing_promotion": {
       const listingId = session.metadata?.targetId;
       if (!listingId) {
@@ -583,6 +587,8 @@ async function handleOneTimeProductCheckout(
     }
 
     case "grant_timed_deal_room":
+    case "create_timed_deal_room":
+    case "launch_confidential_sale_listing":
     case "grant_credit_balance":
     case "manual_service":
     case "not_implemented": {
