@@ -127,7 +127,8 @@
     "toolsMenuCustomerConcentrationLabel": "Customer Concentration",
     "toolsMenuCustomerConcentrationDescription": "Analyze your customer revenue risk",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "adminConsole": "Admin Console"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. All rights reserved.",
@@ -1083,6 +1084,108 @@
     "sending": "Sending message...",
     "error": "An error occurred. Please try again.",
     "sendFailed": "Failed to send message"
+  },
+  "Support": {
+    "title": "Support",
+    "tier": {
+      "priority": "Priority Support",
+      "standard": "Standard Support",
+      "general": "General Contact"
+    },
+    "freeDescription": "Submit a general enquiry below.",
+    "paidDescription": "You are on the {plan} plan — {tier}.",
+    "successPrefix": "Request submitted. Your request ID is:",
+    "form": {
+      "submitHeading": "Submit a Request",
+      "name": "Name",
+      "email": "Email",
+      "category": "Category",
+      "categoryPlaceholder": "Select category...",
+      "subject": "Subject",
+      "subjectPlaceholder": "Brief summary of your request...",
+      "message": "Message",
+      "messagePlaceholder": "Describe your issue or question in detail...",
+      "submit": "Submit Request"
+    },
+    "categories": {
+      "billing": "Billing & Subscription",
+      "technical": "Technical Issue",
+      "feature": "Feature Request",
+      "account": "Account & Access",
+      "security": "Security",
+      "sales": "Sales",
+      "compliance": "Compliance",
+      "other": "Other"
+    },
+    "status": {
+      "submitted": "Submitted",
+      "reviewing": "Under Review",
+      "awaiting_user": "Awaiting Your Response",
+      "open": "Open",
+      "in_progress": "In progress",
+      "waiting_on_user": "Waiting on you",
+      "waiting_on_internal": "Waiting on internal team",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "history": {
+      "heading": "Your Requests",
+      "plan": "plan",
+      "requestId": "ID",
+      "viewThread": "View thread"
+    },
+    "detail": {
+      "back": "Back to support",
+      "requestId": "Request ID",
+      "status": "Status",
+      "thread": "Conversation",
+      "you": "You",
+      "supportTeam": "Support team",
+      "reply": "Reply",
+      "replyPlaceholder": "Add more detail or answer the support team...",
+      "sendReply": "Send reply",
+      "replyDisabled": "Replies are enabled when a request is waiting on your response.",
+      "replySuccess": "Reply sent successfully."
+    },
+    "errors": {
+      "authRequired": "You must be signed in.",
+      "subjectRequired": "Subject is required.",
+      "messageRequired": "Message is required.",
+      "subjectTooLong": "Subject must be {max} characters or fewer.",
+      "messageTooLong": "Message must be {max} characters or fewer.",
+      "invalidCategory": "Invalid category. Allowed values: {categories}.",
+      "submitFailed": "Failed to submit request. Please try again.",
+      "rateLimited": "Too many support requests in a short period. Please try again later.",
+      "duplicate": "A similar support request was already submitted recently.",
+      "requestMissing": "Support request ID is required.",
+      "notFound": "Support request not found.",
+      "notWaitingOnUser": "This request is not currently waiting on your response.",
+      "replyFailed": "Failed to send reply. Please try again.",
+      "unexpected": "Unexpected response while processing your request."
+    }
+  },
+  "AdminSecurity": {
+    "badge": "Platform Admin Security",
+    "title": "Verify Admin Access",
+    "description": "Multi-factor authentication is required before accessing the Admin Console.",
+    "aal1Notice": "Your current session is AAL1. Complete MFA challenge or enrollment to continue.",
+    "challengeTitle": "MFA Challenge",
+    "challengeDescription": "Use a verified factor to step up this session to AAL2.",
+    "refreshFactors": "Refresh factors",
+    "selectFactor": "Select a verified factor",
+    "codePlaceholder": "6-digit code",
+    "verifyChallenge": "Verify challenge",
+    "challengeSuccess": "MFA verified. Redirecting to Admin Console...",
+    "enrollTitle": "Enroll MFA",
+    "enrollDescription": "If you do not have a verified factor, enroll a TOTP authenticator now.",
+    "startEnrollment": "Start enrollment",
+    "scanQr": "Scan this QR code with your authenticator app.",
+    "secretLabel": "Manual setup secret",
+    "verifyEnrollment": "Verify enrollment",
+    "mfaStarted": "Enrollment started. Complete verification with a 6-digit code.",
+    "mfaVerified": "Enrollment verified. Redirecting to Admin Console...",
+    "mfaStartError": "Unable to start MFA enrollment."
   },
   "Privacy": {
     "button": "Privacy choices",

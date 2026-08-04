@@ -127,7 +127,8 @@
     "toolsMenuCustomerConcentrationLabel": "Concentración de clientes",
     "toolsMenuCustomerConcentrationDescription": "Analiza el riesgo de ingresos por cliente",
     "profile": "Perfil",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "adminConsole": "Consola Admin"
   },
   "Footer": {
     "copyright": "© {year} Ownward Hub. Todos los derechos reservados.",
@@ -1083,6 +1084,108 @@
     "sending": "Enviando mensaje...",
     "error": "Ocurrió un error. Inténtalo nuevamente.",
     "sendFailed": "No se pudo enviar el mensaje"
+  },
+  "Support": {
+    "title": "Soporte",
+    "tier": {
+      "priority": "Soporte prioritario",
+      "standard": "Soporte estándar",
+      "general": "Contacto general"
+    },
+    "freeDescription": "Envía una consulta general abajo.",
+    "paidDescription": "Estás en el plan {plan} — {tier}.",
+    "successPrefix": "Solicitud enviada. Tu ID de solicitud es:",
+    "form": {
+      "submitHeading": "Enviar una solicitud",
+      "name": "Nombre",
+      "email": "Correo",
+      "category": "Categoría",
+      "categoryPlaceholder": "Selecciona una categoría...",
+      "subject": "Asunto",
+      "subjectPlaceholder": "Resumen breve de tu solicitud...",
+      "message": "Mensaje",
+      "messagePlaceholder": "Describe tu problema o pregunta en detalle...",
+      "submit": "Enviar solicitud"
+    },
+    "categories": {
+      "billing": "Facturación y suscripción",
+      "technical": "Problema técnico",
+      "feature": "Solicitud de función",
+      "account": "Cuenta y acceso",
+      "security": "Seguridad",
+      "sales": "Ventas",
+      "compliance": "Cumplimiento",
+      "other": "Otro"
+    },
+    "status": {
+      "submitted": "Enviada",
+      "reviewing": "En revisión",
+      "awaiting_user": "Esperando tu respuesta",
+      "open": "Abierta",
+      "in_progress": "En progreso",
+      "waiting_on_user": "Esperando tu respuesta",
+      "waiting_on_internal": "Esperando al equipo interno",
+      "resolved": "Resuelta",
+      "closed": "Cerrada",
+      "archived": "Archivada"
+    },
+    "history": {
+      "heading": "Tus solicitudes",
+      "plan": "plan",
+      "requestId": "ID",
+      "viewThread": "Ver conversación"
+    },
+    "detail": {
+      "back": "Volver a soporte",
+      "requestId": "ID de solicitud",
+      "status": "Estado",
+      "thread": "Conversación",
+      "you": "Tú",
+      "supportTeam": "Equipo de soporte",
+      "reply": "Responder",
+      "replyPlaceholder": "Agrega más detalles o responde al equipo de soporte...",
+      "sendReply": "Enviar respuesta",
+      "replyDisabled": "Las respuestas se habilitan cuando una solicitud está esperando tu respuesta.",
+      "replySuccess": "Respuesta enviada correctamente."
+    },
+    "errors": {
+      "authRequired": "Debes iniciar sesión.",
+      "subjectRequired": "El asunto es obligatorio.",
+      "messageRequired": "El mensaje es obligatorio.",
+      "subjectTooLong": "El asunto debe tener {max} caracteres o menos.",
+      "messageTooLong": "El mensaje debe tener {max} caracteres o menos.",
+      "invalidCategory": "Categoría inválida. Valores permitidos: {categories}.",
+      "submitFailed": "No se pudo enviar la solicitud. Inténtalo de nuevo.",
+      "rateLimited": "Demasiadas solicitudes de soporte en poco tiempo. Inténtalo más tarde.",
+      "duplicate": "Ya se envió recientemente una solicitud de soporte similar.",
+      "requestMissing": "Se requiere el ID de solicitud de soporte.",
+      "notFound": "Solicitud de soporte no encontrada.",
+      "notWaitingOnUser": "Esta solicitud no está esperando tu respuesta en este momento.",
+      "replyFailed": "No se pudo enviar la respuesta. Inténtalo de nuevo.",
+      "unexpected": "Respuesta inesperada mientras se procesaba tu solicitud."
+    }
+  },
+  "AdminSecurity": {
+    "badge": "Seguridad administrativa de plataforma",
+    "title": "Verifica acceso administrativo",
+    "description": "La autenticación multifactor es obligatoria antes de entrar a la Consola Admin.",
+    "aal1Notice": "Tu sesión actual es AAL1. Completa un desafío MFA o el registro para continuar.",
+    "challengeTitle": "Desafío MFA",
+    "challengeDescription": "Usa un factor verificado para elevar esta sesión a AAL2.",
+    "refreshFactors": "Actualizar factores",
+    "selectFactor": "Selecciona un factor verificado",
+    "codePlaceholder": "Código de 6 dígitos",
+    "verifyChallenge": "Verificar desafío",
+    "challengeSuccess": "MFA verificado. Redirigiendo a la Consola Admin...",
+    "enrollTitle": "Registrar MFA",
+    "enrollDescription": "Si aún no tienes un factor verificado, registra ahora un autenticador TOTP.",
+    "startEnrollment": "Iniciar registro",
+    "scanQr": "Escanea este código QR con tu app autenticadora.",
+    "secretLabel": "Secreto para configuración manual",
+    "verifyEnrollment": "Verificar registro",
+    "mfaStarted": "Registro iniciado. Completa la verificación con un código de 6 dígitos.",
+    "mfaVerified": "Registro verificado. Redirigiendo a la Consola Admin...",
+    "mfaStartError": "No se pudo iniciar el registro MFA."
   },
   "Privacy": {
     "button": "Opciones de privacidad",
