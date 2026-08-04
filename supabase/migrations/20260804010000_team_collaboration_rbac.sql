@@ -193,17 +193,21 @@ CREATE POLICY "Invited user can update own invitation"
 DO $$
 BEGIN
   IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'customers'
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'customers'
+      AND column_name = 'business_id'
   ) THEN
-    ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
-
-    DROP POLICY IF EXISTS "Business access for customers" ON public.customers;
-    CREATE POLICY "Business access for customers"
-      ON public.customers
-      FOR ALL TO authenticated
-      USING (public.has_business_access(auth.uid(), business_id))
-      WITH CHECK (public.has_business_access(auth.uid(), business_id));
+    EXECUTE 'ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY';
+    EXECUTE 'DROP POLICY IF EXISTS "Business access for customers" ON public.customers';
+    EXECUTE $sql$
+      CREATE POLICY "Business access for customers"
+        ON public.customers
+        FOR ALL TO authenticated
+        USING (public.has_business_access(auth.uid(), business_id))
+        WITH CHECK (public.has_business_access(auth.uid(), business_id))
+    $sql$;
   END IF;
 END;
 $$;
@@ -267,25 +271,57 @@ END;
 $$;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 11. Marketplace listings – owner full, members read
+-- 11. Marketplace listings – owner and published-listing reads
+--
+-- business_listings is currently user-owned and does not contain business_id.
+-- Collaborator access cannot be safely inferred until listings are explicitly
+-- associated with a business.
 -- ─────────────────────────────────────────────────────────────────────────────
 DO $$
+DECLARE
+  v_has_user_id boolean;
+  v_has_is_public boolean;
+  v_has_status boolean;
 BEGIN
   IF EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name = 'business_listings'
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'business_listings'
   ) THEN
-    ALTER TABLE public.business_listings ENABLE ROW LEVEL SECURITY;
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'user_id'
+    ) INTO v_has_user_id;
 
-    DROP POLICY IF EXISTS "Collaborator read listings" ON public.business_listings;
-    CREATE POLICY "Collaborator read listings"
-      ON public.business_listings
-      FOR SELECT TO authenticated
-      USING (
-        user_id = auth.uid()
-        OR (business_id IS NOT NULL AND public.has_business_access(auth.uid(), business_id))
-        OR status = 'published'
-      );
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'is_public'
+    ) INTO v_has_is_public;
+
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'business_listings' AND column_name = 'status'
+    ) INTO v_has_status;
+
+    IF v_has_user_id AND v_has_is_public AND v_has_status THEN
+      EXECUTE 'ALTER TABLE public.business_listings ENABLE ROW LEVEL SECURITY';
+      EXECUTE 'DROP POLICY IF EXISTS "Collaborator read listings" ON public.business_listings';
+      EXECUTE 'DROP POLICY IF EXISTS "Owner and public read listings" ON public.business_listings';
+      EXECUTE $sql$
+        CREATE POLICY "Owner and public read listings"
+          ON public.business_listings
+          FOR SELECT
+          TO authenticated
+          USING (
+            user_id = auth.uid()
+            OR (
+              is_public = true
+              AND status = 'published'
+            )
+          )
+      $sql$;
+    END IF;
   END IF;
 END;
 $$;
@@ -294,6 +330,10 @@ $$;
 -- 12. Deal rooms – owner and active members
 -- ─────────────────────────────────────────────────────────────────────────────
 DO $$
+DECLARE
+  v_has_seller_id boolean;
+  v_has_buyer_id boolean;
+  v_has_business_id boolean;
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.tables
@@ -302,13 +342,37 @@ BEGIN
     ALTER TABLE public.deal_rooms ENABLE ROW LEVEL SECURITY;
 
     DROP POLICY IF EXISTS "Collaborator access deal_rooms" ON public.deal_rooms;
-    CREATE POLICY "Collaborator access deal_rooms"
-      ON public.deal_rooms
-      FOR SELECT TO authenticated
-      USING (
-        owner_user_id = auth.uid()
-        OR (business_id IS NOT NULL AND public.has_business_access(auth.uid(), business_id))
-      );
+
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'deal_rooms' AND column_name = 'seller_id'
+    ) INTO v_has_seller_id;
+
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'deal_rooms' AND column_name = 'buyer_id'
+    ) INTO v_has_buyer_id;
+
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'deal_rooms' AND column_name = 'business_id'
+    ) INTO v_has_business_id;
+
+    IF v_has_seller_id AND v_has_buyer_id THEN
+      EXECUTE $sql$
+        CREATE POLICY "Collaborator access deal_rooms"
+          ON public.deal_rooms
+          FOR SELECT TO authenticated
+          USING (seller_id = auth.uid() OR buyer_id = auth.uid())
+      $sql$;
+    ELSIF v_has_business_id THEN
+      EXECUTE $sql$
+        CREATE POLICY "Collaborator access deal_rooms"
+          ON public.deal_rooms
+          FOR SELECT TO authenticated
+          USING (business_id IS NOT NULL AND public.has_business_access(auth.uid(), business_id))
+      $sql$;
+    END IF;
   END IF;
 END;
 $$;
