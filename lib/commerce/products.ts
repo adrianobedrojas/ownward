@@ -49,6 +49,7 @@ export type EntitlementType =
 
 export type FulfillmentBehavior =
   | "create_value_action_sprint_workspace"
+  | "apply_business_in_a_box_template"
   | "grant_report_access"
   | "grant_enhanced_valuation_report"
   | "grant_timed_deal_room"
@@ -144,6 +145,7 @@ export const PRODUCT_KEYS = [
   "sale_readiness_blueprint",
   "value_improvement_roadmap",
   "value_action_sprint",
+  "business_in_a_box",
   "exit_intelligence_bundle",
   "deal_room_extension",
   "closing_archive",
@@ -605,6 +607,57 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
       "No constituye asesoría legal, fiscal ni valuación certificada.",
     ],
     active: true,
+    isPublic: true,
+  },
+  business_in_a_box: {
+    key: "business_in_a_box",
+    slug: "business-in-a-box",
+    nameEn: "Ownward Business-in-a-Box",
+    nameEs: "Ownward Business-in-a-Box",
+    descriptionEn:
+      "A ready-to-customize operating setup for one business, including workflow templates, starter tasks, client stages, SOP placeholders, KPI recommendations, document checklists, and onboarding guidance.",
+    descriptionEs:
+      "Una configuración operativa lista para personalizar para un negocio, con flujos de trabajo, tareas iniciales, etapas de clientes, plantillas de procedimientos, recomendaciones de KPI, listas de documentos y orientación de incorporación.",
+    outcomeEn: "Launch a complete operating foundation for one selected business.",
+    outcomeEs: "Lanza una base operativa completa para un negocio seleccionado.",
+    category: "professional_services",
+    audience: ["owner", "team"],
+    goals: ["improve_sale_readiness", "access_intelligence"],
+    billingModel: "one_time",
+    displayPrice: 10,
+    status: "coming_soon",
+    billingContextEn: "one-time per business template",
+    billingContextEs: "pago único por plantilla de negocio",
+    deliverablesEn: [
+      "Client pipeline stage map",
+      "Starter tasks and operating checklist",
+      "SOP and document placeholders",
+      "KPI and onboarding recommendations",
+    ],
+    deliverablesEs: [
+      "Mapa de etapas de clientes",
+      "Tareas iniciales y checklist operativo",
+      "Plantillas SOP y de documentos",
+      "Recomendaciones de KPI e incorporación",
+    ],
+    detailRoute: "/solutions/business-in-a-box",
+    ctaBehavior: "coming_soon",
+    requiresAuth: true,
+    requiredTargetType: "business",
+    stripePriceEnvVar: "STRIPE_PRICE_BUSINESS_IN_A_BOX",
+    purchaseType: "one_time",
+    entitlementType: "workspace_access",
+    fulfillmentBehavior: "apply_business_in_a_box_template",
+    cancelPath: "/solutions/business-in-a-box",
+    disclaimersEn: [
+      "Template placeholders are operational guidance only.",
+      "Not legal, tax, accounting, or certified professional advice.",
+    ],
+    disclaimersEs: [
+      "Las plantillas son guía operativa únicamente.",
+      "No constituye asesoría legal, fiscal, contable ni profesional certificada.",
+    ],
+    active: false,
     isPublic: true,
   },
   exit_intelligence_bundle: {
@@ -1188,6 +1241,7 @@ function assertRegistryInvariants(): void {
   const checkoutPriceEnvVars = new Set<string>();
   const implementedBehaviors = new Set<FulfillmentBehavior>([
     "create_value_action_sprint_workspace",
+    "apply_business_in_a_box_template",
     "grant_report_access",
     "grant_enhanced_valuation_report",
     "create_timed_deal_room",

@@ -11,6 +11,20 @@ type Props = {
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
 };
 
+type TemplateOption = {
+  key: string;
+  name: string;
+  description: string;
+  suitableBusinessType: string;
+  workflowsIncluded: number;
+  tasksIncluded: number;
+  clientStageOutline: string[];
+  kpiCategories: string[];
+  documentPlaceholders: string[];
+  sopPlaceholders: string[];
+  previewCategories: string[];
+};
+
 export default function SolutionCheckoutButton({
   productKey,
   locale,
@@ -25,6 +39,8 @@ export default function SolutionCheckoutButton({
   );
   const [targetRoute, setTargetRoute] = useState<string | null>(null);
   const [targetIncludedMessage, setTargetIncludedMessage] = useState<string | null>(null);
+  const [templateKey, setTemplateKey] = useState("");
+  const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>([]);
   const [targetOptions, setTargetOptions] = useState<
     Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>
   >([]);
@@ -37,6 +53,19 @@ export default function SolutionCheckoutButton({
         processing: "Redirigiendo…",
         targetLabel: "ID del objetivo",
         targetHint: "Selecciona un objetivo",
+        templateLabel: "Plantilla",
+        templateHint: "Selecciona una plantilla aprobada",
+        templatePlaceholder: "Selecciona una plantilla",
+        templateUnavailable: "No hay plantillas habilitadas ahora.",
+        setupPreviewTitle: "Vista previa de lo que se creará",
+        setupBusinessLabel: "Negocio",
+        setupTemplateType: "Tipo sugerido",
+        setupWorkflows: "Flujos incluidos",
+        setupTasks: "Tareas incluidas",
+        setupClientStages: "Etapas de clientes",
+        setupKpis: "Categorías KPI",
+        setupDocuments: "Checklist documental",
+        setupSops: "Plantillas SOP",
         targetPlaceholder: "Selecciona una opción",
         targetLoading: "Cargando opciones…",
         targetUnavailable: "No hay objetivos elegibles por ahora.",
@@ -53,6 +82,19 @@ export default function SolutionCheckoutButton({
       processing: "Redirecting…",
       targetLabel: "Target",
       targetHint: "Select a target",
+      templateLabel: "Template",
+      templateHint: "Select an approved template",
+      templatePlaceholder: "Select a template",
+      templateUnavailable: "No templates are available right now.",
+      setupPreviewTitle: "Preview what will be created",
+      setupBusinessLabel: "Business",
+      setupTemplateType: "Best fit",
+      setupWorkflows: "Workflows included",
+      setupTasks: "Tasks included",
+      setupClientStages: "Client stages",
+      setupKpis: "KPI categories",
+      setupDocuments: "Document checklist",
+      setupSops: "SOP placeholders",
       targetPlaceholder: "Select an option",
       targetLoading: "Loading options…",
       targetUnavailable: "No eligible targets available right now.",
@@ -78,6 +120,7 @@ export default function SolutionCheckoutButton({
       .then(async (res) => {
         const payload = (await res.json()) as {
           options?: Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>;
+          templates?: TemplateOption[];
           includedMessage?: string;
           route?: string;
           error?: string;
@@ -97,6 +140,7 @@ export default function SolutionCheckoutButton({
         }
 
         setTargetOptions(payload.options ?? []);
+        setTemplateOptions(payload.templates ?? []);
         setTargetIncludedMessage(payload.includedMessage ?? null);
         setTargetRoute(payload.route ?? null);
       })
@@ -143,6 +187,7 @@ export default function SolutionCheckoutButton({
           productKey,
           locale,
           targetId: targetId.trim() || undefined,
+          templateKey: templateKey.trim() || undefined,
         }),
       });
 
@@ -186,7 +231,7 @@ export default function SolutionCheckoutButton({
     <div className="space-y-2">
       {requiredTargetType !== "none" ? (
         <label className="block text-xs text-slate-400" aria-label={labels.targetLabel}>
-          {labels.targetLabel}
+          {productKey === "business_in_a_box" ? labels.setupBusinessLabel : labels.targetLabel}
           {targetLoading ? (
             <p className="mt-1 text-xs text-slate-500">{labels.targetLoading}</p>
           ) : (
@@ -214,10 +259,64 @@ export default function SolutionCheckoutButton({
         </label>
       ) : null}
 
+      {productKey === "business_in_a_box" ? (
+        <label className="block text-xs text-slate-400" aria-label={labels.templateLabel}>
+          {labels.templateLabel}
+          <select
+            value={templateKey}
+            onChange={(event) => setTemplateKey(event.target.value)}
+            className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
+          >
+            <option value="">{labels.templatePlaceholder}</option>
+            {templateOptions.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-slate-500">{labels.templateHint}</p>
+          {templateOptions.length === 0 ? (
+            <p className="mt-1 text-xs text-slate-500">{labels.templateUnavailable}</p>
+          ) : null}
+        </label>
+      ) : null}
+
+      {productKey === "business_in_a_box" && templateKey ? (
+        <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-xs text-slate-300">
+          {(() => {
+            const template = templateOptions.find((option) => option.key === templateKey);
+            if (!template) {
+              return null;
+            }
+            return (
+              <>
+                <p className="font-semibold text-slate-100">{labels.setupPreviewTitle}</p>
+                <p className="mt-1 text-slate-300">{template.description}</p>
+                <p className="mt-1 text-slate-400">
+                  {labels.setupTemplateType}: {template.suitableBusinessType}
+                </p>
+                <p className="mt-2 text-slate-400">
+                  {labels.setupWorkflows}: {template.workflowsIncluded} · {labels.setupTasks}: {template.tasksIncluded}
+                </p>
+                <p className="mt-2 text-slate-400">{labels.setupClientStages}: {template.clientStageOutline.join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupKpis}: {template.kpiCategories.slice(0, 5).join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupDocuments}: {template.documentPlaceholders.slice(0, 4).join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupSops}: {template.sopPlaceholders.slice(0, 4).join(" · ")}</p>
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
       <button
         type="button"
         onClick={handleCheckout}
-        disabled={loading || targetLoading || (requiredTargetType !== "none" && !targetId)}
+        disabled={
+          loading ||
+          targetLoading ||
+          (requiredTargetType !== "none" && !targetId) ||
+          (productKey === "business_in_a_box" && !templateKey)
+        }
         className="inline-flex items-center rounded-lg bg-cyan-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
       >
         {loading ? labels.processing : labels.buy}

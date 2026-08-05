@@ -3,6 +3,12 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { getFeaturedListingConfig } from "@/lib/billing";
 import { getProduct } from "@/lib/commerce/products";
+import {
+  buildTemplateItemKey,
+  getBusinessInABoxTemplate,
+  type BusinessInABoxTemplateDefinition,
+  type TemplateItemDefinition,
+} from "@/lib/commerce/business-in-a-box-templates";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -479,6 +485,10 @@ async function handleOneTimeProductCheckout(
   const targetType = String(session.metadata?.targetType ?? "").trim() || null;
   const targetIdRaw = String(session.metadata?.targetId ?? "").trim();
   const targetId = UUID_REGEX.test(targetIdRaw) ? targetIdRaw : null;
+  const templateKey = String(session.metadata?.templateKey ?? "")
+    .trim()
+    .toLowerCase();
+  const templateVersion = String(session.metadata?.templateVersion ?? "").trim();
 
   let targetSnapshot: Record<string, unknown> | null = null;
   const rawSnapshot = String(session.metadata?.targetSnapshot ?? "").trim();
@@ -508,11 +518,13 @@ async function handleOneTimeProductCheckout(
         target_type: targetType,
         target_id: targetId,
         target_snapshot: targetSnapshot,
+        template_key: templateKey || null,
+        template_version: templateVersion || null,
         updated_at: now,
       },
       { onConflict: "stripe_checkout_session_id" }
     )
-    .select("id, user_id, target_type, target_id, target_snapshot")
+    .select("id, user_id, target_type, target_id, target_snapshot, template_key, template_version")
     .single();
 
   if (purchaseError || !purchase) {
@@ -578,6 +590,8 @@ async function handleOneTimeProductCheckout(
           target_id: resolvedTarget.targetId,
           resource_type: fulfillment.fulfilledResourceType,
           resource_id: fulfillment.fulfilledResourceId,
+          template_key: templateKey || null,
+          template_version: templateVersion || null,
           revoked_at: null,
           revoke_reason: null,
           updated_at: now,
@@ -596,6 +610,11 @@ async function handleOneTimeProductCheckout(
     if (product.key === "deal_room_90") {
       await supabaseAdmin
         .from("deal_room_paid_access")
+        .update({ entitlement_grant_id: grant.id, updated_at: now })
+        .eq("purchase_id", purchase.id);
+    } else if (product.key === "business_in_a_box") {
+      await supabaseAdmin
+        .from("business_in_a_box_setups")
         .update({ entitlement_grant_id: grant.id, updated_at: now })
         .eq("purchase_id", purchase.id);
     }
@@ -653,6 +672,19 @@ async function handleOneTimeProductCheckout(
       .eq("id", purchase.id)
       .neq("fulfillment_status", "refunded");
 
+    if (product.key === "business_in_a_box") {
+      await supabaseAdmin
+        .from("business_in_a_box_setups")
+        .update({
+          status: "failed",
+          failure_code: "fulfillment_failed",
+          failure_message_safe: safeMessage.slice(0, 500),
+          updated_at: now,
+        })
+        .eq("purchase_id", purchase.id)
+        .neq("status", "refunded");
+    }
+
     throw err;
   }
 }
@@ -671,6 +703,8 @@ async function revalidateStoredPurchaseTarget(
     target_type: string | null;
     target_id: string | null;
     target_snapshot: Record<string, unknown> | null;
+    template_key: string | null;
+    template_version: string | null;
   },
   product: NonNullable<ReturnType<typeof getProduct>>,
   userId: string,
@@ -684,6 +718,80 @@ async function revalidateStoredPurchaseTarget(
       targetType: "none",
       targetId: null,
       targetSnapshot: purchase.target_snapshot,
+    };
+  }
+
+  const isUserBusinessOwnerOrMember = async (businessId: string): Promise<boolean> => {
+    const { data: business } = await supabaseAdmin
+      .from("businesses")
+      .select("id, owner_id, deleted_at")
+      .eq("id", businessId)
+      .maybeSingle();
+
+    if (!business || business.deleted_at !== null) {
+      return false;
+    }
+
+    if (business.owner_id === userId) {
+      return true;
+    }
+
+    const { data: membership } = await supabaseAdmin
+      .from("business_members")
+      .select("id, status")
+      .eq("business_id", businessId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+
+    return Boolean(membership);
+  };
+
+  if (product.key === "business_in_a_box") {
+    if (!targetId) {
+      throw new Error(`[one_time_product] Missing business target for purchase ${purchase.id}`);
+    }
+
+    const isAllowed = await isUserBusinessOwnerOrMember(targetId);
+    if (!isAllowed) {
+      throw new Error(`[one_time_product] Business target is invalid for purchase ${purchase.id}`);
+    }
+
+    const templateKey = String(
+      purchase.template_key ?? session.metadata?.templateKey ?? ""
+    )
+      .trim()
+      .toLowerCase();
+    const templateVersion = String(
+      purchase.template_version ?? session.metadata?.templateVersion ?? ""
+    ).trim();
+    const template = getBusinessInABoxTemplate(templateKey);
+
+    if (!template || !template.active) {
+      throw new Error(`[one_time_product] Template key is invalid for purchase ${purchase.id}`);
+    }
+
+    if (templateVersion && templateVersion !== template.version) {
+      throw new Error(`[one_time_product] Template version mismatch for purchase ${purchase.id}`);
+    }
+
+    const { data: business } = await supabaseAdmin
+      .from("businesses")
+      .select("id, name")
+      .eq("id", targetId)
+      .maybeSingle();
+
+    return {
+      targetType: "business",
+      targetId,
+      targetSnapshot: {
+        productKey: product.key,
+        targetType: "business",
+        businessId: targetId,
+        displayName: business?.name ?? "Business",
+        templateKey: template.key,
+        templateVersion: template.version,
+      },
     };
   }
 
@@ -793,7 +901,7 @@ async function revalidateStoredPurchaseTarget(
       .eq("id", targetId)
       .maybeSingle();
 
-    if (!business || business.deleted_at !== null || business.owner_id !== userId) {
+    if (!business || business.deleted_at !== null || !(await isUserBusinessOwnerOrMember(targetId))) {
       throw new Error(`[one_time_product] Business target is invalid for purchase ${purchase.id}`);
     }
 
@@ -925,6 +1033,65 @@ async function fulfillProductResource(params: {
       return {
         fulfilledResourceType: "listing",
         fulfilledResourceId: targetId,
+        entitlementExpiresAt: null,
+      };
+    }
+
+    case "apply_business_in_a_box_template": {
+      if (!targetId) {
+        throw new Error(`[one_time_product] Missing business target for purchase ${purchaseId}`);
+      }
+
+      const templateKey = String(session.metadata?.templateKey ?? "")
+        .trim()
+        .toLowerCase();
+      const templateVersion = String(session.metadata?.templateVersion ?? "").trim();
+      const template = getBusinessInABoxTemplate(templateKey);
+
+      if (!template || !template.active) {
+        throw new Error(`[one_time_product] Invalid Business-in-a-Box template for purchase ${purchaseId}`);
+      }
+
+      if (templateVersion && templateVersion !== template.version) {
+        throw new Error(`[one_time_product] Business-in-a-Box template version mismatch for purchase ${purchaseId}`);
+      }
+
+      const setup = await ensureBusinessInABoxSetup({
+        purchaseId,
+        userId,
+        businessId: targetId,
+        template,
+        now,
+        supabaseAdmin,
+      });
+
+      await markBusinessInABoxSetupProcessing(setup.id, now, supabaseAdmin);
+
+      await materializeBusinessInABoxTemplateResources({
+        setupId: setup.id,
+        purchaseId,
+        userId,
+        businessId: targetId,
+        template,
+        now,
+        supabaseAdmin,
+      });
+
+      await supabaseAdmin
+        .from("business_in_a_box_setups")
+        .update({
+          status: "completed",
+          completed_at: now,
+          failure_code: null,
+          failure_message_safe: null,
+          updated_at: now,
+        })
+        .eq("id", setup.id)
+        .neq("status", "refunded");
+
+      return {
+        fulfilledResourceType: "business_in_a_box_setup",
+        fulfilledResourceId: setup.id,
         entitlementExpiresAt: null,
       };
     }
@@ -1187,6 +1354,346 @@ async function fulfillProductResource(params: {
   }
 }
 
+type BusinessInABoxSetupRow = {
+  id: string;
+  status: string;
+  fulfillment_attempts: number;
+};
+
+async function ensureBusinessInABoxSetup(params: {
+  purchaseId: string;
+  userId: string;
+  businessId: string;
+  template: BusinessInABoxTemplateDefinition;
+  now: string;
+  supabaseAdmin: SupabaseClient;
+}): Promise<BusinessInABoxSetupRow> {
+  const { purchaseId, userId, businessId, template, now, supabaseAdmin } = params;
+
+  const { data: existing } = await supabaseAdmin
+    .from("business_in_a_box_setups")
+    .select("id, status, fulfillment_attempts")
+    .eq("purchase_id", purchaseId)
+    .maybeSingle();
+
+  const attempts = Number(existing?.fulfillment_attempts ?? 0) + 1;
+
+  const { data: purchaseItem } = await supabaseAdmin
+    .from("purchase_items")
+    .select("id")
+    .eq("purchase_id", purchaseId)
+    .eq("product_key", "business_in_a_box")
+    .maybeSingle();
+
+  const { data: setup, error } = await supabaseAdmin
+    .from("business_in_a_box_setups")
+    .upsert(
+      {
+        purchase_id: purchaseId,
+        purchase_item_id: purchaseItem?.id ?? null,
+        user_id: userId,
+        business_id: businessId,
+        template_key: template.key,
+        template_version: template.version,
+        status: existing?.status === "completed" ? "completed" : "pending",
+        fulfillment_attempts: attempts,
+        started_at: existing?.status ? undefined : now,
+        updated_at: now,
+      },
+      { onConflict: "purchase_id" }
+    )
+    .select("id, status, fulfillment_attempts")
+    .single();
+
+  if (error || !setup) {
+    throw new Error(
+      `[business_in_a_box] Failed to upsert setup for purchase ${purchaseId}: ${error?.message}`
+    );
+  }
+
+  return {
+    id: String(setup.id),
+    status: String(setup.status),
+    fulfillment_attempts: Number(setup.fulfillment_attempts ?? attempts),
+  };
+}
+
+async function markBusinessInABoxSetupProcessing(
+  setupId: string,
+  now: string,
+  supabaseAdmin: SupabaseClient
+): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("business_in_a_box_setups")
+    .update({ status: "processing", updated_at: now })
+    .eq("id", setupId)
+    .in("status", ["pending", "processing", "failed"]);
+
+  if (error) {
+    throw new Error(`[business_in_a_box] Failed to mark setup ${setupId} processing: ${error.message}`);
+  }
+}
+
+async function ensureGeneratedResource(params: {
+  setupId: string;
+  purchaseId: string;
+  userId: string;
+  businessId: string;
+  template: BusinessInABoxTemplateDefinition;
+  resourceType: string;
+  templateItem: TemplateItemDefinition;
+  now: string;
+  supabaseAdmin: SupabaseClient;
+}): Promise<void> {
+  const {
+    setupId,
+    purchaseId,
+    userId,
+    businessId,
+    template,
+    resourceType,
+    templateItem,
+    now,
+    supabaseAdmin,
+  } = params;
+
+  const templateItemKey = buildTemplateItemKey(resourceType, template.key, templateItem.key);
+
+  const { data: existing } = await supabaseAdmin
+    .from("business_in_a_box_generated_resources")
+    .select("id")
+    .eq("setup_id", setupId)
+    .eq("resource_type", resourceType)
+    .eq("template_item_key", templateItemKey)
+    .maybeSingle();
+
+  if (existing) {
+    return;
+  }
+
+  let sourceTable: string | null = null;
+  let sourceRecordId: string | null = null;
+  const titleEn = templateItem.title.en;
+  const descriptionEn = templateItem.description?.en ?? null;
+
+  if (resourceType === "starter_task" || resourceType === "onboarding_step" || resourceType === "recurring_routine") {
+    const taskDescription =
+      resourceType === "recurring_routine"
+        ? `${descriptionEn ?? ""}\n\nRecurring routine recommendation only. Configure recurrence manually where needed.`.trim()
+        : descriptionEn;
+
+    const { data: task, error } = await supabaseAdmin
+      .from("tasks")
+      .insert({
+        user_id: userId,
+        business_id: businessId,
+        title: titleEn,
+        description: taskDescription,
+        priority: "medium",
+        status: "todo",
+      })
+      .select("id")
+      .single();
+
+    if (error || !task) {
+      throw new Error(`[business_in_a_box] Failed creating task ${templateItemKey}: ${error?.message}`);
+    }
+    sourceTable = "tasks";
+    sourceRecordId = String(task.id);
+  } else if (resourceType === "client_pipeline_stage" || resourceType === "operating_checklist") {
+    const categoryByKey: Record<string, string> = {
+      setup: "operations",
+      clients: "customer",
+      finance: "finance",
+      operations: "operations",
+      documents: "operations",
+      team: "team",
+      health: "operations",
+      growth: "growth",
+    };
+
+    const rawCategory = resourceType === "operating_checklist" ? templateItem.key : "customer";
+    const category = categoryByKey[rawCategory] ?? "custom";
+
+    const { data: milestone, error } = await supabaseAdmin
+      .from("business_milestones")
+      .insert({
+        user_id: userId,
+        business_id: businessId,
+        title:
+          resourceType === "client_pipeline_stage"
+            ? `Pipeline stage: ${titleEn}`
+            : `Operating checklist: ${titleEn}`,
+        description: descriptionEn,
+        category,
+        status: "planned",
+      })
+      .select("id")
+      .single();
+
+    if (error || !milestone) {
+      throw new Error(
+        `[business_in_a_box] Failed creating milestone ${templateItemKey}: ${error?.message}`
+      );
+    }
+    sourceTable = "business_milestones";
+    sourceRecordId = String(milestone.id);
+  } else if (resourceType === "kpi_recommendation") {
+    const categoryByKpi: Record<string, string> = {
+      monthly_revenue: "revenue",
+      unpaid_invoices: "operations",
+      lead_to_client_conversion: "customers",
+      client_concentration: "customers",
+      recurring_revenue_pct: "recurring_revenue",
+      client_retention: "customer_retention",
+      delivery_timeliness: "operations",
+      owner_dependence: "owner_independence",
+      documentation_completeness: "sale_readiness",
+    };
+
+    const { data: goal, error } = await supabaseAdmin
+      .from("growth_goals")
+      .insert({
+        user_id: userId,
+        business_id: businessId,
+        title: `KPI recommendation: ${titleEn}`,
+        category: categoryByKpi[templateItem.key] ?? "other",
+        metric_name: titleEn,
+        status: "active",
+        notes: "Generated recommendation placeholder. Set your own targets and values.",
+      })
+      .select("id")
+      .single();
+
+    if (error || !goal) {
+      throw new Error(`[business_in_a_box] Failed creating KPI goal ${templateItemKey}: ${error?.message}`);
+    }
+    sourceTable = "growth_goals";
+    sourceRecordId = String(goal.id);
+  } else if (resourceType === "sop_placeholder" || resourceType === "document_checklist") {
+    const { data: evidence, error } = await supabaseAdmin
+      .from("sale_readiness_evidence")
+      .insert({
+        user_id: userId,
+        business_id: businessId,
+        category: resourceType === "sop_placeholder" ? "operations" : "documents",
+        evidence_key:
+          resourceType === "sop_placeholder"
+            ? `sop_${templateItem.key}`
+            : `document_${templateItem.key}`,
+        source_type: "unverified",
+        value_text: titleEn,
+        notes:
+          resourceType === "sop_placeholder"
+            ? "Generated SOP placeholder. Replace with your customized operating procedure."
+            : "Generated document checklist placeholder. Upload and maintain your own real documents.",
+      })
+      .select("id")
+      .single();
+
+    if (error || !evidence) {
+      throw new Error(
+        `[business_in_a_box] Failed creating evidence placeholder ${templateItemKey}: ${error?.message}`
+      );
+    }
+    sourceTable = "sale_readiness_evidence";
+    sourceRecordId = String(evidence.id);
+  } else {
+    throw new Error(`[business_in_a_box] Unsupported resource type: ${resourceType}`);
+  }
+
+  const { error: provenanceError } = await supabaseAdmin
+    .from("business_in_a_box_generated_resources")
+    .upsert(
+      {
+        setup_id: setupId,
+        purchase_id: purchaseId,
+        user_id: userId,
+        business_id: businessId,
+        template_key: template.key,
+        template_version: template.version,
+        resource_type: resourceType,
+        template_item_key: templateItemKey,
+        source_table: sourceTable,
+        source_record_id: sourceRecordId,
+        resource_label: titleEn,
+        generation_source: "apply_business_in_a_box_template",
+        provenance: {
+          template_key: template.key,
+          template_version: template.version,
+          item_key: templateItem.key,
+          resource_type: resourceType,
+          created_at: now,
+        },
+        updated_at: now,
+      },
+      { onConflict: "setup_id,resource_type,template_item_key" }
+    );
+
+  if (provenanceError) {
+    throw new Error(
+      `[business_in_a_box] Failed to upsert generated resource ${templateItemKey}: ${provenanceError.message}`
+    );
+  }
+}
+
+async function materializeBusinessInABoxTemplateResources(params: {
+  setupId: string;
+  purchaseId: string;
+  userId: string;
+  businessId: string;
+  template: BusinessInABoxTemplateDefinition;
+  now: string;
+  supabaseAdmin: SupabaseClient;
+}): Promise<void> {
+  const { setupId, purchaseId, userId, businessId, template, now, supabaseAdmin } = params;
+
+  const resourcePlans: Array<{ resourceType: string; items: TemplateItemDefinition[] }> = [
+    { resourceType: "client_pipeline_stage", items: template.clientPipelineStages },
+    { resourceType: "starter_task", items: template.starterTasks },
+    { resourceType: "operating_checklist", items: template.operatingChecklist },
+    { resourceType: "sop_placeholder", items: template.sopPlaceholders },
+    { resourceType: "document_checklist", items: template.documentChecklist },
+    { resourceType: "kpi_recommendation", items: template.kpiRecommendations },
+    { resourceType: "onboarding_step", items: template.onboardingSteps },
+    { resourceType: "recurring_routine", items: template.recurringRoutines },
+  ];
+
+  for (const plan of resourcePlans) {
+    for (const templateItem of plan.items) {
+      await ensureGeneratedResource({
+        setupId,
+        purchaseId,
+        userId,
+        businessId,
+        template,
+        resourceType: plan.resourceType,
+        templateItem,
+        now,
+        supabaseAdmin,
+      });
+    }
+  }
+
+  const expectedCount = resourcePlans.reduce((sum, plan) => sum + plan.items.length, 0);
+  const { count: actualCount, error } = await supabaseAdmin
+    .from("business_in_a_box_generated_resources")
+    .select("id", { count: "exact", head: true })
+    .eq("setup_id", setupId);
+
+  if (error) {
+    throw new Error(
+      `[business_in_a_box] Failed to verify generated resources for setup ${setupId}: ${error.message}`
+    );
+  }
+
+  if ((actualCount ?? 0) < expectedCount) {
+    throw new Error(
+      `[business_in_a_box] Required resources were not fully generated for setup ${setupId}`
+    );
+  }
+}
+
 async function handleOneTimePurchaseRefund(
   paymentIntentId: string,
   charge: Stripe.Charge,
@@ -1251,6 +1758,8 @@ async function handleOneTimePurchaseRefund(
     await reverseDealRoom90Refund(purchase.id, now, supabaseAdmin);
   } else if (product.key === "confidential_sale_launch") {
     await reverseConfidentialSaleLaunchRefund(purchase.id, now, supabaseAdmin);
+  } else if (product.key === "business_in_a_box") {
+    await reverseBusinessInABoxRefund(purchase.id, now, supabaseAdmin);
   } else if (product.fulfillmentBehavior === "apply_listing_promotion") {
     await handleFeaturedListingRefund(paymentIntentId, supabaseAdmin);
   }
@@ -1314,6 +1823,182 @@ async function reverseDealRoom90Refund(
   if (error) {
     throw new Error(
       `[one_time_product] Failed to reverse deal-room paid access on purchase ${purchaseId}: ${error.message}`
+    );
+  }
+}
+
+async function reverseBusinessInABoxRefund(
+  purchaseId: string,
+  now: string,
+  supabaseAdmin: SupabaseClient
+): Promise<void> {
+  const { data: setup, error: setupError } = await supabaseAdmin
+    .from("business_in_a_box_setups")
+    .select("id, status")
+    .eq("purchase_id", purchaseId)
+    .maybeSingle();
+
+  if (setupError) {
+    throw new Error(
+      `[one_time_product] Failed to load Business-in-a-Box setup for purchase ${purchaseId}: ${setupError.message}`
+    );
+  }
+
+  if (!setup) {
+    return;
+  }
+
+  if (setup.status === "refunded") {
+    return;
+  }
+
+  const { data: resources, error: resourcesError } = await supabaseAdmin
+    .from("business_in_a_box_generated_resources")
+    .select("id, source_table, source_record_id")
+    .eq("setup_id", setup.id)
+    .is("archived_at", null);
+
+  if (resourcesError) {
+    throw new Error(
+      `[one_time_product] Failed to load generated resources for setup ${setup.id}: ${resourcesError.message}`
+    );
+  }
+
+  let detachedCount = 0;
+
+  for (const resource of resources ?? []) {
+    const sourceTable = String(resource.source_table ?? "");
+    const sourceId = String(resource.source_record_id ?? "");
+    if (!sourceTable || !sourceId) {
+      continue;
+    }
+
+    let modifiedByUser = false;
+
+    if (sourceTable === "tasks") {
+      const { data: row } = await supabaseAdmin
+        .from("tasks")
+        .select("id, status, created_at, updated_at")
+        .eq("id", sourceId)
+        .maybeSingle();
+
+      if (!row) {
+        continue;
+      }
+
+      modifiedByUser =
+        String(row.status ?? "") !== "todo" ||
+        (row.updated_at && row.created_at && String(row.updated_at) !== String(row.created_at));
+
+      if (modifiedByUser) {
+        detachedCount += 1;
+      } else {
+        await supabaseAdmin.from("tasks").delete().eq("id", sourceId);
+      }
+    } else if (sourceTable === "business_milestones") {
+      const { data: row } = await supabaseAdmin
+        .from("business_milestones")
+        .select("id, status, created_at, updated_at")
+        .eq("id", sourceId)
+        .maybeSingle();
+
+      if (!row) {
+        continue;
+      }
+
+      modifiedByUser =
+        String(row.status ?? "") !== "planned" ||
+        (row.updated_at && row.created_at && String(row.updated_at) !== String(row.created_at));
+
+      if (modifiedByUser) {
+        detachedCount += 1;
+      } else {
+        await supabaseAdmin
+          .from("business_milestones")
+          .update({ deleted_at: now, updated_at: now })
+          .eq("id", sourceId)
+          .is("deleted_at", null);
+      }
+    } else if (sourceTable === "growth_goals") {
+      const { data: row } = await supabaseAdmin
+        .from("growth_goals")
+        .select("id, status, created_at, updated_at")
+        .eq("id", sourceId)
+        .maybeSingle();
+
+      if (!row) {
+        continue;
+      }
+
+      modifiedByUser =
+        String(row.status ?? "") !== "active" ||
+        (row.updated_at && row.created_at && String(row.updated_at) !== String(row.created_at));
+
+      if (modifiedByUser) {
+        detachedCount += 1;
+      } else {
+        await supabaseAdmin
+          .from("growth_goals")
+          .update({
+            status: "cancelled",
+            notes: "Cancelled because purchase was fully refunded before activation was retained.",
+            updated_at: now,
+          })
+          .eq("id", sourceId)
+          .eq("status", "active");
+      }
+    } else if (sourceTable === "sale_readiness_evidence") {
+      const { data: row } = await supabaseAdmin
+        .from("sale_readiness_evidence")
+        .select("id, deleted_at, created_at, updated_at")
+        .eq("id", sourceId)
+        .maybeSingle();
+
+      if (!row) {
+        continue;
+      }
+
+      modifiedByUser =
+        row.deleted_at !== null ||
+        (row.updated_at && row.created_at && String(row.updated_at) !== String(row.created_at));
+
+      if (modifiedByUser) {
+        detachedCount += 1;
+      } else {
+        await supabaseAdmin
+          .from("sale_readiness_evidence")
+          .update({ deleted_at: now, updated_at: now })
+          .eq("id", sourceId)
+          .is("deleted_at", null);
+      }
+    }
+
+    await supabaseAdmin
+      .from("business_in_a_box_generated_resources")
+      .update({
+        detached_on_refund: modifiedByUser,
+        modified_by_user: modifiedByUser,
+        archived_at: modifiedByUser ? null : now,
+        updated_at: now,
+      })
+      .eq("id", resource.id);
+  }
+
+  const setupStatus = detachedCount > 0 ? "partially_reversed" : "refunded";
+
+  const { error: updateError } = await supabaseAdmin
+    .from("business_in_a_box_setups")
+    .update({
+      status: setupStatus,
+      refunded_at: now,
+      updated_at: now,
+    })
+    .eq("id", setup.id)
+    .neq("status", "refunded");
+
+  if (updateError) {
+    throw new Error(
+      `[one_time_product] Failed to update Business-in-a-Box setup ${setup.id} on refund: ${updateError.message}`
     );
   }
 }

@@ -1912,6 +1912,9 @@
     "actions": {
       "refunded": "Reembolsado",
       "processing": "Procesando",
+      "completeSetup": "Completar configuración",
+      "viewSetup": "Ver configuración",
+      "setupFailed": "Configuración fallida",
       "openWorkspace": "Abrir espacio de trabajo",
       "viewReport": "Ver informe",
       "viewEnhancedReport": "Abrir informe mejorado",

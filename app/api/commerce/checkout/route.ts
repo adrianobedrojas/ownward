@@ -6,6 +6,10 @@ import {
   isProductConfigured,
   type ProductDefinition,
 } from "@/lib/commerce/products";
+import {
+  getBusinessInABoxTemplate,
+  type BusinessInABoxTemplateDefinition,
+} from "@/lib/commerce/business-in-a-box-templates";
 import { getSiteUrl } from "@/lib/config";
 import { getUserBillingState, isObsoleteStripeCustomer } from "@/lib/billing";
 import Stripe from "stripe";
@@ -41,6 +45,64 @@ type DuplicateGuardResult =
       error: string;
       route?: string;
     };
+
+type TemplateValidationResult =
+  | {
+      ok: true;
+      template: BusinessInABoxTemplateDefinition | null;
+    }
+  | {
+      ok: false;
+      status: number;
+      error: string;
+    };
+
+function validateTemplateSelection(
+  product: ProductDefinition,
+  templateKey: string
+): TemplateValidationResult {
+  if (product.key !== "business_in_a_box") {
+    return { ok: true, template: null };
+  }
+
+  if (!templateKey) {
+    return {
+      ok: false,
+      status: 400,
+      error: "templateKey is required for this product",
+    };
+  }
+
+  if (!/^[a-z0-9_]+$/.test(templateKey)) {
+    return {
+      ok: false,
+      status: 400,
+      error: "templateKey format is invalid",
+    };
+  }
+
+  const template = getBusinessInABoxTemplate(templateKey);
+  if (!template) {
+    return {
+      ok: false,
+      status: 400,
+      error: "templateKey is not supported",
+    };
+  }
+
+  if (!template.active) {
+    return {
+      ok: false,
+      status: 409,
+      error: "templateKey is currently unavailable",
+    };
+  }
+
+  return {
+    ok: true,
+    template,
+  };
+}
 
 async function validateTargetEligibility(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -129,16 +191,31 @@ async function validateTargetEligibility(
   if (product.requiredTargetType === "business") {
     const { data: business } = await supabase
       .from("businesses")
-      .select("id, owner_id, deleted_at, name")
+      .select("id, owner_id, deleted_at, name, profile_completion")
       .eq("id", targetId)
       .maybeSingle();
 
     if (!business || business.deleted_at !== null) {
       return { ok: false, status: 404, error: "Target business not found" };
     }
-    if (business.owner_id !== userId) {
-      return { ok: false, status: 403, error: "You do not own this business" };
+
+    const isOwner = business.owner_id === userId;
+    let hasMembership = false;
+    if (!isOwner) {
+      const { data: membership } = await supabase
+        .from("business_members")
+        .select("id")
+        .eq("business_id", business.id)
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .maybeSingle();
+      hasMembership = Boolean(membership);
     }
+
+    if (!isOwner && !hasMembership) {
+      return { ok: false, status: 403, error: "You do not have access to this business" };
+    }
+
     return {
       ok: true,
       targetType: "business",
@@ -148,7 +225,8 @@ async function validateTargetEligibility(
         targetType: "business",
         businessId: business.id,
         displayName: business.name,
-        validatedOwner: true,
+        accessRole: isOwner ? "owner" : "member",
+        profileCompletion: business.profile_completion,
       },
     };
   }
@@ -222,7 +300,8 @@ async function guardAgainstDuplicatePurchase(
   userId: string,
   product: ProductDefinition,
   targetType: string,
-  targetId: string | null
+  targetId: string | null,
+  selectedTemplate: BusinessInABoxTemplateDefinition | null
 ): Promise<DuplicateGuardResult> {
   if (!targetId || targetType === "none") {
     return { ok: true };
@@ -230,7 +309,9 @@ async function guardAgainstDuplicatePurchase(
 
   const { data: openPurchase } = await supabase
     .from("purchases")
-    .select("id, payment_status, fulfillment_status, fulfilled_resource_type, fulfilled_resource_id")
+    .select(
+      "id, payment_status, fulfillment_status, fulfilled_resource_type, fulfilled_resource_id, template_key"
+    )
     .eq("user_id", userId)
     .eq("product_key", product.key)
     .eq("target_type", targetType)
@@ -242,20 +323,29 @@ async function guardAgainstDuplicatePurchase(
     .maybeSingle();
 
   if (openPurchase) {
-    const existingRoute =
-      openPurchase.fulfilled_resource_type === "deal_room" && openPurchase.fulfilled_resource_id
-        ? `/deals/${openPurchase.fulfilled_resource_id}`
-        : openPurchase.fulfilled_resource_type === "valuation_report"
-          ? `/account/products/${openPurchase.id}/report`
-          : openPurchase.fulfilled_resource_type === "listing"
-            ? `/sell/${openPurchase.fulfilled_resource_id}/edit`
-            : `/account/products`;
-    return {
-      ok: false,
-      status: 409,
-      error: "A purchase for this target is already pending or active",
-      route: existingRoute,
-    };
+    if (
+      product.key === "business_in_a_box" &&
+      selectedTemplate &&
+      openPurchase.template_key !== selectedTemplate.key
+    ) {
+      // Different template keys can proceed for now; precise template collisions
+      // are guarded below for Business-in-a-Box.
+    } else {
+      const existingRoute =
+        openPurchase.fulfilled_resource_type === "deal_room" && openPurchase.fulfilled_resource_id
+          ? `/deals/${openPurchase.fulfilled_resource_id}`
+          : openPurchase.fulfilled_resource_type === "valuation_report"
+            ? `/account/products/${openPurchase.id}/report`
+            : openPurchase.fulfilled_resource_type === "listing"
+              ? `/sell/${openPurchase.fulfilled_resource_id}/edit`
+              : `/account/products`;
+      return {
+        ok: false,
+        status: 409,
+        error: "A purchase for this target is already pending or active",
+        route: existingRoute,
+      };
+    }
   }
 
   const { data: activeGrant } = await supabase
@@ -275,6 +365,69 @@ async function guardAgainstDuplicatePurchase(
       error: "You already have active access for this target",
       route: `/account/products`,
     };
+  }
+
+  if (product.key === "business_in_a_box" && selectedTemplate) {
+    const { data: existingSetup } = await supabase
+      .from("business_in_a_box_setups")
+      .select("id, status")
+      .eq("business_id", targetId)
+      .eq("template_key", selectedTemplate.key)
+      .in("status", ["pending", "processing", "completed"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingSetup) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A Business-in-a-Box setup already exists for this business and template",
+        route: "/account/products",
+      };
+    }
+
+    const { data: existingTemplatePurchase } = await supabase
+      .from("purchases")
+      .select("id")
+      .eq("product_key", "business_in_a_box")
+      .eq("target_type", "business")
+      .eq("target_id", targetId)
+      .eq("template_key", selectedTemplate.key)
+      .in("payment_status", ["pending", "paid"])
+      .in("fulfillment_status", ["pending", "fulfilled"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingTemplatePurchase) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A pending or completed purchase already exists for this business and template",
+        route: "/account/products",
+      };
+    }
+
+    const { data: existingTemplateGrant } = await supabase
+      .from("entitlement_grants")
+      .select("id")
+      .eq("product_key", "business_in_a_box")
+      .eq("target_type", "business")
+      .eq("target_id", targetId)
+      .eq("template_key", selectedTemplate.key)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (existingTemplateGrant) {
+      return {
+        ok: false,
+        status: 409,
+        error: "An active entitlement already exists for this business and template",
+        route: "/account/products",
+      };
+    }
   }
 
   if (product.key === "deal_room_90") {
@@ -358,7 +511,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized", redirectTo: "/login" }, { status: 401 });
     }
 
-    // 2. Parse body. The client may provide productKey, locale, and targetId only.
+    // 2. Parse body. The client may provide productKey, locale, targetId, and templateKey only.
     //    All sensitive billing and fulfillment inputs stay server-controlled
     //    (price ID, amount, currency, user ID, fulfillment behavior, and redirect URLs).
     let body: unknown;
@@ -386,6 +539,12 @@ export async function POST(req: Request) {
       body && typeof body === "object" && "targetId" in body
         ? String((body as Record<string, unknown>).targetId ?? "").trim()
         : "";
+    const selectedTemplateKey =
+      body && typeof body === "object" && "templateKey" in body
+        ? String((body as Record<string, unknown>).templateKey ?? "")
+            .trim()
+            .toLowerCase()
+        : "";
 
     if (!productKey) {
       return NextResponse.json({ error: "productKey is required" }, { status: 400 });
@@ -412,6 +571,11 @@ export async function POST(req: Request) {
         { error: targetCheck.error, route: targetCheck.route },
         { status: targetCheck.status }
       );
+    }
+
+    const templateCheck = validateTemplateSelection(product, selectedTemplateKey);
+    if (!templateCheck.ok) {
+      return NextResponse.json({ error: templateCheck.error }, { status: templateCheck.status });
     }
 
     const billing = await getUserBillingState(supabase, user.id);
@@ -462,7 +626,8 @@ export async function POST(req: Request) {
       user.id,
       product,
       targetCheck.targetType,
-      targetCheck.targetId
+      targetCheck.targetId,
+      templateCheck.template
     );
 
     if (!duplicateGuard.ok) {
@@ -578,7 +743,12 @@ export async function POST(req: Request) {
       }
     }
 
-    const serializedTargetSnapshot = JSON.stringify(targetCheck.targetSnapshot).slice(0, 490);
+    const checkoutTargetSnapshot = {
+      ...targetCheck.targetSnapshot,
+      templateKey: templateCheck.template?.key ?? null,
+      templateVersion: templateCheck.template?.version ?? null,
+    };
+    const serializedTargetSnapshot = JSON.stringify(checkoutTargetSnapshot).slice(0, 490);
 
     // 7. Create Stripe Checkout Session (mode: payment — one-time purchase)
     const session = await stripe.checkout.sessions.create({
@@ -595,6 +765,8 @@ export async function POST(req: Request) {
         productKey: product.key,
         targetType: targetCheck.targetType,
         targetId: targetCheck.targetId || "",
+        templateKey: templateCheck.template?.key ?? "",
+        templateVersion: templateCheck.template?.version ?? "",
         targetSnapshot: serializedTargetSnapshot,
       },
     });

@@ -97,6 +97,21 @@ describe("Product Registry — getStripePriceId", () => {
 });
 
 describe("Product Registry — product definitions", () => {
+  it("business_in_a_box is defined with one-time $10 config and stays inactive", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("business_in_a_box")!;
+    expect(p.nameEn).toBe("Ownward Business-in-a-Box");
+    expect(p.billingModel).toBe("one_time");
+    expect(p.displayPrice).toBe(10);
+    expect(p.requiredTargetType).toBe("business");
+    expect(p.fulfillmentBehavior).toBe("apply_business_in_a_box_template");
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_BUSINESS_IN_A_BOX");
+    expect(p.status).toBe("coming_soon");
+    expect(p.ctaBehavior).toBe("coming_soon");
+    expect(p.active).toBe(false);
+    expect(getPurchasableProduct("business_in_a_box")).toBeNull();
+  });
+
   it("enhanced_valuation_report maps to the new Stripe env var and is purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("enhanced_valuation_report")!;

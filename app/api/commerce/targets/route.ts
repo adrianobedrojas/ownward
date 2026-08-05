@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getPurchasableProduct } from "@/lib/commerce/products";
+import { getProduct } from "@/lib/commerce/products";
 import { getUserBillingState } from "@/lib/billing";
+import { listPublicBusinessInABoxTemplateSummaries } from "@/lib/commerce/business-in-a-box-templates";
 
 type TargetOption = {
   id: string;
@@ -9,6 +10,8 @@ type TargetOption = {
   description?: string;
   eligible: boolean;
   reason?: string;
+  setupStatus?: string;
+  accessRole?: string;
 };
 
 export async function GET(req: Request) {
@@ -21,8 +24,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "productKey is required" }, { status: 400 });
     }
 
-    const product = getPurchasableProduct(productKey);
-    if (!product) {
+    const product = getProduct(productKey);
+    if (!product || !product.isPublic || !product.requiresAuth) {
       return NextResponse.json({ error: "Invalid or unavailable product" }, { status: 400 });
     }
 
@@ -77,6 +80,149 @@ export async function GET(req: Request) {
             : "Confidential listing capability is already included in your current plan.",
         route: `/${locale === "es" ? "es/" : ""}sell`,
       });
+    }
+
+    if (product.key === "business_in_a_box") {
+      const [{ data: ownedBusinesses }, { data: memberships }] = await Promise.all([
+        supabase
+          .from("businesses")
+          .select("id, owner_id, name, profile_completion, deleted_at")
+          .eq("owner_id", user.id)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("business_members")
+          .select("business_id, role, status")
+          .eq("user_id", user.id)
+          .eq("status", "active"),
+      ]);
+
+      const memberBusinessIds = Array.from(
+        new Set((memberships ?? []).map((row) => String(row.business_id)).filter(Boolean))
+      );
+
+      const { data: memberBusinesses } = memberBusinessIds.length
+        ? await supabase
+            .from("businesses")
+            .select("id, owner_id, name, profile_completion, deleted_at")
+            .in("id", memberBusinessIds)
+            .is("deleted_at", null)
+        : {
+            data: [] as Array<{
+              id: string;
+              owner_id: string;
+              name: string;
+              profile_completion: number | null;
+              deleted_at: string | null;
+            }>,
+          };
+
+      const businessById = new Map<
+        string,
+        {
+          id: string;
+          owner_id: string;
+          name: string;
+          profile_completion: number | null;
+          accessRole: "owner" | "member";
+        }
+      >();
+
+      for (const business of ownedBusinesses ?? []) {
+        businessById.set(String(business.id), {
+          id: String(business.id),
+          owner_id: String(business.owner_id),
+          name: String(business.name ?? (locale === "es" ? "Negocio" : "Business")),
+          profile_completion:
+            typeof business.profile_completion === "number" ? business.profile_completion : null,
+          accessRole: "owner",
+        });
+      }
+
+      for (const business of memberBusinesses ?? []) {
+        const id = String(business.id);
+        if (businessById.has(id)) {
+          continue;
+        }
+        businessById.set(id, {
+          id,
+          owner_id: String(business.owner_id),
+          name: String(business.name ?? (locale === "es" ? "Negocio" : "Business")),
+          profile_completion:
+            typeof business.profile_completion === "number" ? business.profile_completion : null,
+          accessRole: "member",
+        });
+      }
+
+      const businessIds = Array.from(businessById.keys());
+      const activeStatuses = ["pending", "processing", "completed"];
+      const [setupsRes, openPurchasesRes] = await Promise.all([
+        businessIds.length
+          ? supabase
+              .from("business_in_a_box_setups")
+              .select("business_id, status")
+              .in("business_id", businessIds)
+              .in("status", activeStatuses)
+          : Promise.resolve({ data: [] as Array<{ business_id: string; status: string }> }),
+        businessIds.length
+          ? supabase
+              .from("purchases")
+              .select("target_id, payment_status, fulfillment_status")
+              .eq("product_key", "business_in_a_box")
+              .eq("target_type", "business")
+              .in("target_id", businessIds)
+              .in("payment_status", ["pending", "paid"])
+              .in("fulfillment_status", ["pending", "fulfilled"])
+          : Promise.resolve({ data: [] as Array<{ target_id: string; payment_status: string; fulfillment_status: string }> }),
+      ]);
+
+      const setupStateByBusiness = new Map<string, string>();
+      for (const row of setupsRes.data ?? []) {
+        const businessId = String(row.business_id);
+        const state = String(row.status);
+        const prev = setupStateByBusiness.get(businessId);
+        if (!prev || prev === "pending") {
+          setupStateByBusiness.set(businessId, state);
+        }
+      }
+
+      const openPurchaseByBusiness = new Set<string>(
+        (openPurchasesRes.data ?? []).map((row) => String(row.target_id))
+      );
+
+      const options: TargetOption[] = businessIds.map((id) => {
+        const business = businessById.get(id)!;
+        const profilePct = typeof business.profile_completion === "number" ? business.profile_completion : 0;
+        const hasOpenSetup = setupStateByBusiness.has(id);
+        const hasOpenPurchase = openPurchaseByBusiness.has(id);
+        const ineligible = hasOpenSetup || hasOpenPurchase;
+        const setupStatus = setupStateByBusiness.get(id) ?? (hasOpenPurchase ? "pending" : "eligible");
+
+        const description =
+          locale === "es"
+            ? `Perfil ${profilePct}% · Acceso ${business.accessRole === "owner" ? "propietario" : "colaborador"} · Setup ${setupStatus}`
+            : `Profile ${profilePct}% · Access ${business.accessRole} · Setup ${setupStatus}`;
+
+        const reason =
+          ineligible
+            ? locale === "es"
+              ? "No elegible: ya existe un setup activo o compra en proceso"
+              : "Not eligible: active setup or pending purchase already exists"
+            : undefined;
+
+        return {
+          id,
+          label: business.name,
+          description,
+          eligible: !ineligible,
+          reason,
+          setupStatus,
+          accessRole: business.accessRole,
+        };
+      });
+
+      const templates = listPublicBusinessInABoxTemplateSummaries(locale);
+      return NextResponse.json({ options, templates });
     }
 
     if (product.key === "enhanced_valuation_report") {

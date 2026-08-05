@@ -60,6 +60,10 @@ export default async function AccountProductsPage({
     string,
     { listing_id: string; status: string }
   >();
+  const businessInABoxSetupByPurchaseId = new Map<
+    string,
+    { id: string; business_id: string; template_key: string; status: string; completed_at: string | null }
+  >();
 
   if (purchaseIds.length > 0) {
     const { data: entitlementGrants } = await supabase
@@ -81,7 +85,7 @@ export default async function AccountProductsPage({
       workspaceByPurchaseId.set(String(workspace.purchase_id), { id: String(workspace.id) });
     }
 
-    const [valuationDeliveriesRes, dealRoomAccessRes, confidentialLaunchesRes] = await Promise.all([
+    const [valuationDeliveriesRes, dealRoomAccessRes, confidentialLaunchesRes, businessInABoxSetupsRes] = await Promise.all([
       supabase
         .from("paid_valuation_report_deliveries")
         .select("purchase_id, status, valuation_report_id, business_id")
@@ -93,6 +97,10 @@ export default async function AccountProductsPage({
       supabase
         .from("confidential_sale_launches")
         .select("purchase_id, listing_id, status")
+        .in("purchase_id", purchaseIds),
+      supabase
+        .from("business_in_a_box_setups")
+        .select("id, purchase_id, business_id, template_key, status, completed_at")
         .in("purchase_id", purchaseIds),
     ]);
 
@@ -116,6 +124,16 @@ export default async function AccountProductsPage({
       confidentialLaunchByPurchaseId.set(String(row.purchase_id), {
         listing_id: String(row.listing_id),
         status: String(row.status),
+      });
+    }
+
+    for (const row of businessInABoxSetupsRes.data ?? []) {
+      businessInABoxSetupByPurchaseId.set(String(row.purchase_id), {
+        id: String(row.id),
+        business_id: String(row.business_id),
+        template_key: String(row.template_key),
+        status: String(row.status),
+        completed_at: row.completed_at ? String(row.completed_at) : null,
       });
     }
   }
@@ -231,6 +249,23 @@ export default async function AccountProductsPage({
               } else {
                 actionLabel = t("actions.manageConfidentialLaunch");
                 actionHref = `${localePrefix}/sell/${launch.listing_id}/edit`;
+              }
+            } else if (product.key === "business_in_a_box") {
+              const setup = businessInABoxSetupByPurchaseId.get(purchase.id);
+              if (!setup) {
+                actionLabel = t("actions.completeSetup");
+              } else if (setup.status === "failed") {
+                actionLabel = t("actions.setupFailed");
+                actionHref = `${localePrefix}/account/products/${purchase.id}/business-in-a-box`;
+              } else if (setup.status === "refunded" || setup.status === "partially_reversed") {
+                actionLabel = t("actions.refunded");
+                actionHref = `${localePrefix}/account/products/${purchase.id}/business-in-a-box`;
+              } else if (setup.status === "completed") {
+                actionLabel = t("actions.viewSetup");
+                actionHref = `${localePrefix}/account/products/${purchase.id}/business-in-a-box`;
+              } else {
+                actionLabel = t("actions.processing");
+                actionHref = `${localePrefix}/account/products/${purchase.id}/business-in-a-box`;
               }
             } else if (hasEntitlement) {
               actionLabel = t("actions.viewEntitlement");
