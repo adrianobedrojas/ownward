@@ -134,7 +134,7 @@ async function validateTargetEligibility(
   if (product.requiredTargetType === "listing") {
     const { data: listing } = await supabase
       .from("business_listings")
-      .select("id, user_id, status, is_public, is_confidential, teaser_title, business_name")
+      .select("id, user_id, status, is_public, is_confidential, teaser_title, business_name, featured_until")
       .eq("id", targetId)
       .maybeSingle();
 
@@ -167,6 +167,16 @@ async function validateTargetEligibility(
           status: 422,
           error: "Complete this listing with a public teaser title before checkout",
           route: `/sell/${listing.id}/edit`,
+        };
+      }
+    }
+    if (product.key === "featured_listing") {
+      const featuredUntil = listing.featured_until ? new Date(listing.featured_until as string) : null;
+      if (featuredUntil && featuredUntil > new Date()) {
+        return {
+          ok: false,
+          status: 409,
+          error: "This listing is already actively featured",
         };
       }
     }

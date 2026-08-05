@@ -130,7 +130,7 @@ export const PLACEMENT_CONFIG: Record<SolutionPlacement, PlacementConfig> = {
       C("owner_dependence_scan", 100, "owner_dependence_signal"),
       C("customer_risk_scan", 98, "customer_risk_signal"),
       C("sale_readiness_blueprint", 95, "readiness_multiple_categories"),
-      C("confidential_sale_launch_pack", 90, "strong_readiness_sell_intent"),
+      C("confidential_sale_launch", 90, "strong_readiness_sell_intent"),
       C("buyer_lens_memo", 86, "valuation_to_buyer_lens"),
     ],
   },
@@ -242,7 +242,7 @@ export const PLACEMENT_CONFIG: Record<SolutionPlacement, PlacementConfig> = {
     maxItems: 3,
     dismissible: true,
     candidates: [
-      C("confidential_sale_launch_pack", 100, "document_driven_sale_workflow"),
+      C("confidential_sale_launch", 100, "document_driven_sale_workflow"),
       C("deal_room_90", 95, "document_driven_sale_workflow"),
       C("closing_archive", 90, "document_driven_sale_workflow"),
       C("value_action_sprint", 85, "document_improvement_workflow"),
