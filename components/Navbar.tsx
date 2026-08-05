@@ -4,6 +4,7 @@ import type { ControlCenterData } from "./control-center/PersonalControlCenter";
 import type { ConversationPreview } from "./control-center/MessagesPopover";
 import type { NotificationItem } from "./control-center/NotificationsPopover";
 import { isConversationUnread } from "@/lib/messaging/unread";
+import { canAccessAdminConsole } from "@/lib/admin/access";
 
 export default async function Navbar() {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export default async function Navbar() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <NavbarClient signedIn={false} controlCenterData={null} />;
+    return <NavbarClient signedIn={false} controlCenterData={null} showAdminConsole={false} />;
   }
 
   // ── Single authorized data fetch for the control center ──────────────────
@@ -130,5 +131,13 @@ export default async function Navbar() {
     initialUnreadNotifications: unreadNotifCount,
   };
 
-  return <NavbarClient signedIn={true} controlCenterData={controlCenterData} />;
+  const showAdminConsole = await canAccessAdminConsole();
+
+  return (
+    <NavbarClient
+      signedIn={true}
+      controlCenterData={controlCenterData}
+      showAdminConsole={showAdminConsole}
+    />
+  );
 }

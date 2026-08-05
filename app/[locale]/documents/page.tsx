@@ -1,5 +1,6 @@
 // app/documents/page.tsx
 import Link from "next/link";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { getUserBillingState } from "@/lib/billing";
 import { DEFAULT_DOCUMENT_FOLDER, formatFolderName } from "@/lib/documents";
 import { requireUser } from "@/lib/require-user";
@@ -25,7 +26,12 @@ const vaultFolders = [
   { key: "marketing", label: "Marketing", description: "Logos, advertisements, and promotional files." },
 ];
 
-export default async function DocumentsPage() {
+export default async function DocumentsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const { supabase, user } = await requireUser();
 
   let documents: DocumentRow[] = [];
@@ -137,6 +143,12 @@ export default async function DocumentsPage() {
           )}
         </article>
       </div>
+
+      <ContextualSolutionModule
+        placement="documents"
+        locale={locale === "es" ? "es" : "en"}
+        userId={user.id}
+      />
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-white">

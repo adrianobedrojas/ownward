@@ -18,7 +18,7 @@ describe('legal/disclosure UI copy', () => {
 
   it('includes pricing disclosure and legal links near checkout controls', () => {
     const pricingCards = read('app/[locale]/pricing/PricingCards.tsx');
-    expect(pricingCards).toContain('Billed monthly unless checkout states otherwise');
+    expect(pricingCards).toContain('Billed on the selected interval at checkout');
     expect(pricingCards).toContain('Stripe Customer Portal');
     expect(pricingCards).toContain('href="/terms"');
     expect(pricingCards).toContain('href="/privacy"');

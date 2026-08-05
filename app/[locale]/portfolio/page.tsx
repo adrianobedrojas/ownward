@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState, checkProFeature } from '@/lib/billing';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import PortfolioClient from './PortfolioClient';
 
 export const metadata = {
@@ -8,7 +9,12 @@ export const metadata = {
   description: 'Multi-business portfolio view with risk comparison and performance metrics.',
 };
 
-export default async function PortfolioPage() {
+export default async function PortfolioPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,10 +52,20 @@ export default async function PortfolioPage() {
     .not('status', 'in', '("closed","withdrawn")');
 
   return (
-    <PortfolioClient
-      businesses={businesses ?? []}
-      assessments={assessments ?? []}
-      dealRooms={dealRooms ?? []}
-    />
+    <>
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <ContextualSolutionModule
+          placement="portfolio"
+          locale={locale === 'es' ? 'es' : 'en'}
+          userId={user.id}
+          currentPlan={billing.plan}
+        />
+      </div>
+      <PortfolioClient
+        businesses={businesses ?? []}
+        assessments={assessments ?? []}
+        dealRooms={dealRooms ?? []}
+      />
+    </>
   );
 }

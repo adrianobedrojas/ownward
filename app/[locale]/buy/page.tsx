@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import { createClient } from '@/lib/supabase/server';
 import { capitalizeFirst } from '@/lib/documents';
 
@@ -87,6 +88,11 @@ export default async function MarketplacePage({ params: pageParams, searchParams
           </div>
         </form>
       </section>
+
+      <ContextualSolutionModule
+        placement="buy_marketplace"
+        locale={locale === 'es' ? 'es' : 'en'}
+      />
 
       {featuredListings.length > 0 ? (
         <section className="mt-10">

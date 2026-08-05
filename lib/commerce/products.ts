@@ -2,7 +2,8 @@ if (typeof window !== "undefined") {
   throw new Error("lib/commerce/products must only be imported on the server.");
 }
 
-export const ALLOWED_PUBLIC_PRICES = new Set([0, 5, 10, 20]);
+export const ALLOWED_SOLUTION_PRICES = new Set([0, 5, 10, 20]);
+export const ALLOWED_PUBLIC_PRICES = ALLOWED_SOLUTION_PRICES;
 
 export type ProductCategory =
   | "marketplace_visibility"

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState, checkProFeature } from '@/lib/billing';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import SellerClient from './SellerClient';
 
 export const metadata = {
@@ -8,7 +9,12 @@ export const metadata = {
   description: 'Manage your sale process, pipeline, inquiries, deal rooms, and offers.',
 };
 
-export default async function SellerPage() {
+export default async function SellerPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -78,12 +84,22 @@ export default async function SellerPage() {
   });
 
   return (
-    <SellerClient
-      businesses={businesses ?? []}
-      opportunities={opportunities ?? []}
-      pendingOffers={offers ?? []}
-      recentAssessments={recentAssessments ?? []}
-      interestEvents={flatEvents}
-    />
+    <>
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <ContextualSolutionModule
+          placement="seller_command_center"
+          locale={locale === 'es' ? 'es' : 'en'}
+          userId={user.id}
+          currentPlan={billing.plan}
+        />
+      </div>
+      <SellerClient
+        businesses={businesses ?? []}
+        opportunities={opportunities ?? []}
+        pendingOffers={offers ?? []}
+        recentAssessments={recentAssessments ?? []}
+        interestEvents={flatEvents}
+      />
+    </>
   );
 }
