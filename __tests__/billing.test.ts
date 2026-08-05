@@ -242,15 +242,9 @@ describe("checkMilestoneMonthlyLimit", () => {
   });
 });
 
-<<<<<<< HEAD
-// ─── Subscription billing intervals ──────────────────────────────────────────
-
-describe("subscription billing intervals", () => {
-=======
 // ─── Monthly-only public billing ─────────────────────────────────────────────
 
 describe("monthly-only billing", () => {
->>>>>>> origin/main
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -267,11 +261,7 @@ describe("monthly-only billing", () => {
     process.env = originalEnv;
   });
 
-<<<<<<< HEAD
-  it("getAllowedPriceIds includes monthly and annual subscription price IDs", async () => {
-=======
   it("getAllowedPriceIds includes only monthly subscription price IDs", async () => {
->>>>>>> origin/main
     const { getAllowedPriceIds } = await import("@/lib/billing");
     const ids = getAllowedPriceIds();
     expect(ids.has("price_starter")).toBe(true);
@@ -301,19 +291,11 @@ describe("monthly-only billing", () => {
     expect(getPriceIdForPlan("pro", "annual")).toBeNull();
   });
 
-<<<<<<< HEAD
-  it("getPlanByPriceId maps annual price IDs", async () => {
-    const { getPlanByPriceId } = await import("@/lib/billing");
-    expect(getPlanByPriceId("price_starter_annual")).toBe("starter");
-    expect(getPlanByPriceId("price_builder_annual")).toBe("builder");
-    expect(getPlanByPriceId("price_pro_annual")).toBe("pro");
-=======
   it("getPlanByPriceId returns null for annual price IDs", async () => {
     const { getPlanByPriceId } = await import("@/lib/billing");
     expect(getPlanByPriceId("price_starter_annual")).toBeNull();
     expect(getPlanByPriceId("price_builder_annual")).toBeNull();
     expect(getPlanByPriceId("price_pro_annual")).toBeNull();
->>>>>>> origin/main
   });
 
   it("getPlanByPriceId still maps monthly price IDs correctly", async () => {
@@ -329,13 +311,8 @@ describe("monthly-only billing", () => {
   });
 });
 
-<<<<<<< HEAD
-describe("PLAN_CATALOG annual pricing", () => {
-  it("PLAN_CATALOG annual prices are available for paid plans", async () => {
-=======
 describe("PLAN_CATALOG annualPrice retirement", () => {
   it("PLAN_CATALOG annual prices are retired for paid plans", async () => {
->>>>>>> origin/main
     const { PLAN_CATALOG } = await import("@/lib/billing");
     const byKey = Object.fromEntries(PLAN_CATALOG.map((p) => [p.key, p]));
     expect(byKey["free"].annualPrice).toBe(0);

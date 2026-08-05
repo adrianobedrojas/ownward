@@ -97,6 +97,55 @@ describe("Product Registry — getStripePriceId", () => {
 });
 
 describe("Product Registry — product definitions", () => {
+  it("business_in_a_box is defined with one-time $10 config and stays inactive", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("business_in_a_box")!;
+    expect(p.nameEn).toBe("Ownward Business-in-a-Box");
+    expect(p.billingModel).toBe("one_time");
+    expect(p.displayPrice).toBe(10);
+    expect(p.requiredTargetType).toBe("business");
+    expect(p.fulfillmentBehavior).toBe("apply_business_in_a_box_template");
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_BUSINESS_IN_A_BOX");
+    expect(p.status).toBe("coming_soon");
+    expect(p.ctaBehavior).toBe("coming_soon");
+    expect(p.active).toBe(false);
+    expect(getPurchasableProduct("business_in_a_box")).toBeNull();
+  });
+
+  it("enhanced_valuation_report maps to the new Stripe env var and is purchasable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("enhanced_valuation_report")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_ENHANCED_VALUATION_REPORT");
+    expect(p.requiredTargetType).toBe("business");
+    expect(p.fulfillmentBehavior).toBe("grant_enhanced_valuation_report");
+    expect(getPurchasableProduct("enhanced_valuation_report")?.key).toBe("enhanced_valuation_report");
+  });
+
+  it("deal_room_90 keeps transaction target type and is purchasable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("deal_room_90")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_DEAL_ROOM_90");
+    expect(p.requiredTargetType).toBe("transaction");
+    expect(p.fulfillmentBehavior).toBe("create_timed_deal_room");
+    expect(getPurchasableProduct("deal_room_90")?.key).toBe("deal_room_90");
+  });
+
+  it("confidential_sale_launch maps to the new Stripe env var and is purchasable", async () => {
+    const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
+    const p = getProduct("confidential_sale_launch")!;
+    expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH");
+    expect(p.requiredTargetType).toBe("listing");
+    expect(p.fulfillmentBehavior).toBe("launch_confidential_sale_listing");
+    expect(getPurchasableProduct("confidential_sale_launch")?.key).toBe("confidential_sale_launch");
+  });
+
+  it("resolves historical aliases for legacy purchase keys", async () => {
+    const { getProduct } = await import("@/lib/commerce/products");
+    expect(getProduct("full_deal_room")?.key).toBe("deal_room_90");
+    expect(getProduct("confidential_sale_listing")?.key).toBe("confidential_sale_launch");
+    expect(getProduct("confidential_sale_launch_pack")?.key).toBe("confidential_sale_launch");
+  });
+
   it("value_action_sprint has English and Spanish names", async () => {
     const { getProduct } = await import("@/lib/commerce/products");
     const p = getProduct("value_action_sprint")!;
@@ -542,12 +591,6 @@ describe("Existing subscription helpers — unaffected", () => {
     process.env.STRIPE_PRICE_STARTER = "price_starter_monthly";
     process.env.STRIPE_PRICE_BUILDER = "price_builder_monthly";
     process.env.STRIPE_PRICE_PRO = "price_pro_monthly";
-<<<<<<< HEAD
-    process.env.STRIPE_PRICE_STARTER_ANNUAL = "price_starter_annual";
-    process.env.STRIPE_PRICE_BUILDER_ANNUAL = "price_builder_annual";
-    process.env.STRIPE_PRICE_PRO_ANNUAL = "price_pro_annual";
-=======
->>>>>>> origin/main
     const { getPriceIdForPlan } = await import("@/lib/billing");
     expect(getPriceIdForPlan("starter", "monthly")).toBe("price_starter_monthly");
     expect(getPriceIdForPlan("pro", "monthly")).toBe("price_pro_monthly");

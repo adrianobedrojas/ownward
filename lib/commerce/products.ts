@@ -2,13 +2,8 @@ if (typeof window !== "undefined") {
   throw new Error("lib/commerce/products must only be imported on the server.");
 }
 
-<<<<<<< HEAD
 export const ALLOWED_SOLUTION_PRICES = new Set([0, 5, 10, 20]);
 export const ALLOWED_PUBLIC_PRICES = ALLOWED_SOLUTION_PRICES;
-export const ALLOWED_ANNUAL_PLAN_TOTALS = new Set([50, 100, 200]);
-=======
-export const ALLOWED_PUBLIC_PRICES = new Set([0, 5, 10, 20]);
->>>>>>> origin/main
 
 export type ProductCategory =
   | "marketplace_visibility"
@@ -55,9 +50,13 @@ export type EntitlementType =
 
 export type FulfillmentBehavior =
   | "create_value_action_sprint_workspace"
+  | "apply_business_in_a_box_template"
   | "grant_report_access"
+  | "grant_enhanced_valuation_report"
   | "grant_timed_deal_room"
+  | "create_timed_deal_room"
   | "apply_listing_promotion"
+  | "launch_confidential_sale_listing"
   | "grant_credit_balance"
   | "manual_service"
   | "not_implemented";
@@ -143,14 +142,16 @@ export const PRODUCT_KEYS = [
   "customer_risk_scan",
   "owner_dependence_scan",
   "value_dna_snapshot",
+  "enhanced_valuation_report",
   "sale_readiness_blueprint",
   "value_improvement_roadmap",
   "value_action_sprint",
+  "business_in_a_box",
   "exit_intelligence_bundle",
   "deal_room_extension",
   "closing_archive",
   "deal_room_90",
-  "confidential_sale_launch_pack",
+  "confidential_sale_launch",
   "transaction_workspace",
   "business_comparison_pack",
   "acquisition_readiness_profile",
@@ -465,6 +466,45 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     active: true,
     isPublic: true,
   },
+  enhanced_valuation_report: {
+    key: "enhanced_valuation_report",
+    slug: "enhanced-valuation-report",
+    nameEn: "Enhanced Valuation Report",
+    nameEs: "Informe de Valuacion Mejorado",
+    descriptionEn: "Comprehensive valuation report for transfer planning.",
+    descriptionEs: "Informe integral de valuacion para planificar la transferencia.",
+    outcomeEn: "Get deeper valuation context before major decisions.",
+    outcomeEs: "Obtiene un contexto de valuacion mas profundo antes de decisiones importantes.",
+    category: "business_intelligence",
+    audience: ["owner", "seller"],
+    goals: ["improve_valuation", "improve_sale_readiness"],
+    billingModel: "one_time",
+    displayPrice: 20,
+    status: "active",
+    billingContextEn: "one-time",
+    billingContextEs: "pago unico",
+    deliverablesEn: ["Enhanced valuation report"],
+    deliverablesEs: ["Informe de valuacion mejorado"],
+    detailRoute: "/solutions/enhanced-valuation-report",
+    ctaBehavior: "checkout",
+    requiresAuth: true,
+    requiredTargetType: "business",
+    stripePriceEnvVar: "STRIPE_PRICE_ENHANCED_VALUATION_REPORT",
+    purchaseType: "one_time",
+    entitlementType: "report_access",
+    fulfillmentBehavior: "grant_enhanced_valuation_report",
+    cancelPath: "/solutions/enhanced-valuation-report",
+    disclaimersEn: [
+      "Business planning and valuation support only.",
+      "Not legal, tax, or certified appraisal advice.",
+    ],
+    disclaimersEs: [
+      "Solo apoyo de planificacion empresarial y valuacion.",
+      "No constituye asesoria legal, fiscal ni tasacion certificada.",
+    ],
+    active: true,
+    isPublic: true,
+  },
   sale_readiness_blueprint: {
     key: "sale_readiness_blueprint",
     slug: "sale-readiness-blueprint",
@@ -568,6 +608,57 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
       "No constituye asesoría legal, fiscal ni valuación certificada.",
     ],
     active: true,
+    isPublic: true,
+  },
+  business_in_a_box: {
+    key: "business_in_a_box",
+    slug: "business-in-a-box",
+    nameEn: "Ownward Business-in-a-Box",
+    nameEs: "Ownward Business-in-a-Box",
+    descriptionEn:
+      "A ready-to-customize operating setup for one business, including workflow templates, starter tasks, client stages, SOP placeholders, KPI recommendations, document checklists, and onboarding guidance.",
+    descriptionEs:
+      "Una configuración operativa lista para personalizar para un negocio, con flujos de trabajo, tareas iniciales, etapas de clientes, plantillas de procedimientos, recomendaciones de KPI, listas de documentos y orientación de incorporación.",
+    outcomeEn: "Launch a complete operating foundation for one selected business.",
+    outcomeEs: "Lanza una base operativa completa para un negocio seleccionado.",
+    category: "professional_services",
+    audience: ["owner", "team"],
+    goals: ["improve_sale_readiness", "access_intelligence"],
+    billingModel: "one_time",
+    displayPrice: 10,
+    status: "coming_soon",
+    billingContextEn: "one-time per business template",
+    billingContextEs: "pago único por plantilla de negocio",
+    deliverablesEn: [
+      "Client pipeline stage map",
+      "Starter tasks and operating checklist",
+      "SOP and document placeholders",
+      "KPI and onboarding recommendations",
+    ],
+    deliverablesEs: [
+      "Mapa de etapas de clientes",
+      "Tareas iniciales y checklist operativo",
+      "Plantillas SOP y de documentos",
+      "Recomendaciones de KPI e incorporación",
+    ],
+    detailRoute: "/solutions/business-in-a-box",
+    ctaBehavior: "coming_soon",
+    requiresAuth: true,
+    requiredTargetType: "business",
+    stripePriceEnvVar: "STRIPE_PRICE_BUSINESS_IN_A_BOX",
+    purchaseType: "one_time",
+    entitlementType: "workspace_access",
+    fulfillmentBehavior: "apply_business_in_a_box_template",
+    cancelPath: "/solutions/business-in-a-box",
+    disclaimersEn: [
+      "Template placeholders are operational guidance only.",
+      "Not legal, tax, accounting, or certified professional advice.",
+    ],
+    disclaimersEs: [
+      "Las plantillas son guía operativa únicamente.",
+      "No constituye asesoría legal, fiscal, contable ni profesional certificada.",
+    ],
+    active: false,
     isPublic: true,
   },
   exit_intelligence_bundle: {
@@ -683,30 +774,36 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     goals: ["run_transaction"],
     billingModel: "one_time",
     displayPrice: 20,
-    status: "planned",
+    status: "active",
     billingContextEn: "one-time per room",
     billingContextEs: "pago único por sala",
     deliverablesEn: ["Extended secure workspace"],
     deliverablesEs: ["Espacio seguro extendido"],
     detailRoute: "/solutions/deal-room-90",
-    ctaBehavior: "coming_soon",
+    ctaBehavior: "checkout",
     requiresAuth: true,
-    requiredTargetType: "deal_room",
+    requiredTargetType: "transaction",
     stripePriceEnvVar: "STRIPE_PRICE_DEAL_ROOM_90",
     purchaseType: "one_time",
     entitlementType: "deal_room_access",
-    fulfillmentBehavior: "not_implemented",
+    fulfillmentBehavior: "create_timed_deal_room",
     cancelPath: "/deals",
-    disclaimersEn: ["Rollout planned."],
-    disclaimersEs: ["Lanzamiento planificado."],
-    active: false,
+    disclaimersEn: [
+      "Purchase applies to one eligible seller transaction target.",
+      "Access expires after 90 days and is revoked on full refund.",
+    ],
+    disclaimersEs: [
+      "La compra aplica a un objetivo de transaccion elegible del vendedor.",
+      "El acceso vence en 90 dias y se revoca con reembolso total.",
+    ],
+    active: true,
     isPublic: true,
   },
-  confidential_sale_launch_pack: {
-    key: "confidential_sale_launch_pack",
-    slug: "confidential-sale-launch-pack",
-    nameEn: "Confidential Sale Launch Pack",
-    nameEs: "Paquete de Lanzamiento de Venta Confidencial",
+  confidential_sale_launch: {
+    key: "confidential_sale_launch",
+    slug: "confidential-sale-launch",
+    nameEn: "Confidential Sale Launch",
+    nameEs: "Lanzamiento de Venta Confidencial",
     descriptionEn: "Launch support for confidential sale workflows.",
     descriptionEs: "Soporte de lanzamiento para flujos de venta confidencial.",
     outcomeEn: "Prepare a controlled confidential process.",
@@ -716,23 +813,29 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     goals: ["run_transaction", "support_transfer"],
     billingModel: "one_time",
     displayPrice: 20,
-    status: "planned",
+    status: "active",
     billingContextEn: "one-time",
     billingContextEs: "pago único",
     deliverablesEn: ["Launch checklist"],
     deliverablesEs: ["Checklist de lanzamiento"],
-    detailRoute: "/solutions/confidential-sale-launch-pack",
-    ctaBehavior: "coming_soon",
+    detailRoute: "/solutions/confidential-sale-launch",
+    ctaBehavior: "checkout",
     requiresAuth: true,
-    requiredTargetType: "business",
-    stripePriceEnvVar: "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH_PACK",
+    requiredTargetType: "listing",
+    stripePriceEnvVar: "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH",
     purchaseType: "one_time",
-    entitlementType: "service_access",
-    fulfillmentBehavior: "manual_service",
+    entitlementType: "listing_promotion",
+    fulfillmentBehavior: "launch_confidential_sale_listing",
     cancelPath: "/sell",
-    disclaimersEn: ["Manual service scheduling required."],
-    disclaimersEs: ["Requiere programación de servicio manual."],
-    active: false,
+    disclaimersEn: [
+      "Listing must remain published and include a teaser title.",
+      "Confidential state is reversed on full refund when no other active launch exists.",
+    ],
+    disclaimersEs: [
+      "El listado debe mantenerse publicado e incluir un titulo teaser.",
+      "El estado confidencial se revierte con reembolso total si no existe otro lanzamiento activo.",
+    ],
+    active: true,
     isPublic: true,
   },
   transaction_workspace: {
@@ -1139,8 +1242,12 @@ function assertRegistryInvariants(): void {
   const checkoutPriceEnvVars = new Set<string>();
   const implementedBehaviors = new Set<FulfillmentBehavior>([
     "create_value_action_sprint_workspace",
+    "apply_business_in_a_box_template",
     "grant_report_access",
+    "grant_enhanced_valuation_report",
+    "create_timed_deal_room",
     "apply_listing_promotion",
+    "launch_confidential_sale_listing",
   ]);
 
   for (const key of PRODUCT_KEYS) {
@@ -1186,9 +1293,49 @@ function assertRegistryInvariants(): void {
 
 assertRegistryInvariants();
 
+const HISTORICAL_PRODUCT_KEY_ALIASES: Partial<Record<string, ProductKey>> = {
+  full_deal_room: "deal_room_90",
+  confidential_sale_listing: "confidential_sale_launch",
+  confidential_sale_launch_pack: "confidential_sale_launch",
+};
+
+const STRIPE_ENV_FALLBACK_BY_PRODUCT_KEY: Partial<Record<ProductKey, readonly string[]>> = {
+  deal_room_90: ["STRIPE_PRICE_FULL_DEAL_ROOM"],
+  confidential_sale_launch: [
+    "STRIPE_PRICE_CONFIDENTIAL_SALE_LISTING",
+    "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH_PACK",
+  ],
+};
+
+function resolveCanonicalProductKey(key: string): ProductKey | null {
+  const normalized = key.trim();
+  if (!normalized) return null;
+  if (PRODUCT_KEYS.includes(normalized as ProductKey)) {
+    return normalized as ProductKey;
+  }
+  return HISTORICAL_PRODUCT_KEY_ALIASES[normalized] ?? null;
+}
+
+function resolveStripePriceFromEnv(product: ProductDefinition): string | null {
+  const envVarCandidates = [
+    product.stripePriceEnvVar,
+    ...(STRIPE_ENV_FALLBACK_BY_PRODUCT_KEY[product.key] ?? []),
+  ].filter((value): value is string => Boolean(value));
+
+  for (const envVarName of envVarCandidates) {
+    const candidate = process.env[envVarName]?.trim();
+    if (candidate && /^price_[A-Za-z0-9_]+$/.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 export function getProduct(key: string): ProductDefinition | null {
-  if (!PRODUCT_KEYS.includes(key as ProductKey)) return null;
-  return PRODUCT_REGISTRY[key as ProductKey] ?? null;
+  const canonicalKey = resolveCanonicalProductKey(key);
+  if (!canonicalKey) return null;
+  return PRODUCT_REGISTRY[canonicalKey] ?? null;
 }
 
 export function getActiveProduct(key: string): ProductDefinition | null {
@@ -1208,8 +1355,7 @@ export function getPurchasableProduct(key: string): ProductDefinition | null {
 
 export function isProductConfigured(product: ProductDefinition): boolean {
   if (!product.stripePriceEnvVar) return product.ctaBehavior !== "checkout";
-  const value = process.env[product.stripePriceEnvVar]?.trim();
-  return Boolean(value && /^price_[A-Za-z0-9_]+$/.test(value));
+  return Boolean(resolveStripePriceFromEnv(product));
 }
 
 export function getStripePriceId(product: ProductDefinition): string {
@@ -1217,12 +1363,9 @@ export function getStripePriceId(product: ProductDefinition): string {
     throw new Error(`Product ${product.key} has no stripePriceEnvVar.`);
   }
 
-  const priceId = process.env[product.stripePriceEnvVar]?.trim();
+  const priceId = resolveStripePriceFromEnv(product);
   if (!priceId) {
     throw new Error(`${product.stripePriceEnvVar} is not configured on the server.`);
-  }
-  if (!/^price_[A-Za-z0-9_]+$/.test(priceId)) {
-    throw new Error(`${product.stripePriceEnvVar} is malformed on the server.`);
   }
   return priceId;
 }

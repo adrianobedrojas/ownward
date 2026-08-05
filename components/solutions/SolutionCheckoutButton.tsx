@@ -1,10 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-<<<<<<< HEAD
-=======
+import { useEffect, useMemo, useState } from "react";
 import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
->>>>>>> origin/main
 
 type Props = {
   productKey: string;
@@ -12,12 +9,20 @@ type Props = {
   ctaBehavior: "checkout" | "coming_soon" | "included" | "contact" | "manage";
   status: "active" | "planned" | "coming_soon" | "included" | "contact";
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
-<<<<<<< HEAD
-  targetId?: string;
-  targetOptions?: Array<{ id: string; label: string; description?: string }>;
-  onStartCheckout?: () => void;
-=======
->>>>>>> origin/main
+};
+
+type TemplateOption = {
+  key: string;
+  name: string;
+  description: string;
+  suitableBusinessType: string;
+  workflowsIncluded: number;
+  tasksIncluded: number;
+  clientStageOutline: string[];
+  kpiCategories: string[];
+  documentPlaceholders: string[];
+  sopPlaceholders: string[];
+  previewCategories: string[];
 };
 
 export default function SolutionCheckoutButton({
@@ -26,18 +31,19 @@ export default function SolutionCheckoutButton({
   ctaBehavior,
   status,
   requiredTargetType,
-<<<<<<< HEAD
-  targetId,
-  targetOptions = [],
-  onStartCheckout,
-}: Props) {
-  const [loading, setLoading] = useState(false);
-  const [selectedTarget, setSelectedTarget] = useState<string>(targetId ?? targetOptions[0]?.id ?? "");
-=======
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [targetId, setTargetId] = useState("");
->>>>>>> origin/main
+  const [targetLoading, setTargetLoading] = useState(
+    ctaBehavior === "checkout" && status === "active" && requiredTargetType !== "none"
+  );
+  const [targetRoute, setTargetRoute] = useState<string | null>(null);
+  const [targetIncludedMessage, setTargetIncludedMessage] = useState<string | null>(null);
+  const [templateKey, setTemplateKey] = useState("");
+  const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>([]);
+  const [targetOptions, setTargetOptions] = useState<
+    Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>
+  >([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const labels = useMemo(() => {
@@ -45,14 +51,24 @@ export default function SolutionCheckoutButton({
       return {
         buy: "Comprar",
         processing: "Redirigiendo…",
-<<<<<<< HEAD
-        targetLabel: "Selecciona objetivo",
-        targetHint: "Debes elegir un objetivo elegible",
-        missingTarget: "Selecciona un objetivo elegible para continuar.",
-=======
         targetLabel: "ID del objetivo",
-        targetHint: "Requerido para esta solución",
->>>>>>> origin/main
+        targetHint: "Selecciona un objetivo",
+        templateLabel: "Plantilla",
+        templateHint: "Selecciona una plantilla aprobada",
+        templatePlaceholder: "Selecciona una plantilla",
+        templateUnavailable: "No hay plantillas habilitadas ahora.",
+        setupPreviewTitle: "Vista previa de lo que se creará",
+        setupBusinessLabel: "Negocio",
+        setupTemplateType: "Tipo sugerido",
+        setupWorkflows: "Flujos incluidos",
+        setupTasks: "Tareas incluidas",
+        setupClientStages: "Etapas de clientes",
+        setupKpis: "Categorías KPI",
+        setupDocuments: "Checklist documental",
+        setupSops: "Plantillas SOP",
+        targetPlaceholder: "Selecciona una opción",
+        targetLoading: "Cargando opciones…",
+        targetUnavailable: "No hay objetivos elegibles por ahora.",
         comingSoon: "Próximamente",
         included: "Incluido",
         contact: "Contáctanos",
@@ -64,14 +80,24 @@ export default function SolutionCheckoutButton({
     return {
       buy: "Buy now",
       processing: "Redirecting…",
-<<<<<<< HEAD
-      targetLabel: "Select target",
-      targetHint: "You must choose an eligible target",
-      missingTarget: "Select an eligible target to continue.",
-=======
-      targetLabel: "Target ID",
-      targetHint: "Required for this solution",
->>>>>>> origin/main
+      targetLabel: "Target",
+      targetHint: "Select a target",
+      templateLabel: "Template",
+      templateHint: "Select an approved template",
+      templatePlaceholder: "Select a template",
+      templateUnavailable: "No templates are available right now.",
+      setupPreviewTitle: "Preview what will be created",
+      setupBusinessLabel: "Business",
+      setupTemplateType: "Best fit",
+      setupWorkflows: "Workflows included",
+      setupTasks: "Tasks included",
+      setupClientStages: "Client stages",
+      setupKpis: "KPI categories",
+      setupDocuments: "Document checklist",
+      setupSops: "SOP placeholders",
+      targetPlaceholder: "Select an option",
+      targetLoading: "Loading options…",
+      targetUnavailable: "No eligible targets available right now.",
       comingSoon: "Coming soon",
       included: "Included",
       contact: "Contact us",
@@ -80,7 +106,59 @@ export default function SolutionCheckoutButton({
     };
   }, [locale]);
 
-  if (ctaBehavior !== "checkout" || status !== "active") {
+  const isCheckoutActive = ctaBehavior === "checkout" && status === "active";
+
+  useEffect(() => {
+    if (!isCheckoutActive || requiredTargetType === "none") {
+      return;
+    }
+
+    let active = true;
+
+    const qs = new URLSearchParams({ productKey, locale });
+    fetch(`/api/commerce/targets?${qs.toString()}`)
+      .then(async (res) => {
+        const payload = (await res.json()) as {
+          options?: Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>;
+          templates?: TemplateOption[];
+          includedMessage?: string;
+          route?: string;
+          error?: string;
+          redirectTo?: string;
+        };
+
+        if (!active) return;
+
+        if (!res.ok) {
+          if (payload.redirectTo) {
+            window.location.assign(payload.redirectTo);
+            return;
+          }
+          setErrorMessage(payload.error ?? labels.fallbackError);
+          setTargetOptions([]);
+          return;
+        }
+
+        setTargetOptions(payload.options ?? []);
+        setTemplateOptions(payload.templates ?? []);
+        setTargetIncludedMessage(payload.includedMessage ?? null);
+        setTargetRoute(payload.route ?? null);
+      })
+      .catch(() => {
+        if (!active) return;
+        setErrorMessage(labels.fallbackError);
+      })
+      .finally(() => {
+        if (!active) return;
+        setTargetLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive]);
+
+  if (!isCheckoutActive) {
     const text =
       ctaBehavior === "included"
         ? labels.included
@@ -98,16 +176,6 @@ export default function SolutionCheckoutButton({
   }
 
   async function handleCheckout() {
-<<<<<<< HEAD
-    const effectiveTargetId = targetId ?? selectedTarget;
-    if (requiredTargetType !== "none" && !effectiveTargetId) {
-      setErrorMessage(labels.missingTarget);
-      return;
-    }
-
-    onStartCheckout?.();
-=======
->>>>>>> origin/main
     setLoading(true);
     setErrorMessage(null);
 
@@ -118,11 +186,8 @@ export default function SolutionCheckoutButton({
         body: JSON.stringify({
           productKey,
           locale,
-<<<<<<< HEAD
-          targetId: effectiveTargetId || undefined,
-=======
           targetId: targetId.trim() || undefined,
->>>>>>> origin/main
+          templateKey: templateKey.trim() || undefined,
         }),
       });
 
@@ -133,13 +198,17 @@ export default function SolutionCheckoutButton({
           window.location.assign(data.redirectTo);
           return;
         }
+        const route = (data as { route?: string }).route;
+        if (route) {
+          setErrorMessage(`${data.error ?? labels.fallbackError}`);
+          setTargetRoute(route);
+          return;
+        }
         setErrorMessage(data.error ?? labels.fallbackError);
         return;
       }
 
       if (data.url) {
-<<<<<<< HEAD
-=======
         trackGoogleAnalyticsConversion(
           "begin_checkout",
           {
@@ -149,7 +218,6 @@ export default function SolutionCheckoutButton({
           },
           { dedupeKey: `begin_checkout:product:${productKey}:${data.url}` },
         );
->>>>>>> origin/main
         window.location.assign(data.url);
       }
     } catch {
@@ -161,54 +229,105 @@ export default function SolutionCheckoutButton({
 
   return (
     <div className="space-y-2">
-<<<<<<< HEAD
-      {requiredTargetType !== "none" && !targetId && targetOptions.length > 0 ? (
-        <label className="block text-xs text-slate-400">
-          {labels.targetLabel}
+      {requiredTargetType !== "none" ? (
+        <label className="block text-xs text-slate-400" aria-label={labels.targetLabel}>
+          {productKey === "business_in_a_box" ? labels.setupBusinessLabel : labels.targetLabel}
+          {targetLoading ? (
+            <p className="mt-1 text-xs text-slate-500">{labels.targetLoading}</p>
+          ) : (
+            <>
+              <select
+                value={targetId}
+                onChange={(event) => setTargetId(event.target.value)}
+                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
+              >
+                <option value="">{labels.targetPlaceholder}</option>
+                {targetOptions.map((option) => (
+                  <option key={option.id} value={option.eligible ? option.id : ""} disabled={!option.eligible}>
+                    {option.label}
+                    {option.eligible ? "" : ` — ${option.reason ?? labels.targetUnavailable}`}
+                  </option>
+                ))}
+              </select>
+              {targetIncludedMessage ? (
+                <p className="mt-1 text-xs text-cyan-300">{targetIncludedMessage}</p>
+              ) : targetOptions.length === 0 ? (
+                <p className="mt-1 text-xs text-slate-500">{labels.targetUnavailable}</p>
+              ) : null}
+            </>
+          )}
+        </label>
+      ) : null}
+
+      {productKey === "business_in_a_box" ? (
+        <label className="block text-xs text-slate-400" aria-label={labels.templateLabel}>
+          {labels.templateLabel}
           <select
-            value={selectedTarget}
-            onChange={(event) => setSelectedTarget(event.target.value)}
+            value={templateKey}
+            onChange={(event) => setTemplateKey(event.target.value)}
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
           >
-            <option value="">{labels.targetHint}</option>
-            {targetOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
+            <option value="">{labels.templatePlaceholder}</option>
+            {templateOptions.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.name}
               </option>
             ))}
           </select>
-          {targetOptions.find((option) => option.id === selectedTarget)?.description ? (
-            <span className="mt-1 block text-[11px] text-slate-500">
-              {targetOptions.find((option) => option.id === selectedTarget)?.description}
-            </span>
+          <p className="mt-1 text-xs text-slate-500">{labels.templateHint}</p>
+          {templateOptions.length === 0 ? (
+            <p className="mt-1 text-xs text-slate-500">{labels.templateUnavailable}</p>
           ) : null}
         </label>
-      ) : requiredTargetType !== "none" && !targetId ? (
-        <p className="text-xs text-slate-500">{labels.missingTarget}</p>
-=======
-      {requiredTargetType !== "none" ? (
-        <label className="block text-xs text-slate-400">
-          {labels.targetLabel}
-          <input
-            value={targetId}
-            onChange={(event) => setTargetId(event.target.value)}
-            placeholder={labels.targetHint}
-            className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
-          />
-        </label>
->>>>>>> origin/main
+      ) : null}
+
+      {productKey === "business_in_a_box" && templateKey ? (
+        <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-3 text-xs text-slate-300">
+          {(() => {
+            const template = templateOptions.find((option) => option.key === templateKey);
+            if (!template) {
+              return null;
+            }
+            return (
+              <>
+                <p className="font-semibold text-slate-100">{labels.setupPreviewTitle}</p>
+                <p className="mt-1 text-slate-300">{template.description}</p>
+                <p className="mt-1 text-slate-400">
+                  {labels.setupTemplateType}: {template.suitableBusinessType}
+                </p>
+                <p className="mt-2 text-slate-400">
+                  {labels.setupWorkflows}: {template.workflowsIncluded} · {labels.setupTasks}: {template.tasksIncluded}
+                </p>
+                <p className="mt-2 text-slate-400">{labels.setupClientStages}: {template.clientStageOutline.join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupKpis}: {template.kpiCategories.slice(0, 5).join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupDocuments}: {template.documentPlaceholders.slice(0, 4).join(" · ")}</p>
+                <p className="mt-2 text-slate-400">{labels.setupSops}: {template.sopPlaceholders.slice(0, 4).join(" · ")}</p>
+              </>
+            );
+          })()}
+        </div>
       ) : null}
 
       <button
         type="button"
         onClick={handleCheckout}
-        disabled={loading}
+        disabled={
+          loading ||
+          targetLoading ||
+          (requiredTargetType !== "none" && !targetId) ||
+          (productKey === "business_in_a_box" && !templateKey)
+        }
         className="inline-flex items-center rounded-lg bg-cyan-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
       >
         {loading ? labels.processing : labels.buy}
       </button>
 
       {errorMessage ? <p className="text-xs text-rose-300">{errorMessage}</p> : null}
+      {targetRoute ? (
+        <a href={targetRoute} className="text-xs text-cyan-300 hover:text-cyan-200">
+          {labels.manage}
+        </a>
+      ) : null}
     </div>
   );
 }

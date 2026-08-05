@@ -2087,9 +2087,17 @@
     "actions": {
       "refunded": "Reembolsado",
       "processing": "Procesando",
+      "completeSetup": "Completar configuración",
+      "viewSetup": "Ver configuración",
+      "setupFailed": "Configuración fallida",
       "openWorkspace": "Abrir espacio de trabajo",
       "viewReport": "Ver informe",
+      "viewEnhancedReport": "Abrir informe mejorado",
+      "completeReportInputs": "Completar datos del informe",
       "managePromotion": "Gestionar promoción",
+      "openDealRoom": "Abrir deal room",
+      "dealRoomExpired": "Acceso al deal room vencido",
+      "manageConfidentialLaunch": "Gestionar listado confidencial",
       "viewEntitlement": "Ver compra",
       "noWorkspace": "Sin espacio vinculado"
     },

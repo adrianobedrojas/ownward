@@ -11,11 +11,9 @@ import { ValueDnaScorecard } from "@/components/valuation/ValueDnaScorecard";
 import { BuyerLens } from "@/components/valuation/BuyerLens";
 import { ValueBridge } from "@/components/valuation/ValueBridge";
 import { RiskMap } from "@/components/valuation/RiskMap";
-<<<<<<< HEAD
 import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
-=======
 import ValuationCompleteTracker from "@/components/valuation/ValuationCompleteTracker";
->>>>>>> origin/main
+import ValuationCompleteTracker from "@/components/valuation/ValuationCompleteTracker";
 import type { ValuationResult } from "@/lib/valuation/types";
 import type { ValuationLevel } from "@/lib/billing";
 import { archiveReportFormAction } from "../actions";
@@ -33,12 +31,8 @@ function isUuid(value: string) {
 }
 
 interface PageProps {
-<<<<<<< HEAD
   params: Promise<{ locale: string; reportId: string }>;
-=======
-  params: Promise<{ reportId: string }>;
   searchParams: Promise<{ valuation?: string; nonce?: string }>;
->>>>>>> origin/main
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -63,14 +57,9 @@ function PriorityBadge({ priority }: { priority: "immediate" | "short-term" | "l
   );
 }
 
-<<<<<<< HEAD
-export default async function ValuationReportPage({ params }: PageProps) {
-  const { locale, reportId } = await params;
-=======
 export default async function ValuationReportPage({ params, searchParams }: PageProps) {
-  const { reportId } = await params;
+  const { locale, reportId } = await params;
   const resolvedSearchParams = await searchParams;
->>>>>>> origin/main
 
   if (!isUuid(reportId)) {
     notFound();

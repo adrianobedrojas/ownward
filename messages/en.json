@@ -2087,9 +2087,17 @@
     "actions": {
       "refunded": "Refunded",
       "processing": "Processing",
+      "completeSetup": "Complete setup",
+      "viewSetup": "View setup",
+      "setupFailed": "Setup failed",
       "openWorkspace": "Open workspace",
       "viewReport": "View report",
+      "viewEnhancedReport": "Open enhanced report",
+      "completeReportInputs": "Complete report inputs",
       "managePromotion": "Manage promotion",
+      "openDealRoom": "Open deal room",
+      "dealRoomExpired": "Deal room access expired",
+      "manageConfidentialLaunch": "Manage confidential listing",
       "viewEntitlement": "View purchase",
       "noWorkspace": "No linked workspace"
     },

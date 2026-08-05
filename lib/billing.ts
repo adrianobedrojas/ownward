@@ -263,11 +263,7 @@ export function getPlanPriceMapAnnual() {
 }
 
 export function getAllowedPriceIds() {
-<<<<<<< HEAD
-  const prices = [...Object.values(getPlanPriceMap()), ...Object.values(getPlanPriceMapAnnual())].filter(
-=======
   const prices = Object.values(getPlanPriceMap()).filter(
->>>>>>> origin/main
     (value): value is string => Boolean(value)
   );
   return new Set(prices);
