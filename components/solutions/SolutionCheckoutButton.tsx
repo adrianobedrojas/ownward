@@ -3,36 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
 
-type TargetOption = {
-  id: string;
-  label: string;
-  description?: string;
-  eligible?: boolean;
-  reason?: string;
-};
-
 type Props = {
   productKey: string;
   locale: "en" | "es";
   ctaBehavior: "checkout" | "coming_soon" | "included" | "contact" | "manage";
   status: "active" | "planned" | "coming_soon" | "included" | "contact";
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
-  /** Pre-resolved target ID for contextual checkout (skips selection UI). */
-  targetId?: string;
-  /** Server-provided eligible options for selection-based checkout. */
-  targetOptions?: TargetOption[];
-  /** Localized label for the target selection group. */
-  targetSelectLabel?: string;
-  /** Localized placeholder for the target select control. */
-  targetSelectPlaceholder?: string;
-  /** Localized message shown when no eligible target exists. */
-  noEligibleTargetMessage?: string;
-  /** Localized link href shown when no eligible target exists. */
-  noEligibleTargetHref?: string;
-  /** Localized link text shown when no eligible target exists. */
-  noEligibleTargetLinkText?: string;
-  /** Callback fired when the checkout button is clicked (before the network call). */
-  onStartCheckout?: () => void;
 };
 
 type TemplateOption = {
@@ -55,30 +31,19 @@ export default function SolutionCheckoutButton({
   ctaBehavior,
   status,
   requiredTargetType,
-  targetId: contextTargetId,
-  targetOptions: serverTargetOptions,
-  targetSelectLabel,
-  targetSelectPlaceholder,
-  noEligibleTargetMessage,
-  noEligibleTargetHref,
-  noEligibleTargetLinkText,
-  onStartCheckout,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  // When a contextTargetId is provided server-side, we use it automatically.
-  // Otherwise the user selects from a dropdown.
-  const [selectedTargetId, setSelectedTargetId] = useState(contextTargetId ?? "");
+  const [targetId, setTargetId] = useState("");
   const [targetLoading, setTargetLoading] = useState(
-    // Only use client-side loading when no server-side options were passed and target is required
-    !serverTargetOptions && ctaBehavior === "checkout" && status === "active" && requiredTargetType !== "none"
+    ctaBehavior === "checkout" && status === "active" && requiredTargetType !== "none"
   );
   const [targetRoute, setTargetRoute] = useState<string | null>(null);
   const [targetIncludedMessage, setTargetIncludedMessage] = useState<string | null>(null);
   const [templateKey, setTemplateKey] = useState("");
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>([]);
-  // Use server-provided options when available, otherwise fetched client-side
-  const [fetchedTargetOptions, setFetchedTargetOptions] = useState<TargetOption[]>([]);
-  const targetOptions = serverTargetOptions ?? fetchedTargetOptions;
+  const [targetOptions, setTargetOptions] = useState<
+    Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>
+  >([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const labels = useMemo(() => {
@@ -144,8 +109,6 @@ export default function SolutionCheckoutButton({
   const isCheckoutActive = ctaBehavior === "checkout" && status === "active";
 
   useEffect(() => {
-    // Skip client-side fetch when server already provided options
-    if (serverTargetOptions) return;
     if (!isCheckoutActive || requiredTargetType === "none") {
       return;
     }
@@ -156,7 +119,7 @@ export default function SolutionCheckoutButton({
     fetch(`/api/commerce/targets?${qs.toString()}`)
       .then(async (res) => {
         const payload = (await res.json()) as {
-          options?: TargetOption[];
+          options?: Array<{ id: string; label: string; description?: string; eligible: boolean; reason?: string }>;
           templates?: TemplateOption[];
           includedMessage?: string;
           route?: string;
@@ -172,11 +135,11 @@ export default function SolutionCheckoutButton({
             return;
           }
           setErrorMessage(payload.error ?? labels.fallbackError);
-          setFetchedTargetOptions([]);
+          setTargetOptions([]);
           return;
         }
 
-        setFetchedTargetOptions(payload.options ?? []);
+        setTargetOptions(payload.options ?? []);
         setTemplateOptions(payload.templates ?? []);
         setTargetIncludedMessage(payload.includedMessage ?? null);
         setTargetRoute(payload.route ?? null);
@@ -193,7 +156,7 @@ export default function SolutionCheckoutButton({
     return () => {
       active = false;
     };
-  }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive, serverTargetOptions]);
+  }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive]);
 
   if (!isCheckoutActive) {
     const text =
@@ -213,7 +176,6 @@ export default function SolutionCheckoutButton({
   }
 
   async function handleCheckout() {
-    if (loading) return;
     setLoading(true);
     setErrorMessage(null);
     onStartCheckout?.();
@@ -225,7 +187,7 @@ export default function SolutionCheckoutButton({
         body: JSON.stringify({
           productKey,
           locale,
-          targetId: selectedTargetId.trim() || undefined,
+          targetId: targetId.trim() || undefined,
           templateKey: templateKey.trim() || undefined,
         }),
       });
@@ -282,43 +244,30 @@ export default function SolutionCheckoutButton({
 
   return (
     <div className="space-y-2">
-      {requiredTargetType !== "none" && !contextTargetId ? (
-        <label className="block text-xs text-slate-400" aria-label={targetSelectLabel ?? labels.targetLabel}>
-          {productKey === "business_in_a_box" ? labels.setupBusinessLabel : (targetSelectLabel ?? labels.targetLabel)}
+      {requiredTargetType !== "none" ? (
+        <label className="block text-xs text-slate-400" aria-label={labels.targetLabel}>
+          {productKey === "business_in_a_box" ? labels.setupBusinessLabel : labels.targetLabel}
           {targetLoading ? (
             <p className="mt-1 text-xs text-slate-500">{labels.targetLoading}</p>
-          ) : serverTargetOptions !== undefined && serverTargetOptions.filter((o) => o.eligible !== false).length === 0 ? (
-            // Blocked state: server provided options but none are eligible
-            <div className="mt-2 rounded-md border border-amber-700/40 bg-amber-950/20 p-3 text-xs text-amber-200">
-              <p>{noEligibleTargetMessage ?? labels.targetUnavailable}</p>
-              {noEligibleTargetHref ? (
-                <a
-                  href={noEligibleTargetHref}
-                  className="mt-1 inline-block text-cyan-300 hover:text-cyan-200 underline"
-                >
-                  {noEligibleTargetLinkText ?? labels.manage}
-                </a>
-              ) : null}
-            </div>
           ) : (
             <>
               <select
-                value={selectedTargetId}
-                onChange={(event) => setSelectedTargetId(event.target.value)}
+                value={targetId}
+                onChange={(event) => setTargetId(event.target.value)}
                 className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
               >
-                <option value="">{targetSelectPlaceholder ?? labels.targetPlaceholder}</option>
+                <option value="">{labels.targetPlaceholder}</option>
                 {targetOptions.map((option) => (
-                  <option key={option.id} value={option.eligible !== false ? option.id : ""} disabled={option.eligible === false}>
+                  <option key={option.id} value={option.eligible ? option.id : ""} disabled={!option.eligible}>
                     {option.label}
-                    {option.eligible !== false ? "" : ` — ${option.reason ?? labels.targetUnavailable}`}
+                    {option.eligible ? "" : ` — ${option.reason ?? labels.targetUnavailable}`}
                   </option>
                 ))}
               </select>
               {targetIncludedMessage ? (
                 <p className="mt-1 text-xs text-cyan-300">{targetIncludedMessage}</p>
               ) : targetOptions.length === 0 ? (
-                <p className="mt-1 text-xs text-slate-500">{noEligibleTargetMessage ?? labels.targetUnavailable}</p>
+                <p className="mt-1 text-xs text-slate-500">{labels.targetUnavailable}</p>
               ) : null}
             </>
           )}
@@ -377,7 +326,12 @@ export default function SolutionCheckoutButton({
       <button
         type="button"
         onClick={handleCheckout}
-        disabled={isCheckoutDisabled}
+        disabled={
+          loading ||
+          targetLoading ||
+          (requiredTargetType !== "none" && !targetId) ||
+          (productKey === "business_in_a_box" && !templateKey)
+        }
         className="inline-flex items-center rounded-lg bg-cyan-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-60"
       >
         {loading ? labels.processing : labels.buy}

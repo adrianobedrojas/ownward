@@ -60,7 +60,7 @@ type TemplateValidationResult =
 
 function validateTemplateSelection(
   product: ProductDefinition,
-  templateKey: string
+  templateKey: string,
 ): TemplateValidationResult {
   if (product.key !== "business_in_a_box") {
     return { ok: true, template: null };
@@ -109,7 +109,7 @@ async function validateTargetEligibility(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   product: ProductDefinition,
-  targetId: string | null
+  targetId: string | null,
 ): Promise<TargetValidationResult> {
   if (product.requiredTargetType === "none") {
     return {
@@ -132,18 +132,51 @@ async function validateTargetEligibility(
   }
 
   if (product.requiredTargetType === "listing") {
-    const { data: listing } = await supabase
+    const { data: listing, error: listingError } = await supabase
       .from("business_listings")
-      .select("id, user_id, status, is_public, is_confidential, teaser_title, business_name, featured_until")
+      .select(
+        "id, user_id, status, is_public, is_confidential, teaser_title, business_name, featured_until",
+      )
       .eq("id", targetId)
       .maybeSingle();
 
+    if (listingError) {
+      console.error(
+        "Commerce checkout — listing lookup failed:",
+        listingError.message,
+      );
+
+      return {
+        ok: false,
+        status: 500,
+        error: "Unable to verify this listing. Please try again.",
+      };
+    }
+
     if (!listing) {
-      return { ok: false, status: 404, error: "Target listing not found" };
+      return {
+        ok: false,
+        status: 404,
+        error: "Target listing not found",
+      };
     }
+
     if (listing.user_id !== userId) {
-      return { ok: false, status: 403, error: "You do not own this listing" };
+      return {
+        ok: false,
+        status: 403,
+        error: "You do not own this listing",
+      };
     }
+
+    if (listing.status !== "published" || !listing.is_public) {
+      return {
+        ok: false,
+        status: 422,
+        error: "Listing must be public and published for this product",
+      };
+    }
+
     if (product.key === "confidential_sale_launch" && listing.is_confidential) {
       return {
         ok: false,
@@ -152,26 +185,26 @@ async function validateTargetEligibility(
         route: `/sell/${listing.id}/edit`,
       };
     }
-    if (listing.status !== "published" || !listing.is_public) {
-      return {
-        ok: false,
-        status: 422,
-        error: "Listing must be public and published for this product",
-      };
-    }
+
     if (product.key === "confidential_sale_launch") {
       const teaser = String(listing.teaser_title ?? "").trim();
+
       if (!teaser) {
         return {
           ok: false,
           status: 422,
-          error: "Complete this listing with a public teaser title before checkout",
+          error:
+            "Complete this listing with a public teaser title before checkout",
           route: `/sell/${listing.id}/edit`,
         };
       }
     }
+
     if (product.key === "featured_listing") {
-      const featuredUntil = listing.featured_until ? new Date(listing.featured_until as string) : null;
+      const featuredUntil = listing.featured_until
+        ? new Date(listing.featured_until as string)
+        : null;
+
       if (featuredUntil && featuredUntil > new Date()) {
         return {
           ok: false,
@@ -198,7 +231,6 @@ async function validateTargetEligibility(
       },
     };
   }
-
   if (product.requiredTargetType === "business") {
     const { data: business } = await supabase
       .from("businesses")
@@ -210,9 +242,16 @@ async function validateTargetEligibility(
       return { ok: false, status: 404, error: "Target business not found" };
     }
 
-    const canPurchase = await canPurchaseBusinessConfiguration(userId, business.id);
+    const canPurchase = await canPurchaseBusinessConfiguration(
+      userId,
+      business.id,
+    );
     if (!canPurchase) {
-      return { ok: false, status: 403, error: "You do not have access to this business" };
+      return {
+        ok: false,
+        status: 403,
+        error: "You do not have access to this business",
+      };
     }
 
     return {
@@ -230,7 +269,10 @@ async function validateTargetEligibility(
     };
   }
 
-  if (product.requiredTargetType === "transaction" && product.key === "deal_room_90") {
+  if (
+    product.requiredTargetType === "transaction" &&
+    product.key === "deal_room_90"
+  ) {
     const { data: conversation } = await supabase
       .from("conversations")
       .select("id, listing_id, buyer_id, seller_id, status")
@@ -245,11 +287,14 @@ async function validateTargetEligibility(
       return {
         ok: false,
         status: 403,
-        error: "Only the seller can purchase Deal Room 90 for this conversation",
+        error:
+          "Only the seller can purchase Deal Room 90 for this conversation",
       };
     }
 
-    if (!["active", "qualified", "nda_requested"].includes(conversation.status)) {
+    if (
+      !["active", "qualified", "nda_requested"].includes(conversation.status)
+    ) {
       return {
         ok: false,
         status: 422,
@@ -300,7 +345,7 @@ async function guardAgainstDuplicatePurchase(
   product: ProductDefinition,
   targetType: string,
   targetId: string | null,
-  selectedTemplate: BusinessInABoxTemplateDefinition | null
+  selectedTemplate: BusinessInABoxTemplateDefinition | null,
 ): Promise<DuplicateGuardResult> {
   if (!targetId || targetType === "none") {
     return { ok: true };
@@ -309,7 +354,7 @@ async function guardAgainstDuplicatePurchase(
   const { data: openPurchase } = await supabase
     .from("purchases")
     .select(
-      "id, payment_status, fulfillment_status, fulfilled_resource_type, fulfilled_resource_id, template_key"
+      "id, payment_status, fulfillment_status, fulfilled_resource_type, fulfilled_resource_id, template_key",
     )
     .eq("user_id", userId)
     .eq("product_key", product.key)
@@ -331,7 +376,8 @@ async function guardAgainstDuplicatePurchase(
       // are guarded below for Business-in-a-Box.
     } else {
       const existingRoute =
-        openPurchase.fulfilled_resource_type === "deal_room" && openPurchase.fulfilled_resource_id
+        openPurchase.fulfilled_resource_type === "deal_room" &&
+        openPurchase.fulfilled_resource_id
           ? `/deals/${openPurchase.fulfilled_resource_id}`
           : openPurchase.fulfilled_resource_type === "valuation_report"
             ? `/account/products/${openPurchase.id}/report`
@@ -381,7 +427,8 @@ async function guardAgainstDuplicatePurchase(
       return {
         ok: false,
         status: 409,
-        error: "A Business-in-a-Box setup already exists for this business and template",
+        error:
+          "A Business-in-a-Box setup already exists for this business and template",
         route: "/account/products",
       };
     }
@@ -403,7 +450,8 @@ async function guardAgainstDuplicatePurchase(
       return {
         ok: false,
         status: 409,
-        error: "A pending or completed purchase already exists for this business and template",
+        error:
+          "A pending or completed purchase already exists for this business and template",
         route: "/account/products",
       };
     }
@@ -423,7 +471,8 @@ async function guardAgainstDuplicatePurchase(
       return {
         ok: false,
         status: 409,
-        error: "An active entitlement already exists for this business and template",
+        error:
+          "An active entitlement already exists for this business and template",
         route: "/account/products",
       };
     }
@@ -459,7 +508,8 @@ async function guardAgainstDuplicatePurchase(
       return {
         ok: false,
         status: 409,
-        error: "You already have a valuation delivery in progress for this business",
+        error:
+          "You already have a valuation delivery in progress for this business",
         route: `/account/products`,
       };
     }
@@ -491,7 +541,10 @@ export async function POST(req: Request) {
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeSecretKey) {
-      return NextResponse.json({ error: "Stripe is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Stripe is not configured" },
+        { status: 500 },
+      );
     }
 
     const stripe = new Stripe(stripeSecretKey, {
@@ -507,7 +560,10 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized", redirectTo: "/login" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized", redirectTo: "/login" },
+        { status: 401 },
+      );
     }
 
     // 2. Parse body. The client may provide productKey, locale, targetId, and templateKey only.
@@ -517,7 +573,10 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
     }
 
     const productKey =
@@ -546,35 +605,50 @@ export async function POST(req: Request) {
         : "";
 
     if (!productKey) {
-      return NextResponse.json({ error: "productKey is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "productKey is required" },
+        { status: 400 },
+      );
     }
 
     // 3. Resolve product — rejects unknown, planned, and unavailable keys
     const product = getPurchasableProduct(productKey);
     if (!product) {
-      return NextResponse.json({ error: "Invalid or unavailable product" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid or unavailable product" },
+        { status: 400 },
+      );
     }
 
     if (!isProductConfigured(product)) {
-      return NextResponse.json({ error: "Product is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Product is not configured" },
+        { status: 500 },
+      );
     }
 
     const targetCheck = await validateTargetEligibility(
       supabase,
       user.id,
       product,
-      targetId || null
+      targetId || null,
     );
     if (!targetCheck.ok) {
       return NextResponse.json(
         { error: targetCheck.error, route: targetCheck.route },
-        { status: targetCheck.status }
+        { status: targetCheck.status },
       );
     }
 
-    const templateCheck = validateTemplateSelection(product, selectedTemplateKey);
+    const templateCheck = validateTemplateSelection(
+      product,
+      selectedTemplateKey,
+    );
     if (!templateCheck.ok) {
-      return NextResponse.json({ error: templateCheck.error }, { status: templateCheck.status });
+      return NextResponse.json(
+        { error: templateCheck.error },
+        { status: templateCheck.status },
+      );
     }
 
     const billing = await getUserBillingState(supabase, user.id);
@@ -585,10 +659,11 @@ export async function POST(req: Request) {
     ) {
       return NextResponse.json(
         {
-          error: "Included in your Pro plan. Use the valuation workflow directly.",
+          error:
+            "Included in your Pro plan. Use the valuation workflow directly.",
           route: `${localePrefix}/valuation?mode=detailed`,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -602,21 +677,26 @@ export async function POST(req: Request) {
       if ((activeRoomCount ?? 0) < billing.entitlements.activeDealRoomLimit) {
         return NextResponse.json(
           {
-            error: "Included in your Pro plan. Use your included Deal Room capacity.",
+            error:
+              "Included in your Pro plan. Use your included Deal Room capacity.",
             route: `${localePrefix}/deals`,
           },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
 
-    if (product.key === "confidential_sale_launch" && billing.entitlements.confidentialListings) {
+    if (
+      product.key === "confidential_sale_launch" &&
+      billing.entitlements.confidentialListings
+    ) {
       return NextResponse.json(
         {
-          error: "Confidential listing capability is already included in your current plan.",
+          error:
+            "Confidential listing capability is already included in your current plan.",
           route: `${localePrefix}/sell/${targetCheck.targetId}/edit`,
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -626,13 +706,13 @@ export async function POST(req: Request) {
       product,
       targetCheck.targetType,
       targetCheck.targetId,
-      templateCheck.template
+      templateCheck.template,
     );
 
     if (!duplicateGuard.ok) {
       return NextResponse.json(
         { error: duplicateGuard.error, route: duplicateGuard.route },
-        { status: duplicateGuard.status }
+        { status: duplicateGuard.status },
       );
     }
 
@@ -642,7 +722,10 @@ export async function POST(req: Request) {
       priceId = getStripePriceId(product);
     } catch (err) {
       console.error("Commerce checkout — price config error:", err);
-      return NextResponse.json({ error: "Product is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Product is not configured" },
+        { status: 500 },
+      );
     }
 
     // 5. Build site URL for redirects
@@ -651,7 +734,10 @@ export async function POST(req: Request) {
       siteUrl = getSiteUrl();
     } catch (err) {
       console.error("Commerce checkout — site URL config error:", err);
-      return NextResponse.json({ error: "Application URL is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Application URL is not configured" },
+        { status: 500 },
+      );
     }
 
     // 6. Resolve or create a Stripe customer (reuse profile's customer ID when present)
@@ -682,31 +768,33 @@ export async function POST(req: Request) {
 
     if (!stripeCustomerId) {
       if (obsoleteStripeCustomerId) {
-        const { data: clearedProfiles, error: clearProfileError } = await supabase
-          .from("profiles")
-          .update({ stripe_customer_id: null })
-          .eq("id", user.id)
-          .eq("stripe_customer_id", obsoleteStripeCustomerId)
-          .select("stripe_customer_id");
+        const { data: clearedProfiles, error: clearProfileError } =
+          await supabase
+            .from("profiles")
+            .update({ stripe_customer_id: null })
+            .eq("id", user.id)
+            .eq("stripe_customer_id", obsoleteStripeCustomerId)
+            .select("stripe_customer_id");
 
         if (clearProfileError) {
           return NextResponse.json(
             { error: "Unable to update billing profile. Please try again." },
-            { status: 500 }
+            { status: 500 },
           );
         }
 
         if ((clearedProfiles?.length ?? 0) === 0) {
-          const { data: latestProfile, error: latestProfileError } = await supabase
-            .from("profiles")
-            .select("stripe_customer_id")
-            .eq("id", user.id)
-            .maybeSingle();
+          const { data: latestProfile, error: latestProfileError } =
+            await supabase
+              .from("profiles")
+              .select("stripe_customer_id")
+              .eq("id", user.id)
+              .maybeSingle();
 
           if (latestProfileError) {
             return NextResponse.json(
               { error: "Unable to update billing profile. Please try again." },
-              { status: 500 }
+              { status: 500 },
             );
           }
 
@@ -716,7 +804,7 @@ export async function POST(req: Request) {
           } else {
             return NextResponse.json(
               { error: "Your billing profile changed. Please try again." },
-              { status: 409 }
+              { status: 409 },
             );
           }
         }
@@ -736,7 +824,7 @@ export async function POST(req: Request) {
         if (profileError) {
           return NextResponse.json(
             { error: "Unable to update billing profile. Please try again." },
-            { status: 500 }
+            { status: 500 },
           );
         }
       }
@@ -747,7 +835,9 @@ export async function POST(req: Request) {
       templateKey: templateCheck.template?.key ?? null,
       templateVersion: templateCheck.template?.version ?? null,
     };
-    const serializedTargetSnapshot = JSON.stringify(checkoutTargetSnapshot).slice(0, 490);
+    const serializedTargetSnapshot = JSON.stringify(
+      checkoutTargetSnapshot,
+    ).slice(0, 490);
 
     // 7. Create Stripe Checkout Session (mode: payment — one-time purchase)
     const session = await stripe.checkout.sessions.create({
@@ -772,11 +862,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error";
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
     console.error("Commerce checkout error:", message);
     return NextResponse.json(
       { error: "Unable to start checkout. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
