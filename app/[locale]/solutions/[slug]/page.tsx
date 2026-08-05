@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import SolutionCheckoutButton from "@/components/solutions/SolutionCheckoutButton";
 import { getCatalogSolutionBySlug, toPublicSolution } from "@/lib/commerce/products";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
   params,
@@ -26,6 +27,69 @@ export async function generateMetadata({
   };
 }
 
+/** Load eligible published+public listings for the authenticated user. */
+async function loadEligibleListings(
+  locale: "en" | "es"
+): Promise<{ options: Array<{ id: string; label: string; description: string; eligible: boolean }>; dashboardHref: string } | null> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    // Query published, public listings owned by the user that are not already
+    // actively featured (featured_until > now()).
+    const { data: listings } = await supabase
+      .from("business_listings")
+      .select("id, business_name, teaser_title, status, is_public, featured_until")
+      .eq("user_id", user.id)
+      .eq("status", "published")
+      .eq("is_public", true)
+      .order("created_at", { ascending: false });
+
+    const now = new Date();
+    const eligibleListings = (listings ?? []).filter((l) => {
+      if (!l.featured_until) return true;
+      return new Date(l.featured_until) <= now;
+    });
+
+    const options = eligibleListings.map((l) => {
+      const name = (l.teaser_title ?? l.business_name ?? l.id) as string;
+      return {
+        id: l.id as string,
+        label: name,
+        description: locale === "es" ? "Publicado y elegible" : "Published and eligible",
+        eligible: true,
+      };
+    });
+
+    return { options, dashboardHref: "/sell" };
+  } catch {
+    return null;
+  }
+}
+
+const STATUS_LABELS: Record<string, { en: string; es: string }> = {
+  active: { en: "Available", es: "Disponible" },
+  planned: { en: "Coming soon", es: "Próximamente" },
+  coming_soon: { en: "Coming soon", es: "Próximamente" },
+  included: { en: "Included", es: "Incluido" },
+  contact: { en: "Contact us", es: "Contáctanos" },
+};
+
+const BILLING_MODEL_LABELS: Record<string, { en: string; es: string }> = {
+  one_time: { en: "One-time purchase", es: "Compra única" },
+  free: { en: "Free", es: "Gratis" },
+  monthly: { en: "Monthly", es: "Mensual" },
+  annual: { en: "Annual", es: "Anual" },
+  per_target: { en: "Per item", es: "Por elemento" },
+  per_transaction: { en: "Per transaction", es: "Por transacción" },
+  included: { en: "Included", es: "Incluido" },
+  contact: { en: "Contact us", es: "Contáctanos" },
+};
+
 export default async function SolutionDetailPage({
   params,
 }: {
@@ -41,6 +105,30 @@ export default async function SolutionDetailPage({
   }
 
   const publicSolution = toPublicSolution(solution, safeLocale);
+
+  const statusLabel =
+    STATUS_LABELS[publicSolution.status]?.[safeLocale] ?? publicSolution.status;
+  const billingModelLabel =
+    BILLING_MODEL_LABELS[publicSolution.billingModel]?.[safeLocale] ?? publicSolution.billingModel;
+
+  // For listing-targeted products, load eligible listings server-side so
+  // customers never see a raw UUID input field.
+  let listingTargetOptions: Array<{ id: string; label: string; description: string; eligible: boolean }> | undefined;
+  let listingDashboardHref: string | undefined;
+  if (publicSolution.requiredTargetType === "listing" && publicSolution.ctaBehavior === "checkout") {
+    const result = await loadEligibleListings(safeLocale);
+    listingTargetOptions = result?.options ?? [];
+    listingDashboardHref = result?.dashboardHref;
+  }
+
+  const targetSelectLabel = isSpanish ? "Elige el listado que deseas destacar" : "Choose the listing to feature";
+  const targetSelectPlaceholder = isSpanish ? "Selecciona un listado publicado" : "Select a published listing";
+  const noEligibleTargetMessage = isSpanish
+    ? "Todavía no tienes un listado publicado elegible."
+    : "You do not have an eligible published listing yet.";
+  const noEligibleTargetLinkText = isSpanish
+    ? "Crea o publica un listado antes de comprar Listado Destacado."
+    : "Create or publish a listing before purchasing Featured Listing.";
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -58,8 +146,8 @@ export default async function SolutionDetailPage({
         </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-500">{isSpanish ? "Estado" : "Status"}</p>
-          <p className="mt-1 text-sm text-slate-200">{publicSolution.status}</p>
-          <p className="mt-1 text-xs text-slate-400">{publicSolution.billingModel}</p>
+          <p className="mt-1 text-sm text-slate-200">{statusLabel}</p>
+          <p className="mt-1 text-xs text-slate-400">{billingModelLabel}</p>
         </div>
       </div>
 
@@ -81,6 +169,12 @@ export default async function SolutionDetailPage({
             ctaBehavior={publicSolution.ctaBehavior}
             status={publicSolution.status}
             requiredTargetType={publicSolution.requiredTargetType}
+            targetOptions={listingTargetOptions}
+            targetSelectLabel={publicSolution.requiredTargetType === "listing" ? targetSelectLabel : undefined}
+            targetSelectPlaceholder={publicSolution.requiredTargetType === "listing" ? targetSelectPlaceholder : undefined}
+            noEligibleTargetMessage={publicSolution.requiredTargetType === "listing" ? noEligibleTargetMessage : undefined}
+            noEligibleTargetHref={publicSolution.requiredTargetType === "listing" ? (listingDashboardHref ?? "/sell") : undefined}
+            noEligibleTargetLinkText={publicSolution.requiredTargetType === "listing" ? noEligibleTargetLinkText : undefined}
           />
         </div>
       </section>
