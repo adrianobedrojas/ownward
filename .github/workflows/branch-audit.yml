@@ -1,0 +1,37 @@
+name: Branch Audit (Read-Only)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Audit Remote Branches
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch all remote branches
+        run: git fetch origin 'refs/heads/*:refs/remotes/origin/*' --prune --tags
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run branch audit (read-only)
+        run: npm run audit:branches
+
+      - name: Upload branch audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-audit-report
+          path: docs/branch-audit-*.md
+          retention-days: 90
