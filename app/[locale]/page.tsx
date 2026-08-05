@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import InstagramLink from '@/components/InstagramLink';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import { createClient } from '@/lib/supabase/server';
 import { capitalizeFirst } from '@/lib/documents';
 
@@ -19,7 +20,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params?: Promise<{ locale: string }>;
+} = {}) {
+  const { locale } = params ? await params : { locale: 'en' };
+  const showContextualModule = Boolean(params);
+  const recommendationLocale = locale === 'es' ? 'es' : 'en';
   const t = await getTranslations('Home');
   const supabase = await createClient();
   const now = new Date().toISOString();
@@ -115,6 +123,15 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {showContextualModule ? (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <ContextualSolutionModule
+            placement="home"
+            locale={recommendationLocale}
+          />
+        </div>
+      ) : null}
 
       <section className="mx-auto max-w-7xl border-t border-slate-900 px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getUserBillingState } from '@/lib/billing';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import TeamClient from './TeamClient';
 import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -74,16 +75,26 @@ export default async function TeamPage() {
   const usedSeats = typeof seatUsageCount === 'number' ? seatUsageCount : 0;
 
   return (
-    <TeamClient
-      userId={user.id}
-      ownedBusinesses={ownedBusinesses ?? []}
-      sharedBusinesses={sharedBusinesses ?? []}
-      myMemberships={myMemberships ?? []}
-      members={members ?? []}
-      invitations={invitations ?? []}
-      teamMemberLimit={teamMemberLimit}
-      usedSeats={usedSeats}
-      locale={locale}
-    />
+    <>
+      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <ContextualSolutionModule
+          placement="team"
+          locale={locale === 'es' ? 'es' : 'en'}
+          userId={user.id}
+          currentPlan={billing.plan}
+        />
+      </div>
+      <TeamClient
+        userId={user.id}
+        ownedBusinesses={ownedBusinesses ?? []}
+        sharedBusinesses={sharedBusinesses ?? []}
+        myMemberships={myMemberships ?? []}
+        members={members ?? []}
+        invitations={invitations ?? []}
+        teamMemberLimit={teamMemberLimit}
+        usedSeats={usedSeats}
+        locale={locale}
+      />
+    </>
   );
 }

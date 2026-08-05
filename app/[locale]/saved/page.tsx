@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { requireUser } from "@/lib/require-user";
 import { removeSavedListingAction } from "./actions";
 
@@ -8,7 +9,12 @@ export const metadata: Metadata = {
   description: "Your privately saved business listings.",
 };
 
-export default async function SavedListingsPage() {
+export default async function SavedListingsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const { supabase, user } = await requireUser();
 
   const { data: saved, error } = await supabase
@@ -41,6 +47,12 @@ export default async function SavedListingsPage() {
           Only you can see this list. Sellers are not notified when you save a listing.
         </p>
       </div>
+
+      <ContextualSolutionModule
+        placement="saved_listings"
+        locale={locale === "es" ? "es" : "en"}
+        userId={user.id}
+      />
 
       {error && (
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-300">

@@ -10,9 +10,10 @@ import PersonalControlCenter, { type ControlCenterData } from './control-center/
 interface NavbarClientProps {
   signedIn: boolean;
   controlCenterData: ControlCenterData | null;
+  showAdminConsole: boolean;
 }
 
-export default function NavbarClient({ signedIn, controlCenterData }: NavbarClientProps) {
+export default function NavbarClient({ signedIn, controlCenterData, showAdminConsole }: NavbarClientProps) {
   const pathname = usePathname();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const learnMenuRef = useRef<HTMLDetailsElement>(null);
@@ -215,6 +216,14 @@ export default function NavbarClient({ signedIn, controlCenterData }: NavbarClie
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
+          {showAdminConsole ? (
+            <Link
+              href="/admin"
+              className="rounded-lg border border-emerald-500/50 px-3 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/10"
+            >
+              {t("adminConsole")}
+            </Link>
+          ) : null}
           <LanguageSwitcher />
           {signedIn && controlCenterData ? (
             <PersonalControlCenter data={controlCenterData} />
@@ -339,6 +348,9 @@ export default function NavbarClient({ signedIn, controlCenterData }: NavbarClie
             <div className="mt-3 grid gap-2">
               {signedIn ? (
                 <>
+                  {showAdminConsole ? (
+                    <Link href="/admin" onClick={closeMobileMenu} className="block rounded-lg border border-emerald-600/60 px-4 py-3 text-center text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/10">{t('adminConsole')}</Link>
+                  ) : null}
                   <Link href="/dashboard" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('dashboard')}</Link>
                   <Link href="/messages" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('messages')}</Link>
                   <Link href="/profile" onClick={closeMobileMenu} className="block rounded-lg border border-slate-700 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800">{t('profile')}</Link>

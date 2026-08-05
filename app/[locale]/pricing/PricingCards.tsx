@@ -32,6 +32,7 @@ export default function PricingCards({
   const locale = useLocale();
   const isSpanish = locale === 'es';
   const t = useTranslations('Pricing');
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<{
     type: 'error' | 'info';
@@ -44,6 +45,11 @@ export default function PricingCards({
       key,
       isFree: key === 'free',
       monthlyPrice: `$${plan.monthlyPrice}`,
+<<<<<<< HEAD
+      annualPrice: `$${plan.annualPrice}`,
+      annualEquivalent: plan.annualPrice > 0 ? `$${Math.round(plan.annualPrice / 12)}` : '$0',
+=======
+>>>>>>> origin/main
       featured: key === 'builder',
       name: t(`plans.${key}.name`),
       tagline: t(`plans.${key}.tagline`),
@@ -62,7 +68,11 @@ export default function PricingCards({
   const disclosure = isSpanish
     ? {
         recurring:
+<<<<<<< HEAD
+            'Cobro recurrente según el período elegido en checkout, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+=======
           'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+>>>>>>> origin/main
         cancel: 'Gestiona o cancela en Stripe Customer Portal. La cancelación normalmente aplica al final del período pagado.',
         legalLead: 'Al continuar aceptas los',
         terms: 'Términos',
@@ -71,7 +81,11 @@ export default function PricingCards({
       }
     : {
         recurring:
+<<<<<<< HEAD
+            'Billed on the selected interval at checkout, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+=======
           'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+>>>>>>> origin/main
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',
@@ -282,8 +296,42 @@ export default function PricingCards({
         </div>
       ) : null}
 
+<<<<<<< HEAD
+      <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-slate-200">{t('billingToggle.label')}</p>
+          <div className="inline-flex rounded-lg border border-slate-700 bg-slate-950 p-1">
+            <button
+              type="button"
+              aria-pressed={billingInterval === 'monthly'}
+              onClick={() => setBillingInterval('monthly')}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                billingInterval === 'monthly'
+                  ? 'bg-cyan-400 text-slate-950'
+                  : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              {t('billingToggle.monthly')}
+            </button>
+            <button
+              type="button"
+              aria-pressed={billingInterval === 'annual'}
+              onClick={() => setBillingInterval('annual')}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                billingInterval === 'annual'
+                  ? 'bg-cyan-400 text-slate-950'
+                  : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              {t('billingToggle.annual')}
+            </button>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-cyan-300">{t('billingToggle.savingsBadge')}</p>
+=======
       <div className="mt-8 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-3 text-center text-sm text-slate-300">
         {isSpanish ? 'Facturación mensual activa para todos los planes de pago.' : 'Monthly billing is active for all paid plans.'}
+>>>>>>> origin/main
       </div>
 
       {isSignedIn && currentPlan && currentPlan !== 'free' ? (
@@ -346,9 +394,25 @@ export default function PricingCards({
                     $0 <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
                 ) : (
+<<<<<<< HEAD
+                  <>
+                    <p className="mt-4 text-3xl font-bold">
+                      {billingInterval === 'annual' ? plan.annualPrice : plan.monthlyPrice}{' '}
+                      <span className="text-sm font-normal text-slate-400">
+                        {billingInterval === 'annual' ? t('perYear') : t('perMonth')}
+                      </span>
+                    </p>
+                    {billingInterval === 'annual' ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {plan.annualEquivalent} {t('annualEquivalentSuffix')} · {t('annualBilledOnce')}
+                      </p>
+                    ) : null}
+                  </>
+=======
                   <p className="mt-4 text-3xl font-bold">
                     {plan.monthlyPrice} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
+>>>>>>> origin/main
                 )}
 
                 <ul className="mt-6 space-y-2.5 text-sm text-slate-300">

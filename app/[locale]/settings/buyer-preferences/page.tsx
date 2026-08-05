@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import { requireUser } from '@/lib/require-user';
 import BuyerPreferencesClient from './BuyerPreferencesClient';
 
@@ -6,7 +7,12 @@ export const metadata: Metadata = {
   title: 'Buyer Preferences | Ownward',
 };
 
-export default async function BuyerPreferencesPage() {
+export default async function BuyerPreferencesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const { supabase, user } = await requireUser();
 
   const { data: profile } = await supabase
@@ -24,6 +30,11 @@ export default async function BuyerPreferencesPage() {
           Find the right business faster — share your acquisition goals to get better recommendations.
         </p>
       </div>
+      <ContextualSolutionModule
+        placement="buyer_preferences"
+        locale={locale === 'es' ? 'es' : 'en'}
+        userId={user.id}
+      />
       <BuyerPreferencesClient initialData={profile ?? null} />
     </main>
   );

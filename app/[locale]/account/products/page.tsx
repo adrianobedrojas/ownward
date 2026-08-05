@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { requireUser } from "@/lib/require-user";
 import { getProduct } from "@/lib/commerce/products";
 
@@ -34,7 +35,7 @@ export default async function AccountProductsPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "AccountProducts" });
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const { data: purchases } = await supabase
     .from("purchases")
@@ -74,6 +75,12 @@ export default async function AccountProductsPage({
         {t("heading")}
       </h1>
       <p className="text-slate-400 mb-8">{t("subheading")}</p>
+
+      <ContextualSolutionModule
+        placement="my_purchases"
+        locale={locale === "es" ? "es" : "en"}
+        userId={user.id}
+      />
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-slate-700 bg-slate-900/60 px-6 py-12 text-center">

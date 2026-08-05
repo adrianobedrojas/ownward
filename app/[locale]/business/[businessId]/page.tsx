@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { canEditBusiness, canViewBusiness } from "@/lib/business-access";
+import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 
 export const metadata: Metadata = {
   title: "Business Profile | Ownward",
@@ -13,10 +14,10 @@ export default async function BusinessDetailPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ businessId: string }>;
+  params: Promise<{ locale: string; businessId: string }>;
   searchParams: Promise<{ updated?: string; error?: string }>;
 }) {
-  const { businessId } = await params;
+  const { locale, businessId } = await params;
   const qp = await searchParams;
   const { supabase, user } = await requireUser();
 
@@ -65,6 +66,13 @@ export default async function BusinessDetailPage({
           </div>
         </div>
       </div>
+
+      <ContextualSolutionModule
+        placement="business_workspace"
+        locale={locale === "es" ? "es" : "en"}
+        userId={user.id}
+        businessId={businessId}
+      />
 
       {qp.updated === "1" && (
         <div className="mb-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300 text-sm">
