@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
