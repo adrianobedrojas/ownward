@@ -70,7 +70,7 @@ export default function PricingCards({
       }
     : {
         recurring:
-          'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+          'Billed on the selected interval at checkout. Auto-renews until canceled; no prorated refunds unless required by law or expressly stated.',
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',
