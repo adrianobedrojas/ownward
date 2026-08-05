@@ -13,7 +13,6 @@ import { ValueBridge } from "@/components/valuation/ValueBridge";
 import { RiskMap } from "@/components/valuation/RiskMap";
 import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import ValuationCompleteTracker from "@/components/valuation/ValuationCompleteTracker";
-import ValuationCompleteTracker from "@/components/valuation/ValuationCompleteTracker";
 import type { ValuationResult } from "@/lib/valuation/types";
 import type { ValuationLevel } from "@/lib/billing";
 import { archiveReportFormAction } from "../actions";
