@@ -256,14 +256,18 @@ export function getPlanPriceMap() {
 
 export function getPlanPriceMapAnnual() {
   return {
-    starter: process.env.STRIPE_PRICE_STARTER_ANNUAL,
-    builder: process.env.STRIPE_PRICE_BUILDER_ANNUAL,
-    pro: process.env.STRIPE_PRICE_PRO_ANNUAL,
+    starter: undefined,
+    builder: undefined,
+    pro: undefined,
   };
 }
 
 export function getAllowedPriceIds() {
+<<<<<<< HEAD
   const prices = [...Object.values(getPlanPriceMap()), ...Object.values(getPlanPriceMapAnnual())].filter(
+=======
+  const prices = Object.values(getPlanPriceMap()).filter(
+>>>>>>> origin/main
     (value): value is string => Boolean(value)
   );
   return new Set(prices);
@@ -276,17 +280,16 @@ export function getPriceIdForPlan(plan: string, interval: BillingInterval = "mon
   }
 
   if (interval === "annual") {
-    return getPlanPriceMapAnnual()[normalizedPlan] ?? null;
+    return null;
   }
   return getPlanPriceMap()[normalizedPlan] ?? null;
 }
 
 export function getPlanByPriceId(priceId: string): PlanKey | null {
   const monthlyMap = getPlanPriceMap();
-  const annualMap = getPlanPriceMapAnnual();
 
   for (const plan of PLAN_KEYS) {
-    if (monthlyMap[plan] === priceId || annualMap[plan] === priceId) {
+    if (monthlyMap[plan] === priceId) {
       return plan;
     }
   }
@@ -760,7 +763,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "starter",
     name: "Starter",
     monthlyPrice: 5,
-    annualPrice: 50,
+    annualPrice: 0,
     tagline: "Build operations and reach buyers",
     publicFeatures: [
       "1 Business Workspace",
@@ -788,7 +791,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "builder",
     name: "Builder",
     monthlyPrice: 10,
-    annualPrice: 100,
+    annualPrice: 0,
     tagline: "Scale with advanced analytics and collaboration",
     publicFeatures: [
       "Up to 2 Businesses",
@@ -817,7 +820,7 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     key: "pro",
     name: "Pro",
     monthlyPrice: 20,
-    annualPrice: 200,
+    annualPrice: 0,
     tagline: "Serious owners preparing to grow or sell",
     publicFeatures: [
       "Up to 5 Businesses",

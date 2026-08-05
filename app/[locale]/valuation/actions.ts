@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { calculateValuation } from "@/lib/valuation/engine";
 import { validateValuationInput } from "@/lib/valuation/normalization";
@@ -121,6 +123,20 @@ function buildInputFromFormData(formData: FormData): ValuationInput {
       hasEmployeeAgreements: formData.get("hasEmployeeAgreements") === "true",
     },
   };
+}
+
+async function redirectToCalculatedReport(reportId: string): Promise<never> {
+  const valuationNonce = randomUUID();
+  const cookieStore = await cookies();
+  cookieStore.set("ownward_valuation_complete_nonce", valuationNonce, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 900,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  redirect(`/valuation/${reportId}?valuation=complete&nonce=${encodeURIComponent(valuationNonce)}`);
 }
 
 // ─────────────────────────────────────────────
@@ -325,7 +341,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
       }
 
       revalidatePath("/valuation");
-      redirect(`/valuation/${newReport.id}`);
+      return redirectToCalculatedReport(newReport.id);
     }
 
     // Update existing draft to calculated
@@ -353,7 +369,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
     }
 
     revalidatePath("/valuation");
-    redirect(`/valuation/${existingReportId}`);
+    return redirectToCalculatedReport(existingReportId);
   }
 
   // Create new calculated report
@@ -382,7 +398,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   }
 
   revalidatePath("/valuation");
-  redirect(`/valuation/${newReport.id}`);
+  return redirectToCalculatedReport(newReport.id);
 }
 
 // ─────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
 import { PLAN_CATALOG } from '@/lib/billing';
+import { trackGoogleAnalyticsConversion } from '@/lib/google-analytics';
 import {
   ALL_PLAN_KEYS,
   COMPARISON_ROW_KEYS,
@@ -44,8 +45,11 @@ export default function PricingCards({
       key,
       isFree: key === 'free',
       monthlyPrice: `$${plan.monthlyPrice}`,
+<<<<<<< HEAD
       annualPrice: `$${plan.annualPrice}`,
       annualEquivalent: plan.annualPrice > 0 ? `$${Math.round(plan.annualPrice / 12)}` : '$0',
+=======
+>>>>>>> origin/main
       featured: key === 'builder',
       name: t(`plans.${key}.name`),
       tagline: t(`plans.${key}.tagline`),
@@ -64,7 +68,11 @@ export default function PricingCards({
   const disclosure = isSpanish
     ? {
         recurring:
+<<<<<<< HEAD
             'Cobro recurrente según el período elegido en checkout, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+=======
+          'Cobro mensual salvo que checkout indique otra cosa, renovación automática hasta cancelar y sin reembolso prorrateado salvo ley aplicable o aviso expreso.',
+>>>>>>> origin/main
         cancel: 'Gestiona o cancela en Stripe Customer Portal. La cancelación normalmente aplica al final del período pagado.',
         legalLead: 'Al continuar aceptas los',
         terms: 'Términos',
@@ -73,7 +81,11 @@ export default function PricingCards({
       }
     : {
         recurring:
+<<<<<<< HEAD
             'Billed on the selected interval at checkout, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+=======
+          'Billed monthly unless checkout states otherwise, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+>>>>>>> origin/main
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',
@@ -192,7 +204,7 @@ export default function PricingCards({
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planKey, interval: billingInterval }),
+        body: JSON.stringify({ plan: planKey, interval: 'monthly' }),
       });
       const data = await res.json();
 
@@ -217,6 +229,15 @@ export default function PricingCards({
       }
 
       if (data.url) {
+        trackGoogleAnalyticsConversion(
+          'begin_checkout',
+          {
+            checkout_type: 'subscription',
+            plan: planKey,
+            interval: 'monthly',
+          },
+          { dedupeKey: `begin_checkout:subscription:${planKey}:${data.url}` },
+        );
         window.location.assign(data.url);
       } else {
         setStatusMessage({ type: 'error', text: data.error ?? t('errors.checkout') });
@@ -275,6 +296,7 @@ export default function PricingCards({
         </div>
       ) : null}
 
+<<<<<<< HEAD
       <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-slate-200">{t('billingToggle.label')}</p>
@@ -306,6 +328,10 @@ export default function PricingCards({
           </div>
         </div>
         <p className="mt-2 text-xs text-cyan-300">{t('billingToggle.savingsBadge')}</p>
+=======
+      <div className="mt-8 rounded-lg border border-slate-800 bg-slate-900/60 px-4 py-3 text-center text-sm text-slate-300">
+        {isSpanish ? 'Facturación mensual activa para todos los planes de pago.' : 'Monthly billing is active for all paid plans.'}
+>>>>>>> origin/main
       </div>
 
       {isSignedIn && currentPlan && currentPlan !== 'free' ? (
@@ -368,6 +394,7 @@ export default function PricingCards({
                     $0 <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
                   </p>
                 ) : (
+<<<<<<< HEAD
                   <>
                     <p className="mt-4 text-3xl font-bold">
                       {billingInterval === 'annual' ? plan.annualPrice : plan.monthlyPrice}{' '}
@@ -381,6 +408,11 @@ export default function PricingCards({
                       </p>
                     ) : null}
                   </>
+=======
+                  <p className="mt-4 text-3xl font-bold">
+                    {plan.monthlyPrice} <span className="text-sm font-normal text-slate-400">{t('perMonth')}</span>
+                  </p>
+>>>>>>> origin/main
                 )}
 
                 <ul className="mt-6 space-y-2.5 text-sm text-slate-300">

@@ -1,5 +1,7 @@
 export const GA_RELOAD_SESSION_KEY = 'ownward_ga_withdrawal_reload_v1';
 
+import { readPrivacyConsent } from '@/lib/privacy-consent';
+
 /**
  * Builds the inline JavaScript snippet that must be placed in <head> before
  * any gtag/GTM script loads.  It:
@@ -51,6 +53,27 @@ export interface SanitizedGoogleAnalyticsPage {
   pageLocation: string;
   pagePath: string;
 }
+
+export type GoogleAnalyticsConversionEventName =
+  | 'readiness_check_complete'
+  | 'valuation_complete'
+  | 'generate_lead'
+  | 'sign_up'
+  | 'begin_checkout';
+
+const GA_SENSITIVE_PARAMETER_KEY_PATTERN =
+  /(email|name|phone|token|password|secret|address|message|user|customer|session|auth|id_number)/i;
+
+const GA_SENSITIVE_PARAMETER_VALUE_PATTERN =
+  /@|bearer\s+[a-z0-9._-]+|\b(?:\d[ -]*?){10,}\b/i;
+
+const GA_EVENT_PARAMETER_LIMIT = 25;
+
+interface TrackEventOptions {
+  dedupeKey?: string;
+}
+
+type GoogleAnalyticsEventPrimitive = string | number | boolean;
 
 interface GoogleAnalyticsWindow {
   dataLayer?: unknown[];
@@ -165,6 +188,54 @@ export function sanitizeGoogleAnalyticsReferrer(referrer: string, origin: string
   }
 }
 
+export function sanitizeGoogleAnalyticsEventParams(
+  params: Record<string, unknown> | null | undefined,
+): Record<string, GoogleAnalyticsEventPrimitive> {
+  if (!params) {
+    return {};
+  }
+
+  const sanitized: Record<string, GoogleAnalyticsEventPrimitive> = {};
+  let count = 0;
+
+  for (const [rawKey, rawValue] of Object.entries(params)) {
+    if (count >= GA_EVENT_PARAMETER_LIMIT) {
+      break;
+    }
+
+    const key = rawKey.trim();
+    if (!key || GA_SENSITIVE_PARAMETER_KEY_PATTERN.test(key)) {
+      continue;
+    }
+
+    if (typeof rawValue === 'string') {
+      const value = rawValue.trim();
+      if (!value || GA_SENSITIVE_PARAMETER_VALUE_PATTERN.test(value)) {
+        continue;
+      }
+      sanitized[key] = value.slice(0, 100);
+      count += 1;
+      continue;
+    }
+
+    if (typeof rawValue === 'number') {
+      if (!Number.isFinite(rawValue)) {
+        continue;
+      }
+      sanitized[key] = rawValue;
+      count += 1;
+      continue;
+    }
+
+    if (typeof rawValue === 'boolean') {
+      sanitized[key] = rawValue;
+      count += 1;
+    }
+  }
+
+  return sanitized;
+}
+
 export function deleteGoogleAnalyticsCookies(cookieString: string, hostname: string): string[] {
   const names = cookieString
     .split(';')
@@ -201,6 +272,7 @@ export class GoogleAnalyticsController {
   private readonly origin: string | null;
   private currentConsent: GoogleAnalyticsConsentState = { analytics: false, functionality: false };
   private lastPageViewKey: string | null = null;
+  private sentEventKeys = new Set<string>();
 
   constructor(measurementId: string | null | undefined, win = getCurrentWindow()) {
     this.measurementId = isValidGaMeasurementId(measurementId) ? measurementId.trim() : null;
@@ -340,4 +412,57 @@ export class GoogleAnalyticsController {
     this.gtag('set', payload);
     this.gtag('event', 'page_view', payload);
   }
+
+  trackEvent(
+    eventName: GoogleAnalyticsConversionEventName,
+    params: Record<string, unknown> = {},
+    options: TrackEventOptions = {},
+  ) {
+    if (!this.measurementId || !this.win || !this.currentConsent.analytics) {
+      return;
+    }
+
+    if (options.dedupeKey) {
+      if (this.sentEventKeys.has(options.dedupeKey)) {
+        return;
+      }
+      this.sentEventKeys.add(options.dedupeKey);
+    }
+
+    const payload = sanitizeGoogleAnalyticsEventParams(params);
+
+    this.gtag('event', eventName, payload);
+  }
+}
+
+let browserController: GoogleAnalyticsController | null = null;
+
+export function getGoogleAnalyticsController(): GoogleAnalyticsController {
+  if (!browserController) {
+    browserController = new GoogleAnalyticsController(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
+  }
+
+  return browserController;
+}
+
+export function trackGoogleAnalyticsConversion(
+  eventName: GoogleAnalyticsConversionEventName,
+  params: Record<string, unknown> = {},
+  options: TrackEventOptions = {},
+): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const consent = readPrivacyConsent();
+  if (!consent?.analytics) {
+    return;
+  }
+
+  const controller = getGoogleAnalyticsController();
+  controller.setConsent({
+    analytics: Boolean(consent.analytics),
+    functionality: Boolean(consent.functionality),
+  });
+  controller.trackEvent(eventName, params, options);
 }

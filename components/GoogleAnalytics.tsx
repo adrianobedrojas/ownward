@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { usePrivacyConsent } from '@/components/PrivacyConsent';
-import { GoogleAnalyticsController } from '@/lib/google-analytics';
+import { getGoogleAnalyticsController } from '@/lib/google-analytics';
 
 export default function GoogleAnalytics() {
   const { consent } = usePrivacyConsent();
@@ -13,7 +13,7 @@ export default function GoogleAnalytics() {
   const previousUrlRef = useRef<string>('');
 
   const controller = useMemo(
-    () => new GoogleAnalyticsController(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
+    () => getGoogleAnalyticsController(),
     [],
   );
 

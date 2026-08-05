@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+<<<<<<< HEAD
+=======
+import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
+>>>>>>> origin/main
 
 type Props = {
   productKey: string;
@@ -8,9 +12,12 @@ type Props = {
   ctaBehavior: "checkout" | "coming_soon" | "included" | "contact" | "manage";
   status: "active" | "planned" | "coming_soon" | "included" | "contact";
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
+<<<<<<< HEAD
   targetId?: string;
   targetOptions?: Array<{ id: string; label: string; description?: string }>;
   onStartCheckout?: () => void;
+=======
+>>>>>>> origin/main
 };
 
 export default function SolutionCheckoutButton({
@@ -19,12 +26,18 @@ export default function SolutionCheckoutButton({
   ctaBehavior,
   status,
   requiredTargetType,
+<<<<<<< HEAD
   targetId,
   targetOptions = [],
   onStartCheckout,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<string>(targetId ?? targetOptions[0]?.id ?? "");
+=======
+}: Props) {
+  const [loading, setLoading] = useState(false);
+  const [targetId, setTargetId] = useState("");
+>>>>>>> origin/main
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const labels = useMemo(() => {
@@ -32,9 +45,14 @@ export default function SolutionCheckoutButton({
       return {
         buy: "Comprar",
         processing: "Redirigiendo…",
+<<<<<<< HEAD
         targetLabel: "Selecciona objetivo",
         targetHint: "Debes elegir un objetivo elegible",
         missingTarget: "Selecciona un objetivo elegible para continuar.",
+=======
+        targetLabel: "ID del objetivo",
+        targetHint: "Requerido para esta solución",
+>>>>>>> origin/main
         comingSoon: "Próximamente",
         included: "Incluido",
         contact: "Contáctanos",
@@ -46,9 +64,14 @@ export default function SolutionCheckoutButton({
     return {
       buy: "Buy now",
       processing: "Redirecting…",
+<<<<<<< HEAD
       targetLabel: "Select target",
       targetHint: "You must choose an eligible target",
       missingTarget: "Select an eligible target to continue.",
+=======
+      targetLabel: "Target ID",
+      targetHint: "Required for this solution",
+>>>>>>> origin/main
       comingSoon: "Coming soon",
       included: "Included",
       contact: "Contact us",
@@ -75,6 +98,7 @@ export default function SolutionCheckoutButton({
   }
 
   async function handleCheckout() {
+<<<<<<< HEAD
     const effectiveTargetId = targetId ?? selectedTarget;
     if (requiredTargetType !== "none" && !effectiveTargetId) {
       setErrorMessage(labels.missingTarget);
@@ -82,6 +106,8 @@ export default function SolutionCheckoutButton({
     }
 
     onStartCheckout?.();
+=======
+>>>>>>> origin/main
     setLoading(true);
     setErrorMessage(null);
 
@@ -92,7 +118,11 @@ export default function SolutionCheckoutButton({
         body: JSON.stringify({
           productKey,
           locale,
+<<<<<<< HEAD
           targetId: effectiveTargetId || undefined,
+=======
+          targetId: targetId.trim() || undefined,
+>>>>>>> origin/main
         }),
       });
 
@@ -108,6 +138,18 @@ export default function SolutionCheckoutButton({
       }
 
       if (data.url) {
+<<<<<<< HEAD
+=======
+        trackGoogleAnalyticsConversion(
+          "begin_checkout",
+          {
+            checkout_type: "one_time_product",
+            product_key: productKey,
+            target_type: requiredTargetType,
+          },
+          { dedupeKey: `begin_checkout:product:${productKey}:${data.url}` },
+        );
+>>>>>>> origin/main
         window.location.assign(data.url);
       }
     } catch {
@@ -119,6 +161,7 @@ export default function SolutionCheckoutButton({
 
   return (
     <div className="space-y-2">
+<<<<<<< HEAD
       {requiredTargetType !== "none" && !targetId && targetOptions.length > 0 ? (
         <label className="block text-xs text-slate-400">
           {labels.targetLabel}
@@ -142,6 +185,18 @@ export default function SolutionCheckoutButton({
         </label>
       ) : requiredTargetType !== "none" && !targetId ? (
         <p className="text-xs text-slate-500">{labels.missingTarget}</p>
+=======
+      {requiredTargetType !== "none" ? (
+        <label className="block text-xs text-slate-400">
+          {labels.targetLabel}
+          <input
+            value={targetId}
+            onChange={(event) => setTargetId(event.target.value)}
+            placeholder={labels.targetHint}
+            className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-200"
+          />
+        </label>
+>>>>>>> origin/main
       ) : null}
 
       <button
