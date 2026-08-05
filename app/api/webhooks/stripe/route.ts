@@ -747,12 +747,39 @@ async function revalidateStoredPurchaseTarget(
     return Boolean(membership);
   };
 
+  const canUserPurchaseBusinessConfiguration = async (businessId: string): Promise<boolean> => {
+    const { data: business } = await supabaseAdmin
+      .from("businesses")
+      .select("id, owner_id, deleted_at")
+      .eq("id", businessId)
+      .maybeSingle();
+
+    if (!business || business.deleted_at !== null) {
+      return false;
+    }
+
+    if (business.owner_id === userId) {
+      return true;
+    }
+
+    const { data: membership } = await supabaseAdmin
+      .from("business_members")
+      .select("id")
+      .eq("business_id", businessId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .eq("role", "manager")
+      .maybeSingle();
+
+    return Boolean(membership);
+  };
+
   if (product.key === "business_in_a_box") {
     if (!targetId) {
       throw new Error(`[one_time_product] Missing business target for purchase ${purchase.id}`);
     }
 
-    const isAllowed = await isUserBusinessOwnerOrMember(targetId);
+    const isAllowed = await canUserPurchaseBusinessConfiguration(targetId);
     if (!isAllowed) {
       throw new Error(`[one_time_product] Business target is invalid for purchase ${purchase.id}`);
     }
