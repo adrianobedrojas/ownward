@@ -178,6 +178,7 @@ export default function SolutionCheckoutButton({
   async function handleCheckout() {
     setLoading(true);
     setErrorMessage(null);
+    onStartCheckout?.();
 
     try {
       const res = await fetch("/api/commerce/checkout", {
@@ -226,6 +227,20 @@ export default function SolutionCheckoutButton({
       setLoading(false);
     }
   }
+
+  // Derived: is target selection blocked because server has no eligible options?
+  const isTargetBlocked =
+    requiredTargetType !== "none" &&
+    !contextTargetId &&
+    serverTargetOptions !== undefined &&
+    serverTargetOptions.filter((o) => o.eligible !== false).length === 0;
+
+  const isCheckoutDisabled =
+    loading ||
+    targetLoading ||
+    isTargetBlocked ||
+    (requiredTargetType !== "none" && !contextTargetId && !selectedTargetId) ||
+    (productKey === "business_in_a_box" && !templateKey);
 
   return (
     <div className="space-y-2">
