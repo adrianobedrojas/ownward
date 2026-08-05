@@ -1360,6 +1360,38 @@ type BusinessInABoxSetupRow = {
   fulfillment_attempts: number;
 };
 
+async function insertGeneratedSourceRecord(params: {
+  supabaseAdmin: SupabaseClient;
+  table: "tasks" | "business_milestones" | "growth_goals" | "sale_readiness_evidence";
+  templateItemKey: string;
+  payload: Record<string, unknown>;
+}): Promise<{ id: string }> {
+  const { supabaseAdmin, table, templateItemKey, payload } = params;
+
+  const { data, error } = await supabaseAdmin.from(table).insert(payload).select("id").single();
+  if (data && !error) {
+    return { id: String(data.id) };
+  }
+
+  if (!error || error.code !== "23505") {
+    throw new Error(`Failed to create generated ${table} row for ${templateItemKey}: ${error?.message}`);
+  }
+
+  const { data: existing, error: selectError } = await supabaseAdmin
+    .from(table)
+    .select("id")
+    .eq("generated_template_item_key", templateItemKey)
+    .maybeSingle();
+
+  if (selectError || !existing) {
+    throw new Error(
+      `Duplicate generated ${table} row could not be resolved for ${templateItemKey}: ${selectError?.message}`
+    );
+  }
+
+  return { id: String(existing.id) };
+}
+
 async function ensureBusinessInABoxSetup(params: {
   purchaseId: string;
   userId: string;
@@ -1434,7 +1466,7 @@ async function markBusinessInABoxSetupProcessing(
   }
 }
 
-async function ensureGeneratedResource(params: {
+export async function ensureGeneratedResource(params: {
   setupId: string;
   purchaseId: string;
   userId: string;
@@ -1475,6 +1507,14 @@ async function ensureGeneratedResource(params: {
   let sourceRecordId: string | null = null;
   const titleEn = templateItem.title.en;
   const descriptionEn = templateItem.description?.en ?? null;
+  const contentSnapshot = {
+    title: titleEn,
+    description: descriptionEn,
+    resourceType,
+    templateKey: template.key,
+    templateVersion: template.version,
+  };
+  const contentHash = JSON.stringify(contentSnapshot);
 
   if (resourceType === "starter_task" || resourceType === "onboarding_step" || resourceType === "recurring_routine") {
     const taskDescription =
@@ -1482,24 +1522,31 @@ async function ensureGeneratedResource(params: {
         ? `${descriptionEn ?? ""}\n\nRecurring routine recommendation only. Configure recurrence manually where needed.`.trim()
         : descriptionEn;
 
-    const { data: task, error } = await supabaseAdmin
-      .from("tasks")
-      .insert({
+    const task = await insertGeneratedSourceRecord({
+      supabaseAdmin,
+      table: "tasks",
+      templateItemKey,
+      payload: {
         user_id: userId,
         business_id: businessId,
         title: titleEn,
         description: taskDescription,
         priority: "medium",
         status: "todo",
-      })
-      .select("id")
-      .single();
-
-    if (error || !task) {
-      throw new Error(`[business_in_a_box] Failed creating task ${templateItemKey}: ${error?.message}`);
-    }
+        generated_template_key: template.key,
+        generated_template_version: template.version,
+        generated_template_item_key: templateItemKey,
+        generated_purchase_id: purchaseId,
+        generated_setup_id: setupId,
+        generated_generation_source: "apply_business_in_a_box_template",
+        generated_content_snapshot: contentSnapshot,
+        generated_content_hash: contentHash,
+        generated_modified_by_user: false,
+        generated_user_modified_at: null,
+      },
+    });
     sourceTable = "tasks";
-    sourceRecordId = String(task.id);
+    sourceRecordId = task.id;
   } else if (resourceType === "client_pipeline_stage" || resourceType === "operating_checklist") {
     const categoryByKey: Record<string, string> = {
       setup: "operations",
@@ -1515,29 +1562,34 @@ async function ensureGeneratedResource(params: {
     const rawCategory = resourceType === "operating_checklist" ? templateItem.key : "customer";
     const category = categoryByKey[rawCategory] ?? "custom";
 
-    const { data: milestone, error } = await supabaseAdmin
-      .from("business_milestones")
-      .insert({
+    const milestone = await insertGeneratedSourceRecord({
+      supabaseAdmin,
+      table: "business_milestones",
+      templateItemKey,
+      payload: {
         user_id: userId,
         business_id: businessId,
         title:
           resourceType === "client_pipeline_stage"
-            ? `Pipeline stage: ${titleEn}`
+            ? `Client pipeline stage map: ${titleEn}`
             : `Operating checklist: ${titleEn}`,
         description: descriptionEn,
         category,
         status: "planned",
-      })
-      .select("id")
-      .single();
-
-    if (error || !milestone) {
-      throw new Error(
-        `[business_in_a_box] Failed creating milestone ${templateItemKey}: ${error?.message}`
-      );
-    }
+        generated_template_key: template.key,
+        generated_template_version: template.version,
+        generated_template_item_key: templateItemKey,
+        generated_purchase_id: purchaseId,
+        generated_setup_id: setupId,
+        generated_generation_source: "apply_business_in_a_box_template",
+        generated_content_snapshot: contentSnapshot,
+        generated_content_hash: contentHash,
+        generated_modified_by_user: false,
+        generated_user_modified_at: null,
+      },
+    });
     sourceTable = "business_milestones";
-    sourceRecordId = String(milestone.id);
+    sourceRecordId = milestone.id;
   } else if (resourceType === "kpi_recommendation") {
     const categoryByKpi: Record<string, string> = {
       monthly_revenue: "revenue",
@@ -1551,9 +1603,11 @@ async function ensureGeneratedResource(params: {
       documentation_completeness: "sale_readiness",
     };
 
-    const { data: goal, error } = await supabaseAdmin
-      .from("growth_goals")
-      .insert({
+    const goal = await insertGeneratedSourceRecord({
+      supabaseAdmin,
+      table: "growth_goals",
+      templateItemKey,
+      payload: {
         user_id: userId,
         business_id: businessId,
         title: `KPI recommendation: ${titleEn}`,
@@ -1561,19 +1615,26 @@ async function ensureGeneratedResource(params: {
         metric_name: titleEn,
         status: "active",
         notes: "Generated recommendation placeholder. Set your own targets and values.",
-      })
-      .select("id")
-      .single();
-
-    if (error || !goal) {
-      throw new Error(`[business_in_a_box] Failed creating KPI goal ${templateItemKey}: ${error?.message}`);
-    }
+        generated_template_key: template.key,
+        generated_template_version: template.version,
+        generated_template_item_key: templateItemKey,
+        generated_purchase_id: purchaseId,
+        generated_setup_id: setupId,
+        generated_generation_source: "apply_business_in_a_box_template",
+        generated_content_snapshot: contentSnapshot,
+        generated_content_hash: contentHash,
+        generated_modified_by_user: false,
+        generated_user_modified_at: null,
+      },
+    });
     sourceTable = "growth_goals";
-    sourceRecordId = String(goal.id);
+    sourceRecordId = goal.id;
   } else if (resourceType === "sop_placeholder" || resourceType === "document_checklist") {
-    const { data: evidence, error } = await supabaseAdmin
-      .from("sale_readiness_evidence")
-      .insert({
+    const evidence = await insertGeneratedSourceRecord({
+      supabaseAdmin,
+      table: "sale_readiness_evidence",
+      templateItemKey,
+      payload: {
         user_id: userId,
         business_id: businessId,
         category: resourceType === "sop_placeholder" ? "operations" : "documents",
@@ -1587,17 +1648,20 @@ async function ensureGeneratedResource(params: {
           resourceType === "sop_placeholder"
             ? "Generated SOP placeholder. Replace with your customized operating procedure."
             : "Generated document checklist placeholder. Upload and maintain your own real documents.",
-      })
-      .select("id")
-      .single();
-
-    if (error || !evidence) {
-      throw new Error(
-        `[business_in_a_box] Failed creating evidence placeholder ${templateItemKey}: ${error?.message}`
-      );
-    }
+        generated_template_key: template.key,
+        generated_template_version: template.version,
+        generated_template_item_key: templateItemKey,
+        generated_purchase_id: purchaseId,
+        generated_setup_id: setupId,
+        generated_generation_source: "apply_business_in_a_box_template",
+        generated_content_snapshot: contentSnapshot,
+        generated_content_hash: contentHash,
+        generated_modified_by_user: false,
+        generated_user_modified_at: null,
+      },
+    });
     sourceTable = "sale_readiness_evidence";
-    sourceRecordId = String(evidence.id);
+    sourceRecordId = evidence.id;
   } else {
     throw new Error(`[business_in_a_box] Unsupported resource type: ${resourceType}`);
   }
@@ -1637,7 +1701,7 @@ async function ensureGeneratedResource(params: {
   }
 }
 
-async function materializeBusinessInABoxTemplateResources(params: {
+export async function materializeBusinessInABoxTemplateResources(params: {
   setupId: string;
   purchaseId: string;
   userId: string;
@@ -1827,7 +1891,7 @@ async function reverseDealRoom90Refund(
   }
 }
 
-async function reverseBusinessInABoxRefund(
+export async function reverseBusinessInABoxRefund(
   purchaseId: string,
   now: string,
   supabaseAdmin: SupabaseClient
@@ -1893,7 +1957,12 @@ async function reverseBusinessInABoxRefund(
       if (modifiedByUser) {
         detachedCount += 1;
       } else {
-        await supabaseAdmin.from("tasks").delete().eq("id", sourceId);
+        const { error: taskDeleteError } = await supabaseAdmin.from("tasks").delete().eq("id", sourceId);
+        if (taskDeleteError) {
+          throw new Error(
+            `[one_time_product] Failed to delete generated task ${sourceId} on refund: ${taskDeleteError.message}`
+          );
+        }
       }
     } else if (sourceTable === "business_milestones") {
       const { data: row } = await supabaseAdmin
@@ -1913,11 +1982,17 @@ async function reverseBusinessInABoxRefund(
       if (modifiedByUser) {
         detachedCount += 1;
       } else {
-        await supabaseAdmin
+        const { error: milestoneUpdateError } = await supabaseAdmin
           .from("business_milestones")
           .update({ deleted_at: now, updated_at: now })
           .eq("id", sourceId)
           .is("deleted_at", null);
+
+        if (milestoneUpdateError) {
+          throw new Error(
+            `[one_time_product] Failed to delete generated milestone ${sourceId} on refund: ${milestoneUpdateError.message}`
+          );
+        }
       }
     } else if (sourceTable === "growth_goals") {
       const { data: row } = await supabaseAdmin
@@ -1937,7 +2012,7 @@ async function reverseBusinessInABoxRefund(
       if (modifiedByUser) {
         detachedCount += 1;
       } else {
-        await supabaseAdmin
+        const { error: goalUpdateError } = await supabaseAdmin
           .from("growth_goals")
           .update({
             status: "cancelled",
@@ -1946,6 +2021,12 @@ async function reverseBusinessInABoxRefund(
           })
           .eq("id", sourceId)
           .eq("status", "active");
+
+        if (goalUpdateError) {
+          throw new Error(
+            `[one_time_product] Failed to cancel generated goal ${sourceId} on refund: ${goalUpdateError.message}`
+          );
+        }
       }
     } else if (sourceTable === "sale_readiness_evidence") {
       const { data: row } = await supabaseAdmin
@@ -1965,11 +2046,17 @@ async function reverseBusinessInABoxRefund(
       if (modifiedByUser) {
         detachedCount += 1;
       } else {
-        await supabaseAdmin
+        const { error: evidenceUpdateError } = await supabaseAdmin
           .from("sale_readiness_evidence")
           .update({ deleted_at: now, updated_at: now })
           .eq("id", sourceId)
           .is("deleted_at", null);
+
+        if (evidenceUpdateError) {
+          throw new Error(
+            `[one_time_product] Failed to delete generated evidence ${sourceId} on refund: ${evidenceUpdateError.message}`
+          );
+        }
       }
     }
 

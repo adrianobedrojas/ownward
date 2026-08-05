@@ -6,6 +6,7 @@ import {
   isProductConfigured,
   type ProductDefinition,
 } from "@/lib/commerce/products";
+import { canPurchaseBusinessConfiguration } from "@/lib/business-access";
 import {
   getBusinessInABoxTemplate,
   type BusinessInABoxTemplateDefinition,
@@ -199,20 +200,8 @@ async function validateTargetEligibility(
       return { ok: false, status: 404, error: "Target business not found" };
     }
 
-    const isOwner = business.owner_id === userId;
-    let hasMembership = false;
-    if (!isOwner) {
-      const { data: membership } = await supabase
-        .from("business_members")
-        .select("id")
-        .eq("business_id", business.id)
-        .eq("user_id", userId)
-        .eq("status", "active")
-        .maybeSingle();
-      hasMembership = Boolean(membership);
-    }
-
-    if (!isOwner && !hasMembership) {
+    const canPurchase = await canPurchaseBusinessConfiguration(userId, business.id);
+    if (!canPurchase) {
       return { ok: false, status: 403, error: "You do not have access to this business" };
     }
 
@@ -225,7 +214,7 @@ async function validateTargetEligibility(
         targetType: "business",
         businessId: business.id,
         displayName: business.name,
-        accessRole: isOwner ? "owner" : "member",
+        accessRole: business.owner_id === userId ? "owner" : "manager",
         profileCompletion: business.profile_completion,
       },
     };

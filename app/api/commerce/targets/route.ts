@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getProduct } from "@/lib/commerce/products";
 import { getUserBillingState } from "@/lib/billing";
+import { canPurchaseBusinessConfiguration } from "@/lib/business-access";
 import { listPublicBusinessInABoxTemplateSummaries } from "@/lib/commerce/business-in-a-box-templates";
 
 type TargetOption = {
@@ -156,6 +157,13 @@ export async function GET(req: Request) {
 
       const businessIds = Array.from(businessById.keys());
       const activeStatuses = ["pending", "processing", "completed"];
+      const purchasePermissionPairs = await Promise.all(
+        businessIds.map(async (businessId) => [
+          businessId,
+          await canPurchaseBusinessConfiguration(user.id, businessId),
+        ] as const)
+      );
+      const purchasePermissionByBusiness = new Map<string, boolean>(purchasePermissionPairs);
       const [setupsRes, openPurchasesRes] = await Promise.all([
         businessIds.length
           ? supabase
@@ -195,16 +203,23 @@ export async function GET(req: Request) {
         const profilePct = typeof business.profile_completion === "number" ? business.profile_completion : 0;
         const hasOpenSetup = setupStateByBusiness.has(id);
         const hasOpenPurchase = openPurchaseByBusiness.has(id);
+        const hasPurchasePermission = purchasePermissionByBusiness.get(id) ?? false;
+        const accessRole = business.owner_id === user.id ? "owner" : "manager";
+        const eligibleForPurchase = hasPurchasePermission && !hasOpenSetup && !hasOpenPurchase;
         const ineligible = hasOpenSetup || hasOpenPurchase;
         const setupStatus = setupStateByBusiness.get(id) ?? (hasOpenPurchase ? "pending" : "eligible");
 
         const description =
           locale === "es"
-            ? `Perfil ${profilePct}% · Acceso ${business.accessRole === "owner" ? "propietario" : "colaborador"} · Setup ${setupStatus}`
-            : `Profile ${profilePct}% · Access ${business.accessRole} · Setup ${setupStatus}`;
+            ? `Perfil ${profilePct}% · Acceso ${accessRole === "owner" ? "propietario" : "administrador"} · Setup ${setupStatus}`
+            : `Profile ${profilePct}% · Access ${accessRole} · Setup ${setupStatus}`;
 
         const reason =
-          ineligible
+          !hasPurchasePermission
+            ? locale === "es"
+              ? "No elegible: requiere permiso de propietario o administrador"
+              : "Not eligible: owner or administrator permission required"
+            : ineligible
             ? locale === "es"
               ? "No elegible: ya existe un setup activo o compra en proceso"
               : "Not eligible: active setup or pending purchase already exists"
@@ -214,10 +229,10 @@ export async function GET(req: Request) {
           id,
           label: business.name,
           description,
-          eligible: !ineligible,
+          eligible: eligibleForPurchase,
           reason,
           setupStatus,
-          accessRole: business.accessRole,
+          accessRole,
         };
       });
 

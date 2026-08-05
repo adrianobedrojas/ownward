@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
 import { getBusinessAccess } from "@/lib/business-access";
 import { getBusinessInABoxTemplate } from "@/lib/commerce/business-in-a-box-templates";
+import { getBusinessInABoxSetupStatusLabel } from "@/lib/commerce/business-in-a-box-status";
 
 export async function generateMetadata({
   params,
@@ -159,7 +160,7 @@ export default async function BusinessInABoxSetupPage({
           </div>
           <div>
             <dt className="text-slate-500">{t.status}</dt>
-            <dd className="text-slate-200">{setup.status}</dd>
+            <dd className="text-slate-200">{getBusinessInABoxSetupStatusLabel(isSpanish ? "es" : "en", setup.status)}</dd>
           </div>
           <div>
             <dt className="text-slate-500">{t.completedAt}</dt>

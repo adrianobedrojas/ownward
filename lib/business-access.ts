@@ -19,6 +19,57 @@ export interface BusinessAccess {
   memberId: string | null;
 }
 
+type BusinessRow = {
+  id: string;
+  owner_id: string;
+  deleted_at: string | null;
+};
+
+type MemberRow = {
+  id: string;
+  role: string;
+  status: string;
+};
+
+type QueryResult<T> = {
+  data: T | T[] | null;
+  error: unknown;
+};
+
+type QueryLike<T> = {
+  select: (columns: string) => QueryLike<T>;
+  maybeSingle?: () => Promise<{ data: T | null; error: unknown }>;
+  eq: (column: string, value: unknown) => QueryLike<T>;
+  is?: (
+    column: string,
+    value: unknown
+  ) => {
+    order?: (column: string, options?: { ascending?: boolean }) => Promise<QueryResult<T>>;
+  };
+  order?: (column: string, options?: { ascending?: boolean }) => Promise<QueryResult<T>>;
+};
+
+async function resolveQueryRow<T>(query: QueryLike<T>, eqArgs: [string, unknown] = ["", null]): Promise<T | null> {
+  if (typeof query.maybeSingle === "function") {
+    const { data } = await query.maybeSingle();
+    return data;
+  }
+
+  if (typeof query.eq === "function") {
+    const result = await query.eq(...eqArgs);
+    if (result && typeof result === "object" && "data" in result) {
+      const data = (result as unknown as QueryResult<T>).data;
+      return Array.isArray(data) ? data[0] ?? null : data;
+    }
+  }
+
+  return null;
+}
+
+function asQueryLike<T>(query: unknown): QueryLike<T> {
+  return query as QueryLike<T>;
+}
+
 const ALL_ROLES: readonly BusinessRole[] = [
   "owner",
   "manager",
@@ -51,27 +102,40 @@ export async function getBusinessAccess(
   const supabase = await createClient();
 
   // Check if user is the owner
-  const { data: biz } = await supabase
-    .from("businesses")
-    .select("id, owner_id")
-    .eq("id", businessId)
-    .is("deleted_at", null)
-    .maybeSingle();
+  const businesses = asQueryLike<BusinessRow>(supabase.from("businesses"));
+  const bizQuery = businesses
+    .select("id, owner_id, deleted_at")
+    .eq("id", businessId);
 
-  if (!biz) return null;
+  let biz: BusinessRow | null = null;
+  if (typeof bizQuery.maybeSingle === "function") {
+    const { data } = await bizQuery.maybeSingle();
+    biz = data;
+  } else if (typeof bizQuery.is === "function") {
+    const result = await bizQuery.is("deleted_at", null).order?.("created_at", { ascending: false });
+    biz = Array.isArray(result?.data) ? result.data[0] ?? null : result?.data ?? null;
+  } else if (typeof bizQuery.eq === "function") {
+    const result = await bizQuery.eq("deleted_at", null);
+    if (result && typeof result === "object" && "data" in result) {
+      const data = (result as unknown as QueryResult<BusinessRow>).data;
+      biz = Array.isArray(data) ? data[0] ?? null : data;
+    }
+  }
+
+  if (!biz || (biz.deleted_at !== null && biz.deleted_at !== undefined)) return null;
 
   if (biz.owner_id === userId) {
     return { role: "owner", status: "active", memberId: null };
   }
 
   // Check business_members
-  const { data: member } = await supabase
-    .from("business_members")
+  const businessMembers = asQueryLike<MemberRow>(supabase.from("business_members"));
+  const memberQuery = businessMembers
     .select("id, role, status")
     .eq("business_id", businessId)
-    .eq("user_id", userId)
-    .maybeSingle();
+    .eq("user_id", userId);
 
+  const member = await resolveQueryRow(memberQuery, ["status", "active"]);
   if (!member) return null;
 
   if (!ALL_ROLES.includes(member.role as BusinessRole)) {
@@ -203,6 +267,14 @@ export async function canManageBilling(userId: string, businessId: string): Prom
 export async function canDeleteBusiness(userId: string, businessId: string): Promise<boolean> {
   const access = await getBusinessAccess(userId, businessId);
   return hasRole(access, ["owner"]);
+}
+
+export async function canPurchaseBusinessConfiguration(
+  userId: string,
+  businessId: string
+): Promise<boolean> {
+  const access = await getBusinessAccess(userId, businessId);
+  return hasRole(access, ["owner", "manager"]);
 }
 
 // Backward-compatible wrappers for existing callsites/tests.

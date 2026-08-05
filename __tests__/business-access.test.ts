@@ -250,6 +250,36 @@ describe('canDeleteBusiness', () => {
   });
 });
 
+// ─── canPurchaseBusinessConfiguration ────────────────────────────────────────
+
+describe('canPurchaseBusinessConfiguration', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('owner can purchase business configuration', async () => {
+    setupMocks(OWNER_ID, OWNER_ID, null);
+    const { canPurchaseBusinessConfiguration } = await import('@/lib/business-access');
+    expect(await canPurchaseBusinessConfiguration(OWNER_ID, BIZ_ID)).toBe(true);
+  });
+
+  it('manager can purchase business configuration', async () => {
+    setupMocks(MANAGER_ID, OWNER_ID, { role: 'manager', status: 'active' });
+    const { canPurchaseBusinessConfiguration } = await import('@/lib/business-access');
+    expect(await canPurchaseBusinessConfiguration(MANAGER_ID, BIZ_ID)).toBe(true);
+  });
+
+  it('active viewer cannot purchase business configuration', async () => {
+    setupMocks(VIEWER_ID, OWNER_ID, { role: 'viewer', status: 'active' });
+    const { canPurchaseBusinessConfiguration } = await import('@/lib/business-access');
+    expect(await canPurchaseBusinessConfiguration(VIEWER_ID, BIZ_ID)).toBe(false);
+  });
+
+  it('suspended manager cannot purchase business configuration', async () => {
+    setupMocks(SUSPENDED_ID, OWNER_ID, { role: 'manager', status: 'suspended' });
+    const { canPurchaseBusinessConfiguration } = await import('@/lib/business-access');
+    expect(await canPurchaseBusinessConfiguration(SUSPENDED_ID, BIZ_ID)).toBe(false);
+  });
+});
+
 // ─── canAccessFinance ─────────────────────────────────────────────────────────
 
 describe('canAccessFinance', () => {
