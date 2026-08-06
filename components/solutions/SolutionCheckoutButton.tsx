@@ -3,13 +3,66 @@
 import { useEffect, useMemo, useState } from "react";
 import { trackGoogleAnalyticsConversion } from "@/lib/google-analytics";
 
-type TargetOption = {
+export type TargetOption = {
   id: string;
   label: string;
   description?: string;
   eligible?: boolean;
   reason?: string;
 };
+
+type ShouldFetchTargetOptionsInput = {
+  isCheckoutActive: boolean;
+  requiredTargetType: Props["requiredTargetType"];
+  contextTargetId?: string;
+  serverTargetOptions?: TargetOption[];
+};
+
+function hasContextTargetId(targetId?: string): boolean {
+  return Boolean(targetId?.trim());
+}
+
+function isOptionEligible(option: TargetOption): boolean {
+  return option.eligible !== false;
+}
+
+export function resolveCheckoutTargetId(
+  contextTargetId?: string,
+  selectedTargetId?: string,
+): string | undefined {
+  const contextual = contextTargetId?.trim();
+  if (contextual) {
+    return contextual;
+  }
+
+  const selected = selectedTargetId?.trim();
+  if (selected) {
+    return selected;
+  }
+
+  return undefined;
+}
+
+export function shouldFetchTargetOptions({
+  isCheckoutActive,
+  requiredTargetType,
+  contextTargetId,
+  serverTargetOptions,
+}: ShouldFetchTargetOptionsInput): boolean {
+  if (!isCheckoutActive || requiredTargetType === "none") {
+    return false;
+  }
+
+  if (hasContextTargetId(contextTargetId)) {
+    return false;
+  }
+
+  if (serverTargetOptions !== undefined) {
+    return false;
+  }
+
+  return true;
+}
 
 type Props = {
   productKey: string;
@@ -65,12 +118,17 @@ export default function SolutionCheckoutButton({
   onStartCheckout,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  const hasContextTarget = hasContextTargetId(contextTargetId);
   // When a contextTargetId is provided server-side, we use it automatically.
   // Otherwise the user selects from a dropdown.
   const [selectedTargetId, setSelectedTargetId] = useState(contextTargetId ?? "");
   const [targetLoading, setTargetLoading] = useState(
-    // Only use client-side loading when no server-side options were passed and target is required
-    !serverTargetOptions && ctaBehavior === "checkout" && status === "active" && requiredTargetType !== "none"
+    shouldFetchTargetOptions({
+      isCheckoutActive: ctaBehavior === "checkout" && status === "active",
+      requiredTargetType,
+      contextTargetId,
+      serverTargetOptions,
+    })
   );
   const [targetRoute, setTargetRoute] = useState<string | null>(null);
   const [targetIncludedMessage, setTargetIncludedMessage] = useState<string | null>(null);
@@ -142,11 +200,17 @@ export default function SolutionCheckoutButton({
   }, [locale]);
 
   const isCheckoutActive = ctaBehavior === "checkout" && status === "active";
+  const checkoutTargetId = resolveCheckoutTargetId(contextTargetId, selectedTargetId);
 
   useEffect(() => {
-    // Skip client-side fetch when server already provided options
-    if (serverTargetOptions) return;
-    if (!isCheckoutActive || requiredTargetType === "none") {
+    if (
+      !shouldFetchTargetOptions({
+        isCheckoutActive,
+        requiredTargetType,
+        contextTargetId,
+        serverTargetOptions,
+      })
+    ) {
       return;
     }
 
@@ -193,7 +257,7 @@ export default function SolutionCheckoutButton({
     return () => {
       active = false;
     };
-  }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive, serverTargetOptions]);
+  }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive, contextTargetId, serverTargetOptions]);
 
   if (!isCheckoutActive) {
     const text =
@@ -225,7 +289,7 @@ export default function SolutionCheckoutButton({
         body: JSON.stringify({
           productKey,
           locale,
-          targetId: selectedTargetId.trim() || undefined,
+          targetId: checkoutTargetId,
           templateKey: templateKey.trim() || undefined,
         }),
       });
@@ -269,25 +333,25 @@ export default function SolutionCheckoutButton({
   // Derived: is target selection blocked because server has no eligible options?
   const isTargetBlocked =
     requiredTargetType !== "none" &&
-    !contextTargetId &&
+    !hasContextTarget &&
     serverTargetOptions !== undefined &&
-    serverTargetOptions.filter((o) => o.eligible !== false).length === 0;
+    serverTargetOptions.filter(isOptionEligible).length === 0;
 
   const isCheckoutDisabled =
     loading ||
     targetLoading ||
     isTargetBlocked ||
-    (requiredTargetType !== "none" && !contextTargetId && !selectedTargetId) ||
+    (requiredTargetType !== "none" && !checkoutTargetId) ||
     (productKey === "business_in_a_box" && !templateKey);
 
   return (
     <div className="space-y-2">
-      {requiredTargetType !== "none" && !contextTargetId ? (
+      {requiredTargetType !== "none" && !hasContextTarget ? (
         <label className="block text-xs text-slate-400" aria-label={targetSelectLabel ?? labels.targetLabel}>
           {productKey === "business_in_a_box" ? labels.setupBusinessLabel : (targetSelectLabel ?? labels.targetLabel)}
           {targetLoading ? (
             <p className="mt-1 text-xs text-slate-500">{labels.targetLoading}</p>
-          ) : serverTargetOptions !== undefined && serverTargetOptions.filter((o) => o.eligible !== false).length === 0 ? (
+          ) : serverTargetOptions !== undefined && serverTargetOptions.filter(isOptionEligible).length === 0 ? (
             // Blocked state: server provided options but none are eligible
             <div className="mt-2 rounded-md border border-amber-700/40 bg-amber-950/20 p-3 text-xs text-amber-200">
               <p>{noEligibleTargetMessage ?? labels.targetUnavailable}</p>
@@ -309,9 +373,9 @@ export default function SolutionCheckoutButton({
               >
                 <option value="">{targetSelectPlaceholder ?? labels.targetPlaceholder}</option>
                 {targetOptions.map((option) => (
-                  <option key={option.id} value={option.eligible !== false ? option.id : ""} disabled={option.eligible === false}>
+                  <option key={option.id} value={isOptionEligible(option) ? option.id : ""} disabled={option.eligible === false}>
                     {option.label}
-                    {option.eligible !== false ? "" : ` — ${option.reason ?? labels.targetUnavailable}`}
+                    {isOptionEligible(option) ? "" : ` — ${option.reason ?? labels.targetUnavailable}`}
                   </option>
                 ))}
               </select>
