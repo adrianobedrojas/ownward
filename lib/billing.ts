@@ -41,33 +41,72 @@ export function isObsoleteStripeCustomer(
 
 // ─── Featured-listing one-time product ───────────────────────────────────────
 
+export type ListingPromotionProductKey =
+  | "quick_boost"
+  | "featured_listing";
+
+const LISTING_PROMOTION_SETTINGS = {
+  quick_boost: {
+    priceEnvironmentVariable: "STRIPE_PRICE_QUICK_BOOST",
+    durationEnvironmentVariable: "QUICK_BOOST_DURATION_DAYS",
+    defaultDurationDays: 14,
+  },
+  featured_listing: {
+    priceEnvironmentVariable: "STRIPE_PRICE_FEATURED_LISTING",
+    durationEnvironmentVariable: "FEATURED_LISTING_DURATION_DAYS",
+    defaultDurationDays: 30,
+  },
+} as const;
+
 /**
- * Server-only helper: returns the Stripe Price ID and duration for featured
- * listings.  Both values come exclusively from environment variables so the
- * client can never supply or override them.
- *
- * @throws if either variable is missing or the duration is not a positive integer.
+ * Returns server-controlled Stripe and duration configuration for a listing
+ * promotion. The client cannot provide or override these values.
+ */
+export function getListingPromotionConfig(
+  productKey: ListingPromotionProductKey
+): {
+  priceId: string;
+  durationDays: number;
+} {
+  const settings = LISTING_PROMOTION_SETTINGS[productKey];
+
+  const priceId = process.env[settings.priceEnvironmentVariable];
+
+  if (!priceId) {
+    throw new Error(
+      `${settings.priceEnvironmentVariable} is not configured on the server.`
+    );
+  }
+
+  const configuredDuration =
+    process.env[settings.durationEnvironmentVariable];
+
+  const durationText =
+    configuredDuration === undefined
+      ? String(settings.defaultDurationDays)
+      : configuredDuration.trim();
+
+  if (!/^[1-9]\d*$/.test(durationText)) {
+    throw new Error(
+      `${settings.durationEnvironmentVariable} must be a positive integer, got: "${configuredDuration ?? ""}".`
+    );
+  }
+
+  return {
+    priceId,
+    durationDays: Number(durationText),
+  };
+}
+
+/**
+ * Preserves compatibility with code that still requests Featured Listing
+ * configuration directly.
  */
 export function getFeaturedListingConfig(): {
   priceId: string;
   durationDays: number;
 } {
-  const priceId = process.env.STRIPE_PRICE_FEATURED_LISTING;
-  if (!priceId) {
-    throw new Error(
-      "STRIPE_PRICE_FEATURED_LISTING is not configured on the server."
-    );
-  }
-
-  const rawDuration = process.env.FEATURED_LISTING_DURATION_DAYS ?? "30";
-  const durationDays = parseInt(rawDuration, 10);
-  if (!Number.isInteger(durationDays) || durationDays <= 0) {
-    throw new Error(
-      `FEATURED_LISTING_DURATION_DAYS must be a positive integer, got: "${rawDuration}".`
-    );
-  }
-
-  return { priceId, durationDays };
+  return getListingPromotionConfig("featured_listing");
 }
 
 // ─── Plan types ───────────────────────────────────────────────────────────────
