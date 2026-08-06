@@ -15,6 +15,47 @@ type TargetOption = {
   accessRole?: string;
 };
 
+type BusinessMembershipRow = {
+  business_id: string;
+  role: string;
+  status: string;
+};
+
+type BusinessRow = {
+  id: string;
+  owner_id: string;
+  name: string | null;
+  profile_completion: number | null;
+  deleted_at: string | null;
+};
+
+function normalizeBusinessRole(role: string | undefined): "owner" | "manager" | "finance" | "operations" | "viewer" {
+  if (role === "manager" || role === "finance" || role === "operations" || role === "viewer") {
+    return role;
+  }
+  return "owner";
+}
+
+function buildBusinessOptionDescription(locale: "en" | "es", profileCompletion: number | null, role: string): string {
+  const pct = typeof profileCompletion === "number" ? profileCompletion : 0;
+  const normalizedRole = normalizeBusinessRole(role);
+  if (locale === "es") {
+    const roleText =
+      normalizedRole === "owner"
+        ? "propietario"
+        : normalizedRole === "manager"
+          ? "administrador"
+          : normalizedRole === "finance"
+            ? "finanzas"
+            : normalizedRole === "operations"
+              ? "operaciones"
+              : "visor";
+    return `Perfil ${pct}% · Acceso ${roleText}`;
+  }
+
+  return `Profile ${pct}% · Access ${normalizedRole}`;
+}
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -258,6 +299,103 @@ export async function GET(req: Request) {
               : "Not eligible: archived business"
             : undefined,
       }));
+
+      return NextResponse.json({ options });
+    }
+
+    if (product.requiredTargetType === "business") {
+      const [{ data: ownedBusinesses, error: ownedBusinessesError }, { data: memberships, error: membershipsError }] = await Promise.all([
+        supabase
+          .from("businesses")
+          .select("id, owner_id, name, profile_completion, deleted_at")
+          .eq("owner_id", user.id)
+          .is("deleted_at", null)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("business_members")
+          .select("business_id, role, status")
+          .eq("user_id", user.id)
+          .eq("status", "active"),
+      ]);
+
+      if (ownedBusinessesError || membershipsError) {
+        console.error("Commerce targets business lookup failed:", {
+          ownedBusinessesError: ownedBusinessesError?.message,
+          membershipsError: membershipsError?.message,
+        });
+        return NextResponse.json({ error: "Unable to load target options" }, { status: 500 });
+      }
+
+      const membershipRows = (memberships ?? []) as BusinessMembershipRow[];
+      const memberBusinessIds = Array.from(
+        new Set(membershipRows.map((row) => String(row.business_id)).filter(Boolean))
+      );
+
+      const { data: memberBusinesses, error: memberBusinessesError } = memberBusinessIds.length
+        ? await supabase
+            .from("businesses")
+            .select("id, owner_id, name, profile_completion, deleted_at")
+            .in("id", memberBusinessIds)
+            .is("deleted_at", null)
+        : {
+            data: [] as BusinessRow[],
+            error: null,
+          };
+
+      if (memberBusinessesError) {
+        console.error("Commerce targets member business lookup failed:", {
+          memberBusinessesError: memberBusinessesError.message,
+        });
+        return NextResponse.json({ error: "Unable to load target options" }, { status: 500 });
+      }
+
+      const membershipRoleByBusinessId = new Map<string, string>();
+      for (const row of membershipRows) {
+        const businessId = String(row.business_id);
+        if (!businessId) continue;
+        membershipRoleByBusinessId.set(businessId, String(row.role ?? "viewer"));
+      }
+
+      const businessById = new Map<string, BusinessRow>();
+      for (const business of (ownedBusinesses ?? []) as BusinessRow[]) {
+        businessById.set(String(business.id), business);
+      }
+      for (const business of (memberBusinesses ?? []) as BusinessRow[]) {
+        const id = String(business.id);
+        if (!businessById.has(id)) {
+          businessById.set(id, business);
+        }
+      }
+
+      const businessIds = Array.from(businessById.keys());
+      const purchasePermissionPairs = await Promise.all(
+        businessIds.map(async (businessId) => [
+          businessId,
+          await canPurchaseBusinessConfiguration(user.id, businessId),
+        ] as const)
+      );
+      const purchasePermissionByBusiness = new Map<string, boolean>(purchasePermissionPairs);
+
+      const options: TargetOption[] = businessIds.map((businessId) => {
+        const business = businessById.get(businessId)!;
+        const role = business.owner_id === user.id
+          ? "owner"
+          : (membershipRoleByBusinessId.get(businessId) ?? "viewer");
+        const eligible = purchasePermissionByBusiness.get(businessId) ?? false;
+        const reason = eligible
+          ? undefined
+          : locale === "es"
+            ? "No elegible: requiere permiso de propietario o administrador"
+            : "Not eligible: owner or manager permission required";
+
+        return {
+          id: businessId,
+          label: String(business.name ?? (locale === "es" ? "Negocio" : "Business")),
+          description: buildBusinessOptionDescription(locale, business.profile_completion, role),
+          eligible,
+          reason,
+        };
+      });
 
       return NextResponse.json({ options });
     }

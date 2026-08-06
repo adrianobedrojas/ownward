@@ -37,7 +37,18 @@ async function renderComponent(element: React.ReactElement): Promise<ReactTestRe
     await Promise.resolve();
   });
 
-  return renderer as ReactTestRenderer;
+  if (!renderer) {
+    throw new Error("Renderer failed to initialize");
+  }
+
+  return renderer;
+}
+
+async function flushMicrotasks() {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
 }
 
 describe("SolutionCheckoutButton", () => {
@@ -252,5 +263,70 @@ describe("SolutionCheckoutButton", () => {
 
     const buttonAfter = renderer.root.findByType("button");
     expect(buttonAfter.props.disabled).toBe(false);
+  });
+
+  it("fetches generic business targets, enables checkout after selection, and posts selected targetId", async () => {
+    fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+      if (String(input).startsWith("/api/commerce/targets")) {
+        return createJsonResponse({
+          options: [
+            {
+              id: "77777777-7777-4777-8777-777777777777",
+              label: "Northwind Services",
+              eligible: true,
+            },
+          ],
+        });
+      }
+
+      return createJsonResponse({});
+    });
+
+    const renderer = await renderComponent(
+      <SolutionCheckoutButton
+        productKey="buyer_lens_memo"
+        locale="en"
+        ctaBehavior="checkout"
+        status="active"
+        requiredTargetType="business"
+      />,
+    );
+
+    await flushMicrotasks();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("/api/commerce/targets");
+
+    const options = renderer.root.findAllByType("option");
+    const hasNorthwindOption = options.some((opt) => {
+      const children = opt.props.children;
+      if (typeof children === "string") {
+        return children.includes("Northwind Services");
+      }
+      if (Array.isArray(children)) {
+        return children.join("").includes("Northwind Services");
+      }
+      return false;
+    });
+    expect(hasNorthwindOption).toBe(true);
+
+    const buttonBefore = renderer.root.findByType("button");
+    expect(buttonBefore.props.disabled).toBe(true);
+
+    const selects = renderer.root.findAllByType("select");
+    await act(async () => {
+      selects[0].props.onChange({ target: { value: "77777777-7777-4777-8777-777777777777" } });
+    });
+
+    const buttonAfter = renderer.root.findByType("button");
+    expect(buttonAfter.props.disabled).toBe(false);
+
+    await act(async () => {
+      await buttonAfter.props.onClick();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const checkoutBody = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body));
+    expect(checkoutBody.targetId).toBe("77777777-7777-4777-8777-777777777777");
   });
 });
