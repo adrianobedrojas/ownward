@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import React, { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { BillingPlan, BillingState } from '@/lib/billing';
@@ -70,7 +71,7 @@ export default function PricingCards({
       }
     : {
         recurring:
-          'Billed on the selected interval at checkout, auto-renews until canceled, and no prorated refunds unless required by law or expressly stated.',
+          'Billed on the selected interval at checkout. Auto-renews until canceled; no prorated refunds unless required by law or expressly stated.',
         cancel: 'Manage or cancel in Stripe Customer Portal. Cancellation normally takes effect at period end.',
         legalLead: 'By continuing you agree to the',
         terms: 'Terms',

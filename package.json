@@ -20,6 +20,9 @@
     "react-dom": "19.2.4",
     "stripe": "^22.3.2"
   },
+  "overrides": {
+    "@swc/helpers": "0.5.23"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^30.0.0",
