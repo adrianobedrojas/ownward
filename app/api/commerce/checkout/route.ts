@@ -209,7 +209,7 @@ async function validateTargetEligibility(
         return {
           ok: false,
           status: 409,
-          error: "This listing is already actively featured",
+          error: "This listing already has an active promotion",
         };
       }
     }
