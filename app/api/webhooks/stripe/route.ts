@@ -265,6 +265,7 @@ async function handleFeaturedListingCheckout(
     supabaseAdmin,
     userId,
     listingId
+    "featured_listing"
   );
 }
 
@@ -359,13 +360,103 @@ async function activateFeaturedListingPromotion(
     );
 
   if (promotionError) {
+function isListingPromotionProductKey(
+  value: string
+): value is ListingPromotionProductKey {
+  return value === "quick_boost" || value === "featured_listing";
+}
+
+async function activateListingPromotion(
+  session: Stripe.Checkout.Session,
+  supabaseAdmin: SupabaseClient,
+  userId: string,
+  listingId: string,
+  productKey: ListingPromotionProductKey
+): Promise<string> {
+  // Stripe can retry webhook delivery. If this checkout session was already
+  // fulfilled, reuse the original expiration instead of extending it again.
+  const { data: existing } = await supabaseAdmin
+    .from("listing_promotions")
+    .select("id, status, ends_at")
+    .eq("stripe_checkout_session_id", session.id)
+    .maybeSingle();
+
+  if (existing?.status === "active") {
+    if (!existing.ends_at) {
+      throw new Error(
+        `[${productKey}] Existing promotion ${existing.id} is missing ends_at`
+      );
+    }
+
+    return String(existing.ends_at);
+  }
+
+  // Verify that the listing still exists and still belongs to the purchaser.
+  const { data: listing, error: listingError } = await supabaseAdmin
+    .from("business_listings")
+    .select("id, user_id, status, is_public")
+    .eq("id", listingId)
+    .maybeSingle();
+
+  if (listingError || !listing) {
     throw new Error(
-      `[featured_listing] Failed to upsert promotion for session ${session.id}:`,
-      { cause: promotionError }
+      `[${productKey}] Listing ${listingId} not found for session ${session.id}`
     );
   }
 
-  // Update the listing's featured window
+  if (listing.user_id !== userId) {
+    throw new Error(
+      `[${productKey}] Listing ${listingId} does not belong to user ${userId}`
+    );
+  }
+
+  // The listing must still be public and published when Stripe fulfillment runs.
+  if (listing.status !== "published" || !listing.is_public) {
+    throw new Error(
+      `[${productKey}] Listing ${listingId} is no longer public/published`
+    );
+  }
+
+  // This selects the correct server-side duration and Stripe Price:
+  //
+  // quick_boost      -> 14 days by default
+  // featured_listing -> 30 days by default
+  const { durationDays, priceId: stripePriceId } =
+    getListingPromotionConfig(productKey);
+
+  const startsAt = new Date();
+  const endsAt = new Date(startsAt);
+
+  endsAt.setUTCDate(endsAt.getUTCDate() + durationDays);
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  const { error: promotionError } = await supabaseAdmin
+    .from("listing_promotions")
+    .upsert(
+      {
+        listing_id: listingId,
+        user_id: userId,
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id: paymentIntentId,
+        stripe_price_id: stripePriceId,
+        status: "active",
+        starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "stripe_checkout_session_id" }
+    );
+
+  if (promotionError) {
+    throw new Error(
+      `[${productKey}] Failed to upsert promotion for session ${session.id}: ${promotionError.message}`
+    );
+  }
+
   const { error: listingUpdateError } = await supabaseAdmin
     .from("business_listings")
     .update({
@@ -377,10 +468,11 @@ async function activateFeaturedListingPromotion(
 
   if (listingUpdateError) {
     throw new Error(
-      `[featured_listing] Failed to update listing ${listingId}:`,
-      { cause: listingUpdateError }
+      `[${productKey}] Failed to update listing ${listingId}: ${listingUpdateError.message}`
     );
   }
+
+  return endsAt.toISOString();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
