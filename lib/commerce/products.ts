@@ -183,7 +183,7 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     goals: ["increase_visibility"],
     billingModel: "one_time",
     displayPrice: 5,
-    status: "planned",
+    status: "active",
     billingContextEn: "one-time per listing",
     billingContextEs: "pago único por listado",
     deliverablesEn: [
@@ -197,13 +197,13 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
       "Vencimiento automático después de 14 días",
     ],
     detailRoute: "/solutions/quick-boost",
-    ctaBehavior: "coming_soon",
+    ctaBehavior: "checkout",
     requiresAuth: true,
     requiredTargetType: "listing",
     stripePriceEnvVar: "STRIPE_PRICE_QUICK_BOOST",
     purchaseType: "one_time",
     entitlementType: "listing_promotion",
-    fulfillmentBehavior: "not_implemented",
+    fulfillmentBehavior: "apply_listing_promotion",
     cancelPath: "/sell",
     disclaimersEn: [
       "The listing must remain public and published.",
@@ -213,7 +213,7 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
       "El listado debe permanecer público y publicado.",
       "La promoción no garantiza visitas, consultas, ofertas ni ventas.",
     ],
-    active: false,
+    active: true,
     isPublic: true,
   },
   featured_listing: {
