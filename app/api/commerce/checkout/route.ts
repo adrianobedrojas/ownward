@@ -351,6 +351,35 @@ async function guardAgainstDuplicatePurchase(
     return { ok: true };
   }
 
+  // Listing promotions are temporary and can be purchased again after
+  // the previous promotion expires. Active promotion eligibility is
+  // validated separately using business_listings.featured_until.
+  if (product.fulfillmentBehavior === "apply_listing_promotion") {
+    const { data: pendingPromotionPurchase } = await supabase
+      .from("purchases")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("product_key", product.key)
+      .eq("target_type", targetType)
+      .eq("target_id", targetId)
+      .in("payment_status", ["pending", "paid"])
+      .eq("fulfillment_status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (pendingPromotionPurchase) {
+      return {
+        ok: false,
+        status: 409,
+        error: "A purchase for this promotion is already pending",
+        route: "/account/products",
+      };
+    }
+
+    return { ok: true };
+  }
+  
   const { data: openPurchase } = await supabase
     .from("purchases")
     .select(
