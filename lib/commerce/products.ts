@@ -191,7 +191,7 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
       "Promotion start and expiration tracking",
       "Automatic expiration after 14 days",
     ],
-    deliverableEs: [
+    deliverablesEs: [
       "Impulso de visibilidad durante 14 días",
       "Seguimiento de la fecha de inicio y vencimiento de la promoción",
       "Vencimiento automático después de 14 días",
