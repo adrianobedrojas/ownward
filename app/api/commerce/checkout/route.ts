@@ -359,7 +359,7 @@ async function guardAgainstDuplicatePurchase(
       .from("purchases")
       .select("id")
       .eq("user_id", userId)
-      .eq("product_key", product.key)
+      .in("product_key", ["quick_boost", "featured_listing"])
       .eq("target_type", targetType)
       .eq("target_id", targetId)
       .in("payment_status", ["pending", "paid"])
