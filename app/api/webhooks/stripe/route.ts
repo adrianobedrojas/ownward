@@ -264,7 +264,7 @@ async function handleFeaturedListingCheckout(
     session,
     supabaseAdmin,
     userId,
-    listingId
+    listingId,
     "featured_listing"
   );
 }
