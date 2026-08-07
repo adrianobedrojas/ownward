@@ -200,7 +200,7 @@ async function validateTargetEligibility(
       }
     }
 
-    if (product.key === "featured_listing") {
+    if (product.fulfillmentBehavior === "apply_listing_promotion") {
       const featuredUntil = listing.featured_until
         ? new Date(listing.featured_until as string)
         : null;
