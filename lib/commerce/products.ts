@@ -205,7 +205,7 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     entitlementType: "listing_promotion",
     fulfillmentBehavior: "not_implemented",
     cancelPath: "/sell",
-    disclaimerEn: [
+    disclaimersEn: [
       "The listing must remain public and published.",
       "Promotion does not guarantee views, inquiries, offers, or sales.",
     ],
