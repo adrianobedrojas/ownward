@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
-import { getFeaturedListingConfig } from "@/lib/billing";
+import {
+  getListingPromotionConfig,
+  type ListingPromotionProductKey,
+} from "@/lib/billing";
 import { getProduct } from "@/lib/commerce/products";
 import {
   buildTemplateItemKey,
