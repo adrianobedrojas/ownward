@@ -121,14 +121,21 @@ export default async function SolutionDetailPage({
     listingDashboardHref = result?.dashboardHref;
   }
 
-  const targetSelectLabel = isSpanish ? "Elige el listado que deseas destacar" : "Choose the listing to feature";
-  const targetSelectPlaceholder = isSpanish ? "Selecciona un listado publicado" : "Select a published listing";
+  const targetSelectLabel = isSpanish
+    ? `Elige el listado para ${publicSolution.name}`
+    : `Choose the listing for ${publicSolution.name}`;
+
+  const targetSelectPlaceholder = isSpanish
+    ? "Selecciona un listado publicado"
+    : "Select a published listing";
+
   const noEligibleTargetMessage = isSpanish
     ? "Todavía no tienes un listado publicado elegible."
     : "You do not have an eligible published listing yet.";
+
   const noEligibleTargetLinkText = isSpanish
-    ? "Crea o publica un listado antes de comprar Listado Destacado."
-    : "Create or publish a listing before purchasing Featured Listing.";
+    ? `Crea o publica un listado antes de comprar ${publicSolution.name}.`
+    : `Create or publish a listing before purchasing ${publicSolution.name}.`;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
