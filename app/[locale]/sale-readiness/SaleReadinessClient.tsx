@@ -223,6 +223,7 @@ export default function SaleReadinessClient({
           <BoolField label="Formation documents" value={input.hasFormationDocs} onChange={(v) => setBool('hasFormationDocs', v)} />
           <BoolField label="Clean cap table / ownership records" value={input.hasCleanCapTable} onChange={(v) => setBool('hasCleanCapTable', v)} />
           <BoolField label="No major litigation or disputes" value={input.hasNoMajorLitigation} onChange={(v) => setBool('hasNoMajorLitigation', v)} />
+          <BoolField label="Active trademark, patent, or other IP protection" value={!!input.hasActiveIpProtection} onChange={(v) => setBool('hasActiveIpProtection', v)} />
         </Section>
 
         {/* Team Continuity */}
