@@ -100,8 +100,10 @@ export default function SaleReadinessClient({
 
   const handleSave = async () => {
     if (!result || !selectedBusinessId) return;
+
     setSaving(true);
     setSaveMessage(null);
+
     try {
       const res = await fetch('/api/pro/sale-readiness', {
         method: 'POST',
@@ -109,13 +111,18 @@ export default function SaleReadinessClient({
         body: JSON.stringify({
           businessId: selectedBusinessId,
           input,
-          result,
         }),
       });
+
+      const data = await res.json();
+
       if (res.ok) {
+        if (data.result) {
+          setResult(data.result as SaleReadinessResult);
+        }
+
         setSaveMessage('Assessment saved successfully.');
       } else {
-        const data = await res.json();
         setSaveMessage(data.error ?? 'Failed to save assessment.');
       }
     } catch {
