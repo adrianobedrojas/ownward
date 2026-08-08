@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   computeSaleReadiness,
   buildActionPlan,
@@ -200,6 +201,42 @@ export default function SaleReadinessClient({
 
   const [validationError, setValidationError] =
     useState<string | null>(null);
+  
+  if (businesses.length === 0) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 px-4 py-10 max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-cyan-300">
+          Sale-Readiness Assessment
+        </h1>
+
+        <p className="mt-2 text-slate-400 text-sm max-w-2xl">
+          Evaluate your business across 10 categories and get a transparent
+          0–100 readiness score.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-slate-700 bg-slate-900 p-8">
+        <h2 className="text-xl font-semibold text-slate-100">
+          Create a business profile first
+        </h2>
+
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          Sale Readiness measures a specific business. Add your business to
+          Ownward before starting this assessment so your score, recommendations,
+          and future progress can be saved to the correct business.
+        </p>
+
+        <Link
+          href="/business/new"
+          className="mt-6 inline-flex items-center rounded-xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+        >
+          Create Business
+        </Link>
+      </div>
+    </div>
+  );
+}
 
   const latestAssessmentForBusiness = recentAssessments.find(
     (assessment) =>
