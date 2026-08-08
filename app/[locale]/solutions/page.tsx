@@ -13,8 +13,8 @@ export async function generateMetadata({
   return {
     title: isSpanish ? "Soluciones Ownward" : "Ownward Solutions",
     description: isSpanish
-      ? "Catálogo comercial de Ownward con filtros por objetivos, audiencia y precio."
-      : "Ownward commercial catalog with filters by goals, audience, and price.",
+      ? "Explora inteligencia gratuita de Ownward y herramientas opcionales de pago para promoción, ejecución, transacciones, automatización y capacidad adicional."
+      : "Explore free Ownward intelligence and optional paid tools for promotion, execution, transactions, automation, and additional capacity.",
   };
 }
 
@@ -37,10 +37,11 @@ export default async function SolutionsPage({
         <h1 className="text-4xl font-bold text-white">
           {isSpanish ? "Soluciones Ownward" : "Ownward Solutions"}
         </h1>
-        <p className="mt-2 text-slate-300">
+
+        <p className="mt-2 max-w-4xl text-slate-300">
           {isSpanish
-            ? "Explora todo el catálogo comercial por meta, categoría, audiencia, disponibilidad y precio."
-            : "Explore the full commercial catalog by goal, category, audience, availability, and price."}
+            ? "Empieza con la inteligencia gratuita y las herramientas premium opcionales que ya están disponibles. Las soluciones futuras aparecen por separado para que puedas distinguir claramente lo que puedes usar hoy."
+            : "Start with free intelligence and optional premium tools that are available today. Upcoming solutions are separated so you can clearly see what you can use now."}
         </p>
       </header>
 
