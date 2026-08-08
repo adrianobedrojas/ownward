@@ -76,6 +76,74 @@ const RISK_COLOR: Record<string, string> = {
   critical: 'text-rose-500',
 };
 
+function validateNumericInputs(input: SaleReadinessInput): string | null {
+  if (
+    input.ebitdaMarginPct !== null &&
+    (input.ebitdaMarginPct < -100 || input.ebitdaMarginPct > 100)
+  ) {
+    return 'EBITDA / profit margin must be between -100% and 100%.';
+  }
+
+  if (
+    input.topCustomerRevenuePct !== null &&
+    (input.topCustomerRevenuePct < 0 || input.topCustomerRevenuePct > 100)
+  ) {
+    return 'Top customer revenue must be between 0% and 100%.';
+  }
+
+  if (
+    input.top5CustomerRevenuePct !== null &&
+    (input.top5CustomerRevenuePct < 0 || input.top5CustomerRevenuePct > 100)
+  ) {
+    return 'Top 5 customers revenue must be between 0% and 100%.';
+  }
+
+  if (
+    input.customerCount !== null &&
+    (input.customerCount < 0 || !Number.isInteger(input.customerCount))
+  ) {
+    return 'Total active customers must be a whole number of 0 or more.';
+  }
+
+  if (
+    input.recurringRevenuePct !== null &&
+    (input.recurringRevenuePct < 0 || input.recurringRevenuePct > 100)
+  ) {
+    return 'Recurring revenue must be between 0% and 100%.';
+  }
+
+  if (
+    input.avgContractLengthMonths !== null &&
+    input.avgContractLengthMonths < 0
+  ) {
+    return 'Average contract length cannot be negative.';
+  }
+
+  if (
+    input.ownerHoursPerWeek !== null &&
+    (input.ownerHoursPerWeek < 0 || input.ownerHoursPerWeek > 168)
+  ) {
+    return 'Owner hours per week must be between 0 and 168.';
+  }
+
+  if (
+    input.avgEmployeeTenureYears !== null &&
+    input.avgEmployeeTenureYears < 0
+  ) {
+    return 'Average employee tenure cannot be negative.';
+  }
+
+  if (
+    input.topCustomerRevenuePct !== null &&
+    input.top5CustomerRevenuePct !== null &&
+    input.topCustomerRevenuePct > input.top5CustomerRevenuePct
+  ) {
+    return 'Top customer revenue cannot be greater than Top 5 customers revenue.';
+  }
+
+  return null;
+}
+
 export default function SaleReadinessClient({
   businesses,
   recentAssessments,
@@ -87,12 +155,23 @@ export default function SaleReadinessClient({
   const [result, setResult] = useState<SaleReadinessResult | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const latestAssessmentForBusiness = recentAssessments.find(
     (a) => a.business_id === selectedBusinessId
   );
 
   const handleCompute = () => {
+    const error = validateNumericInputs(input);
+
+    if (error) {
+      setValidationError(error);
+      setResult(null);
+      return;
+    }
+
+    setValidationError(null);
+
     const previousScore = latestAssessmentForBusiness?.overall_score ?? null;
     const res = computeSaleReadiness(input, previousScore);
     setResult(res);
@@ -256,13 +335,22 @@ export default function SaleReadinessClient({
         </Section>
       </div>
 
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8">
         <button
           onClick={handleCompute}
           className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-6 py-3 rounded-xl text-sm"
         >
           Compute Score
         </button>
+
+        {validationError && (
+          <div
+            role="alert"
+            className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"
+          >
+            {validationError}
+          </div>
+        )}
       </div>
 
       {/* Results */}
