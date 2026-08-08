@@ -363,6 +363,7 @@ async function activateListingPromotion(
       {
         listing_id: listingId,
         user_id: userId,
+        product_key: productKey,
         stripe_checkout_session_id: session.id,
         stripe_payment_intent_id: paymentIntentId,
         stripe_price_id: stripePriceId,
