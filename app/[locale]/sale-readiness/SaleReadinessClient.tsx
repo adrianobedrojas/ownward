@@ -265,7 +265,7 @@ export default function SaleReadinessClient({
           <BoolField label="3+ years of financial history" value={input.hasThreeYearFinancials} onChange={(v) => setBool('hasThreeYearFinancials', v)} />
           <BoolField label="Clean, organized bookkeeping" value={input.hasCleanBooks} onChange={(v) => setBool('hasCleanBooks', v)} />
           <BoolField label="Positive revenue growth trend" value={!!input.revenueGrowthPositive} onChange={(v) => setBool('revenueGrowthPositive', v)} />
-          <NumberField label="EBITDA / profit margin %" value={input.ebitdaMarginPct} onChange={(v) => setNumber('ebitdaMarginPct', v)} />
+          <NumberField label="EBITDA / profit margin %" value={input.ebitdaMarginPct} onChange={(v) => setNumber('ebitdaMarginPct', v)} min={-100} max={100} step={0.1} />
         </Section>
 
         {/* Financial Documentation */}
@@ -278,21 +278,21 @@ export default function SaleReadinessClient({
 
         {/* Customer Diversification */}
         <Section title="Customer Diversification">
-          <NumberField label="Top customer revenue %" value={input.topCustomerRevenuePct} onChange={(v) => setNumber('topCustomerRevenuePct', v)} />
-          <NumberField label="Top 5 customers revenue %" value={input.top5CustomerRevenuePct} onChange={(v) => setNumber('top5CustomerRevenuePct', v)} />
-          <NumberField label="Total active customers" value={input.customerCount} onChange={(v) => setNumber('customerCount', v)} />
+          <NumberField label="Top customer revenue %" value={input.topCustomerRevenuePct} onChange={(v) => setNumber('topCustomerRevenuePct', v)} min={0} max={100} step={0.1} />
+          <NumberField label="Top 5 customers revenue %" value={input.top5CustomerRevenuePct} onChange={(v) => setNumber('top5CustomerRevenuePct', v)} min={0} max={100} step={0.1} />
+          <NumberField label="Total active customers" value={input.customerCount} onChange={(v) => setNumber('customerCount', v)} min={0} step={1} />
         </Section>
 
         {/* Recurring Revenue */}
         <Section title="Recurring & Contracted Revenue">
-          <NumberField label="Recurring revenue %" value={input.recurringRevenuePct} onChange={(v) => setNumber('recurringRevenuePct', v)} />
+          <NumberField label="Recurring revenue %" value={input.recurringRevenuePct} onChange={(v) => setNumber('recurringRevenuePct', v)} min={0} max={100} step={0.1} />
           <BoolField label="Active customer contracts" value={input.hasActiveContracts} onChange={(v) => setBool('hasActiveContracts', v)} />
-          <NumberField label="Avg contract length (months)" value={input.avgContractLengthMonths} onChange={(v) => setNumber('avgContractLengthMonths', v)} />
+          <NumberField label="Avg contract length (months)" value={input.avgContractLengthMonths} onChange={(v) => setNumber('avgContractLengthMonths', v)} min={0} step={0.1} />
         </Section>
 
         {/* Owner Independence */}
         <Section title="Owner Independence">
-          <NumberField label="Owner hours per week in business" value={input.ownerHoursPerWeek} onChange={(v) => setNumber('ownerHoursPerWeek', v)} />
+          <NumberField label="Owner hours per week in business" value={input.ownerHoursPerWeek} onChange={(v) => setNumber('ownerHoursPerWeek', v)}min={0}max={168}step={0.5} />
           <BoolField label="Documented operating procedures" value={input.hasDocumentedProcesses} onChange={(v) => setBool('hasDocumentedProcesses', v)} />
           <BoolField label="Second-in-command or management layer" value={input.hasSecondInCommand} onChange={(v) => setBool('hasSecondInCommand', v)} />
         </Section>
@@ -315,7 +315,7 @@ export default function SaleReadinessClient({
         {/* Team Continuity */}
         <Section title="Team Continuity">
           <BoolField label="Key employee agreements in place" value={input.hasKeyEmployeeContracts} onChange={(v) => setBool('hasKeyEmployeeContracts', v)} />
-          <NumberField label="Avg employee tenure (years)" value={input.avgEmployeeTenureYears} onChange={(v) => setNumber('avgEmployeeTenureYears', v)} />
+          <NumberField label="Avg employee tenure (years)" value={input.avgEmployeeTenureYears} onChange={(v) => setNumber('avgEmployeeTenureYears', v)} min={0} step={0.1} />
           <BoolField label="Succession / continuity plan" value={input.hasSuccessionPlan} onChange={(v) => setBool('hasSuccessionPlan', v)} />
         </Section>
 
@@ -502,10 +502,16 @@ function NumberField({
   label,
   value,
   onChange,
+  min,
+  max,
+  step = 'any',
 }: {
   label: string;
   value: number | null;
   onChange: (v: string) => void;
+  min?: number;
+  max?: number;
+  step?: number | 'any';
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -514,6 +520,9 @@ function NumberField({
         type="number"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
+        min={min}
+        max={max}
+        step={step}
         placeholder="—"
         className="w-28 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-right text-slate-100"
       />
