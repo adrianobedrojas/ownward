@@ -8,6 +8,33 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+function isNullableNumberInRange(
+  value: unknown,
+  min: number,
+  max: number
+): boolean {
+  return (
+    value === null ||
+    (
+      typeof value === 'number' &&
+      Number.isFinite(value) &&
+      value >= min &&
+      value <= max
+    )
+  );
+}
+
+function isNullableNonNegativeNumber(value: unknown): boolean {
+  return (
+    value === null ||
+    (
+      typeof value === 'number' &&
+      Number.isFinite(value) &&
+      value >= 0
+    )
+  );
+}
+
 function isSaleReadinessInput(value: unknown): value is SaleReadinessInput {
   if (!isRecord(value)) {
     return false;
@@ -75,10 +102,61 @@ function isSaleReadinessInput(value: unknown): value is SaleReadinessInput {
 
     if (
       fieldValue !== null &&
-      (typeof fieldValue !== 'number' || !Number.isFinite(fieldValue))
+      (
+        typeof fieldValue !== 'number' ||
+        !Number.isFinite(fieldValue)
+      )
     ) {
       return false;
     }
+  }
+
+  if (!isNullableNumberInRange(value.ebitdaMarginPct, -100, 100)) {
+    return false;
+  }
+
+  if (!isNullableNumberInRange(value.topCustomerRevenuePct, 0, 100)) {
+    return false;
+  }
+
+  if (!isNullableNumberInRange(value.top5CustomerRevenuePct, 0, 100)) {
+    return false;
+  }
+
+  if (!isNullableNumberInRange(value.recurringRevenuePct, 0, 100)) {
+    return false;
+  }
+
+  if (!isNullableNumberInRange(value.ownerHoursPerWeek, 0, 168)) {
+    return false;
+  }
+
+  if (!isNullableNonNegativeNumber(value.avgContractLengthMonths)) {
+    return false;
+  }
+
+  if (!isNullableNonNegativeNumber(value.avgEmployeeTenureYears)) {
+    return false;
+  }
+
+  if (
+    value.customerCount !== null &&
+    (
+      typeof value.customerCount !== 'number' ||
+      !Number.isFinite(value.customerCount) ||
+      value.customerCount < 0 ||
+      !Number.isInteger(value.customerCount)
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    typeof value.topCustomerRevenuePct === 'number' &&
+    typeof value.top5CustomerRevenuePct === 'number' &&
+    value.topCustomerRevenuePct > value.top5CustomerRevenuePct
+  ) {
+    return false;
   }
 
   return true;
@@ -92,7 +170,10 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    );
   }
 
   let body: unknown;
@@ -183,7 +264,10 @@ export async function POST(req: NextRequest) {
     });
 
   if (insertError) {
-    console.error('sale_readiness insert error:', insertError);
+    console.error(
+      'sale_readiness insert error:',
+      insertError
+    );
 
     return NextResponse.json(
       { error: 'Failed to save assessment.' },
