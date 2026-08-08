@@ -457,13 +457,14 @@ export default function SaleReadinessClient({
 
           <NumberField
             label="EBITDA / profit margin %"
+            helperText="Enter your EBITDA margin if you know it, or the operating/profit margin you currently track. Example: $15,000 of profit on $100,000 of revenue = 15%. A negative percentage is allowed if the business is operating at a loss."
             value={input.ebitdaMarginPct}
             onChange={(value) =>
               setNumber(
                 'ebitdaMarginPct',
                 value
               )
-            }
+             }
             min={-100}
             max={100}
             step={0.1}
@@ -521,10 +522,11 @@ export default function SaleReadinessClient({
         <Section title="Customer Diversification">
           <NumberField
             label="Top customer revenue %"
+            helperText="Percentage of your total annual revenue that comes from your single largest customer. Example: if your largest customer generates $20,000 of $100,000 in annual revenue, enter 20%."
             value={input.topCustomerRevenuePct}
             onChange={(value) =>
-              setNumber(
-                'topCustomerRevenuePct',
+             setNumber(
+               'topCustomerRevenuePct',
                 value
               )
             }
@@ -535,6 +537,7 @@ export default function SaleReadinessClient({
 
           <NumberField
             label="Top 5 customers revenue %"
+            helperText="Add together the annual revenue from your five largest customers, then divide it by your total annual revenue. Example: if your top five customers generate $60,000 of $100,000 total revenue, enter 60%."
             value={input.top5CustomerRevenuePct}
             onChange={(value) =>
               setNumber(
@@ -549,10 +552,11 @@ export default function SaleReadinessClient({
 
           <NumberField
             label="Total active customers"
+            helperText="Enter the number of customers currently buying from, subscribed to, or actively under contract with the business. Use a whole number."
             value={input.customerCount}
             onChange={(value) =>
               setNumber(
-                'customerCount',
+              'customerCount',
                 value
               )
             }
@@ -565,6 +569,7 @@ export default function SaleReadinessClient({
         <Section title="Recurring & Contracted Revenue">
           <NumberField
             label="Recurring revenue %"
+            helperText="Percentage of revenue you expect to repeat automatically or contractually, such as subscriptions, retainers, memberships, maintenance agreements, or recurring service contracts."
             value={input.recurringRevenuePct}
             onChange={(value) =>
               setNumber(
@@ -590,9 +595,8 @@ export default function SaleReadinessClient({
 
           <NumberField
             label="Avg contract length (months)"
-            value={
-              input.avgContractLengthMonths
-            }
+            helperText="Enter the typical length of your active customer contracts in months. Example: annual contracts usually equal 12 months. Enter 0 if customers are not committed to a fixed contract term."
+            value={input.avgContractLengthMonths}
             onChange={(value) =>
               setNumber(
                 'avgContractLengthMonths',
@@ -608,6 +612,7 @@ export default function SaleReadinessClient({
         <Section title="Owner Independence">
           <NumberField
             label="Owner hours per week in business"
+            helperText="Approximately how many hours per week the owner personally needs to work for the business to continue operating normally. Include management, sales, customer work, approvals, and other essential owner responsibilities."
             value={input.ownerHoursPerWeek}
             onChange={(value) =>
               setNumber(
@@ -745,9 +750,8 @@ export default function SaleReadinessClient({
 
           <NumberField
             label="Avg employee tenure (years)"
-            value={
-              input.avgEmployeeTenureYears
-            }
+            helperText="Approximately how long your current employees have worked for the business on average. Example: if most employees have been with the business for about 3 years, enter 3."
+            value={input.avgEmployeeTenureYears}
             onChange={(value) =>
               setNumber(
                 'avgEmployeeTenureYears',
@@ -1182,6 +1186,7 @@ function BoolField({
 
 function NumberField({
   label,
+  helperText,
   value,
   onChange,
   min,
@@ -1189,6 +1194,7 @@ function NumberField({
   step = 'any',
 }: {
   label: string;
+  helperText?: string;
   value: number | null;
   onChange: (value: string) => void;
   min?: number;
@@ -1196,10 +1202,18 @@ function NumberField({
   step?: number | 'any';
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <label className="text-sm text-slate-300">
-        {label}
-      </label>
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="min-w-0 flex-1">
+        <label className="text-sm text-slate-300">
+          {label}
+        </label>
+
+        {helperText && (
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
+            {helperText}
+          </p>
+        )}
+      </div>
 
       <input
         type="number"
@@ -1211,7 +1225,7 @@ function NumberField({
         max={max}
         step={step}
         placeholder="—"
-        className="w-28 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-right text-slate-100"
+        className="w-full sm:w-28 shrink-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-right text-slate-100"
       />
     </div>
   );
