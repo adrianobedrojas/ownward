@@ -94,14 +94,20 @@ function translator(namespace: keyof Messages, locale: 'en' | 'es') {
 }
 
 function createQueryBuilder() {
-  const builder = {
-    select: jest.fn(() => builder),
-    eq: jest.fn(() => builder),
-    gt: jest.fn(() => builder),
-    not: jest.fn(() => builder),
-    order: jest.fn(() => builder),
-    limit: jest.fn(async () => ({ data: [] })),
-  };
+  const builder: {
+    select: jest.Mock;
+    eq: jest.Mock;
+    gt: jest.Mock;
+    not: jest.Mock;
+    order: jest.Mock;
+    limit: jest.Mock;
+  } = {} as never;
+  builder.select = jest.fn(() => builder);
+  builder.eq = jest.fn(() => builder);
+  builder.gt = jest.fn(() => builder);
+  builder.not = jest.fn(() => builder);
+  builder.order = jest.fn(() => builder);
+  builder.limit = jest.fn(async () => ({ data: [] }));
 
   return builder;
 }

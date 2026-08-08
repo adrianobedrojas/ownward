@@ -1322,15 +1322,13 @@ function assertRegistryInvariants(): void {
     }
 
     if (product.status === "active" && product.ctaBehavior === "checkout") {
-      if (!product.stripePriceEnvVar) {
-        throw new Error(`Active checkout product must declare stripePriceEnvVar: ${product.key}`);
-      }
-      if (checkoutPriceEnvVars.has(product.stripePriceEnvVar)) {
+      const stripePriceEnvVar = product.stripePriceEnvVar!;
+      if (checkoutPriceEnvVars.has(stripePriceEnvVar)) {
         throw new Error(
-          `Stripe price env var must be unique per product: ${product.stripePriceEnvVar}`
+          `Stripe price env var must be unique per product: ${stripePriceEnvVar}`
         );
       }
-      checkoutPriceEnvVars.add(product.stripePriceEnvVar);
+      checkoutPriceEnvVars.add(stripePriceEnvVar);
     }
 
     if (product.status !== "active" && product.ctaBehavior === "checkout") {

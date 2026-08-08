@@ -264,8 +264,7 @@ async function handleFeaturedListingCheckout(
     session,
     supabaseAdmin,
     userId,
-    listingId,
-    "featured_listing"
+    listingId
   );
 }
 
@@ -275,101 +274,13 @@ async function activateFeaturedListingPromotion(
   userId: string,
   listingId: string
 ): Promise<void> {
-
-  // Idempotency: if a promotion for this checkout session already exists and
-  // is active, skip re-processing.
-  const { data: existing } = await supabaseAdmin
-    .from("listing_promotions")
-    .select("id, status")
-    .eq("stripe_checkout_session_id", session.id)
-    .maybeSingle();
-
-  if (existing?.status === "active") {
-    return;
-  }
-
-  // Verify listing still belongs to the supplied user and is public+published
-  const { data: listing, error: listingError } = await supabaseAdmin
-    .from("business_listings")
-    .select("id, user_id, status, is_public")
-    .eq("id", listingId)
-    .maybeSingle();
-
-  if (listingError || !listing) {
-    throw new Error(
-      `[featured_listing] Listing ${listingId} not found for session ${session.id}`
-    );
-  }
-
-  if (listing.user_id !== userId) {
-    throw new Error(
-      `[featured_listing] Listing ${listingId} does not belong to user ${userId}`
-    );
-  }
-
-  if (listing.status !== "published" || !listing.is_public) {
-    throw new Error(
-      `[featured_listing] Listing ${listingId} is no longer public/published; skipping promotion`
-    );
-  }
-
-  // Calculate promotion window
-  let durationDays = 30;
-  try {
-    ({ durationDays } = getFeaturedListingConfig());
-  } catch {
-    console.warn(
-      "[featured_listing] Could not read FEATURED_LISTING_DURATION_DAYS; defaulting to 30"
-    );
-  }
-
-  const startsAt = new Date();
-  const endsAt = new Date(startsAt);
-  endsAt.setDate(endsAt.getDate() + durationDays);
-
-  const paymentIntentId =
-    typeof session.payment_intent === "string"
-      ? session.payment_intent
-      : session.payment_intent?.id ?? null;
-
-  // Retrieve the Stripe Price ID from the line items (most reliable source)
-  let stripePriceId = "";
-  try {
-    const config = getFeaturedListingConfig();
-    stripePriceId = config.priceId;
-  } catch {
-    stripePriceId = "";
-  }
-
-  // Upsert promotion record (unique on stripe_checkout_session_id)
-  const { error: promotionError } = await supabaseAdmin
-    .from("listing_promotions")
-    .upsert(
-      {
-        listing_id: listingId,
-        user_id: userId,
-        stripe_checkout_session_id: session.id,
-        stripe_payment_intent_id: paymentIntentId,
-        stripe_price_id: stripePriceId,
-        status: "active",
-        starts_at: startsAt.toISOString(),
-        ends_at: endsAt.toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "stripe_checkout_session_id" }
-    );
-
-  if (promotionError) {
-    throw new Error(
-      `[featured_listing] Failed to activate promotion for listing ${listingId}: ${promotionError.message}`
-    );
-  }
-}
-
-function isListingPromotionProductKey(
-  value: string
-): value is ListingPromotionProductKey {
-  return value === "quick_boost" || value === "featured_listing";
+  await activateListingPromotion(
+    session,
+    supabaseAdmin,
+    userId,
+    listingId,
+    "featured_listing"
+  );
 }
 
 async function activateListingPromotion(

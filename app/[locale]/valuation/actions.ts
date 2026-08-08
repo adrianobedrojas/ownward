@@ -151,9 +151,6 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
 
   const { supabase, user } = auth;
 
-  const billing = await getUserBillingState(supabase, user.id);
-  const valuationLevel = billing.entitlements.valuationLevel;
-
   const input = buildInputFromFormData(formData);
 
   const reportId = (formData.get("reportId") as string) ?? null;
@@ -436,8 +433,6 @@ export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateAc
   }
 
   const { supabase, user } = auth;
-
-  const billing = await getUserBillingState(supabase, user.id);
 
   const payload = {
     user_id: user.id,
