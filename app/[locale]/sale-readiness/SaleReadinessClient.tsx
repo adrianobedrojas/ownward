@@ -334,6 +334,10 @@ export default function SaleReadinessClient({
       ...previous,
       [key]: value,
     }));
+
+    setResult(null);
+    setSaveMessage(null);
+    setValidationError(null);
   };
 
   const setNumber = (
