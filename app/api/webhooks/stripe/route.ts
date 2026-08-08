@@ -407,30 +407,59 @@ async function handleFeaturedListingRefund(
 ): Promise<void> {
   const { data: promotion, error } = await supabaseAdmin
     .from("listing_promotions")
-    .select("id, listing_id, status")
+    .select("id, listing_id, status, starts_at, ends_at")
     .eq("stripe_payment_intent_id", paymentIntentId)
     .maybeSingle();
 
-  if (error || !promotion) {
-    return;
-  }
-
-  if (promotion.status === "refunded") {
-    return; // already processed
-  }
-
-  const { error: promotionUpdateError } = await supabaseAdmin
-    .from("listing_promotions")
-    .update({ status: "refunded", updated_at: new Date().toISOString() })
-    .eq("id", promotion.id);
-
-  if (promotionUpdateError) {
-    console.error(
-      `[featured_listing] Failed to mark promotion ${promotion.id} as refunded:`,
-      promotionUpdateError.message
+  if (error) {
+    throw new Error(
+      `[listing_promotion] Failed to load promotion for payment intent ${paymentIntentId}: ${error.message}`
     );
+  }
+
+  if (!promotion) {
     return;
   }
+
+  const now = new Date().toISOString();
+
+  if (promotion.status !== "refunded") {
+    const { error: promotionUpdateError } = await supabaseAdmin
+      .from("listing_promotions")
+      .update({
+        status: "refunded",
+        updated_at: now,
+      })
+      .eq("id", promotion.id);
+
+    if (promotionUpdateError) {
+      throw new Error(
+        `[listing_promotion] Failed to mark promotion ${promotion.id} as refunded: ${promotionUpdateError.message}`
+      );
+    }
+  }
+
+  if (!promotion.starts_at || !promotion.ends_at) {
+    return;
+  }
+
+  const { error: listingUpdateError } = await supabaseAdmin
+    .from("business_listings")
+    .update({
+      featured_started_at: null,
+      featured_until: null,
+      updated_at: now,
+    })
+    .eq("id", promotion.listing_id)
+    .eq("featured_started_at", promotion.starts_at)
+    .eq("featured_until", promotion.ends_at);
+
+  if (listingUpdateError) {
+    throw new Error(
+      `[listing_promotion] Failed to clear refunded promotion window: ${listingUpdateError.message}`
+    );
+  }
+}
 
   // Clear the featured window on the listing
   await supabaseAdmin
