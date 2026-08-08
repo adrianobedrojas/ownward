@@ -23,14 +23,26 @@ export default function FeaturedListingButton({
     setError(null);
 
     try {
-      const res = await fetch("/api/featured-listings/checkout", {
+      const res = await fetch("/api/commerce/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId }),
+        body: JSON.stringify({
+          productKey: "featured_listing",
+          locale: isSpanish ? "es" : "en",
+          targetId: listingId,
+        }),
       });
 
-      const data: { url?: string; error?: string } = await res.json();
-
+      const data: {
+        url?: string;
+        error?: string;
+        redirectTo?: string;
+        route?: string;
+      } = await res.json();
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
+        return;
+      }
       if (!res.ok || !data.url) {
         setError(data.error ?? "Could not start checkout. Please try again.");
         return;
@@ -39,7 +51,8 @@ export default function FeaturedListingButton({
       trackGoogleAnalyticsConversion(
         "begin_checkout",
         {
-          checkout_type: "featured_listing",
+          checkout_type: "one_time_product",
+          product_key: "featured_listing",
         },
         { dedupeKey: `begin_checkout:featured_listing:${listingId}:${data.url}` },
       );
