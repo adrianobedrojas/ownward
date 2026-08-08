@@ -841,19 +841,19 @@
         "ctaLabel": "Explorar mercado"
       },
       "owner-life": {
-        "name": "6. Vida del propietario",
+        "name": "7. Vida del propietario",
         "description": "Orientación práctica sobre la presión, las relaciones, la identidad, los límites y las decisiones personales detrás de ser propietario de un negocio.",
         "cta": "Explora marcos para responder a la presión sin permitir que cada momento difícil controle la siguiente decisión.",
         "ctaLabel": "Explorar la vida del propietario"
       },
       "stories": {
-        "name": "7. Historias de dueños y notas del fundador",
+        "name": "8. Historias de dueños y notas del fundador",
         "description": "Lecciones reales, notas detrás de escena y escenarios cercanos de dueños de negocios.",
         "cta": "Lee historias y lecciones de dueños que han construido, crecido, comprado o vendido negocios.",
         "ctaLabel": "Ver historias"
       },
       "resources": {
-        "name": "8. Recursos interactivos y listas de verificación",
+        "name": "9. Recursos interactivos y listas de verificación",
         "description": "Listas descargables, calculadoras y evaluaciones.",
         "cta": "Usa herramientas prácticas para organizar información y evaluar decisiones.",
         "ctaLabel": "Explorar recursos"
