@@ -16,6 +16,12 @@ import {
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function isListingPromotionProductKey(
+  value: string
+): value is ListingPromotionProductKey {
+  return value === "quick_boost" || value === "featured_listing";
+}
+
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: Request) {
@@ -1060,7 +1066,7 @@ async function fulfillProductResource(params: {
         entitlementExpiresAt: null,
       };
     }
-
+    
     case "apply_listing_promotion": {
       if (!targetId) {
         throw new Error(
@@ -1068,14 +1074,26 @@ async function fulfillProductResource(params: {
         );
       }
 
-      await activateFeaturedListingPromotion(session, supabaseAdmin, userId, targetId);
+      if (!isListingPromotionProductKey(product.key)) {
+        throw new Error(
+          `[one_time_product] Invalid listing-promotion product key: ${product.key}`
+        );
+      }
+      
+      const entitlementExpiresAt = await activateListingPromotion(
+        session,
+        supabaseAdmin,
+        userId,
+        targetId,
+        product.key
+      );
+      
       return {
         fulfilledResourceType: "listing",
         fulfilledResourceId: targetId,
-        entitlementExpiresAt: null,
+        entitlementExpiresAt,
       };
     }
-
     case "apply_business_in_a_box_template": {
       if (!targetId) {
         throw new Error(`[one_time_product] Missing business target for purchase ${purchaseId}`);
