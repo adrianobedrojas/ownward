@@ -462,16 +462,6 @@ async function handleFeaturedListingRefund(
   }
 }
 
-  // Clear the featured window on the listing
-  await supabaseAdmin
-    .from("business_listings")
-    .update({
-      featured_started_at: null,
-      featured_until: null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", promotion.listing_id);
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: fulfill a one-time product purchase
