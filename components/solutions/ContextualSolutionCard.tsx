@@ -81,7 +81,7 @@ export default function ContextualSolutionCard({
       <p className="mt-1 text-xs text-slate-400">{recommendation.outcome}</p>
 
       <p className="mt-3 text-sm font-semibold text-cyan-300">
-        {recommendation.displayPrice === 0 ? "Free" : `$${recommendation.displayPrice}`} · {recommendation.billingContext}
+        {recommendation.displayPrice === 0 ? (locale === "es" ? "Gratis" : "Free") : `$${recommendation.displayPrice}`} · {recommendation.billingContext}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -91,10 +91,22 @@ export default function ContextualSolutionCard({
             locale={locale}
             ctaBehavior="checkout"
             status={recommendation.status === "active" ? "active" : "planned"}
+            analyticsSource={`contextual:${recommendation.analytics.placement}`}
             requiredTargetType={recommendation.targetType}
             targetId={recommendation.targetId ?? undefined}
             targetOptions={recommendation.targetOptions}
             onStartCheckout={() => onAction("solution_checkout_started", recommendation)}
+          />
+        ) : recommendation.ctaState === "open" && recommendation.ctaHref ? (
+          <SolutionCheckoutButton
+            productKey={recommendation.productKey}
+            locale={locale}
+            ctaBehavior="open"
+            status={recommendation.status === "active" ? "active" : "planned"}
+            accessRoute={recommendation.ctaHref}
+            analyticsSource={`contextual:${recommendation.analytics.placement}`}
+            requiredTargetType="none"
+            onStartFree={() => onAction("free_solution_started", recommendation)}
           />
         ) : recommendation.ctaHref ? (
           <Link

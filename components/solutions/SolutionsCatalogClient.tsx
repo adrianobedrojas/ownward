@@ -235,7 +235,7 @@ export default function SolutionsCatalogClient({ locale, solutions }: Props) {
               <p className="mt-2 text-xs text-slate-400">{solution.outcome}</p>
 
               <p className="mt-3 text-sm font-semibold text-cyan-300">
-                {solution.displayPrice === 0 ? "Free" : `$${solution.displayPrice}`} · {solution.billingContext}
+                {solution.displayPrice === 0 ? (isSpanish ? "Gratis" : "Free") : `$${solution.displayPrice}`} · {solution.billingContext}
               </p>
 
               <div className="mt-4 flex items-center gap-2">
@@ -265,7 +265,7 @@ export default function SolutionsCatalogClient({ locale, solutions }: Props) {
             {compareItems.map((solution) => (
               <div key={solution.key} className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 text-sm">
                 <p className="font-semibold text-white">{solution.name}</p>
-                <p className="mt-1 text-slate-300">{solution.displayPrice === 0 ? "Free" : `$${solution.displayPrice}`} · {solution.billingContext}</p>
+                <p className="mt-1 text-slate-300">{solution.displayPrice === 0 ? (isSpanish ? "Gratis" : "Free") : `$${solution.displayPrice}`} · {solution.billingContext}</p>
                 <p className="mt-2 text-xs text-slate-400">{solution.status}</p>
               </div>
             ))}

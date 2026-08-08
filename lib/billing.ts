@@ -131,10 +131,10 @@ export type HealthLevel = "none" | "basic" | "advanced";
 
 /**
  * Valuation feature levels.
- * - preview  : single line estimate, no saved report (free)
- * - basic    : basic range + simplified earnings, up to 3 actions (starter)
- * - detailed : 3-year weighted average, full sections (builder)
- * - enhanced : full report + Value DNA, Buyer Lens, Value Bridge (pro)
+ * - preview  : single line estimate, no saved report
+ * - basic    : basic range + simplified earnings, up to 3 actions
+ * - detailed : 3-year weighted average, full sections
+ * - enhanced : full report + Value DNA, Buyer Lens, Value Bridge
  */
 export type ValuationLevel = "preview" | "basic" | "detailed" | "enhanced";
 
@@ -195,20 +195,20 @@ const FREE_ENTITLEMENTS: PlanEntitlements = {
   storageBytes: 100 * MB,
   leadLimit: 5,
   teamMemberLimit: 0,
-  healthLevel: "basic",
-  valuationLevel: "preview",
+  healthLevel: "advanced",
+  valuationLevel: "enhanced",
   supportLevel: "general",
-  bookkeeping: false,
+  bookkeeping: true,
   dealRooms: false,
   activeDealRoomLimit: 0,
-  saleReadiness: false,
-  customerConcentration: false,
+  saleReadiness: true,
+  customerConcentration: true,
   weeklyValuationRefresh: false,
   sellerCommandCenter: false,
   listingImageLimit: 3,
   savedListingLimit: 5,
   listingComparisonLimit: 2,
-  confidentialListings: false,
+  confidentialListings: true,
 };
 
 const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
@@ -220,14 +220,14 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     storageBytes: 500 * MB,
     leadLimit: 25,
     teamMemberLimit: 1,
-    healthLevel: "basic",
-    valuationLevel: "basic",
+    healthLevel: "advanced",
+    valuationLevel: "enhanced",
     supportLevel: "standard",
     bookkeeping: true,
     dealRooms: false,
     activeDealRoomLimit: 0,
-    saleReadiness: false,
-    customerConcentration: false,
+    saleReadiness: true,
+    customerConcentration: true,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
     listingImageLimit: 10,
@@ -244,13 +244,13 @@ const PLAN_ENTITLEMENTS: Record<PlanKey, PlanEntitlements> = {
     leadLimit: 100,
     teamMemberLimit: 2,
     healthLevel: "advanced",
-    valuationLevel: "detailed",
+    valuationLevel: "enhanced",
     supportLevel: "standard",
     bookkeeping: true,
     dealRooms: false,
     activeDealRoomLimit: 0,
-    saleReadiness: false,
-    customerConcentration: false,
+    saleReadiness: true,
+    customerConcentration: true,
     weeklyValuationRefresh: false,
     sellerCommandCenter: false,
     listingImageLimit: 20,
@@ -613,8 +613,8 @@ export type BookkeepingAccessResult =
  * Checks whether a user's current billing state permits bookkeeping write
  * operations (create/edit transactions, close months, reconcile, etc.).
  *
- * - Starter, Builder, and Pro plans: write access allowed.
- * - Free / downgraded: read/export/delete only, no writes.
+ * - Any plan with bookkeeping enabled: write access allowed.
+ * - Plans without bookkeeping: read/export/delete only, no writes.
  *
  * Returns a structured result — never throws.
  */
@@ -626,7 +626,7 @@ export function checkBookkeepingAccess(
       allowed: false,
       code: "PLAN_REQUIRED",
       message:
-        "Revenue and expense tracking requires a Starter or higher plan. " +
+        "Revenue and expense tracking requires bookkeeping access on your plan. " +
         "You can still view, export, or delete your existing records.",
       featureEnabled: false,
     };
@@ -739,7 +739,7 @@ export function checkConfidentialListingAccess(
   if (!entitlements.confidentialListings) {
     return new EntitlementError(
       "CONFIDENTIAL_LISTING_GATED",
-      "Confidential listings are available on Starter and higher plans. Upgrade to create or view private listings."
+      "Confidential listings are not enabled on your current plan."
     );
   }
   return null;
@@ -774,17 +774,20 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     name: "Explorer",
     monthlyPrice: 0,
     annualPrice: 0,
-    tagline: "Your first meaningful step — free forever",
+    tagline: "Core Ownward intelligence for one business — free forever",
     publicFeatures: [
       "1 Business Workspace",
       "3 Milestones / month",
-      "Basic Health Snapshot",
-      "Valuation Preview",
+      "Advanced Health Check",
+      "Enhanced Valuation Report",
+      "Sale-Readiness Assessment",
+      "Customer Concentration Lab",
       "Up to 3 Documents (100 MB)",
       "5 Active Leads",
+      "Bookkeeping",
       "Save up to 5 listings",
       "Compare up to 2 businesses",
-      "1 Public Listing (3 photos)",
+      "1 Public or Confidential Listing (3 photos)",
     ],
     upgradeOrder: 0,
     entitlements: FREE_ENTITLEMENTS,
@@ -792,19 +795,21 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     storageDescription: "100 MB",
     teamSeatDescription: "No team seats",
     dealRoomDescription: "Not included",
-    valuationRefreshDescription: "Preview only",
+    valuationRefreshDescription: "On demand",
   },
   {
     key: "starter",
     name: "Starter",
     monthlyPrice: 5,
     annualPrice: 0,
-    tagline: "Build operations and reach buyers",
+    tagline: "Increase capacity and collaboration",
     publicFeatures: [
       "1 Business Workspace",
       "10 Milestones / month",
-      "Basic Health Checklist",
-      "Basic Valuation Range",
+      "Advanced Health Check",
+      "Enhanced Valuation Report",
+      "Sale-Readiness Assessment",
+      "Customer Concentration Lab",
       "Up to 10 Documents (500 MB)",
       "25 Active Leads",
       "Save up to 25 listings",
@@ -820,20 +825,22 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     storageDescription: "500 MB (Vault)",
     teamSeatDescription: "1 invited collaborator (owner excluded)",
     dealRoomDescription: "Not included",
-    valuationRefreshDescription: "Basic range (on demand)",
+    valuationRefreshDescription: "On demand",
   },
   {
     key: "builder",
     name: "Builder",
     monthlyPrice: 10,
     annualPrice: 0,
-    tagline: "Scale with advanced analytics and collaboration",
+    tagline: "Multi-business operations and collaboration",
     publicFeatures: [
       "Up to 2 Businesses",
       "Revenue & Expense Tracking",
       "100 Milestones / month",
-      "Advanced Health Report",
-      "Detailed Valuation Estimate",
+      "Advanced Health Check",
+      "Enhanced Valuation Report",
+      "Sale-Readiness Assessment",
+      "Customer Concentration Lab",
       "Up to 100 Documents (5 GB)",
       "100 Active Leads",
       "Save up to 100 listings",
@@ -849,14 +856,14 @@ export const PLAN_CATALOG: PlanCatalogEntry[] = [
     storageDescription: "5 GB (Vault)",
     teamSeatDescription: "2 invited collaborators (owner excluded)",
     dealRoomDescription: "Not included",
-    valuationRefreshDescription: "Detailed estimate (on demand)",
+    valuationRefreshDescription: "On demand",
   },
   {
     key: "pro",
     name: "Pro",
     monthlyPrice: 20,
     annualPrice: 0,
-    tagline: "Serious owners preparing to grow or sell",
+    tagline: "Automation, Deal Rooms, and priority support",
     publicFeatures: [
       "Up to 5 Businesses",
       "Sale-Readiness Score (10 categories)",

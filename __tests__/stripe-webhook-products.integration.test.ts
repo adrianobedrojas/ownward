@@ -799,7 +799,7 @@ describe.each<ProductCase>([
     if (productCase.key === "confidential_sale_launch") {
       expect(resourcesForPurchase(purchase.id)[0]?.status).toBe("refunded");
       const listing = db.tables.business_listings.find((l) => l.id === productCase.targetId);
-      expect(listing?.is_confidential).toBe(false);
+      expect(listing?.is_confidential).toBe(true);
     }
   });
 

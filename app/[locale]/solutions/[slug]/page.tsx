@@ -147,7 +147,7 @@ export default async function SolutionDetailPage({
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-500">{isSpanish ? "Precio" : "Price"}</p>
           <p className="mt-1 text-2xl font-semibold text-cyan-300">
-            {publicSolution.displayPrice === 0 ? "Free" : `$${publicSolution.displayPrice}`}
+            {publicSolution.displayPrice === 0 ? (isSpanish ? "Gratis" : "Free") : `$${publicSolution.displayPrice}`}
           </p>
           <p className="text-sm text-slate-400">{publicSolution.billingContext}</p>
         </div>
@@ -175,6 +175,8 @@ export default async function SolutionDetailPage({
             locale={safeLocale}
             ctaBehavior={publicSolution.ctaBehavior}
             status={publicSolution.status}
+            accessRoute={publicSolution.accessRoute}
+            analyticsSource="solution_detail"
             requiredTargetType={publicSolution.requiredTargetType}
             targetOptions={listingTargetOptions}
             targetSelectLabel={publicSolution.requiredTargetType === "listing" ? targetSelectLabel : undefined}

@@ -57,7 +57,7 @@ describe("Commerce targets route overlap messaging", () => {
     return GET(new Request(`https://ownward.example${path}`));
   }
 
-  it("returns English included-plan message for enhanced valuation", async () => {
+  it("returns free-route guidance for enhanced valuation", async () => {
     const response = await callTargets(
       "/api/commerce/targets?productKey=enhanced_valuation_report&locale=en",
       {
@@ -70,13 +70,14 @@ describe("Commerce targets route overlap messaging", () => {
       }
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      includedMessage: "Included in your Pro plan. Use the valuation workflow directly.",
+      error: "This solution does not require checkout targets.",
+      route: "/valuation?mode=detailed",
     });
   });
 
-  it("returns Spanish included-plan message for enhanced valuation", async () => {
+  it("returns Spanish free-route guidance for enhanced valuation", async () => {
     const response = await callTargets(
       "/api/commerce/targets?productKey=enhanced_valuation_report&locale=es",
       {
@@ -89,9 +90,10 @@ describe("Commerce targets route overlap messaging", () => {
       }
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      includedMessage: "Incluido en tu plan Pro. Usa directamente el flujo de valuacion.",
+      error: "This solution does not require checkout targets.",
+      route: "/valuation?mode=detailed",
     });
   });
 
@@ -116,7 +118,7 @@ describe("Commerce targets route overlap messaging", () => {
     });
   });
 
-  it("returns included capability message for confidential listing in Spanish", async () => {
+  it("returns free-route guidance for confidential listing in Spanish", async () => {
     const response = await callTargets(
       "/api/commerce/targets?productKey=confidential_sale_launch&locale=es",
       {
@@ -129,9 +131,10 @@ describe("Commerce targets route overlap messaging", () => {
       }
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      includedMessage: "La capacidad de listado confidencial ya esta incluida en tu plan actual.",
+      error: "This solution does not require checkout targets.",
+      route: "/sell",
     });
   });
 });

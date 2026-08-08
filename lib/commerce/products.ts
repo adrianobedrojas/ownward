@@ -70,6 +70,7 @@ export type RequiredTargetType =
   | "acquisition_target";
 
 export type CtaBehavior =
+  | "open"
   | "checkout"
   | "coming_soon"
   | "included"
@@ -97,6 +98,7 @@ export interface ProductDefinition {
   deliverablesEs: string[];
   detailRoute: string;
   ctaBehavior: CtaBehavior;
+  accessRoute?: string | null;
   requiresAuth: boolean;
   requiredTargetType: RequiredTargetType;
   stripePriceEnvVar: string | null;
@@ -126,6 +128,7 @@ export type PublicSolution = {
   deliverables: string[];
   detailRoute: string;
   ctaBehavior: CtaBehavior;
+  accessRoute?: string | null;
   requiresAuth: boolean;
   requiredTargetType: RequiredTargetType;
   cancelPath: string;
@@ -360,15 +363,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_sale_readiness", "improve_valuation"],
-    billingModel: "one_time",
-    displayPrice: 5,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Downloadable memo"],
     deliverablesEs: ["Memo descargable"],
     detailRoute: "/solutions/buyer-lens-memo",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/valuation?mode=detailed",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_BUYER_LENS_MEMO",
@@ -393,15 +397,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_sale_readiness"],
-    billingModel: "one_time",
-    displayPrice: 5,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Risk summary"],
     deliverablesEs: ["Resumen de riesgo"],
     detailRoute: "/solutions/customer-risk-scan",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/customer-concentration",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_CUSTOMER_RISK_SCAN",
@@ -426,15 +431,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_sale_readiness"],
-    billingModel: "one_time",
-    displayPrice: 5,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Owner dependence report"],
     deliverablesEs: ["Informe de dependencia del dueño"],
     detailRoute: "/solutions/owner-dependence-scan",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/sale-readiness",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_OWNER_DEPENDENCE_SCAN",
@@ -459,15 +465,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_valuation"],
-    billingModel: "one_time",
-    displayPrice: 10,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Driver map", "Action summary"],
     deliverablesEs: ["Mapa de impulsores", "Resumen de acciones"],
     detailRoute: "/solutions/value-dna-snapshot",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/valuation?mode=detailed",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_VALUE_DNA_SNAPSHOT",
@@ -492,15 +499,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_valuation", "improve_sale_readiness"],
-    billingModel: "one_time",
-    displayPrice: 20,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago unico",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Enhanced valuation report"],
     deliverablesEs: ["Informe de valuacion mejorado"],
     detailRoute: "/solutions/enhanced-valuation-report",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/valuation?mode=detailed",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_ENHANCED_VALUATION_REPORT",
@@ -531,15 +539,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_sale_readiness"],
-    billingModel: "one_time",
-    displayPrice: 10,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Blueprint report"],
     deliverablesEs: ["Informe de plan"],
     detailRoute: "/solutions/sale-readiness-blueprint",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/sale-readiness",
     requiresAuth: true,
     requiredTargetType: "business",
     stripePriceEnvVar: "STRIPE_PRICE_SALE_READINESS_BLUEPRINT",
@@ -564,11 +573,11 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_valuation"],
-    billingModel: "one_time",
-    displayPrice: 10,
+    billingModel: "free",
+    displayPrice: 0,
     status: "planned",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Free when available",
+    billingContextEs: "Gratis cuando esté disponible",
     deliverablesEn: ["Improvement roadmap"],
     deliverablesEs: ["Hoja de ruta de mejora"],
     detailRoute: "/solutions/value-improvement-roadmap",
@@ -687,11 +696,11 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "business_intelligence",
     audience: ["owner", "seller"],
     goals: ["improve_sale_readiness", "improve_valuation"],
-    billingModel: "one_time",
-    displayPrice: 20,
+    billingModel: "free",
+    displayPrice: 0,
     status: "planned",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Free when available",
+    billingContextEs: "Gratis cuando esté disponible",
     deliverablesEn: ["Multi-report package"],
     deliverablesEs: ["Paquete multi-informe"],
     detailRoute: "/solutions/exit-intelligence-bundle",
@@ -825,15 +834,16 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "transactions",
     audience: ["seller"],
     goals: ["run_transaction", "support_transfer"],
-    billingModel: "one_time",
-    displayPrice: 20,
+    billingModel: "free",
+    displayPrice: 0,
     status: "active",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Included with a free Ownward account",
+    billingContextEs: "Incluido con una cuenta gratuita de Ownward",
     deliverablesEn: ["Launch checklist"],
     deliverablesEs: ["Checklist de lanzamiento"],
     detailRoute: "/solutions/confidential-sale-launch",
-    ctaBehavior: "checkout",
+    ctaBehavior: "open",
+    accessRoute: "/sell",
     requiresAuth: true,
     requiredTargetType: "listing",
     stripePriceEnvVar: "STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH",
@@ -843,11 +853,11 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     cancelPath: "/sell",
     disclaimersEn: [
       "Listing must remain published and include a teaser title.",
-      "Confidential state is reversed on full refund when no other active launch exists.",
+      "Historical paid launches are retained for audit and refund records.",
     ],
     disclaimersEs: [
       "El listado debe mantenerse publicado e incluir un titulo teaser.",
-      "El estado confidencial se revierte con reembolso total si no existe otro lanzamiento activo.",
+      "Los lanzamientos de pago históricos se conservan para auditoría y reembolsos.",
     ],
     active: true,
     isPublic: true,
@@ -897,11 +907,11 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "buyer_solutions",
     audience: ["buyer"],
     goals: ["evaluate_acquisition"],
-    billingModel: "one_time",
-    displayPrice: 5,
+    billingModel: "free",
+    displayPrice: 0,
     status: "planned",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Free when available",
+    billingContextEs: "Gratis cuando esté disponible",
     deliverablesEn: ["Comparison worksheet set"],
     deliverablesEs: ["Conjunto de hojas de comparación"],
     detailRoute: "/solutions/business-comparison-pack",
@@ -930,11 +940,11 @@ const PRODUCT_REGISTRY: Record<ProductKey, ProductDefinition> = {
     category: "buyer_solutions",
     audience: ["buyer"],
     goals: ["evaluate_acquisition"],
-    billingModel: "one_time",
-    displayPrice: 10,
+    billingModel: "free",
+    displayPrice: 0,
     status: "planned",
-    billingContextEn: "one-time",
-    billingContextEs: "pago único",
+    billingContextEn: "Free when available",
+    billingContextEs: "Gratis cuando esté disponible",
     deliverablesEn: ["Readiness report"],
     deliverablesEs: ["Informe de preparación"],
     detailRoute: "/solutions/acquisition-readiness-profile",
@@ -1285,6 +1295,32 @@ function assertRegistryInvariants(): void {
       }
     }
 
+    if (product.status === "active" && product.billingModel === "free") {
+      if (product.displayPrice !== 0) {
+        throw new Error(`Active free product must have displayPrice=0: ${product.key}`);
+      }
+      if (product.ctaBehavior !== "open") {
+        throw new Error(`Active free product must use open CTA: ${product.key}`);
+      }
+      if (!product.accessRoute) {
+        throw new Error(`Active free product must declare accessRoute: ${product.key}`);
+      }
+    }
+
+    if (product.ctaBehavior === "checkout") {
+      if (product.displayPrice <= 0) {
+        throw new Error(`Checkout product must have a paid displayPrice: ${product.key}`);
+      }
+      if (!product.stripePriceEnvVar) {
+        throw new Error(`Checkout product must declare stripePriceEnvVar: ${product.key}`);
+      }
+      if (!implementedBehaviors.has(product.fulfillmentBehavior)) {
+        throw new Error(
+          `Checkout product has unimplemented fulfillment: ${product.key} -> ${product.fulfillmentBehavior}`
+        );
+      }
+    }
+
     if (product.status === "active" && product.ctaBehavior === "checkout") {
       if (!product.stripePriceEnvVar) {
         throw new Error(`Active checkout product must declare stripePriceEnvVar: ${product.key}`);
@@ -1295,11 +1331,15 @@ function assertRegistryInvariants(): void {
         );
       }
       checkoutPriceEnvVars.add(product.stripePriceEnvVar);
+    }
 
-      if (!implementedBehaviors.has(product.fulfillmentBehavior)) {
-        throw new Error(
-          `Active checkout product has unimplemented fulfillment: ${product.key} -> ${product.fulfillmentBehavior}`
-        );
+    if (product.status !== "active" && product.ctaBehavior === "checkout") {
+      throw new Error(`Planned/inactive products cannot expose checkout CTA: ${product.key}`);
+    }
+
+    if (product.key === "verified_listing_pack" || product.key === "launch_intelligence_pack") {
+      if (product.isPublic) {
+        throw new Error(`Legacy product must remain non-public: ${product.key}`);
       }
     }
   }
@@ -1368,7 +1408,8 @@ export function getPurchasableProduct(key: string): ProductDefinition | null {
 }
 
 export function isProductConfigured(product: ProductDefinition): boolean {
-  if (!product.stripePriceEnvVar) return product.ctaBehavior !== "checkout";
+  if (product.ctaBehavior !== "checkout") return true;
+  if (!product.stripePriceEnvVar) return false;
   return Boolean(resolveStripePriceFromEnv(product));
 }
 
@@ -1406,6 +1447,7 @@ export function toPublicSolution(
     deliverables: isSpanish ? product.deliverablesEs : product.deliverablesEn,
     detailRoute: product.detailRoute,
     ctaBehavior: product.ctaBehavior,
+    accessRoute: product.accessRoute ?? null,
     requiresAuth: product.requiresAuth,
     requiredTargetType: product.requiredTargetType,
     cancelPath: product.cancelPath,

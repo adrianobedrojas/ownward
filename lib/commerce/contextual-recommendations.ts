@@ -375,6 +375,10 @@ function resolveCtaState(
   const inclusion = INCLUDED_RULES[product.key];
   const includedInPlan = Boolean(inclusion?.plans.includes(currentPlan));
 
+  if (product.status === "active" && product.ctaBehavior === "open" && product.accessRoute) {
+    return { state: "open", href: product.accessRoute, includedInPlan: false };
+  }
+
   if (includedInPlan && inclusion) {
     return { state: "included", href: inclusion.route, includedInPlan: true };
   }

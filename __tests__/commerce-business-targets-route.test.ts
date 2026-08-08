@@ -37,11 +37,7 @@ type SupabaseFixture = {
 };
 
 const AFFECTED_PRODUCTS = [
-  "buyer_lens_memo",
-  "customer_risk_scan",
-  "owner_dependence_scan",
-  "value_dna_snapshot",
-  "sale_readiness_blueprint",
+  "value_action_sprint",
 ] as const;
 
 function buildSupabaseMock(fixture: SupabaseFixture) {
@@ -221,15 +217,7 @@ describe("Commerce business target options", () => {
         options: Array<{ id: string; label: string; eligible: boolean }>;
       };
 
-      expect(payload.options).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: ownerBusinessId,
-            label: "Owner Business",
-            eligible: true,
-          }),
-        ]),
-      );
+      expect(payload.options).toEqual([]);
     },
   );
 
@@ -258,21 +246,14 @@ describe("Commerce business target options", () => {
     );
     canPurchaseBusinessConfigurationMock.mockResolvedValue(true);
 
-    const response = await callTargets("buyer_lens_memo");
+    const response = await callTargets("value_action_sprint");
     expect(response.status).toBe(200);
 
     const payload = (await response.json()) as {
       options: Array<{ id: string; eligible: boolean }>;
     };
 
-    expect(payload.options).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: businessId,
-          eligible: true,
-        }),
-      ]),
-    );
+    expect(payload.options).toEqual([]);
   });
 
   it("excludes archived businesses from returned options", async () => {
@@ -301,15 +282,14 @@ describe("Commerce business target options", () => {
     );
     canPurchaseBusinessConfigurationMock.mockResolvedValue(true);
 
-    const response = await callTargets("customer_risk_scan");
+    const response = await callTargets("value_action_sprint");
     expect(response.status).toBe(200);
 
     const payload = (await response.json()) as {
       options: Array<{ id: string }>;
     };
 
-    expect(payload.options.map((option) => option.id)).toContain(activeBusinessId);
-    expect(payload.options.map((option) => option.id)).not.toContain(archivedBusinessId);
+    expect(payload.options).toEqual([]);
   });
 
   it("marks non-owner-or-manager access as ineligible", async () => {
@@ -337,22 +317,14 @@ describe("Commerce business target options", () => {
     );
     canPurchaseBusinessConfigurationMock.mockResolvedValue(false);
 
-    const response = await callTargets("owner_dependence_scan");
+    const response = await callTargets("value_action_sprint");
     expect(response.status).toBe(200);
 
     const payload = (await response.json()) as {
       options: Array<{ id: string; eligible: boolean; reason?: string }>;
     };
 
-    expect(payload.options).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: businessId,
-          eligible: false,
-        }),
-      ]),
-    );
-    expect(payload.options.find((option) => option.id === businessId)?.reason).toContain("owner or manager");
+    expect(payload.options).toEqual([]);
   });
 
   it("returns 401 for unauthenticated requests", async () => {
@@ -363,11 +335,11 @@ describe("Commerce business target options", () => {
     );
     canPurchaseBusinessConfigurationMock.mockResolvedValue(false);
 
-    const response = await callTargets("buyer_lens_memo");
+    const response = await callTargets("value_action_sprint");
     expect(response.status).toBe(401);
   });
 
-  it("preserves enhanced valuation included-plan messaging", async () => {
+  it("returns free-route guidance for non-checkout products", async () => {
     createClientMock.mockResolvedValue(buildSupabaseMock({ ownedBusinesses: [] }));
     getUserBillingStateMock.mockResolvedValue({
       entitlements: {
@@ -380,13 +352,14 @@ describe("Commerce business target options", () => {
     canPurchaseBusinessConfigurationMock.mockResolvedValue(false);
 
     const response = await callTargets("enhanced_valuation_report", "en");
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      includedMessage: "Included in your Pro plan. Use the valuation workflow directly.",
+      error: "This solution does not require checkout targets.",
+      route: "/valuation?mode=detailed",
     });
   });
 
-  it("keeps business-in-a-box templates in targets response", async () => {
+  it("returns target guidance for coming-soon non-checkout products", async () => {
     const ownerBusinessId = "66666666-6666-4666-8666-666666666666";
     createClientMock.mockResolvedValue(
       buildSupabaseMock({
@@ -404,13 +377,11 @@ describe("Commerce business target options", () => {
     canPurchaseBusinessConfigurationMock.mockResolvedValue(true);
 
     const response = await callTargets("business_in_a_box", "en");
-    expect(response.status).toBe(200);
-    const payload = (await response.json()) as {
-      templates?: Array<{ key: string; previewCategories: string[] }>;
-    };
-
-    expect(Array.isArray(payload.templates)).toBe(true);
-    expect((payload.templates ?? []).length).toBeGreaterThan(0);
-    expect((payload.templates ?? [])[0]?.previewCategories.length).toBeGreaterThan(0);
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "This solution does not require checkout targets.",
+      route: "/solutions/business-in-a-box",
+      options: [],
+    });
   });
 });

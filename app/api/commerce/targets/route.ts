@@ -70,6 +70,16 @@ export async function GET(req: Request) {
     if (!product || !product.isPublic || !product.requiresAuth) {
       return NextResponse.json({ error: "Invalid or unavailable product" }, { status: 400 });
     }
+    if (product.ctaBehavior !== "checkout") {
+      return NextResponse.json(
+        {
+          error: "This solution does not require checkout targets.",
+          route: product.accessRoute ?? product.detailRoute,
+          options: [] as TargetOption[],
+        },
+        { status: 409 },
+      );
+    }
 
     const supabase = await createClient();
     const {
@@ -82,17 +92,6 @@ export async function GET(req: Request) {
     }
 
     const billing = await getUserBillingState(supabase, user.id);
-
-    if (product.key === "enhanced_valuation_report" && billing.entitlements.valuationLevel === "enhanced") {
-      return NextResponse.json({
-        options: [] as TargetOption[],
-        includedMessage:
-          locale === "es"
-            ? "Incluido en tu plan Pro. Usa directamente el flujo de valuacion."
-            : "Included in your Pro plan. Use the valuation workflow directly.",
-        route: `/${locale === "es" ? "es/" : ""}valuation?mode=detailed`,
-      });
-    }
 
     if (product.key === "deal_room_90" && billing.entitlements.dealRooms) {
       const { count: activeRoomCount } = await supabase
@@ -111,17 +110,6 @@ export async function GET(req: Request) {
           route: `/${locale === "es" ? "es/" : ""}deals`,
         });
       }
-    }
-
-    if (product.key === "confidential_sale_launch" && billing.entitlements.confidentialListings) {
-      return NextResponse.json({
-        options: [] as TargetOption[],
-        includedMessage:
-          locale === "es"
-            ? "La capacidad de listado confidencial ya esta incluida en tu plan actual."
-            : "Confidential listing capability is already included in your current plan.",
-        route: `/${locale === "es" ? "es/" : ""}sell`,
-      });
     }
 
     if (product.key === "business_in_a_box") {
@@ -279,28 +267,6 @@ export async function GET(req: Request) {
 
       const templates = listPublicBusinessInABoxTemplateSummaries(locale);
       return NextResponse.json({ options, templates });
-    }
-
-    if (product.key === "enhanced_valuation_report") {
-      const { data: businesses } = await supabase
-        .from("businesses")
-        .select("id, name, deleted_at")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
-
-      const options: TargetOption[] = (businesses ?? []).map((business) => ({
-        id: String(business.id),
-        label: String(business.name ?? (locale === "es" ? "Negocio" : "Business")),
-        eligible: business.deleted_at === null,
-        reason:
-          business.deleted_at !== null
-            ? locale === "es"
-              ? "No elegible: negocio archivado"
-              : "Not eligible: archived business"
-            : undefined,
-      }));
-
-      return NextResponse.json({ options });
     }
 
     if (product.requiredTargetType === "business") {

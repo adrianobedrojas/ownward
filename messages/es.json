@@ -347,7 +347,7 @@
   },
   "Pricing": {
     "heroTitle": "Planes y precios de Ownward",
-    "heroDescription": "Comienza gratis como Explorer, luego desbloquea capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción a medida que crecen tus necesidades.",
+    "heroDescription": "La inteligencia central de Ownward es gratis. Mejora cuando necesites más capacidad, colaboración, automatización, Deal Rooms o soporte.",
     "perMonth": "/ mes",
     "mostPopular": "Más popular",
     "recommendedBadge": "Recomendado",
@@ -377,7 +377,7 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "Lanza lo esencial para un negocio",
+        "tagline": "Más capacidad para la ejecución diaria",
         "features": [
           "1 Espacio de trabajo",
           "10 Hitos / mes",
@@ -395,7 +395,7 @@
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Crece con mejores sistemas y colaboración",
+        "tagline": "Escala en múltiples negocios y equipos",
         "features": [
           "Hasta 2 negocios",
           "Seguimiento de ingresos y gastos",
@@ -414,7 +414,7 @@
       },
       "pro": {
         "name": "Pro",
-        "tagline": "Prepárate para acuerdos, diligencia y venta",
+        "tagline": "Automatización, Deal Rooms y soporte prioritario",
         "features": [
           "Hasta 5 negocios",
           "Puntaje de preparación para venta (10 categorías)",
@@ -430,7 +430,7 @@
       },
       "free": {
         "name": "Explorer",
-        "tagline": "Explora la compra o creación de un negocio a tu ritmo",
+        "tagline": "Inteligencia central para un negocio, gratis para siempre",
         "features": [
           "1 Espacio de trabajo",
           "3 Hitos / mes",
@@ -470,24 +470,24 @@
       "genericRecommendation": "Úsalo como punto de partida y luego compara la capacidad y las herramientas incluidas abajo.",
       "goals": {
         "first-workspace": {
-          "title": "Crear mi primer espacio de trabajo",
-          "description": "Empieza a gestionar un negocio sin pagar primero.",
-          "recommendation": "Explorer te da un espacio de trabajo gratis y lo básico para empezar."
+          "title": "Iniciar mi primer espacio de trabajo",
+          "description": "Empieza con un negocio e inteligencia central gratis.",
+          "recommendation": "Explorer incluye un espacio de trabajo e inteligencia central sin costo."
         },
-        "bookkeeping": {
-          "title": "Organizar la contabilidad",
-          "description": "Registra ingresos, gastos, recibos y cierres mensuales.",
-          "recommendation": "Starter es el primer plan con contabilidad habilitada, así que es el siguiente paso correcto para las finanzas operativas."
+        "capacity-growth": {
+          "title": "Aumentar capacidad",
+          "description": "Necesitas más hitos, documentos, prospectos y capacidad de listados.",
+          "recommendation": "Starter es el primer paso de pago para mayor capacidad operativa."
         },
-        "team-growth": {
-          "title": "Crecer con un equipo",
-          "description": "Agrega más colaboración, capacidad y espacio para escalar.",
-          "recommendation": "Builder agrega más capacidad, más prospectos, más documentos y más colaboración para una operación en crecimiento."
+        "multi-business": {
+          "title": "Gestionar múltiples negocios",
+          "description": "Opera más de un espacio de trabajo con mayor colaboración.",
+          "recommendation": "Builder es ideal cuando operas múltiples negocios."
         },
-        "sale-readiness": {
-          "title": "Prepararme para vender",
-          "description": "Activa flujos listos para diligencia y herramientas avanzadas de transacción.",
-          "recommendation": "Pro desbloquea preparación para venta, concentración de clientes, deal rooms y el centro de comando del vendedor."
+        "deal-automation-support": {
+          "title": "Necesito Deal Rooms y automatización",
+          "description": "Agrega Deal Rooms incluidos, actualización semanal de valuación y soporte prioritario.",
+          "recommendation": "Pro es la mejor opción para ejecución transaccional y automatización."
         }
       }
     },
@@ -527,7 +527,7 @@
     },
     "comparison": {
       "title": "Comparación de planes",
-      "subtitle": "Explorer te da un primer paso real — los planes de pago añaden capacidad, análisis avanzado, colaboración, privacidad y herramientas de transacción.",
+      "subtitle": "Explorer incluye inteligencia central para un negocio. Los planes de pago añaden capacidad, colaboración, automatización, Deal Rooms y soporte.",
       "rowLabels": {
         "workspaces": "Espacios de trabajo",
         "listings": "Listados",
@@ -1587,8 +1587,8 @@
       "guestCreateAccount": "Crear una cuenta gratuita",
       "guestOr": "o",
       "guestNote": "Una cuenta gratuita te permite iniciar el asistente y guardar un borrador.",
-      "freeUserNote": "Se requiere un plan de pago para generar un informe de valuación completo.",
-      "freeUserUpgrade": "Mejorar a Starter",
+      "freeUserNote": "Una cuenta gratuita incluye acceso completo al informe detallado de valuación.",
+      "freeUserUpgrade": "Ver planes",
       "startReport": "Iniciar un nuevo informe",
       "continueReport": "Continuar informe",
       "newReport": "Nuevo informe"
@@ -1634,11 +1634,11 @@
       "upgradeAction": "Ver planes"
     },
     "tiers": {
-      "free": "Gratuito — Solo vista previa de estimación rápida",
-      "starter": "Starter — Rango de valuación, confianza y hasta 3 acciones",
-      "builder": "Builder — Análisis multiaño, mapa de riesgos, dependencia del propietario y concentración de clientes",
-      "pro": "Pro — Informe completo con ADN de valor, perspectiva del comprador, puente de valor y actualización semanal",
-      "upgradePrompt": "Mejora tu plan para desbloquear informes completos"
+      "free": "Explorer — Inteligencia central para un negocio",
+      "starter": "Starter — Más capacidad operativa",
+      "builder": "Builder — Capacidad multi-negocio y colaboración",
+      "pro": "Pro — Deal Rooms, automatización y soporte prioritario",
+      "upgradePrompt": "Resumen de capacidades por plan"
     },
     "calculator": {
       "annualRevenue": "Ingresos anuales (opcional)",
@@ -1654,7 +1654,9 @@
       "highMultiple": "Múltiplo alto",
       "annualRevenuePlaceholder": "ej. 500,000",
       "baseEarningsPlaceholder": "ej. 150,000",
-      "multiplesHint": "Los múltiplos de la industria suelen oscilar entre 1.5× y 6× las ganancias normalizadas"
+      "multiplesHint": "Los múltiplos de la industria suelen oscilar entre 1.5× y 6× las ganancias normalizadas",
+      "upgradeRequired": "La valuación detallada está incluida con una cuenta gratuita.",
+      "saveEstimateUpgradeRequired": "Guardar estimaciones está incluido con una cuenta gratuita."
     },
     "wizard": {
       "step1": "Perfil del negocio",
@@ -1683,11 +1685,11 @@
       "archiveSuccess": "Informe archivado.",
       "archiveError": "No se pudo archivar el informe.",
       "authRequired": "Debes iniciar sesión.",
-      "upgradeRequired": "Mejora a Starter para generar y guardar un informe de valuación. El plan gratuito incluye solo una vista previa básica.",
+      "upgradeRequired": "La valuación detallada está incluida con una cuenta gratuita.",
       "reportNotFound": "Informe no encontrado.",
       "validationError": "Por favor corrige los campos indicados.",
       "saveEstimateAuthRequired": "Debes iniciar sesión para guardar estimaciones.",
-      "saveEstimateUpgradeRequired": "Mejora a Starter para guardar estimaciones."
+      "saveEstimateUpgradeRequired": "Guardar estimaciones está incluido con una cuenta gratuita."
     },
     "industryLabels": {
       "services": "Servicios profesionales",

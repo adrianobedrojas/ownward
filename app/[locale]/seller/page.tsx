@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getUserBillingState, checkProFeature } from '@/lib/billing';
 import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import SellerClient from './SellerClient';
 
 export const metadata = {
-  title: 'Seller Area | Ownward Pro',
+  title: 'Seller Area | Ownward',
   description: 'Manage your sale process, pipeline, inquiries, deal rooms, and offers.',
 };
 
@@ -22,13 +21,6 @@ export default async function SellerPage({
 
   if (!user) {
     redirect('/login?next=/seller');
-  }
-
-  const billing = await getUserBillingState(supabase, user.id);
-  const proCheck = checkProFeature(billing.entitlements, 'sellerCommandCenter');
-
-  if (proCheck) {
-    redirect('/pricing?upgrade=seller');
   }
 
   const { data: businesses } = await supabase
@@ -90,7 +82,6 @@ export default async function SellerPage({
           placement="seller_command_center"
           locale={locale === 'es' ? 'es' : 'en'}
           userId={user.id}
-          currentPlan={billing.plan}
         />
       </div>
       <SellerClient

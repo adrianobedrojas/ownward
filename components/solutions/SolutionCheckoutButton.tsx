@@ -67,8 +67,10 @@ export function shouldFetchTargetOptions({
 type Props = {
   productKey: string;
   locale: "en" | "es";
-  ctaBehavior: "checkout" | "coming_soon" | "included" | "contact" | "manage";
+  ctaBehavior: "open" | "checkout" | "coming_soon" | "included" | "contact" | "manage";
   status: "active" | "planned" | "coming_soon" | "included" | "contact";
+  accessRoute?: string | null;
+  analyticsSource?: string;
   requiredTargetType: "none" | "listing" | "business" | "deal_room" | "transaction" | "acquisition_target";
   /** Pre-resolved target ID for contextual checkout (skips selection UI). */
   targetId?: string;
@@ -86,6 +88,8 @@ type Props = {
   noEligibleTargetLinkText?: string;
   /** Callback fired when the checkout button is clicked (before the network call). */
   onStartCheckout?: () => void;
+  /** Callback fired when a free/open solution is started. */
+  onStartFree?: () => void;
 };
 
 type TemplateOption = {
@@ -107,6 +111,8 @@ export default function SolutionCheckoutButton({
   locale,
   ctaBehavior,
   status,
+  accessRoute,
+  analyticsSource,
   requiredTargetType,
   targetId: contextTargetId,
   targetOptions: serverTargetOptions,
@@ -116,6 +122,7 @@ export default function SolutionCheckoutButton({
   noEligibleTargetHref,
   noEligibleTargetLinkText,
   onStartCheckout,
+  onStartFree,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const hasContextTarget = hasContextTargetId(contextTargetId);
@@ -166,6 +173,7 @@ export default function SolutionCheckoutButton({
         included: "Incluido",
         contact: "Contáctanos",
         manage: "Gestionar",
+        open: "Abrir",
         fallbackError: "No se pudo iniciar el pago.",
       };
     }
@@ -195,11 +203,13 @@ export default function SolutionCheckoutButton({
       included: "Included",
       contact: "Contact us",
       manage: "Manage",
+      open: "Open",
       fallbackError: "Unable to start checkout.",
     };
   }, [locale]);
 
   const isCheckoutActive = ctaBehavior === "checkout" && status === "active";
+  const isOpenActive = ctaBehavior === "open" && status === "active" && Boolean(accessRoute);
   const checkoutTargetId = resolveCheckoutTargetId(contextTargetId, selectedTargetId);
 
   useEffect(() => {
@@ -258,6 +268,31 @@ export default function SolutionCheckoutButton({
       active = false;
     };
   }, [productKey, locale, requiredTargetType, labels.fallbackError, isCheckoutActive, contextTargetId, serverTargetOptions]);
+
+  if (isOpenActive) {
+    const destination = String(accessRoute);
+    const handleOpen = () => {
+      onStartFree?.();
+      trackGoogleAnalyticsConversion(
+        "free_solution_started",
+        {
+          product_key: productKey,
+          destination,
+          source: analyticsSource ?? "solution_cta",
+        },
+        { dedupeKey: `free_solution_started:${productKey}:${destination}` },
+      );
+    };
+    return (
+      <a
+        href={destination}
+        onClick={handleOpen}
+        className="inline-flex items-center rounded-lg bg-cyan-400 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300"
+      >
+        {labels.open}
+      </a>
+    );
+  }
 
   if (!isCheckoutActive) {
     const text =

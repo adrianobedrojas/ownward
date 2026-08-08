@@ -31,7 +31,7 @@ describe('Pricing integrations and workspace access', () => {
   });
 
   it('keeps free-plan entitlements unchanged even when pricing query params recommend a paid plan', () => {
-    const recommendation = getPricingRecommendationFromSearchParams({ goal: 'sale-readiness' });
+    const recommendation = getPricingRecommendationFromSearchParams({ goal: 'deal-automation-support' });
     expect(recommendation?.plan).toBe('pro');
 
     const entitlements = getEntitlementsByPlan('free');
@@ -41,33 +41,26 @@ describe('Pricing integrations and workspace access', () => {
 });
 
 describe('Bookkeeping and plan recommendations', () => {
-  it('uses Starter or higher wording for bookkeeping access', () => {
+  it('allows Explorer bookkeeping access', () => {
     const result = checkBookkeepingAccess(getEntitlementsByPlan('free'));
-    expect(result.allowed).toBe(false);
-    if (!result.allowed) {
-      expect(result.message).toContain('Starter or higher');
-      expect(result.message).not.toContain('Builder or higher');
-    }
+    expect(result.allowed).toBe(true);
   });
 
   it('exposes goal-based plan recommendations', () => {
     expect(PLAN_FINDER_GOALS.map((goal) => goal.key)).toEqual([
       'first-workspace',
-      'bookkeeping',
-      'team-growth',
-      'sale-readiness',
+      'capacity-growth',
+      'multi-business',
+      'deal-automation-support',
     ]);
     expect(getPricingRecommendationFromSearchParams({ goal: 'first-workspace' })?.plan).toBe('free');
-    expect(getPricingRecommendationFromSearchParams({ goal: 'bookkeeping' })?.plan).toBe('starter');
-    expect(getPricingRecommendationFromSearchParams({ goal: 'team-growth' })?.plan).toBe('builder');
-    expect(getPricingRecommendationFromSearchParams({ goal: 'sale-readiness' })?.plan).toBe('pro');
+    expect(getPricingRecommendationFromSearchParams({ goal: 'capacity-growth' })?.plan).toBe('starter');
+    expect(getPricingRecommendationFromSearchParams({ goal: 'multi-business' })?.plan).toBe('builder');
+    expect(getPricingRecommendationFromSearchParams({ goal: 'deal-automation-support' })?.plan).toBe('pro');
   });
 
   it('maps existing upgrade query params to plan recommendations', () => {
-    expect(getPricingRecommendationFromSearchParams({ upgrade: 'seller' })).toEqual({
-      plan: 'pro',
-      source: 'upgrade',
-    });
+    expect(getPricingRecommendationFromSearchParams({ upgrade: 'seller' })).toBeNull();
     expect(getPricingRecommendationFromSearchParams({ recommend: 'starter' })).toEqual({
       plan: 'starter',
       source: 'recommend',

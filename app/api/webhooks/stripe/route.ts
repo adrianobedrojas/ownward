@@ -360,6 +360,12 @@ async function activateFeaturedListingPromotion(
     );
 
   if (promotionError) {
+    throw new Error(
+      `[featured_listing] Failed to activate promotion for listing ${listingId}: ${promotionError.message}`
+    );
+  }
+}
+
 function isListingPromotionProductKey(
   value: string
 ): value is ListingPromotionProductKey {
@@ -2249,29 +2255,4 @@ async function reverseConfidentialSaleLaunchRefund(
     );
   }
 
-  const { data: activeLaunches, error: activeLaunchesError } = await supabaseAdmin
-    .from("confidential_sale_launches")
-    .select("id")
-    .eq("listing_id", launch.listing_id)
-    .eq("status", "active")
-    .limit(1);
-
-  if (activeLaunchesError) {
-    throw new Error(
-      `[one_time_product] Failed to validate active confidential launches for listing ${launch.listing_id}: ${activeLaunchesError.message}`
-    );
-  }
-
-  if ((activeLaunches ?? []).length === 0) {
-    const { error: listingUpdateError } = await supabaseAdmin
-      .from("business_listings")
-      .update({ is_confidential: false, updated_at: now })
-      .eq("id", launch.listing_id);
-
-    if (listingUpdateError) {
-      throw new Error(
-        `[one_time_product] Failed to restore listing visibility on refund for listing ${launch.listing_id}: ${listingUpdateError.message}`
-      );
-    }
-  }
 }
