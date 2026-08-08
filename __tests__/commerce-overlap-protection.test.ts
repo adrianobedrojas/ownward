@@ -318,7 +318,7 @@ describe("Commerce overlap protection", () => {
     confidential_sale_launches: [],
   };
 
-  it("blocks Enhanced Valuation checkout for Pro users with included enhanced access", async () => {
+  it("rejects Enhanced Valuation checkout because the solution is now free/open", async () => {
     const { response, stripeMock } = await callCheckout(
       {
         productKey: "enhanced_valuation_report",
@@ -338,7 +338,7 @@ describe("Commerce overlap protection", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      error: "Included in your Pro plan. Use the valuation workflow directly.",
+      error: "This solution is included with your account. Open it directly.",
       route: "/valuation?mode=detailed",
     });
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
@@ -370,7 +370,7 @@ describe("Commerce overlap protection", () => {
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
-  it("blocks Confidential Sale Launch checkout when confidential listing capability is included", async () => {
+  it("rejects Confidential Sale Launch checkout because the solution is now free/open", async () => {
     const { response, stripeMock } = await callCheckout(
       {
         productKey: "confidential_sale_launch",
@@ -390,13 +390,13 @@ describe("Commerce overlap protection", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      error: "Confidential listing capability is already included in your current plan.",
-      route: "/sell/22222222-2222-4222-8222-222222222222/edit",
+      error: "This solution is included with your account. Open it directly.",
+      route: "/sell",
     });
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
-  it("rejects duplicate target purchases server-side even if UI is bypassed", async () => {
+  it("rejects checkout for now-free products before duplicate checks", async () => {
     const { response, stripeMock } = await callCheckout(
       {
         productKey: "enhanced_valuation_report",
@@ -431,7 +431,8 @@ describe("Commerce overlap protection", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      error: "A purchase for this target is already pending or active",
+      error: "This solution is included with your account. Open it directly.",
+      route: "/valuation?mode=detailed",
     });
     expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled();
   });

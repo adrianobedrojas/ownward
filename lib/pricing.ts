@@ -62,9 +62,9 @@ export type PricingComparisonValue =
 
 export const PLAN_FINDER_GOALS = [
   { key: 'first-workspace', recommendedPlan: 'free' },
-  { key: 'bookkeeping', recommendedPlan: 'starter' },
-  { key: 'team-growth', recommendedPlan: 'builder' },
-  { key: 'sale-readiness', recommendedPlan: 'pro' },
+  { key: 'capacity-growth', recommendedPlan: 'starter' },
+  { key: 'multi-business', recommendedPlan: 'builder' },
+  { key: 'deal-automation-support', recommendedPlan: 'pro' },
 ] as const satisfies readonly { key: string; recommendedPlan: BillingPlan }[];
 
 export type PlanRecommendationGoal = (typeof PLAN_FINDER_GOALS)[number]['key'];
@@ -78,12 +78,11 @@ export type PricingRecommendation = {
 const RECOMMENDABLE_PLANS = new Set<BillingPlan>(ALL_PLAN_KEYS);
 
 const UPGRADE_RECOMMENDATIONS: Record<string, BillingPlan> = {
-  portfolio: 'pro',
   'pro-command-center': 'pro',
-  'customer-concentration': 'pro',
-  'sale-readiness': 'pro',
-  seller: 'pro',
-  bookkeeping: 'starter',
+  portfolio: 'pro',
+  team: 'builder',
+  capacity: 'starter',
+  'deal-rooms': 'pro',
 };
 
 function isBillingPlan(value: string): value is BillingPlan {
@@ -91,31 +90,21 @@ function isBillingPlan(value: string): value is BillingPlan {
 }
 
 function getPlanHealthLevel(plan: BillingPlan): PricingCardFeature {
-  if (plan === 'free') {
-    return { key: 'health', level: 'snapshot' };
-  }
-
-  if (plan === 'starter') {
-    return { key: 'health', level: 'checklist' };
-  }
-
-  return { key: 'health', level: 'advanced' };
+  const { entitlements } = getPlanCatalogEntry(plan);
+  return {
+    key: 'health',
+    level:
+      entitlements.healthLevel === 'advanced'
+        ? 'advanced'
+        : entitlements.healthLevel === 'basic'
+          ? 'checklist'
+          : 'snapshot',
+  };
 }
 
 function getPlanValuationLevel(plan: BillingPlan): PricingCardFeature {
-  if (plan === 'free') {
-    return { key: 'valuation', level: 'preview' };
-  }
-
-  if (plan === 'starter') {
-    return { key: 'valuation', level: 'basic' };
-  }
-
-  if (plan === 'builder') {
-    return { key: 'valuation', level: 'detailed' };
-  }
-
-  return { key: 'valuation', level: 'enhanced' };
+  const { entitlements } = getPlanCatalogEntry(plan);
+  return { key: 'valuation', level: entitlements.valuationLevel };
 }
 
 export function getPlanCardFeatures(plan: BillingPlan): PricingCardFeature[] {
@@ -151,13 +140,9 @@ export function getPlanCardFeatures(plan: BillingPlan): PricingCardFeature[] {
     features.push({ key: 'collaborators', count: entitlements.teamMemberLimit });
   }
 
-  if (plan === 'pro') {
-    features.push(
-      { key: 'saleReadiness', included: true },
-      { key: 'customerConcentration', included: true },
-      { key: 'sellerCommandCenter', included: true }
-    );
-  }
+  if (entitlements.saleReadiness) features.push({ key: 'saleReadiness', included: true });
+  if (entitlements.customerConcentration) features.push({ key: 'customerConcentration', included: true });
+  if (entitlements.sellerCommandCenter) features.push({ key: 'sellerCommandCenter', included: true });
 
   if (entitlements.activeDealRoomLimit > 0) {
     features.push({ key: 'dealRooms', count: entitlements.activeDealRoomLimit });
@@ -204,14 +189,7 @@ export function getComparisonValue(
     case 'valuationLevel':
       return {
         type: 'valuation',
-        level:
-          plan === 'free'
-            ? 'preview'
-            : plan === 'starter'
-              ? 'basic'
-              : plan === 'builder'
-                ? 'detailed'
-                : 'enhanced',
+        level: entitlements.valuationLevel,
       };
     case 'bookkeeping':
       return { type: 'boolean', included: entitlements.bookkeeping };

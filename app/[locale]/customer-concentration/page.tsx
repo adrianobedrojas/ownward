@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getUserBillingState, checkProFeature } from '@/lib/billing';
 import CustomerConcentrationClient from './CustomerConcentrationClient';
 
 export const metadata = {
-  title: 'Customer Concentration Lab | Ownward Pro',
+  title: 'Customer Concentration Lab | Ownward',
   description: 'Analyze customer revenue concentration and model diversification scenarios.',
 };
 
@@ -16,13 +15,6 @@ export default async function CustomerConcentrationPage() {
 
   if (!user) {
     redirect('/login?next=/customer-concentration');
-  }
-
-  const billing = await getUserBillingState(supabase, user.id);
-  const proCheck = checkProFeature(billing.entitlements, 'customerConcentration');
-
-  if (proCheck) {
-    redirect('/pricing?upgrade=customer-concentration');
   }
 
   const { data: businesses } = await supabase

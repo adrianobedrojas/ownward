@@ -151,16 +151,6 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
 
   const { supabase, user } = auth;
 
-  // Enforce valuation tier — free users cannot save drafts
-  const billing = await getUserBillingState(supabase, user.id);
-  const valuationLevel = billing.entitlements.valuationLevel;
-  if (valuationLevel === "preview") {
-    return {
-      success: false,
-      message: "Upgrade to Starter to save valuation reports.",
-    };
-  }
-
   const input = buildInputFromFormData(formData);
 
   const reportId = (formData.get("reportId") as string) ?? null;
@@ -241,16 +231,8 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
 
   const { supabase, user } = auth;
 
-  // Enforce valuation tier server-side — never trust client
   const billing = await getUserBillingState(supabase, user.id);
   const valuationLevel = billing.entitlements.valuationLevel;
-  if (valuationLevel === "preview") {
-    return {
-      success: false,
-      message:
-        "Upgrade to Starter to generate and save a valuation report. The free plan includes a basic estimate preview only.",
-    };
-  }
 
   const input = buildInputFromFormData(formData);
 
@@ -451,15 +433,6 @@ export async function saveEstimate(input: SaveEstimateInput): Promise<EstimateAc
   }
 
   const { supabase, user } = auth;
-
-  // Enforce valuation tier server-side — free/preview users cannot save estimates
-  const billing = await getUserBillingState(supabase, user.id);
-  if (billing.entitlements.valuationLevel === "preview") {
-    return {
-      success: false,
-      message: "Upgrade to Starter to save estimates.",
-    };
-  }
 
   const payload = {
     user_id: user.id,

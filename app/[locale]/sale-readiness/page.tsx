@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getUserBillingState, checkProFeature } from '@/lib/billing';
 import SaleReadinessClient from './SaleReadinessClient';
 
 export const metadata = {
@@ -16,13 +15,6 @@ export default async function SaleReadinessPage() {
 
   if (!user) {
     redirect('/login?next=/sale-readiness');
-  }
-
-  const billing = await getUserBillingState(supabase, user.id);
-  const proCheck = checkProFeature(billing.entitlements, 'saleReadiness');
-
-  if (proCheck) {
-    redirect('/pricing?upgrade=sale-readiness');
   }
 
   // Fetch the user's businesses

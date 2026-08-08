@@ -128,17 +128,15 @@ describe("Business-in-a-Box targets endpoint", () => {
       new Request("https://ownward.example/api/commerce/targets?productKey=business_in_a_box&locale=en")
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     const payload = (await response.json()) as {
       options: Array<{ id: string; label: string; description?: string; eligible: boolean }>;
-      templates: Array<{ key: string; name: string; previewCategories: string[] }>;
+      error: string;
+      route: string;
     };
 
-    expect(payload.options).toHaveLength(1);
-    expect(payload.options[0]?.label).toBe("Alpha Studio");
-    expect(payload.options[0]?.description).toContain("Profile 80%");
-    expect(payload.options[0]?.label).not.toContain("11111111-1111");
-    expect(payload.templates).toHaveLength(8);
-    expect(payload.templates[0]?.previewCategories.length).toBeGreaterThan(0);
+    expect(payload.error).toBe("This solution does not require checkout targets.");
+    expect(payload.route).toBe("/solutions/business-in-a-box");
+    expect(payload.options).toEqual([]);
   });
 });

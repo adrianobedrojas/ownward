@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserBillingState, checkProFeature } from '@/lib/billing';
 import { canWriteFinance } from '@/lib/business-access';
 
 export async function POST(req: NextRequest) {
@@ -11,12 +10,6 @@ export async function POST(req: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const billing = await getUserBillingState(supabase, user.id);
-  const proCheck = checkProFeature(billing.entitlements, 'saleReadiness');
-  if (proCheck) {
-    return NextResponse.json({ error: proCheck.message }, { status: 403 });
   }
 
   let body: { businessId: string; input: unknown; result: Record<string, unknown> };

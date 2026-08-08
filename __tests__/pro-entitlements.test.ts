@@ -25,22 +25,22 @@ describe("Pro entitlements", () => {
     expect(ent.bookkeeping).toBe(true);
   });
 
-  it("free plan has all Pro capabilities disabled", async () => {
+  it("free plan includes core intelligence while keeping Pro-only automation gated", async () => {
     const { getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    expect(ent.saleReadiness).toBe(false);
-    expect(ent.customerConcentration).toBe(false);
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
     expect(ent.weeklyValuationRefresh).toBe(false);
     expect(ent.sellerCommandCenter).toBe(false);
     expect(ent.dealRooms).toBe(false);
     expect(ent.activeDealRoomLimit).toBe(0);
   });
 
-  it("builder plan has no Pro capabilities", async () => {
+  it("builder plan keeps core intelligence and zero included Deal Rooms", async () => {
     const { getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("builder");
-    expect(ent.saleReadiness).toBe(false);
-    expect(ent.customerConcentration).toBe(false);
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
     expect(ent.weeklyValuationRefresh).toBe(false);
     expect(ent.sellerCommandCenter).toBe(false);
     expect(ent.dealRooms).toBe(false);
@@ -90,19 +90,22 @@ describe("checkProFeature", () => {
     expect(checkProFeature(ent, "saleReadiness")).toBeNull();
   });
 
-  it("blocks saleReadiness for builder plan", async () => {
+  it("allows saleReadiness for builder plan", async () => {
     const { checkProFeature, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("builder");
-    const err = checkProFeature(ent, "saleReadiness");
-    expect(err).not.toBeNull();
-    expect(err?.code).toBe("PLAN_REQUIRED");
-    expect(err?.message).toContain("Sale-Readiness");
+    expect(checkProFeature(ent, "saleReadiness")).toBeNull();
   });
 
-  it("blocks customerConcentration for free plan", async () => {
+  it("allows customerConcentration for free plan", async () => {
     const { checkProFeature, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    expect(checkProFeature(ent, "customerConcentration")).not.toBeNull();
+    expect(checkProFeature(ent, "customerConcentration")).toBeNull();
+  });
+
+  it("blocks sellerCommandCenter for builder plan", async () => {
+    const { checkProFeature, getEntitlementsByPlan } = await import("@/lib/billing");
+    const ent = getEntitlementsByPlan("builder");
+    expect(checkProFeature(ent, "sellerCommandCenter")).not.toBeNull();
   });
 
   it("blocks weeklyValuationRefresh for starter", async () => {

@@ -17,15 +17,18 @@ describe("getEntitlementsByPlan", () => {
     expect(ent.storageBytes).toBe(100 * 1024 * 1024); // 100 MB
     expect(ent.milestoneMonthlyLimit).toBe(3);
     expect(ent.leadLimit).toBe(5);
-    expect(ent.bookkeeping).toBe(false);
+    expect(ent.bookkeeping).toBe(true);
     expect(ent.dealRooms).toBe(false);
-    expect(ent.healthLevel).toBe("basic");
-    expect(ent.valuationLevel).toBe("preview");
+    expect(ent.healthLevel).toBe("advanced");
+    expect(ent.valuationLevel).toBe("enhanced");
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
+    expect(ent.weeklyValuationRefresh).toBe(false);
     expect(ent.supportLevel).toBe("general");
     expect(ent.listingImageLimit).toBe(3);
     expect(ent.savedListingLimit).toBe(5);
     expect(ent.listingComparisonLimit).toBe(2);
-    expect(ent.confidentialListings).toBe(false);
+    expect(ent.confidentialListings).toBe(true);
   });
 
   it("returns correct values for starter plan", async () => {
@@ -39,8 +42,11 @@ describe("getEntitlementsByPlan", () => {
     expect(ent.leadLimit).toBe(25);
     expect(ent.bookkeeping).toBe(true);
     expect(ent.dealRooms).toBe(false);
-    expect(ent.healthLevel).toBe("basic");
-    expect(ent.valuationLevel).toBe("basic");
+    expect(ent.healthLevel).toBe("advanced");
+    expect(ent.valuationLevel).toBe("enhanced");
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
+    expect(ent.weeklyValuationRefresh).toBe(false);
     expect(ent.supportLevel).toBe("standard");
     expect(ent.listingImageLimit).toBe(10);
     expect(ent.savedListingLimit).toBe(25);
@@ -53,9 +59,12 @@ describe("getEntitlementsByPlan", () => {
     const ent = getEntitlementsByPlan("builder");
     expect(ent.businessLimit).toBe(2);
     expect(ent.healthLevel).toBe("advanced");
-    expect(ent.valuationLevel).toBe("detailed");
+    expect(ent.valuationLevel).toBe("enhanced");
     expect(ent.dealRooms).toBe(false);
     expect(ent.bookkeeping).toBe(true);
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
+    expect(ent.weeklyValuationRefresh).toBe(false);
   });
 
   it("returns correct values for pro plan", async () => {
@@ -65,6 +74,9 @@ describe("getEntitlementsByPlan", () => {
     expect(ent.valuationLevel).toBe("enhanced");
     expect(ent.dealRooms).toBe(true);
     expect(ent.bookkeeping).toBe(true);
+    expect(ent.saleReadiness).toBe(true);
+    expect(ent.customerConcentration).toBe(true);
+    expect(ent.weeklyValuationRefresh).toBe(true);
     expect(ent.supportLevel).toBe("priority");
   });
 });
@@ -445,12 +457,10 @@ describe("checkListingComparisonLimit", () => {
 // ─── Confidential listing access ──────────────────────────────────────────────
 
 describe("checkConfidentialListingAccess", () => {
-  it("blocks confidential listings on Explorer (free) plan", async () => {
+  it("allows confidential listings on Explorer (free) plan", async () => {
     const { checkConfidentialListingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
-    const err = checkConfidentialListingAccess(ent);
-    expect(err).not.toBeNull();
-    expect(err?.code).toBe("CONFIDENTIAL_LISTING_GATED");
+    expect(checkConfidentialListingAccess(ent)).toBeNull();
   });
 
   it("allows confidential listings on starter plan", async () => {
@@ -490,6 +500,6 @@ describe("Explorer plan catalog", () => {
     expect(freeEntry.entitlements.listingLimit).toBe(1);
     expect(freeEntry.entitlements.savedListingLimit).toBe(5);
     expect(freeEntry.entitlements.listingComparisonLimit).toBe(2);
-    expect(freeEntry.entitlements.confidentialListings).toBe(false);
+    expect(freeEntry.entitlements.confidentialListings).toBe(true);
   });
 });

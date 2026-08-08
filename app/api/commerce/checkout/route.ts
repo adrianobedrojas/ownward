@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
+  getProduct,
   getPurchasableProduct,
   getStripePriceId,
   isProductConfigured,
@@ -641,6 +642,22 @@ export async function POST(req: Request) {
     }
 
     // 3. Resolve product — rejects unknown, planned, and unavailable keys
+    const requestedProduct = getProduct(productKey);
+    if (
+      requestedProduct &&
+      requestedProduct.status === "active" &&
+      requestedProduct.ctaBehavior === "open" &&
+      requestedProduct.accessRoute
+    ) {
+      return NextResponse.json(
+        {
+          error: "This solution is included with your account. Open it directly.",
+          route: `${localePrefix}${requestedProduct.accessRoute}`,
+        },
+        { status: 409 },
+      );
+    }
+
     const product = getPurchasableProduct(productKey);
     if (!product) {
       return NextResponse.json(
@@ -682,20 +699,6 @@ export async function POST(req: Request) {
 
     const billing = await getUserBillingState(supabase, user.id);
 
-    if (
-      product.key === "enhanced_valuation_report" &&
-      billing.entitlements.valuationLevel === "enhanced"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Included in your Pro plan. Use the valuation workflow directly.",
-          route: `${localePrefix}/valuation?mode=detailed`,
-        },
-        { status: 409 },
-      );
-    }
-
     if (product.key === "deal_room_90" && billing.entitlements.dealRooms) {
       const { count: activeRoomCount } = await supabase
         .from("deal_rooms")
@@ -713,20 +716,6 @@ export async function POST(req: Request) {
           { status: 409 },
         );
       }
-    }
-
-    if (
-      product.key === "confidential_sale_launch" &&
-      billing.entitlements.confidentialListings
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Confidential listing capability is already included in your current plan.",
-          route: `${localePrefix}/sell/${targetCheck.targetId}/edit`,
-        },
-        { status: 409 },
-      );
     }
 
     const duplicateGuard = await guardAgainstDuplicatePurchase(

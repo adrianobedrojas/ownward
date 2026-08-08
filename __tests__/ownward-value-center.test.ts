@@ -152,14 +152,14 @@ describe('Valuation disclaimers', () => {
 // ─── Entitlement messages ─────────────────────────────────────────────────────
 
 describe('Valuation entitlement messages', () => {
-  it('EN actions.upgradeRequired mentions Starter', () => {
+  it('EN actions.upgradeRequired confirms free access', () => {
     const actions = enMessages.Valuation.actions as Record<string, string>;
-    expect(actions.upgradeRequired).toContain('Starter');
+    expect(actions.upgradeRequired.toLowerCase()).toContain('free account');
   });
 
-  it('EN saveEstimateUpgradeRequired requires Starter', () => {
+  it('EN saveEstimateUpgradeRequired confirms free access', () => {
     const actions = enMessages.Valuation.actions as Record<string, string>;
-    expect(actions.saveEstimateUpgradeRequired).toContain('Starter');
+    expect(actions.saveEstimateUpgradeRequired.toLowerCase()).toContain('free account');
   });
 
   it('EN tiers describes all four tiers', () => {
@@ -198,22 +198,22 @@ describe('My Reports section messages', () => {
 // ─── Entitlements (billing) ───────────────────────────────────────────────────
 
 describe('saveEstimate server-side entitlement', () => {
-  it('free plan has valuationLevel of "preview"', async () => {
+  it('free plan has valuationLevel of "enhanced"', async () => {
     const { getEntitlementsByPlan } = await import('@/lib/billing');
     const ent = getEntitlementsByPlan('free');
-    expect(ent.valuationLevel).toBe('preview');
+    expect(ent.valuationLevel).toBe('enhanced');
   });
 
-  it('starter plan has valuationLevel of "basic"', async () => {
+  it('starter plan has valuationLevel of "enhanced"', async () => {
     const { getEntitlementsByPlan } = await import('@/lib/billing');
     const ent = getEntitlementsByPlan('starter');
-    expect(ent.valuationLevel).toBe('basic');
+    expect(ent.valuationLevel).toBe('enhanced');
   });
 
-  it('builder plan has valuationLevel of "detailed"', async () => {
+  it('builder plan has valuationLevel of "enhanced"', async () => {
     const { getEntitlementsByPlan } = await import('@/lib/billing');
     const ent = getEntitlementsByPlan('builder');
-    expect(ent.valuationLevel).toBe('detailed');
+    expect(ent.valuationLevel).toBe('enhanced');
   });
 
   it('pro plan has valuationLevel of "enhanced"', async () => {

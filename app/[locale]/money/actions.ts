@@ -102,7 +102,7 @@ async function isPeriodClosed(
   return data?.status === "closed";
 }
 
-/** Enforce bookkeeping write access (Builder-or-higher). Redirects on failure. */
+/** Enforce bookkeeping write access based on active plan entitlements. Redirects on failure. */
 async function requireBookkeepingWrite(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string

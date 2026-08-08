@@ -32,8 +32,7 @@ describe("Product Registry — getProduct", () => {
 
   it("returns the product regardless of active status", async () => {
     const { getProduct } = await import("@/lib/commerce/products");
-    // quick_boost is inactive but getProduct still returns it
-    const product = getProduct("quick_boost");
+    const product = getProduct("market_spotlight");
     expect(product).not.toBeNull();
     expect(product?.active).toBe(false);
   });
@@ -54,7 +53,6 @@ describe("Product Registry — getActiveProduct", () => {
 
   it("returns null for an inactive product", async () => {
     const { getActiveProduct } = await import("@/lib/commerce/products");
-    expect(getActiveProduct("quick_boost")).toBeNull();
     expect(getActiveProduct("market_spotlight")).toBeNull();
     expect(getActiveProduct("transaction_workspace")).toBeNull();
   });
@@ -112,13 +110,17 @@ describe("Product Registry — product definitions", () => {
     expect(getPurchasableProduct("business_in_a_box")).toBeNull();
   });
 
-  it("enhanced_valuation_report maps to the new Stripe env var and is purchasable", async () => {
+  it("enhanced_valuation_report is active free/open and not purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("enhanced_valuation_report")!;
+    expect(p.billingModel).toBe("free");
+    expect(p.displayPrice).toBe(0);
+    expect(p.ctaBehavior).toBe("open");
+    expect(p.accessRoute).toBe("/valuation?mode=detailed");
     expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_ENHANCED_VALUATION_REPORT");
     expect(p.requiredTargetType).toBe("business");
     expect(p.fulfillmentBehavior).toBe("grant_enhanced_valuation_report");
-    expect(getPurchasableProduct("enhanced_valuation_report")?.key).toBe("enhanced_valuation_report");
+    expect(getPurchasableProduct("enhanced_valuation_report")).toBeNull();
   });
 
   it("deal_room_90 keeps transaction target type and is purchasable", async () => {
@@ -130,13 +132,17 @@ describe("Product Registry — product definitions", () => {
     expect(getPurchasableProduct("deal_room_90")?.key).toBe("deal_room_90");
   });
 
-  it("confidential_sale_launch maps to the new Stripe env var and is purchasable", async () => {
+  it("confidential_sale_launch is active free/open and not purchasable", async () => {
     const { getProduct, getPurchasableProduct } = await import("@/lib/commerce/products");
     const p = getProduct("confidential_sale_launch")!;
+    expect(p.billingModel).toBe("free");
+    expect(p.displayPrice).toBe(0);
+    expect(p.ctaBehavior).toBe("open");
+    expect(p.accessRoute).toBe("/sell");
     expect(p.stripePriceEnvVar).toBe("STRIPE_PRICE_CONFIDENTIAL_SALE_LAUNCH");
     expect(p.requiredTargetType).toBe("listing");
     expect(p.fulfillmentBehavior).toBe("launch_confidential_sale_listing");
-    expect(getPurchasableProduct("confidential_sale_launch")?.key).toBe("confidential_sale_launch");
+    expect(getPurchasableProduct("confidential_sale_launch")).toBeNull();
   });
 
   it("resolves historical aliases for legacy purchase keys", async () => {
@@ -166,12 +172,12 @@ describe("Product Registry — product definitions", () => {
     expect(p.fulfillmentBehavior).toBe("create_value_action_sprint_workspace");
   });
 
-  it("featured_listing is the first active product and has a dedicated Stripe env var", async () => {
+  it("quick_boost is the first active product and has a dedicated Stripe env var", async () => {
     const { PRODUCT_KEYS, getProduct } = await import("@/lib/commerce/products");
     const firstActiveKey = PRODUCT_KEYS.find((key) => getProduct(key)?.active);
-    expect(firstActiveKey).toBe("featured_listing");
+    expect(firstActiveKey).toBe("quick_boost");
     const firstActive = getProduct(firstActiveKey!)!;
-    expect(firstActive.stripePriceEnvVar).toBe("STRIPE_PRICE_FEATURED_LISTING");
+    expect(firstActive.stripePriceEnvVar).toBe("STRIPE_PRICE_QUICK_BOOST");
   });
 });
 
@@ -228,7 +234,7 @@ describe("Commerce Checkout — product key enforcement", () => {
   it("rejects inactive products via getActiveProduct", async () => {
     const { getActiveProduct } = await import("@/lib/commerce/products");
     // Future products are inactive and must be rejected
-    expect(getActiveProduct("quick_boost")).toBeNull();
+    expect(getActiveProduct("market_spotlight")).toBeNull();
     expect(getActiveProduct("launch_intelligence_pack")).toBeNull();
   });
 

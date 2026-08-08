@@ -27,7 +27,7 @@ export async function saveHealthAssessment(
   if (billing.entitlements.healthLevel === "none") {
     return {
       success: false,
-      message: "A paid plan is required to use the Health Check.",
+      message: "Health Check is not enabled for your account.",
     };
   }
 
@@ -68,4 +68,3 @@ export async function saveHealthAssessment(
   revalidatePath("/health");
   return { success: true, assessmentId: data.id, overallScore };
 }
-

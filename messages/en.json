@@ -347,7 +347,7 @@
   },
   "Pricing": {
     "heroTitle": "Ownward Plans & Pricing",
-    "heroDescription": "Start free as an Explorer, then unlock capacity, advanced analysis, collaboration, privacy, and transaction tools as your needs grow.",
+    "heroDescription": "Core Ownward intelligence is free. Upgrade when you need more capacity, collaboration, automation, Deal Rooms, or support.",
     "perMonth": "/ mo",
     "mostPopular": "Most Popular",
     "recommendedBadge": "Recommended",
@@ -377,7 +377,7 @@
     "plans": {
       "starter": {
         "name": "Starter",
-        "tagline": "Launch the essentials for one business",
+        "tagline": "Add capacity for daily execution",
         "features": [
           "1 Business Workspace",
           "10 Milestones / month",
@@ -395,7 +395,7 @@
       },
       "builder": {
         "name": "Builder",
-        "tagline": "Grow with stronger systems and collaboration",
+        "tagline": "Scale across multiple businesses and teams",
         "features": [
           "Up to 2 Businesses",
           "Revenue & Expense Tracking",
@@ -414,7 +414,7 @@
       },
       "pro": {
         "name": "Pro",
-        "tagline": "Prepare for deals, diligence, and sale readiness",
+        "tagline": "Automation, Deal Rooms, and priority support",
         "features": [
           "Up to 5 Businesses",
           "Sale-Readiness Score (10 categories)",
@@ -430,7 +430,7 @@
       },
       "free": {
         "name": "Explorer",
-        "tagline": "Explore business ownership at your own pace",
+        "tagline": "Core intelligence for one business, free forever",
         "features": [
           "1 Business Workspace",
           "3 Milestones / month",
@@ -470,24 +470,24 @@
       "genericRecommendation": "Use this as a starting point, then compare the included capacity and tools below.",
       "goals": {
         "first-workspace": {
-          "title": "Create my first workspace",
-          "description": "Start managing one business without paying first.",
-          "recommendation": "Explorer gives you one free workspace plus the core basics to get started."
+          "title": "Start my first workspace",
+          "description": "Get started with one business and core intelligence for free.",
+          "recommendation": "Explorer includes one workspace and core intelligence at no cost."
         },
-        "bookkeeping": {
-          "title": "Organize bookkeeping",
-          "description": "Track income, expenses, receipts, and monthly records.",
-          "recommendation": "Starter is the first plan with bookkeeping enabled, so it is the right next step for operational finance."
+        "capacity-growth": {
+          "title": "Increase capacity",
+          "description": "Need more milestones, documents, leads, and listing capacity.",
+          "recommendation": "Starter is the first paid step for more operating capacity."
         },
-        "team-growth": {
-          "title": "Grow with a team",
-          "description": "Add more collaboration, capacity, and room to scale.",
-          "recommendation": "Builder adds more workspace capacity, more leads, more documents, and more collaboration for a growing operation."
+        "multi-business": {
+          "title": "Manage multiple businesses",
+          "description": "Run more than one workspace with more collaborator capacity.",
+          "recommendation": "Builder is best when you are operating multiple businesses."
         },
-        "sale-readiness": {
-          "title": "Prepare to sell",
-          "description": "Run diligence-ready workflows and advanced transaction tools.",
-          "recommendation": "Pro unlocks sale-readiness, customer concentration, deal rooms, and seller command center workflows."
+        "deal-automation-support": {
+          "title": "Need Deal Rooms and automation",
+          "description": "Add included Deal Rooms, weekly valuation refresh, and priority support.",
+          "recommendation": "Pro is the right fit for transaction execution and automation."
         }
       }
     },
@@ -527,7 +527,7 @@
     },
     "comparison": {
       "title": "Plan comparison",
-      "subtitle": "Explorer gives you a real first step — paid plans add capacity, advanced analysis, collaboration, privacy, and transaction tools.",
+      "subtitle": "Explorer includes core intelligence for one business. Paid plans add capacity, collaboration, automation, Deal Rooms, and support.",
       "rowLabels": {
         "workspaces": "Business Workspaces",
         "listings": "Listings",
@@ -1587,8 +1587,8 @@
       "guestCreateAccount": "Create a free account",
       "guestOr": "or",
       "guestNote": "A free account lets you start the wizard and save a draft.",
-      "freeUserNote": "A paid plan is required to generate a full valuation report.",
-      "freeUserUpgrade": "Upgrade to Starter",
+      "freeUserNote": "A free account includes full detailed valuation report access.",
+      "freeUserUpgrade": "View plans",
       "startReport": "Start a new report",
       "continueReport": "Continue report",
       "newReport": "Start new report"
@@ -1634,11 +1634,11 @@
       "upgradeAction": "View plans"
     },
     "tiers": {
-      "free": "Free — Quick estimate preview only",
-      "starter": "Starter — Valuation range, confidence, and up to 3 actions",
-      "builder": "Builder — Multi-year analysis, risk map, owner dependence, and customer concentration",
-      "pro": "Pro — Full report including Value DNA, Buyer Lens, Value Bridge, and weekly refresh",
-      "upgradePrompt": "Upgrade to unlock full reports"
+      "free": "Explorer — Core intelligence for one business",
+      "starter": "Starter — More operating capacity",
+      "builder": "Builder — Multi-business and collaboration capacity",
+      "pro": "Pro — Deal Rooms, automation, and priority support",
+      "upgradePrompt": "Plan capability overview"
     },
     "calculator": {
       "annualRevenue": "Annual revenue (optional)",
@@ -1654,7 +1654,9 @@
       "highMultiple": "High multiple",
       "annualRevenuePlaceholder": "e.g. 500,000",
       "baseEarningsPlaceholder": "e.g. 150,000",
-      "multiplesHint": "Industry multiples typically range from 1.5× to 6× normalized earnings"
+      "multiplesHint": "Industry multiples typically range from 1.5× to 6× normalized earnings",
+      "upgradeRequired": "Detailed valuation is included with a free account.",
+      "saveEstimateUpgradeRequired": "Saving estimates is included with a free account."
     },
     "wizard": {
       "step1": "Business profile",
@@ -1683,11 +1685,11 @@
       "archiveSuccess": "Report archived.",
       "archiveError": "Failed to archive report.",
       "authRequired": "You must be signed in.",
-      "upgradeRequired": "Upgrade to Starter to generate and save a valuation report. The free plan includes a basic estimate preview only.",
+      "upgradeRequired": "Detailed valuation is included with a free account.",
       "reportNotFound": "Report not found.",
       "validationError": "Please fix the highlighted fields.",
       "saveEstimateAuthRequired": "You must be signed in to save estimates.",
-      "saveEstimateUpgradeRequired": "Upgrade to Starter to save estimates."
+      "saveEstimateUpgradeRequired": "Saving estimates is included with a free account."
     },
     "industryLabels": {
       "services": "Professional services",

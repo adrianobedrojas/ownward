@@ -65,8 +65,6 @@ export default async function ValuationPage({ params, searchParams }: PageProps)
   const billing = user
     ? await getUserBillingState(supabase, user.id)
     : null;
-  const valuationLevel = billing?.entitlements.valuationLevel ?? "preview";
-  const hasPaidAccess = valuationLevel !== "preview";
 
   // Fetch reports only when needed and user is authenticated
   let recentReports: {
@@ -272,25 +270,6 @@ export default async function ValuationPage({ params, searchParams }: PageProps)
                       className="rounded-lg border border-slate-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-cyan-400 hover:bg-slate-800"
                     >
                       {t("detailedReport.guestCreateAccount")}
-                    </Link>
-                  </div>
-                </div>
-              ) : !hasPaidAccess ? (
-                <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 p-6">
-                  <h2 className="text-lg font-bold text-white">{t("tiers.upgradePrompt")}</h2>
-                  <p className="mt-2 text-sm text-slate-400">{t("detailedReport.freeUserNote")}</p>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Link
-                      href="/valuation?mode=quick"
-                      className="rounded-lg border border-slate-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-                    >
-                      {t("modes.quick")}
-                    </Link>
-                    <Link
-                      href="/pricing"
-                      className="rounded-lg bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
-                    >
-                      {t("detailedReport.freeUserUpgrade")}
                     </Link>
                   </div>
                 </div>

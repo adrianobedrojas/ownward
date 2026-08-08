@@ -59,7 +59,8 @@ export type GoogleAnalyticsConversionEventName =
   | 'valuation_complete'
   | 'generate_lead'
   | 'sign_up'
-  | 'begin_checkout';
+  | 'begin_checkout'
+  | 'free_solution_started';
 
 const GA_SENSITIVE_PARAMETER_KEY_PATTERN =
   /(email|name|phone|token|password|secret|address|message|user|customer|session|auth|id_number)/i;

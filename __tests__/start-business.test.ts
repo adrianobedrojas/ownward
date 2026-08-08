@@ -81,7 +81,7 @@ describe('getDefaultPlan', () => {
   it('all fields in the default plan are empty strings', () => {
     const plan = getDefaultPlan();
     for (const step of startBusinessSteps) {
-      const stepData = plan[step.id as keyof StartBusinessPlan] as Record<string, string>;
+      const stepData = plan[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>;
       for (const field of step.fields) {
         expect(stepData[field.id]).toBe('');
       }
@@ -100,7 +100,7 @@ describe('getPlanProgress', () => {
   it('returns 100 when all fields are filled', () => {
     const plan = getDefaultPlan();
     for (const step of startBusinessSteps) {
-      const stepData = plan[step.id as keyof StartBusinessPlan] as Record<string, string>;
+      const stepData = plan[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>;
       for (const field of step.fields) {
         stepData[field.id] = 'filled value';
       }
@@ -114,7 +114,7 @@ describe('getPlanProgress', () => {
     // Fill exactly 1 field
     const step = startBusinessSteps[0];
     const field = step.fields[0];
-    (plan[step.id as keyof StartBusinessPlan] as Record<string, string>)[field.id] = 'filled';
+    (plan[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>)[field.id] = 'filled';
     const expected = Math.round((1 / total) * 100);
     expect(getPlanProgress(plan)).toBe(expected);
   });
@@ -123,7 +123,7 @@ describe('getPlanProgress', () => {
     const plan = getDefaultPlan();
     const step = startBusinessSteps[0];
     const field = step.fields[0];
-    (plan[step.id as keyof StartBusinessPlan] as Record<string, string>)[field.id] = '   ';
+    (plan[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>)[field.id] = '   ';
     expect(countFilledFields(plan)).toBe(0);
   });
 });
@@ -158,10 +158,10 @@ describe('parsePlanFromStorage', () => {
     const defaultPlan = getDefaultPlan();
     const step = startBusinessSteps[0];
     const field = step.fields[0];
-    (defaultPlan[step.id as keyof StartBusinessPlan] as Record<string, string>)[field.id] = 'Test Value';
+    (defaultPlan[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>)[field.id] = 'Test Value';
     const raw = JSON.stringify(defaultPlan);
     const parsed = parsePlanFromStorage(raw);
-    expect((parsed[step.id as keyof StartBusinessPlan] as Record<string, string>)[field.id]).toBe('Test Value');
+    expect((parsed[step.id as keyof StartBusinessPlan] as unknown as Record<string, string>)[field.id]).toBe('Test Value');
   });
 
   it('unknown fields in stored data do not crash parsing', () => {
@@ -172,14 +172,14 @@ describe('parsePlanFromStorage', () => {
     });
     expect(() => parsePlanFromStorage(raw)).not.toThrow();
     const parsed = parsePlanFromStorage(raw);
-    expect((parsed.step1 as Record<string, string>).workingName).toBe('My Biz');
+    expect((parsed.step1 as unknown as Record<string, string>).workingName).toBe('My Biz');
   });
 
   it('missing steps in stored data are filled with defaults', () => {
     const raw = JSON.stringify({ _version: 1, step1: { workingName: 'Only Step 1' } });
     const parsed = parsePlanFromStorage(raw);
     // step2 should have empty defaults
-    expect((parsed.step2 as Record<string, string>).targetCustomer).toBe('');
+    expect((parsed.step2 as unknown as Record<string, string>).targetCustomer).toBe('');
   });
 
   it('non-string field values in stored data do not override defaults', () => {
@@ -188,7 +188,7 @@ describe('parsePlanFromStorage', () => {
       step1: { workingName: 123, oneSentenceIdea: null, problemBeingSolved: [], proposedSolution: {} },
     });
     const parsed = parsePlanFromStorage(raw);
-    expect((parsed.step1 as Record<string, string>).workingName).toBe('');
+    expect((parsed.step1 as unknown as Record<string, string>).workingName).toBe('');
   });
 
   it('storage key constant is correct', () => {
@@ -221,7 +221,7 @@ describe('exportPlanAsText', () => {
 
   it('includes filled values in the text output', () => {
     const plan = getDefaultPlan();
-    (plan.step1 as Record<string, string>).workingName = 'Bright Paws Pet Services';
+    (plan.step1 as unknown as Record<string, string>).workingName = 'Bright Paws Pet Services';
     const text = exportPlanAsText(plan);
     expect(text).toContain('Bright Paws Pet Services');
   });
@@ -251,7 +251,7 @@ describe('exportPlanAsJson', () => {
 
   it('includes filled values in the JSON output', () => {
     const plan = getDefaultPlan();
-    (plan.step1 as Record<string, string>).workingName = 'Acme Co';
+    (plan.step1 as unknown as Record<string, string>).workingName = 'Acme Co';
     const json = exportPlanAsJson(plan);
     expect(json).toContain('Acme Co');
   });
@@ -262,9 +262,9 @@ describe('exportPlanAsJson', () => {
 describe('getDefaultPlan (reset)', () => {
   it('reset returns the default empty plan', () => {
     const filled = getDefaultPlan();
-    (filled.step1 as Record<string, string>).workingName = 'Something';
+    (filled.step1 as unknown as Record<string, string>).workingName = 'Something';
     const reset = getDefaultPlan();
-    expect((reset.step1 as Record<string, string>).workingName).toBe('');
+    expect((reset.step1 as unknown as Record<string, string>).workingName).toBe('');
     expect(getPlanProgress(reset)).toBe(0);
   });
 });

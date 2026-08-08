@@ -117,15 +117,11 @@ describe("checkTeamMemberLimit", () => {
 // ─── checkBookkeepingAccess ───────────────────────────────────────────────────
 
 describe("checkBookkeepingAccess", () => {
-  it("denies write access on free plan", async () => {
+  it("allows write access on free plan", async () => {
     const { checkBookkeepingAccess, getEntitlementsByPlan } = await import("@/lib/billing");
     const ent = getEntitlementsByPlan("free");
     const result = checkBookkeepingAccess(ent);
-    expect(result.allowed).toBe(false);
-    if (!result.allowed) {
-      expect(result.code).toBe("PLAN_REQUIRED");
-      expect(result.featureEnabled).toBe(false);
-    }
+    expect(result.allowed).toBe(true);
   });
 
   it("allows write access on starter plan (bookkeeping=true)", async () => {
@@ -164,7 +160,7 @@ describe("Builder entitlements", () => {
     expect(ent.leadLimit).toBe(100);
     expect(ent.teamMemberLimit).toBe(2);
     expect(ent.healthLevel).toBe("advanced");
-    expect(ent.valuationLevel).toBe("detailed");
+    expect(ent.valuationLevel).toBe("enhanced");
     expect(ent.bookkeeping).toBe(true);
     expect(ent.dealRooms).toBe(false);
   });
