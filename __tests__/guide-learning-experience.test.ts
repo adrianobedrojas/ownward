@@ -55,24 +55,24 @@ describe('guide learning experience data integrity', () => {
   });
   
 it('keeps Guide category numbering sequential in both locales', () => {
-const categoryOrder = [
-'start',
-'run',
-'grow',
-'value',
-'sell',
-'buy',
-'owner-life',
-'stories',
-'resources',
-] as const;
+  const categoryOrder = [
+    'start',
+    'run',
+    'grow',
+    'value',
+    'sell',
+    'buy',
+    'owner-life',
+    'stories',
+    'resources',
+  ] as const;
 
-categoryOrder.forEach((category, index) => {
-const expectedPrefix = `${index + 1}. `;
+  categoryOrder.forEach((category, index) => {
+    const expectedPrefix = `${index + 1}. `;
 
-expect(enMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
-expect(esMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
-});
+    expect(enMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
+    expect(esMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
+  });
 });
   
   it('every related article reference resolves', () => {
