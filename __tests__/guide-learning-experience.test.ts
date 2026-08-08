@@ -13,6 +13,7 @@ import {
 } from '@/lib/academy-content';
 import {
   getArticleTableOfContents,
+  orderGuideArticles,
   searchGuideArticles,
 } from '@/lib/guide-discovery';
 import enMessages from '@/messages/en.json';
@@ -49,7 +50,26 @@ describe('guide learning experience data integrity', () => {
     const keys = guideArticles.map((article) => `${article.category}/${article.slug}`);
     expect(new Set(keys).size).toBe(keys.length);
   });
+  
+  it('orders Guide categories in the same sequence as the numbered navigation', () => {
+    const orderedCategories = orderGuideArticles(guideArticles)
+      .map((article) => article.category)
+      .filter(
+        (category, index, all) => all.indexOf(category) === index
+      );
 
+    expect(orderedCategories).toEqual([
+      'start',
+      'run',
+      'grow',
+      'value',
+      'sell',
+      'buy',
+      'owner-life',
+      'stories',
+    ]);
+  });
+  
   it('keeps the published article inventory at 16 entries', () => {
     expect(guideArticles).toHaveLength(16);
   });
