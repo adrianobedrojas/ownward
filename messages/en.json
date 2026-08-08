@@ -841,19 +841,19 @@
         "ctaLabel": "Browse marketplace"
       },
       "owner-life": {
-        "name": "6. Owner Life",
+        "name": "7. Owner Life",
         "description": "Practical guidance about pressure, relationships, identity, boundaries, and the personal decisions behind business ownership.",
         "cta": "Explore frameworks for responding to pressure without allowing every difficult moment to control the next decision.",
         "ctaLabel": "Explore Owner Life"
       },
       "stories": {
-        "name": "7. Owner stories & founder notes",
+        "name": "8. Owner stories & founder notes",
         "description": "Real-world lessons, behind-the-scenes building notes, and relatable scenarios from business owners.",
         "cta": "Read stories and lessons from owners who have built, grown, bought, or sold businesses.",
         "ctaLabel": "Browse stories"
       },
       "resources": {
-        "name": "8. Interactive resources & checklists",
+        "name": "9. Interactive resources & checklists",
         "description": "Downloadable checklists, calculators, and assessments.",
         "cta": "Use practical tools to organize information and pressure-test decisions.",
         "ctaLabel": "Explore resources"
