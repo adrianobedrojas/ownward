@@ -15,7 +15,8 @@ import {
   getArticleTableOfContents,
   searchGuideArticles,
 } from '@/lib/guide-discovery';
-
+import enMessages from '@/messages/en.json';
+import esMessages from '@/messages/es.json';
 const supportedVisualKinds = new Set<GuideArticleVisualKind>([
   'process',
   'timeline',
@@ -52,7 +53,28 @@ describe('guide learning experience data integrity', () => {
   it('keeps the published article inventory at 16 entries', () => {
     expect(guideArticles).toHaveLength(16);
   });
+  
+it('keeps Guide category numbering sequential in both locales', () => {
+const categoryOrder = [
+'start',
+'run',
+'grow',
+'value',
+'sell',
+'buy',
+'owner-life',
+'stories',
+'resources',
+] as const;
 
+categoryOrder.forEach((category, index) => {
+const expectedPrefix = `${index + 1}. `;
+
+expect(enMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
+expect(esMessages.Guide.categories[category].name.startsWith(expectedPrefix)).toBe(true);
+});
+});
+  
   it('every related article reference resolves', () => {
     for (const article of guideArticles) {
       for (const related of article.relatedArticles ?? []) {
