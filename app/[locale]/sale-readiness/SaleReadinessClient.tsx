@@ -355,7 +355,11 @@ export default function SaleReadinessClient({
           ? null
           : numberValue,
     }));
-  };
+
+  setResult(null);
+  setSaveMessage(null);
+  setValidationError(null);
+};
 
   const actionPlan = result
     ? buildActionPlan(result)
