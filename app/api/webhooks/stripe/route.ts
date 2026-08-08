@@ -1855,7 +1855,13 @@ async function handleOneTimePurchaseRefund(
     .eq("stripe_payment_intent_id", paymentIntentId)
     .maybeSingle();
 
-  if (purchaseError || !purchase) {
+  if (purchaseError) {
+    throw new Error(
+      `[one_time_product] Failed to load purchase for payment intent ${paymentIntentId}: ${purchaseError.message}`
+    );
+  }
+
+  if (!purchase) {
     return false;
   }
 
@@ -1872,7 +1878,7 @@ async function handleOneTimePurchaseRefund(
 
   // Partial refunds do not revoke one-time access automatically.
   if (isPartialRefund) {
-    await supabaseAdmin
+    const { error: partialRefundUpdateError } = await supabaseAdmin
       .from("purchases")
       .update({
         failure_code: "partial_refund_manual_review",
@@ -1880,6 +1886,13 @@ async function handleOneTimePurchaseRefund(
         updated_at: now,
       })
       .eq("id", purchase.id);
+
+    if (partialRefundUpdateError) {
+      throw new Error(
+        `[one_time_product] Failed to flag partial refund for purchase ${purchase.id}: ${partialRefundUpdateError.message}`
+      );
+    }
+
     return true;
   }
 
@@ -1890,7 +1903,7 @@ async function handleOneTimePurchaseRefund(
     return true;
   }
 
-  await supabaseAdmin
+  const { error: entitlementRevokeError } = await supabaseAdmin
     .from("entitlement_grants")
     .update({
       status: "revoked",
@@ -1901,6 +1914,12 @@ async function handleOneTimePurchaseRefund(
     .eq("purchase_id", purchase.id)
     .eq("product_key", product.key)
     .eq("status", "active");
+
+  if (entitlementRevokeError) {
+    throw new Error(
+      `[one_time_product] Failed to revoke entitlement for purchase ${purchase.id}: ${entitlementRevokeError.message}`
+    );
+  }
 
   if (product.key === "enhanced_valuation_report") {
     await reverseEnhancedValuationRefund(purchase.id, now, supabaseAdmin);
