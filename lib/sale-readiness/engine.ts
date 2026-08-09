@@ -424,22 +424,43 @@ function scoreLegalOrgRecords(input: SaleReadinessInput): CategoryResult {
     boolScore(input.hasFormationDocs),
     boolScore(input.hasCleanCapTable),
     boolScore(input.hasNoMajorLitigation),
-    input.hasActiveIpProtection !== null ? boolScore(input.hasActiveIpProtection) : 50,
   ];
 
+  if (input.hasActiveIpProtection === true) {
+    scores.push(100);
+  } else if (input.hasActiveIpProtection === false) {
+    scores.push(0);
+  } else if (input.hasActiveIpProtection === null) {
+    scores.push(50);
+  }
+
   const missing: string[] = [];
-  if (!input.hasFormationDocs) missing.push("Formation documents (articles, bylaws, operating agreement)");
-  if (!input.hasCleanCapTable) missing.push("Clean cap table / ownership records");
-  if (input.hasActiveIpProtection === null) missing.push("IP protection status (patents, trademarks)");
+
+  if (!input.hasFormationDocs) {
+    missing.push(
+      "Formation documents (articles, bylaws, operating agreement)"
+    );
+  }
+
+  if (!input.hasCleanCapTable) {
+    missing.push("Clean cap table / ownership records");
+  }
+
+  if (input.hasActiveIpProtection === null) {
+    missing.push("IP protection status (patents, trademarks)");
+  }
 
   const score = avg(...scores);
-  const defined = countDefined(
-    input.hasFormationDocs,
-    input.hasCleanCapTable,
-    input.hasNoMajorLitigation,
-    input.hasActiveIpProtection
+
+  const ipProtectionAnswered =
+    input.hasActiveIpProtection !== null;
+
+  const defined =
+    3 + (ipProtectionAnswered ? 1 : 0);
+
+  const confidence = Math.round(
+    (defined / 4) * 100
   );
-  const confidence = Math.round((defined / 4) * 100);
 
   return {
     category: "legal_org_records",
