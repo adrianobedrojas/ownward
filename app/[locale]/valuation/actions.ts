@@ -11,6 +11,7 @@ import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
 import type { SaveEstimateInput, EstimateActionResult } from "./types";
 import { getUserBillingState } from "@/lib/billing";
+import { canViewBusiness } from "@/lib/business-access";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -143,6 +144,23 @@ async function redirectToCalculatedReport(reportId: string): Promise<never> {
 // Save draft
 // ─────────────────────────────────────────────
 
+/**
+ * Resolves a server-validated business_id from form data.
+ * Returns { businessId: string } if valid and authorized.
+ * Returns { businessId: null } if no businessId was provided.
+ * Returns { error: string } if businessId was provided but access is denied.
+ */
+async function resolveBusinessId(
+  formData: FormData,
+  userId: string
+): Promise<{ businessId: string | null; error?: string }> {
+  const raw = formData.get("businessId");
+  if (!isUuid(raw)) return { businessId: null };
+  const allowed = await canViewBusiness(userId, raw);
+  if (!allowed) return { businessId: null, error: "You do not have access to the specified business." };
+  return { businessId: raw };
+}
+
 export async function saveDraft(formData: FormData): Promise<ValuationActionResult> {
   const auth = await getAuthenticatedUser();
   if (!auth.authenticated) {
@@ -152,6 +170,11 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
   const { supabase, user } = auth;
 
   const input = buildInputFromFormData(formData);
+  const bizResolution = await resolveBusinessId(formData, user.id);
+  if (bizResolution.error) {
+    return { success: false, message: bizResolution.error };
+  }
+  const businessId = bizResolution.businessId;
 
   const reportId = (formData.get("reportId") as string) ?? null;
   const existingReportId = isUuid(reportId) ? reportId : null;
@@ -207,6 +230,7 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
       business_name: input.businessProfile.businessName,
       industry: input.businessProfile.industry,
       input_snapshot: input,
+      ...(businessId ? { business_id: businessId } : {}),
     })
     .select("id")
     .single();
@@ -235,6 +259,11 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   const valuationLevel = billing.entitlements.valuationLevel;
 
   const input = buildInputFromFormData(formData);
+  const bizResolution = await resolveBusinessId(formData, user.id);
+  if (bizResolution.error) {
+    return { success: false, message: bizResolution.error };
+  }
+  const businessId = bizResolution.businessId;
 
   // Validate input on the server
   const validationErrors = validateValuationInput(input);
@@ -314,6 +343,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
           input_snapshot: input,
           result_snapshot: tieredResult,
           version: 1,
+          ...(businessId ? { business_id: businessId } : {}),
         })
         .select("id")
         .single();
@@ -342,6 +372,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
         confidence_score: result.confidenceScore,
         input_snapshot: input,
         result_snapshot: tieredResult,
+        ...(businessId ? { business_id: businessId } : {}),
       })
       .eq("id", existingReportId)
       .eq("user_id", user.id);
@@ -371,6 +402,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
       confidence_score: result.confidenceScore,
       input_snapshot: input,
       result_snapshot: tieredResult,
+      ...(businessId ? { business_id: businessId } : {}),
     })
     .select("id")
     .single();
