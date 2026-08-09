@@ -1200,6 +1200,68 @@ function BoolField({
   );
 }
 
+function IpProtectionField({
+  value,
+  onChange,
+}: {
+  value: SaleReadinessInput['hasActiveIpProtection'];
+  onChange: (
+    value: SaleReadinessInput['hasActiveIpProtection']
+  ) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-700/60 bg-slate-900/40 p-4">
+      <div className="text-sm text-slate-300">
+        Active trademark, patent, or other IP protection
+      </div>
+
+      <p className="mt-1 text-xs leading-5 text-slate-500">
+        Select Yes if the business has active patents, registered trademarks,
+        or other formal intellectual-property protection. Select Not applicable
+        if this type of protection is not material to the business or its value.
+      </p>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(true)}
+          className={`rounded-lg border px-4 py-2 text-sm transition ${
+            value === true
+              ? 'border-emerald-400 bg-emerald-400/10 text-emerald-300'
+              : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600'
+          }`}
+        >
+          Yes
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onChange(false)}
+          className={`rounded-lg border px-4 py-2 text-sm transition ${
+            value === false
+              ? 'border-rose-400 bg-rose-400/10 text-rose-300'
+              : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600'
+          }`}
+        >
+          No
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onChange('not_applicable')}
+          className={`rounded-lg border px-4 py-2 text-sm transition ${
+            value === 'not_applicable'
+              ? 'border-cyan-400 bg-cyan-400/10 text-cyan-300'
+              : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600'
+          }`}
+        >
+          Not applicable
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function NumberField({
   label,
   helperText,
