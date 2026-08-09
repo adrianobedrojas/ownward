@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { PRIVACY_POLICY_PATH, TERMS_POLICY_PATH } from '@/lib/auth';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -26,7 +27,23 @@ export default async function SignupPage() {
       </section>
       <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950 sm:p-8">
         <div><p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('accountBadge')}</p><h2 className="mt-2 text-2xl font-bold text-white">{t('formTitle')}</h2><p className="mt-2 text-sm text-slate-400">{t('formDescription')}</p></div>
-        <form action="/api/signup" method="post" className="mt-8 space-y-6">
+        <div className="mt-8">
+          <GoogleSignInButton
+            label={t('continueWithGoogle')}
+            loadingLabel={t('connectingToGoogle')}
+          />
+
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-800" />
+
+            <span className="text-xs uppercase tracking-wider text-slate-500">
+              {t('orUseEmail')}
+            </span>
+
+          <div className="h-px flex-1 bg-slate-800" />
+        </div>
+      </div>
+        <form action="/api/signup" method="post" className="space-y-6">
           <div>
             <label htmlFor="account-type" className="block text-sm font-semibold text-slate-300">{t('accountTypeLabel')}</label>
             <select id="account-type" name="accountType" defaultValue="" required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300 outline-none focus:border-cyan-400">
