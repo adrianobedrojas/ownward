@@ -231,7 +231,6 @@ export default function UserAccountMenu({
               <button
                 type="submit"
                 role="menuitem"
-                onClick={onClose}
                 className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
               >
                 {t('logOut')}
