@@ -11,6 +11,7 @@ import { METHODOLOGY_VERSION } from "@/lib/valuation/types";
 import type { ValuationInput } from "@/lib/valuation/types";
 import type { SaveEstimateInput, EstimateActionResult } from "./types";
 import { getUserBillingState } from "@/lib/billing";
+import { canViewBusiness } from "@/lib/business-access";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -143,6 +144,22 @@ async function redirectToCalculatedReport(reportId: string): Promise<never> {
 // Save draft
 // ─────────────────────────────────────────────
 
+/**
+ * Resolves a server-validated business_id from form data.
+ * Returns null if none provided, or throws if businessId is provided but
+ * the user does not have access to that business.
+ */
+async function resolveBusinessId(
+  formData: FormData,
+  userId: string
+): Promise<string | null> {
+  const raw = formData.get("businessId");
+  if (!isUuid(raw)) return null;
+  const allowed = await canViewBusiness(userId, raw);
+  if (!allowed) return null;
+  return raw;
+}
+
 export async function saveDraft(formData: FormData): Promise<ValuationActionResult> {
   const auth = await getAuthenticatedUser();
   if (!auth.authenticated) {
@@ -152,6 +169,7 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
   const { supabase, user } = auth;
 
   const input = buildInputFromFormData(formData);
+  const businessId = await resolveBusinessId(formData, user.id);
 
   const reportId = (formData.get("reportId") as string) ?? null;
   const existingReportId = isUuid(reportId) ? reportId : null;
@@ -207,6 +225,7 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
       business_name: input.businessProfile.businessName,
       industry: input.businessProfile.industry,
       input_snapshot: input,
+      ...(businessId ? { business_id: businessId } : {}),
     })
     .select("id")
     .single();
@@ -235,6 +254,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   const valuationLevel = billing.entitlements.valuationLevel;
 
   const input = buildInputFromFormData(formData);
+  const businessId = await resolveBusinessId(formData, user.id);
 
   // Validate input on the server
   const validationErrors = validateValuationInput(input);
@@ -314,6 +334,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
           input_snapshot: input,
           result_snapshot: tieredResult,
           version: 1,
+          ...(businessId ? { business_id: businessId } : {}),
         })
         .select("id")
         .single();
@@ -342,6 +363,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
         confidence_score: result.confidenceScore,
         input_snapshot: input,
         result_snapshot: tieredResult,
+        ...(businessId ? { business_id: businessId } : {}),
       })
       .eq("id", existingReportId)
       .eq("user_id", user.id);
@@ -371,6 +393,7 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
       confidence_score: result.confidenceScore,
       input_snapshot: input,
       result_snapshot: tieredResult,
+      ...(businessId ? { business_id: businessId } : {}),
     })
     .select("id")
     .single();
