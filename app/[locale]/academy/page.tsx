@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createMetadata, getAbsoluteUrl, serializeJsonLd } from '@/lib/seo';
 import {
   academyCourses,
   getLocalizedAcademyText,
@@ -14,7 +15,7 @@ interface AcademyPageProps {
 export async function generateMetadata({ params }: AcademyPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('academy.title'), description: t('academy.description') };
+  return createMetadata({ locale, pathname: '/academy', title: t('academy.title'), description: t('academy.description') });
 }
 
 function levelLabel(level: AcademyCourse['level'], t: Awaited<ReturnType<typeof getTranslations>>) {
@@ -26,9 +27,17 @@ function levelLabel(level: AcademyCourse['level'], t: Awaited<ReturnType<typeof 
 export default async function AcademyPage({ params }: AcademyPageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Academy' });
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t('breadcrumbAcademy'), item: getAbsoluteUrl('/academy', locale === 'es' ? 'es' : 'en') },
+    ],
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 text-slate-100 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
       <div className="max-w-3xl">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('heroBadge')}</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">{t('heroTitle')}</h1>

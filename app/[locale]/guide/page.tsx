@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createMetadata } from '@/lib/seo';
 import GuideExplorer from '@/components/guide/GuideExplorer';
 import { guideArticles, guideCategoryContent, type GuideCategorySlug } from '@/lib/guide-content';
 import { getRecommendedStartingArticle, orderGuideArticles } from '@/lib/guide-discovery';
@@ -22,7 +23,7 @@ const ctaHref: Record<GuideCategorySlug, string> = {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('guide.title'), description: t('guide.description') };
+  return createMetadata({ locale, pathname: '/guide', title: t('guide.title'), description: t('guide.description') });
 }
 
 export default async function GuideIndexPage() {

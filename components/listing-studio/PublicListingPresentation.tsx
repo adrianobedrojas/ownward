@@ -1,3 +1,4 @@
+import { Link } from '@/i18n/navigation';
 import ListingInterestPanel from "@/components/ListingInterestPanel";
 
 export type PublicListingData = {
@@ -47,6 +48,20 @@ interface Props {
   isOwnerPreview?: boolean;
 }
 
+
+function getLocalizedMediaText(
+  locale: string,
+  englishValue: string | undefined,
+  spanishValue: string | undefined,
+  fallback: string
+): string {
+  const preferred = locale === 'es'
+    ? (spanishValue ?? englishValue)
+    : (englishValue ?? spanishValue);
+
+  return preferred?.trim() || fallback;
+}
+
 function formatCurrency(amount: number | null, currency: string): string {
   if (!amount) return "—";
   return new Intl.NumberFormat("en-US", {
@@ -71,6 +86,12 @@ export default function PublicListingPresentation({
 
   const coverPhoto = media.find((m) => m.isCover) ?? media[0] ?? null;
   const galleryPhotos = media.filter((m) => !m.isCover).slice(0, 8);
+  const coverPhotoAlt = coverPhoto
+    ? getLocalizedMediaText(locale, coverPhoto.altTextEn, coverPhoto.altTextEs, listing.publicTitle)
+    : listing.publicTitle;
+  const breadcrumbLabel = locale === 'es' ? 'Comprar negocios' : 'Buy businesses';
+  const galleryLabel = locale === 'es' ? 'Galería' : 'Gallery';
+  const noPhotosLabel = locale === 'es' ? 'No se proporcionaron fotos' : 'No photos provided';
 
   const revenueMultiple =
     listing.asking_price && listing.annual_revenue && listing.annual_revenue > 0
@@ -90,6 +111,12 @@ export default function PublicListingPresentation({
         </div>
       )}
 
+      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-slate-400">
+        <Link href="/buy" className="transition hover:text-white">{breadcrumbLabel}</Link>
+        <span aria-hidden="true">›</span>
+        <span className="text-slate-200">{listing.publicTitle}</span>
+      </nav>
+
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main content */}
         <article className="lg:col-span-2 space-y-6">
@@ -98,14 +125,14 @@ export default function PublicListingPresentation({
             <div className="rounded-2xl overflow-hidden border border-slate-800">
               <img
                 src={coverPhoto.signedUrl}
-                alt={coverPhoto.altTextEn ?? listing.publicTitle}
+                alt={coverPhotoAlt}
                 className="w-full aspect-video object-cover"
                 loading="eager"
               />
             </div>
           ) : (
             <div className="rounded-2xl border border-slate-800 bg-slate-900 aspect-video flex items-center justify-center">
-              <p className="text-slate-600 text-sm">No photos provided</p>
+              <p className="text-slate-600 text-sm">{noPhotosLabel}</p>
             </div>
           )}
 
@@ -252,20 +279,20 @@ export default function PublicListingPresentation({
           {/* Photo gallery */}
           {galleryPhotos.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-white mb-4">Gallery</h2>
+              <h2 className="text-lg font-bold text-white mb-4">{galleryLabel}</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {galleryPhotos.map((photo) => (
                   photo.signedUrl ? (
                     <div key={photo.id} className="rounded-xl overflow-hidden border border-slate-800">
                       <img
                         src={photo.signedUrl}
-                        alt={photo.altTextEn ?? "Listing photo"}
+                        alt={getLocalizedMediaText(locale, photo.altTextEn, photo.altTextEs, listing.publicTitle)}
                         className="w-full aspect-video object-cover"
                         loading="lazy"
                       />
-                      {photo.captionEn && (
-                        <p className="px-3 py-2 text-xs text-slate-400">{photo.captionEn}</p>
-                      )}
+                      {getLocalizedMediaText(locale, photo.captionEn, photo.captionEs, '').trim() ? (
+                        <p className="px-3 py-2 text-xs text-slate-400">{getLocalizedMediaText(locale, photo.captionEn, photo.captionEs, '')}</p>
+                      ) : null}
                     </div>
                   ) : null
                 ))}

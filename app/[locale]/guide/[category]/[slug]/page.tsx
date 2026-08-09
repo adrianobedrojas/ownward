@@ -23,6 +23,7 @@ import {
   guideArticles,
 } from '@/lib/guide-content';
 import { getArticleTableOfContents } from '@/lib/guide-discovery';
+import { createMetadata, getAbsoluteUrl, serializeJsonLd } from '@/lib/seo';
 
 interface GuideArticlePageProps {
   params: Promise<{ locale: string; category: string; slug: string }>;
@@ -36,10 +37,16 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: GuideArticlePageProps): Promise<Metadata> {
-  const { category, slug } = await params;
+  const { locale, category, slug } = await params;
   const article = getGuideArticle(category, slug);
   if (!article) return {};
-  return { title: article.title, description: article.metadataDescription };
+  return createMetadata({ locale, pathname: `/guide/${article.category}/${article.slug}`, title: article.title, description: article.metadataDescription, type: 'article' });
+}
+
+function toIsoDate(value?: string) {
+  if (!value) return undefined;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
 function getLessonHref(lesson: AcademyLesson) {
@@ -63,9 +70,9 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
 
   if (!article || !catInfo) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ownwardhub.com';
-  const canonicalUrl = new URL(`/guide/${article.category}/${article.slug}`, siteUrl).toString();
+  const canonicalUrl = getAbsoluteUrl(`/guide/${article.category}/${article.slug}`, locale === 'es' ? 'es' : 'en');
   const guideLabel = article.articleType ?? t('ownwardGuideLabel');
+  const categoryLabel = ((t.raw(`categories.${article.category}`) as Record<string, string> | undefined)?.name) ?? catInfo.title;
   const introTitle = article.introductionTitle ?? t('introduction');
   const actionPlanTitle = article.actionPlanTitle ?? t('actionPlan');
   const hasActionPlan = Array.isArray(article.actionPlan) && article.actionPlan.length > 0;
@@ -89,9 +96,31 @@ export default async function GuideArticlePage({ params }: GuideArticlePageProps
   const additionalCategoryArticles = getGuideArticlesByCategory(article.category)
     .filter((candidate) => candidate.slug !== article.slug)
     .slice(0, 2);
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t('ownwardGuideLabel'), item: getAbsoluteUrl('/guide', locale === 'es' ? 'es' : 'en') },
+      { '@type': 'ListItem', position: 2, name: categoryLabel, item: getAbsoluteUrl(`/guide/${article.category}`, locale === 'es' ? 'es' : 'en') },
+      { '@type': 'ListItem', position: 3, name: article.title, item: canonicalUrl },
+    ],
+  };
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.metadataDescription,
+    url: canonicalUrl,
+    mainEntityOfPage: canonicalUrl,
+    datePublished: toIsoDate(article.publishedDate),
+    dateModified: toIsoDate(article.lastReviewed),
+    inLanguage: locale === 'es' ? 'es' : 'en',
+  };
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-12 text-slate-100 sm:px-6 print:max-w-none print:px-0 print:py-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }} />
       <ArticleReadingProgress />
       <div className="grid gap-8 xl:grid-cols-[16rem_minmax(0,72ch)]">
         <ArticleTableOfContents title={t('tableOfContents')} items={tableOfContents} />

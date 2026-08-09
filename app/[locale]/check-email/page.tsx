@@ -2,20 +2,15 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { Link } from '@/i18n/navigation';
+import { createNoIndexMetadata } from '@/lib/seo';
 import { ResendConfirmationForm } from '@/components/ResendConfirmationForm';
 import SignupSuccessTracker from '@/components/analytics/SignupSuccessTracker';
 
+// Equivalent robots: { index: false, follow: false }
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return {
-    title: t('checkEmail.title'),
-    description: t('checkEmail.description'),
-    robots: {
-      index: false,
-      follow: false,
-    },
-  };
+  return createNoIndexMetadata({ locale, pathname: '/check-email', title: t('checkEmail.title'), description: t('checkEmail.description') });
 }
 
 interface CheckEmailPageProps {

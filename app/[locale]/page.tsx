@@ -5,6 +5,7 @@ import InstagramLink from '@/components/InstagramLink';
 import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import { createClient } from '@/lib/supabase/server';
 import { capitalizeFirst } from '@/lib/documents';
+import { SITE_NAME, createMetadata, getAbsoluteUrl, serializeJsonLd } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
@@ -14,10 +15,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
 
-  return {
-    title: t('home.title'),
-    description: t('home.description'),
-  };
+  return createMetadata({ locale, pathname: '', title: t('home.title'), description: t('home.description') });
 }
 
 export default async function HomePage({
@@ -65,9 +63,28 @@ export default async function HomePage({
   }
 
   const previewListings = [...(featuredListings ?? []), ...fillListings];
+  const homeUrl = getAbsoluteUrl('', recommendationLocale);
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${getAbsoluteUrl('')}/#website`,
+    url: homeUrl,
+    name: SITE_NAME,
+    inLanguage: recommendationLocale,
+  };
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${getAbsoluteUrl('')}/#organization`,
+    name: SITE_NAME,
+    url: getAbsoluteUrl(''),
+    sameAs: ['https://www.instagram.com/ownwardhub/'],
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }} />
       <section className="mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:pt-20">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>

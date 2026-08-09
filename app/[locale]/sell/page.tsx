@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import SeoNextSteps from '@/components/seo/SeoNextSteps';
+import { createMetadata } from '@/lib/seo';
 import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('sell.title'), description: t('sell.description') };
+  return createMetadata({ locale, pathname: '/sell', title: t('sell.title'), description: t('sell.description') });
 }
 
 export default async function SellBusinessPage({
@@ -19,6 +21,17 @@ export default async function SellBusinessPage({
   const tStudio = await getTranslations('ListingStudio');
   const steps = t.raw('prepSteps') as Array<Record<string, string>>;
   const areas = t.raw('reviewAreas') as Array<Record<string, string>>;
+  const nextSteps = locale === 'es'
+    ? [
+        { href: '/valuation', title: 'Calcular valuación', description: 'Define una referencia de valor antes de publicar tu negocio.' },
+        { href: '/sale-readiness', title: 'Medir preparación de venta', description: 'Detecta brechas antes de llegar a compradores.' },
+        { href: '/guide/sell', title: 'Leer guías para vender', description: 'Revisa listados confidenciales, diligencia y cierre.' },
+      ]
+    : [
+        { href: '/valuation', title: 'Estimate valuation', description: 'Set a value baseline before you publish your business.' },
+        { href: '/sale-readiness', title: 'Measure sale readiness', description: 'Spot gaps before you go in front of buyers.' },
+        { href: '/guide/sell', title: 'Read selling guides', description: 'Review confidential listings, diligence, and closing guidance.' },
+      ];
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -90,6 +103,7 @@ export default async function SellBusinessPage({
         <h2 className="font-semibold text-white">{t('importantTitle')}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-400">{t('importantDescription')}</p>
       </section>
+      <SeoNextSteps heading={locale === 'es' ? "Siguientes pasos útiles" : "Useful next steps"} links={nextSteps} />
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { createNoIndexMetadata } from "@/lib/seo";
 
 // Allowed OTP types for this landing page (matches the allowlist in
 // app/auth/confirm/route.ts).
@@ -21,10 +22,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Metadata" });
-  return {
-    title: t("confirmEmail.title"),
-    description: t("confirmEmail.description"),
-  };
+  return createNoIndexMetadata({ locale, pathname: '/confirm-email', title: t('confirmEmail.title'), description: t('confirmEmail.description') });
 }
 
 interface SearchParams {
