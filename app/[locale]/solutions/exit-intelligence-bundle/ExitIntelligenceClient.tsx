@@ -891,13 +891,13 @@ function MoveNeedleSection({
             }
             details={
               <div className="space-y-1">
-                {s.improvement && (
+                {!!s.improvement && (
                   <p className="text-sm text-slate-300">
                     <span className="font-semibold text-slate-400">{t.improvementLabel} </span>
                     {s.improvement as string}
                   </p>
                 )}
-                {s.whyItMatters && (
+                {!!s.whyItMatters && (
                   <p className="text-sm text-slate-300">
                     <span className="font-semibold text-slate-400">{t.whyItMatters} </span>
                     {s.whyItMatters as string}
@@ -989,7 +989,7 @@ export default function ExitIntelligenceClient({
   selectedBusinessId,
   exitData,
 }: Props) {
-  const t = T[locale];
+  const t = T[locale] as (typeof T)["en"];
 
   // Empty state: no businesses
   if (businesses.length === 0 || !selectedBusinessId) {
