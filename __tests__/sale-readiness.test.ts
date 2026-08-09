@@ -161,7 +161,6 @@ describe("computeSaleReadiness", () => {
     const result = computeSaleReadiness(FULL_INPUT);
     expect(() => new Date(result.scoredAt)).not.toThrow();
   });
-});
 
   it("does not penalize legal readiness when IP protection is not applicable", () => {
     const applicableInput: SaleReadinessInput = {
