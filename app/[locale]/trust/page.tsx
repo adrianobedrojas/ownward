@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createMetadata } from '@/lib/seo';
 import { LEGAL_OPERATOR } from '@/lib/legal-content';
 import {
   CURRENT_TERMS_VERSION,
@@ -12,7 +13,7 @@ import {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('trust.title'), description: t('trust.description') };
+  return createMetadata({ locale, pathname: '/trust', title: t('trust.title'), description: t('trust.description') });
 }
 
 const EN_BODY =

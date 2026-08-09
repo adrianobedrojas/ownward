@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import SeoNextSteps from '@/components/seo/SeoNextSteps';
 import BusinessIdeaReadinessAssessment from '@/components/business-idea-readiness/BusinessIdeaReadinessAssessment';
+import { createMetadata } from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -10,32 +12,23 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ownwardhub.com';
-
-  return {
-    title: t('businessIdeaReadiness.title'),
-    description: t('businessIdeaReadiness.description'),
-    alternates: {
-      canonical: `${siteUrl}/business-idea-readiness-check`,
-      languages: {
-        en: `${siteUrl}/business-idea-readiness-check`,
-        es: `${siteUrl}/es/business-idea-readiness-check`,
-      },
-    },
-    openGraph: {
-      title: t('businessIdeaReadiness.title'),
-      description: t('businessIdeaReadiness.description'),
-      url:
-        locale === 'es'
-          ? `${siteUrl}/es/business-idea-readiness-check`
-          : `${siteUrl}/business-idea-readiness-check`,
-    },
-  };
+  return createMetadata({ locale, pathname: '/business-idea-readiness-check', title: t('businessIdeaReadiness.title'), description: t('businessIdeaReadiness.description') });
 }
 
 export default async function BusinessIdeaReadinessCheckPage({ params }: Props) {
   const { locale } = await params;
   const isSpanish = locale === 'es';
+  const nextSteps = isSpanish
+    ? [
+        { href: '/start', title: 'Ir a Start', description: 'Convierte tu resultado en un plan práctico de lanzamiento.' },
+        { href: '/guide/start', title: 'Leer guías para empezar', description: 'Profundiza en validación, oferta y costos iniciales.' },
+        { href: '/contact', title: 'Contactar a Ownward', description: 'Comparte tu principal bloqueo y recibe una recomendación inicial.' },
+      ]
+    : [
+        { href: '/start', title: 'Go to Start', description: 'Turn your result into a practical launch plan.' },
+        { href: '/guide/start', title: 'Read startup guides', description: 'Go deeper on validation, your first offer, and startup costs.' },
+        { href: '/contact', title: 'Contact Ownward', description: 'Share your main blocker and get an initial recommendation.' },
+      ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -93,6 +86,7 @@ export default async function BusinessIdeaReadinessCheckPage({ params }: Props) 
             </Link>
           </div>
         </div>
+        <SeoNextSteps heading={isSpanish ? "Siguientes pasos útiles" : "Useful next steps"} links={nextSteps} />
       </section>
     </div>
   );

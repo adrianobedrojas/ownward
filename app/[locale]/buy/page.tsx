@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import SeoNextSteps from '@/components/seo/SeoNextSteps';
+import { createMetadata } from '@/lib/seo';
 import ContextualSolutionModule from '@/components/solutions/ContextualSolutionModule';
 import { createClient } from '@/lib/supabase/server';
 import { capitalizeFirst } from '@/lib/documents';
@@ -8,7 +10,7 @@ import { capitalizeFirst } from '@/lib/documents';
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('buy.title'), description: t('buy.description') };
+  return createMetadata({ locale, pathname: '/buy', title: t('buy.title'), description: t('buy.description') });
 }
 
 interface SearchParams {
@@ -47,6 +49,17 @@ export default async function MarketplacePage({ params: pageParams, searchParams
   const normalListings = listings.filter((listing) => !featuredIds.has(listing.id));
   const buyerPoints = t.raw('buyersPoints') as string[];
   const sellerPoints = t.raw('sellersPoints') as string[];
+  const nextSteps = locale === 'es'
+    ? [
+        { href: '/valuation', title: 'Revisar valuación', description: 'Compara oportunidades con una referencia práctica de valor.' },
+        { href: '/guide/buy', title: 'Leer guías de compra', description: 'Profundiza en evaluación, financiamiento y diligencia.' },
+        { href: '/academy', title: 'Explorar Academy', description: 'Sigue rutas guiadas para comprar y vender un negocio.' },
+      ]
+    : [
+        { href: '/valuation', title: 'Review valuation guidance', description: 'Compare opportunities with a practical value lens.' },
+        { href: '/guide/buy', title: 'Read buying guides', description: 'Go deeper on evaluation, financing, and diligence.' },
+        { href: '/academy', title: 'Explore the Academy', description: 'Follow guided paths on buying and selling a business.' },
+      ];
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -142,6 +155,7 @@ export default async function MarketplacePage({ params: pageParams, searchParams
           <Link href="/sell" className="mt-6 inline-block rounded-lg border border-cyan-400 px-5 py-3 font-semibold text-cyan-300 transition hover:bg-cyan-400/10">{t('sellersCta')}</Link>
         </article>
       </section>
+      <SeoNextSteps heading={locale === 'es' ? "Siguientes pasos útiles" : "Useful next steps"} links={nextSteps} />
     </section>
   );
 

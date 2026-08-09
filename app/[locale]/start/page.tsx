@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import StartBusinessPlanner from './StartBusinessPlanner';
 import { getGuideArticlesByCategory } from '@/lib/guide-content';
+import { createMetadata } from '@/lib/seo';
 
 interface StartPageProps {
   params: Promise<{ locale: string }>;
@@ -13,23 +14,7 @@ interface StartPageProps {
 export async function generateMetadata({ params }: StartPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ownwardhub.com';
-  return {
-    title: t('start.title'),
-    description: t('start.description'),
-    alternates: {
-      canonical: `${siteUrl}/start`,
-      languages: {
-        en: `${siteUrl}/start`,
-        es: `${siteUrl}/es/start`,
-      },
-    },
-    openGraph: {
-      title: t('start.title'),
-      description: t('start.description'),
-      url: locale === 'es' ? `${siteUrl}/es/start` : `${siteUrl}/start`,
-    },
-  };
+  return createMetadata({ locale, pathname: '/start', title: t('start.title'), description: t('start.description') });
 }
 
 export default async function StartPage({ params, searchParams }: StartPageProps) {

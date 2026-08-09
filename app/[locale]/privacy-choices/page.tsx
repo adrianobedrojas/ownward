@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createMetadata } from '@/lib/seo';
 import { OpenPrivacyChoicesButton } from '@/components/PrivacyConsent';
 import { PRIVACY_CONSENT_STORAGE_KEY } from '@/lib/privacy-consent';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('privacyChoices.title'), description: t('privacyChoices.description') };
+  return createMetadata({ locale, pathname: '/privacy-choices', title: t('privacyChoices.title'), description: t('privacyChoices.description') });
 }
 
 export default async function PrivacyChoicesPage() {

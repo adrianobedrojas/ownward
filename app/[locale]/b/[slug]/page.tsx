@@ -1,67 +1,143 @@
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import PublicListingPresentation from "@/components/listing-studio/PublicListingPresentation";
+import type { Metadata } from 'next';
+import { cache } from 'react';
+import { notFound } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import PublicListingPresentation from '@/components/listing-studio/PublicListingPresentation';
+import {
+  buildBusinessListingSeoTitle,
+  createMetadata,
+  getAbsoluteUrl,
+  serializeJsonLd,
+} from '@/lib/seo';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
 
-export default async function PublicBusinessPage({ params }: Props) {
-  const { locale, slug } = await params;
+type PublicListingRow = {
+  id: string;
+  slug: string;
+  business_name: string;
+  is_confidential: boolean | null;
+  teaser_title: string | null;
+  category: string | null;
+  location: string | null;
+  headline_en: string | null;
+  headline_es: string | null;
+  summary: string | null;
+  summary_en: string | null;
+  summary_es: string | null;
+  highlights_en: string | null;
+  highlights_es: string | null;
+  growth_opportunities_en: string | null;
+  growth_opportunities_es: string | null;
+  reason_for_selling_en: string | null;
+  reason_for_selling_es: string | null;
+  asking_price: number | null;
+  annual_revenue: number | null;
+  cash_flow: number | null;
+  year_established: number | null;
+  currency: string | null;
+  seller_financing: boolean | null;
+  inventory_included: boolean | null;
+  real_estate_included: boolean | null;
+  owner_involvement_hours: number | null;
+  number_of_employees: number | null;
+  featured_until: string | null;
+  published_at: string | null;
+};
 
+const getPublicListingRow = cache(async (slug: string): Promise<PublicListingRow | null> => {
   const supabase = await createClient();
-
-  // Query the safe public-detail view (never exposes user_id or raw confidential names)
-  const { data: listing, error } = await supabase
-    .from("business_listing_public_detail")
+  const { data } = await supabase
+    .from('business_listing_public_detail')
     .select(
-      "id, slug, business_name, is_confidential, teaser_title, category, location, headline_en, headline_es, summary, summary_en, summary_es, highlights_en, highlights_es, growth_opportunities_en, growth_opportunities_es, reason_for_selling_en, reason_for_selling_es, asking_price, annual_revenue, cash_flow, year_established, currency, seller_financing, inventory_included, real_estate_included, owner_involvement_hours, number_of_employees, featured_until, published_at"
+      'id, slug, business_name, is_confidential, teaser_title, category, location, headline_en, headline_es, summary, summary_en, summary_es, highlights_en, highlights_es, growth_opportunities_en, growth_opportunities_es, reason_for_selling_en, reason_for_selling_es, asking_price, annual_revenue, cash_flow, year_established, currency, seller_financing, inventory_included, real_estate_included, owner_involvement_hours, number_of_employees, featured_until, published_at'
     )
-    .eq("slug", slug)
+    .eq('slug', slug)
     .maybeSingle();
 
-  if (error || !listing) {
+  return data ?? null;
+});
+
+function getLocalizedValue(locale: string, englishValue: string | null, spanishValue: string | null, fallback?: string | null) {
+  if (locale === 'es') {
+    return spanishValue ?? englishValue ?? fallback ?? null;
+  }
+
+  return englishValue ?? spanishValue ?? fallback ?? null;
+}
+
+function getPublicTitle(listing: PublicListingRow) {
+  return listing.is_confidential
+    ? (listing.teaser_title ?? listing.business_name ?? '')
+    : listing.business_name;
+}
+
+function buildListingDescription(locale: string, listing: PublicListingRow) {
+  return getLocalizedValue(
+    locale,
+    listing.summary_en,
+    listing.summary_es,
+    listing.summary ?? getLocalizedValue(locale, listing.headline_en, listing.headline_es)
+  ) ?? (locale === 'es' ? 'Explora este negocio publicado en Ownward Hub.' : 'Explore this public business listing on Ownward Hub.');
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const listing = await getPublicListingRow(slug);
+
+  if (!listing) {
+    return {};
+  }
+
+  return createMetadata({
+    locale,
+    pathname: `/b/${listing.slug}`,
+    title: buildBusinessListingSeoTitle(locale, getPublicTitle(listing), listing.location),
+    description: buildListingDescription(locale, listing),
+  });
+}
+
+export default async function PublicBusinessPage({ params }: Props) {
+  const { locale, slug } = await params;
+  const supabase = await createClient();
+  const listing = await getPublicListingRow(slug);
+
+  if (!listing) {
     notFound();
   }
 
-  // Check auth for interest panel
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Check if already saved
   let initialSaved = false;
   if (user) {
     const { data: saved } = await supabase
-      .from("saved_listings")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("listing_id", listing.id)
+      .from('saved_listings')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('listing_id', listing.id)
       .maybeSingle();
     initialSaved = !!saved;
   }
 
-  // isOwner: cannot be determined from the public view (user_id is not exposed).
-  // Ownership editing is handled in the seller dashboard; mark false for public pages.
   const isOwner = false;
 
-  // Fetch media records — only those belonging to this listing (prevents cross-listing path injection)
   const { data: rawMedia } = await supabase
-    .from("listing_media")
-    .select("id, storage_path, alt_text_en, alt_text_es, caption_en, caption_es, sort_order, is_cover")
-    .eq("listing_id", listing.id)
-    .order("sort_order", { ascending: true });
+    .from('listing_media')
+    .select('id, storage_path, alt_text_en, alt_text_es, caption_en, caption_es, sort_order, is_cover')
+    .eq('listing_id', listing.id)
+    .order('sort_order', { ascending: true });
 
-  // Generate short-lived signed URLs using the server-only admin client.
-  // The listing is already verified as published/public by the view query above.
-  // Each media row is fetched from the DB so storage paths cannot be browser-supplied.
   const adminClient = createAdminClient();
   const media = await Promise.all(
     (rawMedia ?? []).map(async (m) => {
       try {
         const { data: signed } = await adminClient.storage
-          .from("listing-images")
+          .from('listing-images')
           .createSignedUrl(m.storage_path, 3600);
         return {
           id: m.id,
@@ -74,7 +150,6 @@ export default async function PublicBusinessPage({ params }: Props) {
           sortOrder: m.sort_order,
         };
       } catch {
-        // Gracefully handle inaccessible images – render without a URL
         return {
           id: m.id,
           signedUrl: null,
@@ -89,36 +164,31 @@ export default async function PublicBusinessPage({ params }: Props) {
     })
   );
 
-  // Public title: teaser for confidential listings (business_name is already masked in the view)
-  const publicTitle = listing.is_confidential
-    ? (listing.teaser_title ?? listing.business_name ?? "")
-    : listing.business_name;
-
-  // Locale-aware content fallback
-  const headline =
-    locale === "es"
-      ? (listing.headline_es ?? listing.headline_en ?? null)
-      : (listing.headline_en ?? listing.headline_es ?? null);
-
-  const summary =
-    locale === "es"
-      ? (listing.summary_es ?? listing.summary_en ?? listing.summary ?? null)
-      : (listing.summary_en ?? listing.summary_es ?? listing.summary ?? null);
-
-  const highlights =
-    locale === "es"
-      ? (listing.highlights_es ?? listing.highlights_en ?? null)
-      : (listing.highlights_en ?? listing.highlights_es ?? null);
-
-  const growthOpportunities =
-    locale === "es"
-      ? (listing.growth_opportunities_es ?? listing.growth_opportunities_en ?? null)
-      : (listing.growth_opportunities_en ?? listing.growth_opportunities_es ?? null);
-
-  const reasonForSelling =
-    locale === "es"
-      ? (listing.reason_for_selling_es ?? listing.reason_for_selling_en ?? null)
-      : (listing.reason_for_selling_en ?? listing.reason_for_selling_es ?? null);
+  const publicTitle = getPublicTitle(listing);
+  const headline = getLocalizedValue(locale, listing.headline_en, listing.headline_es);
+  const summary = getLocalizedValue(locale, listing.summary_en, listing.summary_es, listing.summary);
+  const highlights = getLocalizedValue(locale, listing.highlights_en, listing.highlights_es);
+  const growthOpportunities = getLocalizedValue(locale, listing.growth_opportunities_en, listing.growth_opportunities_es);
+  const reasonForSelling = getLocalizedValue(locale, listing.reason_for_selling_en, listing.reason_for_selling_es);
+  const canonicalUrl = getAbsoluteUrl(`/b/${listing.slug}`, locale === 'es' ? 'es' : 'en');
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: locale === 'es' ? 'Comprar negocios' : 'Buy businesses',
+        item: getAbsoluteUrl('/buy', locale === 'es' ? 'es' : 'en'),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: publicTitle,
+        item: canonicalUrl,
+      },
+    ],
+  };
 
   const listingData = {
     id: listing.id,
@@ -135,7 +205,7 @@ export default async function PublicBusinessPage({ params }: Props) {
     annual_revenue: listing.annual_revenue,
     cash_flow: listing.cash_flow,
     year_established: listing.year_established,
-    currency: listing.currency ?? "USD",
+    currency: listing.currency ?? 'USD',
     seller_financing: listing.seller_financing ?? false,
     inventory_included: listing.inventory_included ?? false,
     real_estate_included: listing.real_estate_included ?? false,
@@ -146,13 +216,16 @@ export default async function PublicBusinessPage({ params }: Props) {
   };
 
   return (
-    <PublicListingPresentation
-      listing={listingData}
-      media={media}
-      locale={locale}
-      isOwner={isOwner}
-      isSignedIn={!!user}
-      initialSaved={initialSaved}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
+      <PublicListingPresentation
+        listing={listingData}
+        media={media}
+        locale={locale}
+        isOwner={isOwner}
+        isSignedIn={!!user}
+        initialSaved={initialSaved}
+      />
+    </>
   );
 }

@@ -10,6 +10,7 @@ import {
   getLocalizedAcademyText,
 } from '@/lib/academy-content';
 import { CourseProgressPanel } from './CourseProgressPanel';
+import { createMetadata, getAbsoluteUrl, serializeJsonLd } from '@/lib/seo';
 
 interface CoursePageProps {
   params: Promise<{ locale: string; courseSlug: string }>;
@@ -28,7 +29,13 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   if (!course) return {};
   const title = getLocalizedAcademyText(course.title, locale);
   const description = getLocalizedAcademyText(course.description, locale);
-  return { title: `${title} | Ownward Academy`, description };
+  return createMetadata({
+    locale,
+    pathname: `/academy/${course.slug}`,
+    title,
+    description,
+    index: course.status === 'available',
+  });
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
@@ -64,9 +71,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
     : [];
 
   const hasPlannedModules = (course.plannedModules ?? []).length > 0;
+  const canonicalUrl = getAbsoluteUrl(`/academy/${course.slug}`, locale === 'es' ? 'es' : 'en');
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t('breadcrumbAcademy'), item: getAbsoluteUrl('/academy', locale === 'es' ? 'es' : 'en') },
+      { '@type': 'ListItem', position: 2, name: title, item: canonicalUrl },
+    ],
+  };
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 text-slate-100 sm:px-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-slate-400">
         <Link href="/academy" className="transition hover:text-white">{t('breadcrumbAcademy')}</Link>
         <span aria-hidden="true">›</span>

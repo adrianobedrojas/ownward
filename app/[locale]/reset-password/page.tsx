@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createNoIndexMetadata } from '@/lib/seo';
 import { updatePassword } from './actions';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('resetPassword.title'), description: t('resetPassword.description') };
+  return createNoIndexMetadata({ locale, pathname: '/reset-password', title: t('resetPassword.title'), description: t('resetPassword.description') });
 }
 
 export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {

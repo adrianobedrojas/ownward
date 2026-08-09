@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import SolutionCheckoutButton from "@/components/solutions/SolutionCheckoutButton";
 import { getCatalogSolutionBySlug, toPublicSolution } from "@/lib/commerce/products";
 import { createClient } from "@/lib/supabase/server";
+import { createMetadata, getAbsoluteUrl, isSolutionIndexable, serializeJsonLd } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -21,10 +23,13 @@ export async function generateMetadata({
 
   const publicSolution = toPublicSolution(solution, safeLocale);
 
-  return {
+  return createMetadata({
+    locale,
+    pathname: `/solutions/${publicSolution.slug}`,
     title: publicSolution.name,
     description: publicSolution.description,
-  };
+    index: isSolutionIndexable(publicSolution.status),
+  });
 }
 
 /** Load eligible published+public listings for the authenticated user. */
@@ -136,9 +141,24 @@ export default async function SolutionDetailPage({
   const noEligibleTargetLinkText = isSpanish
     ? `Crea o publica un listado antes de comprar ${publicSolution.name}.`
     : `Create or publish a listing before purchasing ${publicSolution.name}.`;
+  const canonicalUrl = getAbsoluteUrl(`/solutions/${publicSolution.slug}`, safeLocale);
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: isSpanish ? 'Soluciones' : 'Solutions', item: getAbsoluteUrl('/solutions', safeLocale) },
+      { '@type': 'ListItem', position: 2, name: publicSolution.name, item: canonicalUrl },
+    ],
+  };
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }} />
+      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm text-slate-400">
+        <Link href="/solutions" className="transition hover:text-white">{isSpanish ? "Soluciones" : "Solutions"}</Link>
+        <span aria-hidden="true">›</span>
+        <span className="text-slate-200">{publicSolution.name}</span>
+      </nav>
       <h1 className="text-3xl font-bold text-white">{publicSolution.name}</h1>
       <p className="mt-3 text-slate-300">{publicSolution.description}</p>
       <p className="mt-2 text-sm text-slate-400">{publicSolution.outcome}</p>

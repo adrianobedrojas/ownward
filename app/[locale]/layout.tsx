@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -15,6 +16,20 @@ const consentInitScript = buildConsentInitScript(
   PRIVACY_CONSENT_STORAGE_KEY,
   LEGACY_PRIVACY_CONSENT_STORAGE_KEY,
 );
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  return {
+    openGraph: {
+      locale: locale === 'es' ? 'es_ES' : 'en_US',
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

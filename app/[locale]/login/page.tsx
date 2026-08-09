@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { createNoIndexMetadata } from '@/lib/seo';
 import { getSafeRedirect } from '@/lib/auth/safe-redirect';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  return { title: t('login.title'), description: t('login.description') };
+  return createNoIndexMetadata({ locale, pathname: '/login', title: t('login.title'), description: t('login.description') });
 }
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {

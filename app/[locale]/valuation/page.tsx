@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import SeoNextSteps from "@/components/seo/SeoNextSteps";
 import { createClient } from "@/lib/supabase/server";
 import { getUserBillingState } from "@/lib/billing";
 import ContextualSolutionModule from "@/components/solutions/ContextualSolutionModule";
 import { ValuationWizard } from "./ValuationWizard";
 import ValuationCalculator from "./ValuationCalculator";
+import { createMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -14,17 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Valuation" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-    alternates: {
-      canonical: "/valuation",
-      languages: {
-        en: "/valuation",
-        es: "/es/valuation",
-      },
-    },
-  };
+  return createMetadata({ locale, pathname: "/valuation", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 type Mode = "quick" | "detailed" | "reports";
@@ -95,6 +87,17 @@ export default async function ValuationPage({ params, searchParams }: PageProps)
   const industryLabels = t.raw("industryLabels") as Record<string, string>;
   const stageList = t.raw("detailedReport.stageList") as string[];
   const whatItems = t.raw("what.items") as string[];
+  const nextSteps = routeLocale === "es"
+    ? [
+        { href: '/sale-readiness', title: 'Evaluar preparación de venta', description: 'Complementa tu valuación con un diagnóstico de preparación para vender.' },
+        { href: '/customer-concentration', title: 'Revisar concentración de clientes', description: 'Detecta riesgos que pueden afectar el valor de tu negocio.' },
+        { href: '/sell', title: 'Preparar un listado confidencial', description: 'Organiza la información que compradores serios esperan ver.' },
+      ]
+    : [
+        { href: '/sale-readiness', title: 'Assess sale readiness', description: 'Pair your valuation with a readiness review before going to market.' },
+        { href: '/customer-concentration', title: 'Review customer concentration', description: 'Spot concentration risks that can affect business value.' },
+        { href: '/sell', title: 'Prepare a confidential listing', description: 'Organize the information serious buyers expect to review.' },
+      ];
 
   return (
     <main>
@@ -492,6 +495,9 @@ export default async function ValuationPage({ params, searchParams }: PageProps)
             )}
           </div>
         )}
+      </section>
+      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
+        <SeoNextSteps heading={routeLocale === "es" ? "Siguientes pasos útiles" : "Useful next steps"} links={nextSteps} />
       </section>
     </main>
   );
