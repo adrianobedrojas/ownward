@@ -163,69 +163,122 @@ describe("computeSaleReadiness", () => {
   });
 });
 
-describe("readinessStageFromScore", () => {
-  it("returns early_preparation for 0", () => {
-    expect(readinessStageFromScore(0)).toBe("early_preparation");
-  });
-  it("returns building_readiness for 30", () => {
-    expect(readinessStageFromScore(30)).toBe("building_readiness");
-  });
-  it("returns approaching_market for 60", () => {
-    expect(readinessStageFromScore(60)).toBe("approaching_market");
-  });
-  it("returns buyer_ready for 80", () => {
-    expect(readinessStageFromScore(80)).toBe("buyer_ready");
-  });
-  it("returns buyer_ready for 100", () => {
-    expect(readinessStageFromScore(100)).toBe("buyer_ready");
-  });
-});
+  it("does not penalize legal readiness when IP protection is not applicable", () => {
+    const applicableInput: SaleReadinessInput = {
+      ...FULL_INPUT,
+      hasActiveIpProtection: true,
+    };
 
-describe("riskLevelFromScore", () => {
-  it("critical for 0–19", () => {
-    expect(riskLevelFromScore(0)).toBe("critical");
-    expect(riskLevelFromScore(19)).toBe("critical");
-  });
-  it("high for 20–39", () => {
-    expect(riskLevelFromScore(20)).toBe("high");
-    expect(riskLevelFromScore(39)).toBe("high");
-  });
-  it("medium for 40–59", () => {
-    expect(riskLevelFromScore(40)).toBe("medium");
-    expect(riskLevelFromScore(59)).toBe("medium");
-  });
-  it("low for 60–79", () => {
-    expect(riskLevelFromScore(60)).toBe("low");
-    expect(riskLevelFromScore(79)).toBe("low");
-  });
-  it("none for 80–100", () => {
-    expect(riskLevelFromScore(80)).toBe("none");
-    expect(riskLevelFromScore(100)).toBe("none");
-  });
-});
+    const notApplicableInput: SaleReadinessInput = {
+      ...FULL_INPUT,
+      hasActiveIpProtection: "not_applicable",
+    };
 
-describe("buildActionPlan", () => {
-  it("returns array of action items", () => {
-    const result = computeSaleReadiness(EMPTY_INPUT);
-    const plan = buildActionPlan(result);
-    expect(Array.isArray(plan)).toBe(true);
+    const applicableResult = computeSaleReadiness(applicableInput);
+    const notApplicableResult = computeSaleReadiness(notApplicableInput);
+
+    const applicableLegal = applicableResult.categories.find(
+      (category) => category.category === "legal_org_records"
+    );
+
+    const notApplicableLegal = notApplicableResult.categories.find(
+      (category) => category.category === "legal_org_records"
+    );
+
+    expect(applicableLegal?.score).toBe(100);
+    expect(notApplicableLegal?.score).toBe(100);
   });
 
-  it("action items have valid horizon (30, 60, or 90)", () => {
-    const result = computeSaleReadiness(EMPTY_INPUT);
-    const plan = buildActionPlan(result);
-    plan.forEach((item) => {
-      expect([30, 60, 90]).toContain(item.horizon);
+  it("treats explicit no IP protection differently from not applicable", () => {
+    const noIpInput: SaleReadinessInput = {
+      ...FULL_INPUT,
+      hasActiveIpProtection: false,
+    };
+
+    const notApplicableInput: SaleReadinessInput = {
+      ...FULL_INPUT,
+      hasActiveIpProtection: "not_applicable",
+    };
+
+    const noIpResult = computeSaleReadiness(noIpInput);
+    const notApplicableResult = computeSaleReadiness(notApplicableInput);
+
+    const noIpLegal = noIpResult.categories.find(
+      (category) => category.category === "legal_org_records"
+    );
+
+    const notApplicableLegal = notApplicableResult.categories.find(
+      (category) => category.category === "legal_org_records"
+    );
+
+    expect(notApplicableLegal?.score).toBeGreaterThan(
+      noIpLegal?.score ?? 0
+    );
+  });
+
+  });
+
+  describe("readinessStageFromScore", () => {
+    it("returns early_preparation for 0", () => {
+      expect(readinessStageFromScore(0)).toBe("early_preparation");
+    });
+    it("returns building_readiness for 30", () => {
+      expect(readinessStageFromScore(30)).toBe("building_readiness");
+    });
+    it("returns approaching_market for 60", () => {
+      expect(readinessStageFromScore(60)).toBe("approaching_market");
+    });
+    it("returns buyer_ready for 80", () => {
+      expect(readinessStageFromScore(80)).toBe("buyer_ready");
+    });
+    it("returns buyer_ready for 100", () => {
+      expect(readinessStageFromScore(100)).toBe("buyer_ready");
     });
   });
 
+  describe("riskLevelFromScore", () => {
+    it("critical for 0–19", () => {
+      expect(riskLevelFromScore(0)).toBe("critical");
+      expect(riskLevelFromScore(19)).toBe("critical");
+    });
+    it("high for 20–39", () => {
+      expect(riskLevelFromScore(20)).toBe("high");
+      expect(riskLevelFromScore(39)).toBe("high");
+    });
+    it("medium for 40–59", () => {
+      expect(riskLevelFromScore(40)).toBe("medium");
+      expect(riskLevelFromScore(59)).toBe("medium");
+    });
+    it("low for 60–79", () => {
+      expect(riskLevelFromScore(60)).toBe("low");
+      expect(riskLevelFromScore(79)).toBe("low");
+    });
+    it("none for 80–100", () => {
+      expect(riskLevelFromScore(80)).toBe("none");
+      expect(riskLevelFromScore(100)).toBe("none");
+    });
+  });
+
+  describe("buildActionPlan", () => {
+    it("returns array of action items", () => {
+      const result = computeSaleReadiness(EMPTY_INPUT);
+      const plan = buildActionPlan(result);
+      expect(Array.isArray(plan)).toBe(true);
+    });
+
+    it("action items have valid horizon (30, 60, or 90)", () => {
+      const result = computeSaleReadiness(EMPTY_INPUT);
+      const plan = buildActionPlan(result);
+      plan.forEach((item) => {
+        expect([30, 60, 90]).toContain(item.horizon);
+      });
+    });
+
   it("returns empty plan for perfect score", () => {
-    // Perfect score means no critical/high/medium risk
-    const result = computeSaleReadiness(FULL_INPUT);
-    const plan = buildActionPlan(result);
-    // Plan may have entries for medium risk items; that's fine
-    plan.forEach((item) => {
-      expect(item.action).toBeTruthy();
+      // Perfect score means no critical/high/medium risk    const result = computeSaleReadiness(FULL_INPUT);
+   const plan = buildActionPlan(result);
+    // Plan may have entries for medium risk items; that's fine    plan.forEach((item) => {
+  expect(item.action).toBeTruthy();
     });
   });
 });
