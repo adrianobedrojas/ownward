@@ -743,15 +743,9 @@ const setNumber = (
             }
           />
 
-          <BoolField
-            label="Active trademark, patent, or other IP protection"
-            value={!!input.hasActiveIpProtection}
-            onChange={(value) =>
-              setBool(
-                'hasActiveIpProtection',
-                value
-              )
-            }
+          <IpProtectionField
+            value={input.hasActiveIpProtection}
+            onChange={setIpProtection}
           />
         </Section>
 
