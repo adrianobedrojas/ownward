@@ -339,7 +339,21 @@ export default function SaleReadinessClient({
     setSaveMessage(null);
     setValidationError(null);
   };
+  
+  const setIpProtection = (
+    value: SaleReadinessInput['hasActiveIpProtection']
+  ) => {
+    setInput((previous) => ({
+      ...previous,
+      hasActiveIpProtection: value,
+    }));
 
+    setResult(null);
+    setSaveMessage(null);
+    setValidationError(null);
+  };
+
+const setNumber = (
   const setNumber = (
     key: keyof SaleReadinessInput,
     raw: string
