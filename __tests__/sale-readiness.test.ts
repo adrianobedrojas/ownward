@@ -214,7 +214,6 @@ describe("computeSaleReadiness", () => {
       noIpLegal?.score ?? 0
     );
   });
-
   });
 
   describe("readinessStageFromScore", () => {
@@ -268,16 +267,17 @@ describe("computeSaleReadiness", () => {
     it("action items have valid horizon (30, 60, or 90)", () => {
       const result = computeSaleReadiness(EMPTY_INPUT);
       const plan = buildActionPlan(result);
+      
       plan.forEach((item) => {
         expect([30, 60, 90]).toContain(item.horizon);
       });
     });
 
-  it("returns empty plan for perfect score", () => {
-      // Perfect score means no critical/high/medium risk    const result = computeSaleReadiness(FULL_INPUT);
-   const plan = buildActionPlan(result);
-    // Plan may have entries for medium risk items; that's fine    plan.forEach((item) => {
-  expect(item.action).toBeTruthy();
+    it("returns empty plan when all category risks are low or none", () => {
+      const result = computeSaleReadiness(FULL_INPUT);
+      const plan = buildActionPlan(result);
+
+      expect(plan).toHaveLength(0);
     });
   });
 });
