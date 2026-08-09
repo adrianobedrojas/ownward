@@ -116,7 +116,7 @@ export type SaleReadinessInput = {
   // Legal & org records
   hasFormationDocs: boolean;
   hasCleanCapTable: boolean;
-  hasActiveIpProtection: boolean | null;
+  hasActiveIpProtection: boolean | "not_applicable" | null;
   hasNoMajorLitigation: boolean;
 
   // Team continuity
