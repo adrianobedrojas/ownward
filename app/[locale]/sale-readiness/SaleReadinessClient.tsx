@@ -353,7 +353,6 @@ export default function SaleReadinessClient({
     setValidationError(null);
   };
 
-const setNumber = (
   const setNumber = (
     key: keyof SaleReadinessInput,
     raw: string
