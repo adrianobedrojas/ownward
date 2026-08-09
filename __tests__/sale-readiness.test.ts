@@ -280,7 +280,6 @@ describe("computeSaleReadiness", () => {
       expect(plan).toHaveLength(0);
     });
   });
-});
 
 describe("estimateTimelineMonths", () => {
   it("returns 1–3 months for score >= 75", () => {
