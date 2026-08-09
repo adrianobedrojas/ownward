@@ -69,7 +69,6 @@ function isSaleReadinessInput(value: unknown): value is SaleReadinessInput {
 
   const nullableBooleanFields: (keyof SaleReadinessInput)[] = [
     'revenueGrowthPositive',
-    'hasActiveIpProtection',
   ];
 
   const nullableNumberFields: (keyof SaleReadinessInput)[] = [
