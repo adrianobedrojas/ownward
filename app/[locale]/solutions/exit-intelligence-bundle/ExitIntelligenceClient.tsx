@@ -74,6 +74,10 @@ const T = {
     months: "months",
     printBrief: "Print Executive Brief",
     refreshSuggestion: "Your core intelligence is complete. Consider refreshing assessments periodically.",
+    weakestLabel: "(weakest)",
+    primaryConcerns: "Primary concerns:",
+    improvementLabel: "Improvement:",
+    whyItMatters: "Why it matters:",
   },
   es: {
     title: "Paquete de Inteligencia de Salida",
@@ -141,6 +145,10 @@ const T = {
     months: "meses",
     printBrief: "Imprimir Resumen Ejecutivo",
     refreshSuggestion: "Tu inteligencia principal está completa. Considera actualizar las evaluaciones periódicamente.",
+    weakestLabel: "(más débil)",
+    primaryConcerns: "Preocupaciones principales:",
+    improvementLabel: "Mejora:",
+    whyItMatters: "Por qué importa:",
   },
 } as const;
 
@@ -551,7 +559,7 @@ function CategoryExplorer({
                 <span className={`text-sm font-semibold ${cat.category === weakestCategory ? "text-rose-300" : "text-white"}`}>
                   {cat.label}
                   {cat.category === weakestCategory && (
-                    <span className="ml-2 text-xs text-rose-400 font-normal">(weakest)</span>
+                    <span className="ml-2 text-xs text-rose-400 font-normal">{t.weakestLabel}</span>
                   )}
                 </span>
                 <div className="flex items-center gap-2 ml-auto text-xs text-slate-400">
@@ -706,7 +714,7 @@ function BuyerLensSection({
         </div>
         {active.primaryConcerns.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-slate-400 mb-1">Primary concerns:</p>
+            <p className="text-xs font-semibold text-slate-400 mb-1">{t.primaryConcerns}</p>
             <ul className="list-disc pl-4 space-y-0.5">
               {active.primaryConcerns.map((c) => (
                 <li key={c} className="text-xs text-slate-400">{c}</li>
@@ -885,13 +893,13 @@ function MoveNeedleSection({
               <div className="space-y-1">
                 {s.improvement && (
                   <p className="text-sm text-slate-300">
-                    <span className="font-semibold text-slate-400">Improvement: </span>
+                    <span className="font-semibold text-slate-400">{t.improvementLabel} </span>
                     {s.improvement as string}
                   </p>
                 )}
                 {s.whyItMatters && (
                   <p className="text-sm text-slate-300">
-                    <span className="font-semibold text-slate-400">Why it matters: </span>
+                    <span className="font-semibold text-slate-400">{t.whyItMatters} </span>
                     {s.whyItMatters as string}
                   </p>
                 )}
@@ -1002,7 +1010,17 @@ export default function ExitIntelligenceClient({
     );
   }
 
-  const data = exitData!;
+  if (!exitData) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-12">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 text-center">
+          <p className="text-sm text-slate-400">{t.noReadiness}</p>
+        </div>
+      </main>
+    );
+  }
+
+  const data = exitData;
   const businessName = businesses.find((b) => b.id === selectedBusinessId)?.name ?? "";
   const lastUpdated =
     data.valuation?.updatedAt ?? data.saleReadiness?.scoredAt ?? null;

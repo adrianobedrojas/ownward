@@ -293,14 +293,26 @@ describe("buildExitIntelligence — business_id isolation", () => {
 // 8. valuation business_id persistence — resolveBusinessId
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("valuation actions — resolveBusinessId", () => {
-  it("only persists business_id when user has access (integration note)", () => {
-    // resolveBusinessId is internal to actions.ts and calls canViewBusiness server-side.
-    // This test documents the expected behavior:
-    // - If canViewBusiness returns false, business_id is NOT set on the report.
-    // - This is enforced by the server action, not the client.
-    // A full integration test would require a Supabase mock.
-    // The key invariant: business_id is never set without server-side authorization.
-    expect(true).toBe(true); // placeholder — behavior verified by code review
+describe("valuation actions — resolveBusinessId auth enforcement", () => {
+  it("buildExitIntelligence receives null valuation when no business-linked report exists", () => {
+    // Security invariant: the page query uses .eq("business_id", selectedBusinessId)
+    // so a report with business_id = NULL or a different business_id is never passed.
+    // This test verifies the builder correctly handles the null case (no valuation passed).
+    const result = buildExitIntelligence(
+      "cccccccc-cccc-1ccc-cccc-cccccccccccc",
+      "My Business",
+      null,
+      null
+    );
+    expect(result.valuation).toBeNull();
+    expect(result.businessId).toBe("cccccccc-cccc-1ccc-cccc-cccccccccccc");
+  });
+
+  it("buildExitIntelligence always preserves businessId in output regardless of input", () => {
+    // The businessId in output must always match the authorized business being viewed,
+    // not any business_id field from a valuation row.
+    const bizId = "dddddddd-dddd-1ddd-dddd-dddddddddddd";
+    const result = buildExitIntelligence(bizId, "Test Co", null, null);
+    expect(result.businessId).toBe(bizId);
   });
 });

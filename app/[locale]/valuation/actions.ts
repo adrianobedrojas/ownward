@@ -146,18 +146,19 @@ async function redirectToCalculatedReport(reportId: string): Promise<never> {
 
 /**
  * Resolves a server-validated business_id from form data.
- * Returns null if none provided, or throws if businessId is provided but
- * the user does not have access to that business.
+ * Returns { businessId: string } if valid and authorized.
+ * Returns { businessId: null } if no businessId was provided.
+ * Returns { error: string } if businessId was provided but access is denied.
  */
 async function resolveBusinessId(
   formData: FormData,
   userId: string
-): Promise<string | null> {
+): Promise<{ businessId: string | null; error?: string }> {
   const raw = formData.get("businessId");
-  if (!isUuid(raw)) return null;
+  if (!isUuid(raw)) return { businessId: null };
   const allowed = await canViewBusiness(userId, raw);
-  if (!allowed) return null;
-  return raw;
+  if (!allowed) return { businessId: null, error: "You do not have access to the specified business." };
+  return { businessId: raw };
 }
 
 export async function saveDraft(formData: FormData): Promise<ValuationActionResult> {
@@ -169,7 +170,11 @@ export async function saveDraft(formData: FormData): Promise<ValuationActionResu
   const { supabase, user } = auth;
 
   const input = buildInputFromFormData(formData);
-  const businessId = await resolveBusinessId(formData, user.id);
+  const bizResolution = await resolveBusinessId(formData, user.id);
+  if (bizResolution.error) {
+    return { success: false, message: bizResolution.error };
+  }
+  const businessId = bizResolution.businessId;
 
   const reportId = (formData.get("reportId") as string) ?? null;
   const existingReportId = isUuid(reportId) ? reportId : null;
@@ -254,7 +259,11 @@ export async function calculateReport(formData: FormData): Promise<ValuationActi
   const valuationLevel = billing.entitlements.valuationLevel;
 
   const input = buildInputFromFormData(formData);
-  const businessId = await resolveBusinessId(formData, user.id);
+  const bizResolution = await resolveBusinessId(formData, user.id);
+  if (bizResolution.error) {
+    return { success: false, message: bizResolution.error };
+  }
+  const businessId = bizResolution.businessId;
 
   // Validate input on the server
   const validationErrors = validateValuationInput(input);
