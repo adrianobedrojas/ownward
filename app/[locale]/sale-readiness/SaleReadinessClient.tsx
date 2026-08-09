@@ -62,7 +62,7 @@ const EMPTY_INPUT: SaleReadinessInput = {
   hasFormationDocs: false,
   hasCleanCapTable: false,
   hasActiveIpProtection: null,
-  hasNoMajorLitigation: true,
+  hasNoMajorLitigation: false,
 
   hasKeyEmployeeContracts: false,
   avgEmployeeTenureYears: null,
