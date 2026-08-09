@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { getSafeRedirect } from '@/lib/auth/safe-redirect';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -33,7 +34,23 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <h2 className="mt-2 text-2xl font-bold text-white">{t('formTitle')}</h2>
           <p className="mt-2 text-sm text-slate-400">{t('formDescription')}</p>
         </div>
-        <form action="/api/login" method="post" className="mt-8 space-y-6">
+        <div className="mt-8">
+          <GoogleSignInButton
+            label={t('continueWithGoogle')}
+            loadingLabel={t('connectingToGoogle')}
+          />
+
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-800" />
+
+          <span className="text-xs uppercase tracking-wider text-slate-500">
+            {t('orUseEmail')}
+          </span>
+
+          <div className="h-px flex-1 bg-slate-800" />
+        </div>
+      </div>
+        <form action="/api/login" method="post" className="space-y-6">
           {/* Pass the validated redirect destination through the form */}
           <input type="hidden" name="next" value={safeNext} />
           <div>
