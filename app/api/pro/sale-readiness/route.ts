@@ -96,6 +96,16 @@ function isSaleReadinessInput(value: unknown): value is SaleReadinessInput {
     }
   }
 
+  const ipProtectionValue = value.hasActiveIpProtection;
+
+  if (
+    ipProtectionValue !== null &&
+    typeof ipProtectionValue !== 'boolean' &&
+    ipProtectionValue !== 'not_applicable'
+  ) {
+    return false;
+  }
+  
   for (const field of nullableNumberFields) {
     const fieldValue = value[field];
 
