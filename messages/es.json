@@ -84,6 +84,10 @@
       "title": "Centro legal y de confianza | Ownward",
       "description": "Documentos legales, opciones de privacidad, información de contacto y orientación para solicitudes en Ownward Hub."
     }
+    "partnerCommunications": {
+      "title": "Comunicaciones y Oportunidades de Socios | Ownward",
+      "description": "Conozca cómo Ownward y socios seleccionados pueden comunicarse con usted sobre oportunidades comerciales relevantes cuando proporciona su consentimiento opcional."
+    }
   },
   "Common": {
     "appName": "Ownward",
