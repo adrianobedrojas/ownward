@@ -146,3 +146,7 @@ export default async function SignupPage() {
 <Link href="/" className="mt-6 block text-center text-sm font-semibold text-slate-400 hover:text-white">
   {t('returnHome')}
 </Link>
+      </section>
+    </div>
+  );
+}
