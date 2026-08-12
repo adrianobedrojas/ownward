@@ -203,7 +203,7 @@ export default async function SignupPage() {
                   </>
                 ) : (
                   <>
-                    Yes, I'd like relevant business opportunities. Ownward and selected partners may contact
+                    Yes, I&apos;d like relevant business opportunities. Ownward and selected partners may contact
                     me by email, phone, or SMS. I can withdraw my consent at any time.{' '}
                     <Link href="/partner-communications" className="font-semibold text-cyan-300 hover:text-cyan-200">
                       View Partner Communications Terms
