@@ -63,13 +63,86 @@ export default async function SignupPage() {
             <div><label htmlFor="confirm-password" className="block text-sm font-semibold text-slate-300">{forms('confirmPassword')}</label><input id="confirm-password" name="confirmPassword" type="password" autoComplete="new-password" placeholder="••••••••" minLength={8} required className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none placeholder:text-slate-600 focus:border-cyan-400" /></div>
           </div>
           <p className="text-xs text-slate-500">{t('passwordHint')}</p>
-          <label className="flex items-start gap-3 text-sm text-slate-300"><input name="agreement" type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400" /><span>{isSpanish ? 'Acepto los ' : 'I agree to the '}<Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('terms')}</Link>{isSpanish ? ' y reconozco la ' : ' and acknowledge the '}<Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">{t('privacy')}</Link>.</span></label>
-          <button type="submit" className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300">{t('submit')}</button>
-          <p className="text-center text-xs text-slate-500">{t('secureNote')}</p>
-        </form>
-        <div className="mt-8 border-t border-slate-800 pt-6 text-center"><p className="text-sm text-slate-400">{t('haveAccount')}</p><Link href="/login" className="mt-3 inline-block font-semibold text-cyan-300 hover:text-cyan-200">{t('logIn')}</Link></div>
-        <Link href="/" className="mt-6 block text-center text-sm font-semibold text-slate-400 hover:text-white">{t('returnHome')}</Link>
-      </section>
-    </div>
-  );
-}
+<label className="flex items-start gap-3 text-sm text-slate-300">
+  <input
+    name="agreement"
+    type="checkbox"
+    required
+    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+  />
+  <span>
+    {isSpanish ? 'Acepto los ' : 'I agree to the '}
+    <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+      {t('terms')}
+    </Link>
+    {isSpanish ? ' y reconozco la ' : ' and acknowledge the '}
+    <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+      {t('privacy')}
+    </Link>
+    .
+  </span>
+</label>
+
+<div className="mt-3 rounded-lg border border-slate-700 bg-slate-900/40 p-3">
+  <label className="flex items-start gap-3 text-sm text-slate-300">
+    <input
+      name="partnerMarketingConsent"
+      type="checkbox"
+      className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+    />
+    <span>
+      {isSpanish ? (
+        <>
+          Sí, quiero recibir oportunidades comerciales relevantes. Ownward y socios seleccionados
+          pueden contactarme por correo electrónico, teléfono o SMS. Puedo retirar mi
+          consentimiento en cualquier momento.{' '}
+          <Link
+            href="/partner-communications"
+            className="font-semibold text-cyan-300 hover:text-cyan-200"
+          >
+            Ver Términos de Comunicaciones de Socios
+          </Link>
+          .
+        </>
+      ) : (
+        <>
+          Yes, I’d like relevant business opportunities. Ownward and selected partners may contact
+          me by email, phone, or SMS. I can withdraw my consent at any time.{' '}
+          <Link
+            href="/partner-communications"
+            className="font-semibold text-cyan-300 hover:text-cyan-200"
+          >
+            View Partner Communications Terms
+          </Link>
+          .
+        </>
+      )}
+    </span>
+  </label>
+
+  <p className="mt-2 text-xs text-slate-500">
+    {isSpanish
+      ? 'Ownward puede recibir compensación, como una tarifa de referencia o comisión, de ciertas ofertas de socios.'
+      : 'Ownward may receive compensation, such as a referral fee or commission, from certain partner offers.'}
+  </p>
+</div>
+
+<button
+  type="submit"
+  className="w-full rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
+>
+  {t('submit')}
+</button>
+<p className="text-center text-xs text-slate-500">{t('secureNote')}</p>
+</form>
+
+<div className="mt-8 border-t border-slate-800 pt-6 text-center">
+  <p className="text-sm text-slate-400">{t('haveAccount')}</p>
+  <Link href="/login" className="mt-3 inline-block font-semibold text-cyan-300 hover:text-cyan-200">
+    {t('logIn')}
+  </Link>
+</div>
+
+<Link href="/" className="mt-6 block text-center text-sm font-semibold text-slate-400 hover:text-white">
+  {t('returnHome')}
+</Link>
