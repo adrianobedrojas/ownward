@@ -27,6 +27,7 @@ export const PUBLIC_STATIC_PATHS = [
   '/trust',
   '/privacy',
   '/privacy-choices',
+  '/partner-communications',
   '/contact',
   '/terms',
 ] as const;
@@ -190,7 +191,6 @@ export function createMetadata(options: {
     },
   };
 }
-
 
 export function buildBusinessListingSeoTitle(locale: string, publicTitle: string, location?: string | null): string {
   const trimmedTitle = publicTitle.trim();
