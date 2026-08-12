@@ -229,11 +229,6 @@ export default async function SignupPage() {
               </span>
             </label>
 
-            <p className="mt-2 text-xs text-slate-500">
-              {isSpanish
-                ? 'Ownward puede recibir compensación, como una tarifa de referencia o comisión, de ciertas ofertas de socios.'
-                : 'Ownward may receive compensation, such as a referral fee or commission, from certain partner offers.'}
-            </p>
           </div>
 
           <button
