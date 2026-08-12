@@ -2,22 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
 import { isValidAccountType } from "@/lib/auth/account-types";
-import { CURRENT_PARTNER_COMMUNICATIONS_VERSION } from "@/lib/policies";
 import { randomUUID } from "node:crypto";
 
+const MARKETING_CONSENT_VERSION = "2026-08-10.1";
+
 function redirectTo(path: string, setCookie?: string) {
-  const headers: Record<string, string> = {
-    Location: path,
-  };
-
-  if (setCookie) {
-    headers["Set-Cookie"] = setCookie;
-  }
-
-  return new Response(null, {
-    status: 303,
-    headers,
-  });
+  const headers: Record<string, string> = { Location: path };
+  if (setCookie) headers["Set-Cookie"] = setCookie;
+  return new Response(null, { status: 303, headers });
 }
 
 function buildSignupSuccessCookie(nonce: string): string {
@@ -28,11 +20,7 @@ function buildSignupSuccessCookie(nonce: string): string {
     "SameSite=Lax",
     "Max-Age=900",
   ];
-
-  if (process.env.NODE_ENV === "production") {
-    parts.push("Secure");
-  }
-
+  if (process.env.NODE_ENV === "production") parts.push("Secure");
   return parts.join("; ");
 }
 
@@ -47,15 +35,8 @@ export async function POST(request: Request) {
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const agreementAccepted = formData.get("agreement") === "on";
 
-  // NEW: optional partner marketing consent
-  const partnerMarketingConsent =
-    formData.get("partnerMarketingConsent") === "on";
-  const partnerMarketingConsentAt = partnerMarketingConsent
-    ? new Date().toISOString()
-    : null;
-  const partnerMarketingConsentVersion = partnerMarketingConsent
-    ? CURRENT_PARTNER_COMMUNICATIONS_VERSION
-    : null;
+  const marketingOptIn = formData.get("marketingOptIn") === "on";
+  const thirdPartyMarketingOptIn = formData.get("thirdPartyMarketingOptIn") === "on";
 
   if (
     !accountType ||
@@ -68,7 +49,6 @@ export async function POST(request: Request) {
     return redirectTo("/error");
   }
 
-  // Reject unsupported account types with a controlled 400
   if (!isValidAccountType(accountType)) {
     return new Response(JSON.stringify({ error: "Invalid account type" }), {
       status: 400,
@@ -83,7 +63,7 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const siteUrl = getSiteUrl();
 
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -92,11 +72,6 @@ export async function POST(request: Request) {
         account_type: accountType,
         full_name: fullName,
         business_name: businessName || null,
-
-        // NEW: capture optional consent at signup
-        partner_marketing_consent: partnerMarketingConsent,
-        partner_marketing_consent_at: partnerMarketingConsentAt,
-        partner_marketing_consent_version: partnerMarketingConsentVersion,
       },
     },
   });
@@ -106,11 +81,35 @@ export async function POST(request: Request) {
     return redirectTo("/error");
   }
 
+  const userId = signUpData.user?.id;
+  if (userId) {
+    const now = new Date().toISOString();
+    const consentPayload = {
+      id: userId,
+      marketing_opt_in: marketingOptIn,
+      marketing_opt_in_at: marketingOptIn ? now : null,
+      marketing_opt_in_source: marketingOptIn ? "signup_form" : null,
+      third_party_marketing_opt_in: thirdPartyMarketingOptIn,
+      third_party_marketing_opt_in_at: thirdPartyMarketingOptIn ? now : null,
+      third_party_marketing_opt_in_source: thirdPartyMarketingOptIn ? "signup_form" : null,
+      marketing_consent_version: MARKETING_CONSENT_VERSION,
+      updated_at: now,
+    };
+
+    const { error: profileConsentError } = await supabase
+      .from("profiles")
+      .upsert(consentPayload, { onConflict: "id" });
+
+    if (profileConsentError) {
+      console.error("Ownward Hub signup consent write error:", profileConsentError.message);
+    }
+  }
+
   const signupNonce = randomUUID();
   const signupCookie = buildSignupSuccessCookie(signupNonce);
 
   return redirectTo(
     `/check-email?signup=success&nonce=${encodeURIComponent(signupNonce)}`,
-    signupCookie
+    signupCookie,
   );
 }

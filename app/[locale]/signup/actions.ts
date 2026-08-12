@@ -8,16 +8,19 @@ import { getSiteUrl } from "@/lib/config";
 import { isValidAccountType } from "@/lib/auth/account-types";
 import { randomUUID } from "node:crypto";
 
+const MARKETING_CONSENT_VERSION = "2026-08-10.1";
+
 export async function signup(formData: FormData) {
   const accountType = String(formData.get("accountType") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
   const businessName = String(formData.get("businessName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const confirmPassword = String(
-    formData.get("confirmPassword") ?? ""
-  );
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const agreementAccepted = formData.get("agreement") === "on";
+
+  const marketingOptIn = formData.get("marketingOptIn") === "on";
+  const thirdPartyMarketingOptIn = formData.get("thirdPartyMarketingOptIn") === "on";
 
   if (
     !accountType ||
@@ -41,7 +44,7 @@ export async function signup(formData: FormData) {
   const supabase = await createClient();
   const siteUrl = getSiteUrl();
 
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -56,6 +59,31 @@ export async function signup(formData: FormData) {
 
   if (error) {
     redirect("/error");
+  }
+
+  const userId = signUpData.user?.id;
+  if (userId) {
+    const now = new Date().toISOString();
+
+    const consentPayload = {
+      id: userId,
+      marketing_opt_in: marketingOptIn,
+      marketing_opt_in_at: marketingOptIn ? now : null,
+      marketing_opt_in_source: marketingOptIn ? "signup_form" : null,
+      third_party_marketing_opt_in: thirdPartyMarketingOptIn,
+      third_party_marketing_opt_in_at: thirdPartyMarketingOptIn ? now : null,
+      third_party_marketing_opt_in_source: thirdPartyMarketingOptIn ? "signup_form" : null,
+      marketing_consent_version: MARKETING_CONSENT_VERSION,
+      updated_at: now,
+    };
+
+    const { error: profileConsentError } = await supabase
+      .from("profiles")
+      .upsert(consentPayload, { onConflict: "id" });
+
+    if (profileConsentError) {
+      console.error("Failed to store marketing consent on signup:", profileConsentError.message);
+    }
   }
 
   const signupNonce = randomUUID();

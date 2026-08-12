@@ -186,7 +186,22 @@ export default async function SignupPage() {
           <div className="mt-3 rounded-lg border border-slate-700 bg-slate-900/40 p-3">
             <label className="flex items-start gap-3 text-sm text-slate-300">
               <input
-                name="partnerMarketingConsent"
+                name="marketingOptIn"
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+              />
+              <span>
+                {isSpanish
+                  ? 'Sí, quiero recibir actualizaciones, consejos y correos promocionales de Ownward. (opcional)'
+                  : 'Yes, I want to receive Ownward product updates, tips, and promotional emails. (optional)'}
+              </span>
+            </label>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-slate-700 bg-slate-900/40 p-3">
+            <label className="flex items-start gap-3 text-sm text-slate-300">
+              <input
+                name="thirdPartyMarketingOptIn"
                 type="checkbox"
                 className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
               />
