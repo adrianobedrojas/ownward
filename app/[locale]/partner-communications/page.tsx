@@ -100,14 +100,7 @@ export default async function PartnerCommunicationsPage() {
               {section.title}
             </h2>
 
-            {section.content.map((paragraph) => (
-              <p
-                key={paragraph}
-                className="text-slate-300"
-              >
-                {paragraph}
-              </p>
-            ))}
+            <p className="text-slate-300">{section.content}</p>
           </section>
         ))}
 
