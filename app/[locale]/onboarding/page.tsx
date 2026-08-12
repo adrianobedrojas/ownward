@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
   const { data: profile, error } = await supabase
     .from("profiles")
     .select(
-      "full_name, account_type, business_name, current_stage, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version"
+      "full_name, account_type, business_name, current_stage, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version, partner_marketing_consent"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -40,6 +40,12 @@ export default async function OnboardingPage() {
     profile?.business_name ??
     String(user.user_metadata?.business_name ?? "").trim();
   const currentStage = profile?.current_stage ?? "run";
+
+  const prefilledPartnerMarketingConsent =
+    typeof profile?.partner_marketing_consent === "boolean"
+      ? profile.partner_marketing_consent
+      : Boolean(user.user_metadata?.partner_marketing_consent);
+
   const { needsTermsAcceptance, needsPrivacyAcknowledgment } = getPolicyAcceptanceRequirements(profile);
 
   const copy = isSpanish
@@ -63,6 +69,12 @@ export default async function OnboardingPage() {
         stageBuy: "Buscando comprar",
         termsAgree: "Acepto los",
         privacyAck: "Reconozco la",
+        partnerConsentTitle: "Comunicaciones y oportunidades de socios (opcional)",
+        partnerConsentBody:
+          "Sí, quiero recibir oportunidades comerciales relevantes. Ownward y socios seleccionados pueden contactarme por correo electrónico, teléfono o SMS. Puedo retirar mi consentimiento en cualquier momento.",
+        partnerTermsLink: "Ver Términos de Comunicaciones de Socios",
+        partnerCompDisclosure:
+          "Ownward puede recibir compensación, como una tarifa de referencia o comisión, de ciertas ofertas de socios.",
         continue: "Continuar al panel",
       }
     : {
@@ -85,6 +97,12 @@ export default async function OnboardingPage() {
         stageBuy: "Looking to buy",
         termsAgree: "I agree to the",
         privacyAck: "I acknowledge the",
+        partnerConsentTitle: "Partner communications & opportunities (optional)",
+        partnerConsentBody:
+          "Yes, I’d like relevant business opportunities. Ownward and selected partners may contact me by email, phone, or SMS. I can withdraw my consent at any time.",
+        partnerTermsLink: "View Partner Communications Terms",
+        partnerCompDisclosure:
+          "Ownward may receive compensation, such as a referral fee or commission, from certain partner offers.",
         continue: "Continue to dashboard",
       };
 
@@ -169,39 +187,67 @@ export default async function OnboardingPage() {
 
           {(needsTermsAcceptance || needsPrivacyAcknowledgment) && (
             <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-              {needsTermsAcceptance ? <label className="flex items-start gap-3 text-sm text-slate-300">
-                <input
-                  name="acceptTerms"
-                  type="checkbox"
-                  required
-                  className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
-                />
-                <span>
-                  {copy.termsAgree}{" "}
-                  <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                    {isSpanish ? "Términos del servicio" : "Terms of Service"}
-                  </Link>
-                  .
-                </span>
-              </label> : null}
+              {needsTermsAcceptance ? (
+                <label className="flex items-start gap-3 text-sm text-slate-300">
+                  <input
+                    name="acceptTerms"
+                    type="checkbox"
+                    required
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+                  />
+                  <span>
+                    {copy.termsAgree}{" "}
+                    <Link href={TERMS_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                      {isSpanish ? "Términos del servicio" : "Terms of Service"}
+                    </Link>
+                    .
+                  </span>
+                </label>
+              ) : null}
 
-              {needsPrivacyAcknowledgment ? <label className="flex items-start gap-3 text-sm text-slate-300">
-                <input
-                  name="acceptPrivacy"
-                  type="checkbox"
-                  required
-                  className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
-                />
-                <span>
-                  {copy.privacyAck}{" "}
-                  <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
-                    {isSpanish ? "Política de privacidad" : "Privacy Policy"}
-                  </Link>
-                  .
-                </span>
-              </label> : null}
+              {needsPrivacyAcknowledgment ? (
+                <label className="flex items-start gap-3 text-sm text-slate-300">
+                  <input
+                    name="acceptPrivacy"
+                    type="checkbox"
+                    required
+                    className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+                  />
+                  <span>
+                    {copy.privacyAck}{" "}
+                    <Link href={PRIVACY_POLICY_PATH} className="font-semibold text-cyan-300 hover:text-cyan-200">
+                      {isSpanish ? "Política de privacidad" : "Privacy Policy"}
+                    </Link>
+                    .
+                  </span>
+                </label>
+              ) : null}
             </div>
           )}
+
+          <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              {copy.partnerConsentTitle}
+            </p>
+
+            <label className="mt-3 flex items-start gap-3 text-sm text-slate-300">
+              <input
+                name="partnerMarketingConsent"
+                type="checkbox"
+                defaultChecked={prefilledPartnerMarketingConsent}
+                className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-950 accent-cyan-400"
+              />
+              <span>
+                {copy.partnerConsentBody}{" "}
+                <Link href="/partner-communications" className="font-semibold text-cyan-300 hover:text-cyan-200">
+                  {copy.partnerTermsLink}
+                </Link>
+                .
+              </span>
+            </label>
+
+            <p className="mt-2 text-xs text-slate-500">{copy.partnerCompDisclosure}</p>
+          </div>
 
           <button
             type="submit"
