@@ -4,6 +4,9 @@ export const POLICY_LAST_UPDATED_DATE = '2026-08-03';
 export const CURRENT_TERMS_VERSION = '2026-08-02.1';
 export const CURRENT_PRIVACY_VERSION = '2026-08-03.1';
 
+export const CURRENT_PARTNER_COMMUNICATIONS_VERSION = '2026-08-10.1';
+export const PARTNER_COMMUNICATIONS_PATH = '/partner-communications';
+
 export const TERMS_POLICY_PATH = '/terms';
 export const PRIVACY_POLICY_PATH = '/privacy';
 
