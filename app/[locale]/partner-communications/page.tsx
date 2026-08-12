@@ -35,6 +35,100 @@ export default async function PartnerCommunicationsPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
       <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950 sm:p-8">
+        <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          {content.title}
+        </h1>
+
+        <p className="mt-4 text-sm text-slate-300">
+          <span className="font-semibold text-white">
+            {content.effectiveDateLabel}:
+          </span>{' '}
+          {content.effectiveDate}
+
+          <span className="mx-2 text-slate-500">•</span>
+
+          <span className="font-semibold text-white">
+            {content.lastUpdatedLabel}:
+          </span>{' '}
+          {content.lastUpdated}
+
+          <span className="mx-2 text-slate-500">•</span>
+
+          <span className="font-semibold text-white">
+            {content.versionLabel}:
+          </span>{' '}
+          {CURRENT_PARTNER_COMMUNICATIONS_VERSION}
+        </p>
+
+        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/70 p-5">
+          <p className="text-slate-300">
+            {content.notice}
+          </p>
+        </div>
+
+        {content.sections.map((section) => (
+          <section
+            key={section.title}
+            className="mt-8 space-y-3"
+          >
+            <h2 className="text-2xl font-semibold text-white">
+              {section.title}
+            </h2>
+
+            <p className="text-slate-300">
+              {section.content}
+            </p>
+          </section>
+        ))}
+
+        <section className="mt-10 rounded-xl border border-slate-800 bg-slate-950/70 p-5 text-sm text-slate-300">
+          <p>
+            {isSpanish
+              ? 'Enlaces legales relacionados:'
+              : 'Related legal links:'}
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-3">
+            <Link
+              href="/terms"
+              className="font-semibold text-cyan-300 hover:text-cyan-200"
+            >
+              {content.termsLinkText}
+            </Link>
+
+            <Link
+              href="/privacy"
+              className="font-semibold text-cyan-300 hover:text-cyan-200"
+            >
+              {content.privacyLinkText}
+            </Link>
+
+            <Link
+              href="/privacy-choices"
+              className="font-semibold text-cyan-300 hover:text-cyan-200"
+            >
+              {isSpanish
+                ? 'Opciones de privacidad'
+                : 'Privacy choices'}
+            </Link>
+          </div>
+
+          <p className="mt-3 text-slate-400">
+            {isSpanish
+              ? 'Contacto legal y de privacidad:'
+              : 'Legal and privacy contact:'}{' '}
+            <a
+              href={`mailto:${LEGAL_OPERATOR.email}`}
+              className="text-cyan-300 hover:text-cyan-200"
+            >
+              {LEGAL_OPERATOR.email}
+            </a>
+          </p>
+        </section>
+      </article>
+    </main>
+  );
+}      <article className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
           {content.badge}
         </p>
