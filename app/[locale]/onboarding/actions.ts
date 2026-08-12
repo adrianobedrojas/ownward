@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { CURRENT_PRIVACY_VERSION, CURRENT_TERMS_VERSION } from "@/lib/auth";
-import { getPolicyAcceptanceRequirements } from "@/lib/policies";
+import {
+  CURRENT_PARTNER_COMMUNICATIONS_VERSION,
+  getPolicyAcceptanceRequirements,
+} from "@/lib/policies";
 import { createClient } from "@/lib/supabase/server";
 
 const allowedStages = new Set(["start", "run", "sell", "buy"]);
@@ -30,17 +33,18 @@ export async function completeOnboarding(formData: FormData) {
   const acceptedTerms = formData.get("acceptTerms") === "on";
   const acceptedPrivacy = formData.get("acceptPrivacy") === "on";
 
-  if (
-    !fullName ||
-    !allowedAccountTypes.has(accountType) ||
-    !allowedStages.has(currentStage)
-  ) {
+  // NEW: optional partner communications consent (onboarding capture path)
+  const partnerMarketingConsent = formData.get("partnerMarketingConsent") === "on";
+
+  if (!fullName || !allowedAccountTypes.has(accountType) || !allowedStages.has(currentStage)) {
     redirect("/error");
   }
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version")
+    .select(
+      "id, terms_accepted_at, privacy_accepted_at, terms_version, privacy_version, partner_marketing_consent, partner_marketing_consent_at, partner_marketing_consent_version"
+    )
     .eq("id", user.id)
     .maybeSingle();
 
@@ -48,7 +52,8 @@ export async function completeOnboarding(formData: FormData) {
     redirect("/error");
   }
 
-  const { needsTermsAcceptance, needsPrivacyAcknowledgment } = getPolicyAcceptanceRequirements(profile);
+  const { needsTermsAcceptance, needsPrivacyAcknowledgment } =
+    getPolicyAcceptanceRequirements(profile);
 
   if ((needsTermsAcceptance && !acceptedTerms) || (needsPrivacyAcknowledgment && !acceptedPrivacy)) {
     redirect("/error");
@@ -63,7 +68,24 @@ export async function completeOnboarding(formData: FormData) {
     onboarding_complete: true,
     onboarding_completed_at: now,
     updated_at: now,
+
+    // NEW: persist current consent state
+    partner_marketing_consent: partnerMarketingConsent,
   };
+
+  // NEW: when consenting, stamp timestamp/version if missing.
+  // when not consenting, preserve historical audit values (do not erase).
+  if (partnerMarketingConsent) {
+    profileUpdate.partner_marketing_consent_at =
+      profile?.partner_marketing_consent_at ?? now;
+    profileUpdate.partner_marketing_consent_version =
+      profile?.partner_marketing_consent_version ?? CURRENT_PARTNER_COMMUNICATIONS_VERSION;
+  } else {
+    profileUpdate.partner_marketing_consent_at =
+      profile?.partner_marketing_consent_at ?? null;
+    profileUpdate.partner_marketing_consent_version =
+      profile?.partner_marketing_consent_version ?? null;
+  }
 
   if (needsTermsAcceptance) {
     profileUpdate.terms_version = CURRENT_TERMS_VERSION;
@@ -71,6 +93,7 @@ export async function completeOnboarding(formData: FormData) {
       profileUpdate.terms_accepted_at = now;
     }
   }
+
   if (needsPrivacyAcknowledgment) {
     profileUpdate.privacy_version = CURRENT_PRIVACY_VERSION;
     if (!profile?.privacy_accepted_at) {
@@ -78,10 +101,7 @@ export async function completeOnboarding(formData: FormData) {
     }
   }
 
-  const { error } = await supabase
-    .from("profiles")
-    .update(profileUpdate)
-    .eq("id", user.id);
+  const { error } = await supabase.from("profiles").update(profileUpdate).eq("id", user.id);
 
   if (error) {
     redirect("/error");

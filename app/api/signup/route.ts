@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOnboardingConfirmRedirectUrl } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/config";
 import { isValidAccountType } from "@/lib/auth/account-types";
+import { CURRENT_PARTNER_COMMUNICATIONS_VERSION } from "@/lib/policies";
 import { randomUUID } from "node:crypto";
 
 function redirectTo(path: string, setCookie?: string) {
@@ -40,18 +41,21 @@ export async function POST(request: Request) {
 
   const accountType = String(formData.get("accountType") ?? "");
   const fullName = String(formData.get("fullName") ?? "").trim();
-  const businessName = String(
-    formData.get("businessName") ?? ""
-  ).trim();
-  const email = String(formData.get("email") ?? "")
-    .trim()
-    .toLowerCase();
+  const businessName = String(formData.get("businessName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const confirmPassword = String(
-    formData.get("confirmPassword") ?? ""
-  );
-  const agreementAccepted =
-    formData.get("agreement") === "on";
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const agreementAccepted = formData.get("agreement") === "on";
+
+  // NEW: optional partner marketing consent
+  const partnerMarketingConsent =
+    formData.get("partnerMarketingConsent") === "on";
+  const partnerMarketingConsentAt = partnerMarketingConsent
+    ? new Date().toISOString()
+    : null;
+  const partnerMarketingConsentVersion = partnerMarketingConsent
+    ? CURRENT_PARTNER_COMMUNICATIONS_VERSION
+    : null;
 
   if (
     !accountType ||
@@ -66,16 +70,13 @@ export async function POST(request: Request) {
 
   // Reject unsupported account types with a controlled 400
   if (!isValidAccountType(accountType)) {
-    return new Response(
-      JSON.stringify({ error: "Invalid account type" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Invalid account type" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  if (
-    password !== confirmPassword ||
-    password.length < 8
-  ) {
+  if (password !== confirmPassword || password.length < 8) {
     return redirectTo("/error");
   }
 
@@ -91,16 +92,17 @@ export async function POST(request: Request) {
         account_type: accountType,
         full_name: fullName,
         business_name: businessName || null,
+
+        // NEW: capture optional consent at signup
+        partner_marketing_consent: partnerMarketingConsent,
+        partner_marketing_consent_at: partnerMarketingConsentAt,
+        partner_marketing_consent_version: partnerMarketingConsentVersion,
       },
     },
   });
 
   if (error) {
-    console.error(
-      "Ownward Hub signup error:",
-      error.message
-    );
-
+    console.error("Ownward Hub signup error:", error.message);
     return redirectTo("/error");
   }
 
@@ -109,6 +111,6 @@ export async function POST(request: Request) {
 
   return redirectTo(
     `/check-email?signup=success&nonce=${encodeURIComponent(signupNonce)}`,
-    signupCookie,
+    signupCookie
   );
 }
