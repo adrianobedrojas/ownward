@@ -100,7 +100,13 @@ export default async function PartnerCommunicationsPage() {
               {section.title}
             </h2>
 
-            <p className="text-slate-300">{section.content}</p>
+            {(Array.isArray(section.content)
+              ? section.content
+              : [section.content]).map((paragraph, index) => (
+              <p key={`${section.id}-${index}`} className="text-slate-300">
+                {paragraph}
+              </p>
+            ))}
           </section>
         ))}
 
