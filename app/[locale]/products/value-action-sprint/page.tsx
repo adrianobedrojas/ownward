@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import PurchaseCard from "./PurchaseCard";
+import StartTrialButton from "./StartTrialButton";
 
 export async function generateMetadata({
   params,
