@@ -11,7 +11,7 @@ export type ValueActionSprintAccess = {
 };
 
 export function getValueActionSprintAccess(
-  accessMode: ValueActionSprintAccess,
+  accessMode: ValueActionSprintAccessMode,
   trialEndsAt: string | null
 ): ValueActionSprintAccess {
   if (accessMode === "paid") {
