@@ -1,7 +1,7 @@
 export interface PartnerCommunicationsSection {
   id: string;
   title: string;
-  content: string;
+  content: string | string[];
 }
 
 export interface PartnerCommunicationsData {
