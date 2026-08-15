@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import ts from "typescript";
 
@@ -8,21 +7,29 @@ describe("partner communications page source", () => {
       process.cwd(),
       "app/[locale]/partner-communications/page.tsx",
     );
-    const source = fs.readFileSync(filePath, "utf8");
+    const tsconfigPath = path.join(process.cwd(), "tsconfig.json");
+    const readConfig = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
 
-    const result = ts.transpileModule(source, {
-      compilerOptions: {
-        jsx: ts.JsxEmit.Preserve,
-        target: ts.ScriptTarget.ESNext,
-      },
-      fileName: filePath,
-      reportDiagnostics: true,
-    });
+    expect(readConfig.error).toBeUndefined();
 
-    const syntaxErrors = (result.diagnostics ?? []).filter(
-      (diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error,
+    const parsedConfig = ts.parseJsonConfigFileContent(
+      readConfig.config,
+      ts.sys,
+      process.cwd(),
     );
 
-    expect(syntaxErrors).toHaveLength(0);
+    const program = ts.createProgram([filePath], {
+      ...parsedConfig.options,
+      noEmit: true,
+    });
+    const sourceFile = program.getSourceFile(filePath);
+
+    expect(sourceFile).toBeDefined();
+
+    const syntaxErrors = program.getSyntacticDiagnostics(sourceFile!);
+    const syntaxErrorMessages = syntaxErrors.map((diagnostic) =>
+      ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"),
+    );
+    expect(syntaxErrorMessages).toEqual([]);
   });
 });
