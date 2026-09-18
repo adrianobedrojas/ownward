@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 import PersonalControlCenter, { type ControlCenterData } from './control-center/PersonalControlCenter';
 
@@ -14,17 +14,16 @@ interface NavbarClientProps {
 }
 
 export default function NavbarClient({ signedIn, controlCenterData, showAdminConsole }: NavbarClientProps) {
-  const pathname = usePathname();
+  const locale = useLocale();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const t = useTranslations('Navigation');
 
-  const isSpanish = pathname.startsWith('/es');
+  const isSpanish = locale === 'es';
   const labels = isSpanish
     ? {
         tagline: 'Soporte de TI para pequeñas empresas',
         services: 'Servicios',
         pricing: 'Precios',
-        about: 'Cómo funciona',
         contact: 'Contacto',
         request: 'Solicitar soporte',
         menu: 'Menú',
@@ -36,7 +35,6 @@ export default function NavbarClient({ signedIn, controlCenterData, showAdminCon
         tagline: 'Small business IT support',
         services: 'Services',
         pricing: 'Pricing',
-        about: 'How it works',
         contact: 'Contact',
         request: 'Request support',
         menu: 'Menu',
@@ -61,12 +59,12 @@ export default function NavbarClient({ signedIn, controlCenterData, showAdminCon
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
-          <a href="#services" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+          <Link href="/#services" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
             {labels.services}
-          </a>
-          <a href="#pricing" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
+          </Link>
+          <Link href="/#pricing" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
             {labels.pricing}
-          </a>
+          </Link>
           <Link href="/contact" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">
             {labels.contact}
           </Link>
@@ -99,12 +97,12 @@ export default function NavbarClient({ signedIn, controlCenterData, showAdminCon
           </summary>
           <div className="absolute right-0 mt-3 w-72 rounded-2xl border border-white/10 bg-slate-950 p-3 shadow-2xl">
             <div className="grid gap-1">
-              <a href="#services" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+              <Link href="/#services" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white">
                 {labels.services}
-              </a>
-              <a href="#pricing" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+              </Link>
+              <Link href="/#pricing" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white">
                 {labels.pricing}
-              </a>
+              </Link>
               <Link href="/contact" onClick={closeMobileMenu} className="rounded-lg px-3 py-3 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white">
                 {labels.contact}
               </Link>
