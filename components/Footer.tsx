@@ -12,6 +12,7 @@ export default async function Footer() {
         contact: 'Contacto',
         privacy: 'Privacidad',
         terms: 'Términos',
+        trust: 'Legal y confianza',
       }
     : {
         description: 'Local and remote IT support for small businesses in San Antonio.',
@@ -19,6 +20,7 @@ export default async function Footer() {
         contact: 'Contact',
         privacy: 'Privacy',
         terms: 'Terms',
+        trust: 'Legal and Trust',
       };
 
   return (
@@ -33,6 +35,7 @@ export default async function Footer() {
           <Link href="/contact" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.contact}</Link>
           <Link href="/privacy" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.privacy}</Link>
           <Link href="/terms" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.terms}</Link>
+          <Link href="/trust" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.trust}</Link>
         </nav>
       </div>
     </footer>
