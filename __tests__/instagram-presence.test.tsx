@@ -119,7 +119,7 @@ async function renderFooter(locale: 'en' | 'es' = 'en') {
 
 async function renderHome(locale: 'en' | 'es' = 'en') {
   currentLocale = locale;
-  return renderToStaticMarkup(await HomePage());
+  return renderToStaticMarkup(await HomePage({ params: Promise.resolve({ locale }) }));
 }
 
 function renderContact(locale: 'en' | 'es' = 'en') {
