@@ -2,6 +2,7 @@
 
 jest.mock('next-intl/server', () => ({
   getTranslations: jest.fn(),
+  getLocale: jest.fn(),
 }));
 
 jest.mock('next-intl', () => ({
@@ -32,7 +33,7 @@ jest.mock('@/lib/supabase/server', () => ({
 import fs from 'fs';
 import path from 'path';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/server';
 import Footer from '@/components/Footer';
@@ -45,6 +46,7 @@ import esMessages from '@/messages/es.json';
 type Messages = typeof enMessages;
 
 const mockedGetTranslations = getTranslations as jest.MockedFunction<typeof getTranslations>;
+const mockedGetLocale = getLocale as jest.MockedFunction<typeof getLocale>;
 const mockedUseTranslations = useTranslations as jest.MockedFunction<typeof useTranslations>;
 const mockedCreateClient = createClient as jest.MockedFunction<typeof createClient>;
 
@@ -119,7 +121,7 @@ async function renderFooter(locale: 'en' | 'es' = 'en') {
 
 async function renderHome(locale: 'en' | 'es' = 'en') {
   currentLocale = locale;
-  return renderToStaticMarkup(await HomePage());
+  return renderToStaticMarkup(await HomePage({ params: Promise.resolve({ locale }) }));
 }
 
 function renderContact(locale: 'en' | 'es' = 'en') {
@@ -131,6 +133,7 @@ describe('Instagram presence', () => {
   beforeEach(() => {
     mockedGetTranslations.mockImplementation((((namespace: keyof Messages) =>
       Promise.resolve(translator(namespace, currentLocale))) as unknown) as typeof getTranslations);
+    mockedGetLocale.mockResolvedValue(currentLocale);
     mockedUseTranslations.mockImplementation(((namespace: keyof Messages) =>
       translator(namespace, currentLocale)) as typeof useTranslations);
     mockedCreateClient.mockResolvedValue({
@@ -151,38 +154,32 @@ describe('Instagram presence', () => {
     expect(markup).toContain('<svg');
   });
 
-  it('adds the footer Instagram link without removing existing footer links', async () => {
+  it('keeps core footer links available in English', async () => {
     const markup = await renderFooter('en');
 
-    expect(markup).toContain('href="/guide"');
-    expect(markup).toContain('href="/academy"');
-    expect(markup).toContain('href="/privacy"');
-    expect(markup).toContain('href="/privacy-choices"');
-    expect(markup).toContain('href="/terms"');
     expect(markup).toContain('href="/contact"');
-    expect(markup).toContain(`href="${INSTAGRAM_URL}"`);
-    expect(markup).toContain('@ownwardhub');
+    expect(markup).toContain('href="/privacy"');
+    expect(markup).toContain('href="/terms"');
+    expect(markup).toContain('href="/trust"');
   });
 
-  it('renders the homepage Instagram callout between articles and process in English and Spanish', async () => {
+  it('renders the homepage local-service flow in English and Spanish', async () => {
     const englishMarkup = await renderHome('en');
     const spanishMarkup = await renderHome('es');
 
-    expect(englishMarkup).toContain('BEHIND OWNWARD');
-    expect(englishMarkup).toContain('Follow Ownward as it grows');
-    expect(englishMarkup).toContain('See behind-the-scenes progress, practical business ideas, founder lessons, and new Ownward Hub features.');
-    expect(englishMarkup).toContain('Follow @ownwardhub on Instagram');
-    expect(englishMarkup.indexOf('Practical guidance and real-world lessons')).toBeLessThan(
-      englishMarkup.indexOf('Follow Ownward as it grows'),
-    );
-    expect(englishMarkup.indexOf('Follow Ownward as it grows')).toBeLessThan(
-      englishMarkup.indexOf('How Ownward Hub works'),
+    expect(englishMarkup).toContain('Practical IT, not enterprise complexity');
+    expect(englishMarkup).toContain('The technology your business actually depends on.');
+    expect(englishMarkup).toContain('Get help without building an IT department.');
+    expect(englishMarkup.indexOf('The technology your business actually depends on.')).toBeLessThan(
+      englishMarkup.indexOf('Get help without building an IT department.'),
     );
 
-    expect(spanishMarkup).toContain('DETRÁS DE OWNWARD');
-    expect(spanishMarkup).toContain('Sigue el crecimiento de Ownward');
-    expect(spanishMarkup).toContain('Descubre avances detrás de escena, ideas prácticas para negocios, lecciones del fundador y nuevas funciones de Ownward Hub.');
-    expect(spanishMarkup).toContain('Sigue a @ownwardhub en Instagram');
+    expect(spanishMarkup).toContain('TI práctica, sin complejidad empresarial');
+    expect(spanishMarkup).toContain('La tecnología de la que tu negocio realmente depende.');
+    expect(spanishMarkup).toContain('Obtén ayuda sin crear un departamento de TI.');
+    expect(spanishMarkup.indexOf('La tecnología de la que tu negocio realmente depende.')).toBeLessThan(
+      spanishMarkup.indexOf('Obtén ayuda sin crear un departamento de TI.'),
+    );
   });
 
   it('renders the contact page Instagram CTA and localized founder image alt text without changing the form CTA', () => {

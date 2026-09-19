@@ -1,32 +1,42 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import InstagramLink from '@/components/InstagramLink';
 
 export default async function Footer() {
-  const t = await getTranslations('Footer');
+  const locale = await getLocale();
+  const year = new Date().getFullYear();
+  const isSpanish = locale === 'es';
+  const labels = isSpanish
+    ? {
+        description: 'Soporte de TI local y remoto para pequeñas empresas en San Antonio.',
+        rights: 'Todos los derechos reservados.',
+        contact: 'Contacto',
+        privacy: 'Privacidad',
+        terms: 'Términos',
+        trust: 'Legal y confianza',
+      }
+    : {
+        description: 'Local and remote IT support for small businesses in San Antonio.',
+        rights: 'All rights reserved.',
+        contact: 'Contact',
+        privacy: 'Privacy',
+        terms: 'Terms',
+        trust: 'Legal and Trust',
+      };
 
   return (
-    <footer className="border-t border-slate-800 bg-slate-950/95">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-400">{t('copyright', { year: new Date().getFullYear() })}</p>
-          <nav aria-label="Footer" className="flex flex-wrap items-center gap-4 text-sm">
-            <Link href="/guide" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('guide')}</Link>
-            <Link href="/academy" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('academy')}</Link>
-            <Link href="/solutions" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('solutions')}</Link>
-            <Link href="/trust" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('trust')}</Link>
-            <Link href="/privacy" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('privacyPolicy')}</Link>
-            <Link href="/privacy-choices" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('privacyChoices')}</Link>
-            <Link href="/terms" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('terms')}</Link>
-            <Link href="/contact" className="font-medium text-slate-300 transition hover:text-cyan-300">{t('contact')}</Link>
-            <InstagramLink
-              text={t('instagramHandle')}
-              ariaLabel={t('instagramAriaLabel')}
-              className="font-medium text-slate-400 hover:text-cyan-300"
-              iconClassName="text-slate-500"
-            />
-          </nav>
+    <footer className="border-t border-white/10 bg-[#050b14]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p className="text-lg font-bold text-white">Ownward IT</p>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">{labels.description}</p>
+          <p className="mt-5 text-xs text-slate-600">© {year} Ownward. {labels.rights}</p>
         </div>
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-3 text-sm">
+          <Link href="/contact" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.contact}</Link>
+          <Link href="/privacy" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.privacy}</Link>
+          <Link href="/terms" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.terms}</Link>
+          <Link href="/trust" className="font-medium text-slate-300 transition hover:text-cyan-300">{labels.trust}</Link>
+        </nav>
       </div>
     </footer>
   );
